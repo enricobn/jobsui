@@ -1,0 +1,34 @@
+version = '1.0.0-SNAPSHOT'
+
+subprojects {
+    apply plugin: 'java'
+    
+    group = 'org.bef'
+    
+    sourceCompatibility = '1.7'
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+
+    dependencies {
+        testCompile 'junit:junit:4.11'
+        testCompile 'org.mockito:mockito-all:1.10.19'
+    }
+
+    // to add resources from java and test source dirs since gradle does not copy them
+    sourceSets {
+        test {
+            resources {
+                srcDir 'src/test/java'
+            }
+        }
+        main {
+            resources {
+                srcDir 'src/main/java'
+            }
+        }
+    }
+
+}
