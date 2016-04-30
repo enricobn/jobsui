@@ -8,6 +8,7 @@ import rx.functions.Action1;
 import rx.functions.Func2;
 
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,11 +21,11 @@ import java.util.List;
  * Created by enrico on 2/14/16.
  */
 public class SwingUIContainer extends JPanel implements UIContainer {
-    private final Map<JComboBox, Boolean> choices = new HashMap<>();
+//    private final Map<JComboBox, Boolean> choices = new HashMap<>();
     private int rows = 0;
 
     public static void main(String[] args) {
-        SwingUIWindow window = new SwingUIWindow();
+        SwingUIWindow window = new SwingUIWindow("Tetst");
 
         UIContainer container = window.addContainer();
 
@@ -105,29 +106,11 @@ public class SwingUIContainer extends JPanel implements UIContainer {
     @Override
     public <T> UIChoice<T> addChoice(String title, final T[] items) {
         final JComboBox<T> choice = new JComboBox<>();
-        choices.put(choice, true);
+//        choices.put(choice, true);
 
         setItems(choice, items);
 
-        {
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.gridx = 1;
-            gbc.gridy = rows;
-            gbc.insets.right = 5;
-            gbc.insets.top = 5;
-            gbc.anchor = GridBagConstraints.EAST;
-            add(new JLabel(title), gbc);
-        }
-
-        {
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.insets.top = 5;
-            gbc.gridy = rows;
-            gbc.anchor = GridBagConstraints.WEST;
-            add(choice, gbc);
-        }
-
-        rows++;
+        addRow(title, choice);
 
         final Observable<T> observable = Observable.create(new Observable.OnSubscribe<T>() {
             @Override
@@ -138,9 +121,9 @@ public class SwingUIContainer extends JPanel implements UIContainer {
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        if (!choices.get(choice)) {
-                            return;
-                        }
+//                        if (!choices.get(choice)) {
+//                            return;
+//                        }
                         if (!Objects.equals(selectedItem, choice.getSelectedItem())) {
                             selectedItem = SwingUIContainer.getSelectedItem(choice);
                             subscriber.onNext(selectedItem);
@@ -189,7 +172,7 @@ public class SwingUIContainer extends JPanel implements UIContainer {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                choices.put(choice, false);
+//                choices.put(choice, false);
 
                 choice.removeAllItems();
 
@@ -207,9 +190,9 @@ public class SwingUIContainer extends JPanel implements UIContainer {
 
                 if (found) {
                     choice.setSelectedItem(selectedItem);
-                    choices.put(choice, true);
+//                    choices.put(choice, true);
                 } else {
-                    choices.put(choice, true);
+//                    choices.put(choice, true);
                     if (items.length == 1) {
                         choice.setSelectedItem(items[0]);
                     } else {
@@ -259,29 +242,7 @@ public class SwingUIContainer extends JPanel implements UIContainer {
             textField.setText(converter.toString(defaultValue));
         }
 
-        {
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.gridx = 1;
-            gbc.gridy = rows;
-            gbc.insets.right = 5;
-            gbc.insets.top = 5;
-            gbc.anchor = GridBagConstraints.EAST;
-            add(new JLabel(title), gbc);
-        }
-
-        {
-            GridBagConstraints gbc = new GridBagConstraints();
-            gbc.gridx = 2;
-            gbc.gridy = rows;
-            gbc.weightx = 1.0;
-            gbc.insets.right = 5;
-            gbc.insets.top = 5;
-            gbc.anchor = GridBagConstraints.EAST;
-            gbc.fill = GridBagConstraints.HORIZONTAL;
-            add(textField, gbc);
-        }
-
-        rows++;
+        addRow(title, textField);
 
         final Observable<T> observable = Observable.create(new Observable.OnSubscribe<T>() {
             @Override
@@ -319,6 +280,51 @@ public class SwingUIContainer extends JPanel implements UIContainer {
                 return title;
             }
         };
+    }
+
+    public void addFiller() {
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.gridy = rows++;
+
+        // filler
+        add(new JLabel(), constraints);
+    }
+
+    public void addRow(String label, Component component) {
+        {
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = rows;
+            gbc.insets.right = 5;
+            gbc.insets.left = 5;
+            gbc.insets.top = 5;
+            gbc.anchor = GridBagConstraints.EAST;
+            gbc.weightx = 0;
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            final JLabel jlabel = new JLabel(label);
+//            jlabel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+            add(jlabel, gbc);
+        }
+
+        {
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 1;
+            gbc.gridy = rows;
+            gbc.weightx = 10.0; // why 1.0 does not work ???
+            gbc.insets.right = 5;
+            gbc.insets.top = 5;
+            gbc.insets.left = 5;
+            gbc.anchor = GridBagConstraints.WEST;
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            add(component, gbc);
+//            textField.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+        }
+
+        rows++;
+
     }
 
 }

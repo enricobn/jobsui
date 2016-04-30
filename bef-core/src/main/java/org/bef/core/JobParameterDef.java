@@ -22,7 +22,7 @@ public interface JobParameterDef<T> {
 
     Observable<T> addToUI(UIContainer container);
 
-    List<JobParameterDef> getDependencies();
+    List<JobParameterDef<?>> getDependencies();
 
     List<String> validate(T value);
 

@@ -12,8 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 /**
  * Created by enrico on 2/14/16.
@@ -22,11 +21,12 @@ public class SwingUIWindow implements UIWindow {
     private final JFrame frame;
     private final JPanel containersPanel = new JPanel();
     private final JButton okButton = new JButton("OK");
+    private final java.util.List<SwingUIContainer> containers = new ArrayList<>();
     //    private final Map<JComboBox, Boolean> choices = new HashMap<>();
     private boolean ok;
 
     public static void main(String[] args) {
-        SwingUIWindow window = new SwingUIWindow();
+        SwingUIWindow window = new SwingUIWindow("Test");
         UIContainer container = window.addContainer();
 
         final UIChoice<String> version = container.addChoice("Version", new String[]{"1.0", "2.0"});
@@ -83,8 +83,8 @@ public class SwingUIWindow implements UIWindow {
 //        System.exit(0);
     }
 
-    public SwingUIWindow() {
-        frame = new JFrame("TGKDevContainer");
+    public SwingUIWindow(String title) {
+        frame = new JFrame(title);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         Container contentPane = frame.getContentPane();
 
@@ -96,6 +96,7 @@ public class SwingUIWindow implements UIWindow {
 
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;
+        constraints.weightx = 1.0;
         constraints.weighty = 1.0;
         containersPanel.setLayout(new GridBagLayout());
         contentPane.add(containersPanel, constraints);
@@ -161,13 +162,15 @@ public class SwingUIWindow implements UIWindow {
     @Override
     public UIContainer addContainer() {
         SwingUIContainer container = new SwingUIContainer();
+        containers.add(container);
 
         GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.HORIZONTAL;
+        constraints.fill = GridBagConstraints.BOTH;
         constraints.weightx = 1.0;
-        constraints.weighty = 0;
+        constraints.weighty = 1.0;
         constraints.gridy = containersPanel.getComponentCount();
         constraints.insets.top = 5;
+        constraints.anchor = GridBagConstraints.NORTH;
 
         containersPanel.add(container, constraints);
         return container;
@@ -175,6 +178,19 @@ public class SwingUIWindow implements UIWindow {
 
     @Override
     public boolean show() {
+        for (SwingUIContainer container : containers) {
+            container.addFiller();
+        }
+
+        GridBagConstraints constraints = new GridBagConstraints();
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.gridy = containersPanel.getComponentCount();
+
+        // filler
+        containersPanel.add(new JLabel(), constraints);
+
         frame.setVisible(true);
         while (frame.isVisible()) {
             try {

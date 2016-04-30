@@ -5,11 +5,11 @@ package org.bef.core.ui;
  */
 public interface UI {
 
-    <T> T get(String title, T[] values);
+//    <T> T get(String title, T[] values);
 
     void showMessage(String message);
 
-    UIWindow createWindow();
+    UIWindow createWindow(String title);
 
     void log(String message);
 

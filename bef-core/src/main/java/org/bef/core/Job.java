@@ -1,16 +1,17 @@
 package org.bef.core;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by enrico on 4/29/16.
  */
-public interface Job {
+public interface Job<T> {
 
-    List<JobParameterDef> getParameterDefs();
+    List<JobParameterDef<?>> getParameterDefs();
 
-    JobFuture run(List<JobParameter> parameters);
+    JobFuture<T> run(Map<String,Object> parameters);
 
-    List<String> validate(List<JobParameter> parameters);
+    List<String> validate(Map<String,Object> parameters);
 
 }

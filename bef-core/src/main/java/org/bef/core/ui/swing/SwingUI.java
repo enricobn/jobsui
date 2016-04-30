@@ -10,22 +10,22 @@ import javax.swing.*;
  */
 public class SwingUI implements UI {
 
-    @Override
-    public <T> T get(String title, T[] values) {
-        if (values == null || values.length == 0) {
-            return null;
-        } else if(values.length == 1) {
-            return values[0];
-        }
-        return (T) JOptionPane.showInputDialog(
-                null,
-                title,
-                "TGKDevContainer",
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                values,
-                values[0]);
-    }
+//    @Override
+//    public <T> T get(String title, T[] values) {
+//        if (values == null || values.length == 0) {
+//            return null;
+//        } else if(values.length == 1) {
+//            return values[0];
+//        }
+//        return (T) JOptionPane.showInputDialog(
+//                null,
+//                title,
+//                "TGKDevContainer",
+//                JOptionPane.QUESTION_MESSAGE,
+//                null,
+//                values,
+//                values[0]);
+//    }
 
     @Override
     public void showMessage(String message) {
@@ -33,8 +33,8 @@ public class SwingUI implements UI {
     }
 
     @Override
-    public UIWindow createWindow() {
-        return new SwingUIWindow();
+    public UIWindow createWindow(String title) {
+        return new SwingUIWindow(title);
     }
 
     @Override

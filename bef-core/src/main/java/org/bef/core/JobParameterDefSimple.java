@@ -59,7 +59,7 @@ public class JobParameterDefSimple<T> implements JobParameterDef<T> {
     }
 
     @Override
-    public List<JobParameterDef> getDependencies() {
+    public List<JobParameterDef<?>> getDependencies() {
         return Collections.emptyList();
     }
 

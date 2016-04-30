@@ -7,31 +7,25 @@ import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.FuncN;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by enrico on 4/29/16.
  */
 public class JobRunner {
 
-    public JobFuture run(UI ui, final Job job) {
-        final UIWindow window = ui.createWindow();
+    public <T> JobFuture<T> run(UI ui, final Job<T> job) {
+        final UIWindow window = ui.createWindow("Test");
         final UIContainer uiContainer = window.addContainer();
 
-        final Map<JobParameterDef, Observable<Object>> observableMap = new LinkedHashMap<>();
+        final Map<JobParameterDef<?>, Observable<?>> observableMap = new LinkedHashMap<>();
 
-        for (JobParameterDef jobParameterDef : job.getParameterDefs()) {
-            final Observable<Object> observable = jobParameterDef.addToUI(uiContainer);
+        for (JobParameterDef<?> jobParameterDef : job.getParameterDefs()) {
+            final Observable<?> observable = jobParameterDef.addToUI(uiContainer);
             observableMap.put(jobParameterDef, observable);
         }
 
-//        final UIButton runButton = uiContainer.addButton("Run");
-//        runButton.setEnabled(false);
-
-        final List<JobParameter> parameters = new ArrayList<JobParameter>();
+        final Map<String,Object> parameters = new HashMap<>();
 
         Observable<Boolean> combined = Observable.combineLatest(observableMap.values(), new FuncN<Boolean>() {
             @Override
@@ -40,26 +34,22 @@ public class JobRunner {
 
                 int i = 0;
 
-                for (final Map.Entry<JobParameterDef, Observable<Object>> entry : observableMap.entrySet()) {
+                for (final Map.Entry<JobParameterDef<?>, Observable<?>> entry : observableMap.entrySet()) {
                     final Object value = args[i++];
-                    // TODO where must I put the validation?
-                    if (!entry.getKey().validate(value).isEmpty()) {
+                    // TODO where must I put the validation messages?
+                    final JobParameterDef<Object> parameterDef = (JobParameterDef<Object>) entry.getKey();
+                    if (!parameterDef.validate(value).isEmpty()) {
                         break;
                     }
-                    parameters.add(new JobParameter() {
-                        @Override
-                        public String getKey() {
-                            return entry.getKey().getKey();
-                        }
-
-                        @Override
-                        public Object getValue() {
-                            return value;
-                        }
-                    });
+                    parameters.put(parameterDef.getKey(), value);
                 }
 
-                return parameters.size() == args.length;
+                if (parameters.size() != args.length) {
+                    return false;
+                }
+
+                // TODO where must I put the validation messages?
+                return job.validate(parameters).isEmpty();
             }
         });
 
