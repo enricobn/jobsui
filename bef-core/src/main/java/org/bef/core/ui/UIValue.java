@@ -11,6 +11,4 @@ public interface UIValue<T> {
 
     T getValue();
 
-    String getName();
-
 }

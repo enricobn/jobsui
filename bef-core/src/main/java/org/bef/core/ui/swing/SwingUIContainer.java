@@ -105,102 +105,12 @@ public class SwingUIContainer extends JPanel implements UIContainer {
 
     @Override
     public <T> UIChoice<T> addChoice(String title, final T[] items) {
-        final JComboBox<T> choice = new JComboBox<>();
-//        choices.put(choice, true);
+        SwingUIChoice<T> choice = new SwingUIChoice<>();
+        choice.setItems(items);
 
-        setItems(choice, items);
+        addRow(title, choice.getComponent());
 
-        addRow(title, choice);
-
-        final Observable<T> observable = Observable.create(new Observable.OnSubscribe<T>() {
-            @Override
-            public void call(final Subscriber<? super T> subscriber) {
-                subscriber.onStart();
-                choice.addActionListener(new ActionListener() {
-                    private T selectedItem = null;
-
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-//                        if (!choices.get(choice)) {
-//                            return;
-//                        }
-                        if (!Objects.equals(selectedItem, choice.getSelectedItem())) {
-                            selectedItem = SwingUIContainer.getSelectedItem(choice);
-                            subscriber.onNext(selectedItem);
-//                        subscriber.onCompleted();
-                        }
-                    }
-                });
-            }
-        });
-
-        return new UIChoice<T>() {
-            @Override
-            public Observable<T> getObservable() {
-                return observable;
-            }
-
-            @Override
-            public void setEnabled(boolean enable) {
-                choice.setEnabled(enable);
-            }
-
-            @Override
-            public T getSelectedItem() {
-                return SwingUIContainer.getSelectedItem(choice);
-            }
-
-            @Override
-            public void setItems(T[] items) {
-                SwingUIContainer.this.setItems(choice, items);
-            }
-        };
-    }
-
-    private static <T> T getSelectedItem(JComboBox<T> choice) {
-        int selectedIndex = choice.getSelectedIndex();
-        if (selectedIndex < 0) {
-            return null;
-        } else {
-            return choice.getItemAt(selectedIndex);
-        }
-    }
-
-    private <T> void setItems(final JComboBox<T> choice, final T[] items) {
-        final Object selectedItem = choice.getSelectedItem();
-
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-//                choices.put(choice, false);
-
-                choice.removeAllItems();
-
-                if (items.length > 1) {
-                    choice.addItem(null);
-                }
-
-                boolean found = false;
-                for (T v : items) {
-                    choice.addItem(v);
-                    if (Objects.equals(selectedItem, v)) {
-                        found = true;
-                    }
-                }
-
-                if (found) {
-                    choice.setSelectedItem(selectedItem);
-//                    choices.put(choice, true);
-                } else {
-//                    choices.put(choice, true);
-                    if (items.length == 1) {
-                        choice.setSelectedItem(items[0]);
-                    } else {
-                        choice.setSelectedItem(null);
-                    }
-                }
-            }
-        });
+        return choice;
     }
 
     @Override
@@ -236,50 +146,11 @@ public class SwingUIContainer extends JPanel implements UIContainer {
 
     @Override
     public <T> UIValue<T> add(final String title, final StringConverter<T> converter, final T defaultValue) {
-        final JTextField textField = new JTextField();
+        SwingUIValue<T> uiValue = new SwingUIValue<>(converter, defaultValue);
 
-        if (defaultValue != null) {
-            textField.setText(converter.toString(defaultValue));
-        }
+        addRow(title, uiValue.getComponent());
 
-        addRow(title, textField);
-
-        final Observable<T> observable = Observable.create(new Observable.OnSubscribe<T>() {
-            @Override
-            public void call(final Subscriber<? super T> subscriber) {
-                subscriber.onStart();
-                textField.addFocusListener(new FocusListener() {
-                    @Override
-                    public void focusGained(FocusEvent e) {
-
-                    }
-
-                    @Override
-                    public void focusLost(FocusEvent e) {
-                        T value = converter.fromString(textField.getText());
-                        subscriber.onNext(value);
-                    }
-                });
-                subscriber.onNext(defaultValue);
-            }
-        });
-
-        return new UIValue<T>() {
-            @Override
-            public Observable<T> getObservable() {
-                return observable;
-            }
-
-            @Override
-            public T getValue() {
-                return converter.fromString(textField.getText());
-            }
-
-            @Override
-            public String getName() {
-                return title;
-            }
-        };
+        return uiValue;
     }
 
     public void addFiller() {
