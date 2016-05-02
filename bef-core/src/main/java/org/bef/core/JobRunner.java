@@ -18,23 +18,62 @@ public class JobRunner {
         final UIWindow window = ui.createWindow("Test");
         final UIContainer uiContainer = window.addContainer();
 
-        final Map<JobParameterDef<?>, Observable<?>> observableMap = new LinkedHashMap<>();
+        final Map<JobParameterDef<?>, JobParameterDefUIComponent<?>> componentsMap = new LinkedHashMap<>();
 
         for (JobParameterDef<?> jobParameterDef : job.getParameterDefs()) {
-            final Observable<?> observable = jobParameterDef.addToUI(uiContainer);
-            observableMap.put(jobParameterDef, observable);
+            final JobParameterDefUIComponent<?> component = jobParameterDef.addToUI(uiContainer);
+            componentsMap.put(jobParameterDef, component);
+        }
+
+        for (final JobParameterDef<?> jobParameterDef : job.getParameterDefs()) {
+            final List<JobParameterDef<?>> dependencies = jobParameterDef.getDependencies();
+            if (!dependencies.isEmpty()) {
+                List<Observable<?>> observables = new ArrayList<>();
+                for (JobParameterDef<?> dependency : dependencies) {
+                    final JobParameterDefUIComponent<?> component = componentsMap.get(dependency);
+                    observables.add(component.getObservable());
+                }
+
+                final Observable<Map<String,Object>> observable = Observable.combineLatest(observables, new FuncN<Map<String,Object>>() {
+                    @Override
+                    public Map<String,Object> call(Object... args) {
+                        Map<String,Object> result = new HashMap<>();
+
+                        int i = 0;
+                        for (JobParameterDef<?> dependency : dependencies) {
+                            result.put(dependency.getKey(), args[i++]);
+                        }
+                        return result;
+                    }
+                });
+
+                observable.subscribe(new Action1<Map<String,Object>>() {
+                    @Override
+                    public void call(Map<String,Object> objects) {
+                        // TODO only if are valid
+                        componentsMap.get(jobParameterDef).onDependenciesChange(objects);
+                    }
+                });
+            }
         }
 
         final Map<String,Object> parameters = new HashMap<>();
 
-        Observable<Boolean> combined = Observable.combineLatest(observableMap.values(), new FuncN<Boolean>() {
+        List<Observable<?>> observables = new ArrayList<>();
+
+        for (JobParameterDefUIComponent<?> jobParameterDefUIComponent : componentsMap.values()) {
+            observables.add(jobParameterDefUIComponent.getObservable());
+        }
+
+
+        Observable<Boolean> combined = Observable.combineLatest(observables, new FuncN<Boolean>() {
             @Override
             public Boolean call(Object... args) {
                 parameters.clear();
 
                 int i = 0;
 
-                for (final Map.Entry<JobParameterDef<?>, Observable<?>> entry : observableMap.entrySet()) {
+                for (final Map.Entry<JobParameterDef<?>, JobParameterDefUIComponent<?>> entry : componentsMap.entrySet()) {
                     final Object value = args[i++];
                     // TODO where must I put the validation messages?
                     final JobParameterDef<Object> parameterDef = (JobParameterDef<Object>) entry.getKey();

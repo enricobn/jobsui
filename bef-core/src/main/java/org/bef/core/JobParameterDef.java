@@ -12,7 +12,7 @@ public interface JobParameterDef<T> {
 
     String getKey();
 
-    String getName();
+//    String getName();
 
     Class<T> getType();
 
@@ -20,7 +20,7 @@ public interface JobParameterDef<T> {
 
     T getDefaultValue();
 
-    Observable<T> addToUI(UIContainer container);
+    JobParameterDefUIComponent<T> addToUI(UIContainer container);
 
     List<JobParameterDef<?>> getDependencies();
 

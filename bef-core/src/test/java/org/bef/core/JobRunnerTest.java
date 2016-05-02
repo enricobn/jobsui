@@ -2,8 +2,11 @@ package org.bef.core;
 
 import org.bef.core.ui.StringConverterString;
 import org.bef.core.ui.UI;
+import org.bef.core.ui.UIContainer;
+import org.bef.core.ui.UIValue;
 import org.bef.core.ui.swing.SwingUI;
 import org.junit.Test;
+import rx.Observable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,14 +24,53 @@ public class JobRunnerTest {
 
         UI ui = new SwingUI();
 
+        final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
+        final JobParameterDefAbstract<String> name = new JobParameterDefAbstract<String>("name",
+                String.class,
+                new NotEmptyStringValidator()) {
+            @Override
+            public JobParameterDefUIComponent<String> addToUI(UIContainer container) {
+                final UIValue<String> uiValue = container.add("Name", new StringConverterString(), null);
+                return new JobParameterDefUIComponent<String>() {
+                    @Override
+                    public Observable<String> getObservable() {
+                        return uiValue.getObservable();
+                    }
+
+                    @Override
+                    public void onDependenciesChange(Map<String,Object> values) {
+                    }
+                };
+            }
+        };
+        parameterDefs.add(name);
+
+        final JobParameterDefAbstract<String> surname = new JobParameterDefAbstract<String>("surname",
+                String.class,
+                new NotEmptyStringValidator()) {
+            @Override
+            public JobParameterDefUIComponent<String> addToUI(UIContainer container) {
+                final UIValue<String> uiValue = container.add("Surname", new StringConverterString(), null);
+                return new JobParameterDefUIComponent<String>() {
+                    @Override
+                    public Observable<String> getObservable() {
+                        return uiValue.getObservable();
+                    }
+
+                    @Override
+                    public void onDependenciesChange(Map<String,Object> values) {
+                        System.out.println("name=" + values.get("name"));
+                    }
+                };
+            }
+        };
+        surname.addDependency(name);
+        parameterDefs.add(surname);
+
+
         Job<String> job = new Job<String>() {
             @Override
             public List<JobParameterDef<?>> getParameterDefs() {
-                List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
-                parameterDefs.add(new JobParameterDefSimple<>("name", "Name", String.class, new StringConverterString(),
-                        new NotEmptyStringValidator()));
-                parameterDefs.add(new JobParameterDefSimple<>("surname", "Surname", String.class, new StringConverterString(),
-                        new NotEmptyStringValidator()));
                 return parameterDefs;
             }
 
