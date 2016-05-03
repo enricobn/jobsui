@@ -3,12 +3,11 @@ package org.bef.core;
 import org.bef.core.ui.StringConverterString;
 import org.bef.core.ui.UI;
 import org.bef.core.ui.UIContainer;
-import org.bef.core.ui.UIValue;
 import org.bef.core.ui.swing.SwingUI;
+import org.bef.core.ui.swing.SwingUIValue;
 import org.junit.Test;
 import rx.Observable;
 
-import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -31,7 +30,11 @@ public class JobRunnerTest {
                 new NotEmptyStringValidator()) {
             @Override
             public JobParameterDefUIComponent<String> addToUI(UIContainer container) {
-                final UIValue<String,?> uiValue = container.add("Name", new StringConverterString(), "Enrico");
+                final SwingUIValue<String> uiValue = new SwingUIValue<>();
+                uiValue.setConverter(new StringConverterString());
+                uiValue.setDefaultValue("Enrico");
+                container.add("Name", uiValue);
+
                 return new JobParameterDefUIComponent<String>() {
                     @Override
                     public Observable<String> getObservable() {
@@ -51,7 +54,10 @@ public class JobRunnerTest {
                 new NotEmptyStringValidator()) {
             @Override
             public JobParameterDefUIComponent<String> addToUI(UIContainer container) {
-                final UIValue<String,?> uiValue = container.add("Surname", new StringConverterString(), null);
+                final SwingUIValue<String> uiValue = new SwingUIValue<>();
+                uiValue.setConverter(new StringConverterString());
+                container.add("Surname", uiValue);
+
                 return new JobParameterDefUIComponent<String>() {
                     @Override
                     public Observable<String> getObservable() {

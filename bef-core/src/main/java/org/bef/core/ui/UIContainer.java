@@ -7,14 +7,16 @@ import java.util.List;
  */
 public interface UIContainer<C> {
 
-    <T> UIChoice<T,C> addChoice(String title, T[] items);
-
-    UIButton<C> addButton(String title);
-
-    <T> UIList<T,C> addList(List<T> items, boolean allowRemove);
-
-    <T> UIValue<T,C> add(String title, StringConverter<T> converter, T defaultValue);
+//    <T> UIChoice<T,C> addChoice(String title, T[] items);
+//
+//    UIButton<C> addButton(String title);
+//
+//    <T> UIList<T,C> addList(List<T> items, boolean allowRemove);
+//
+//    <T> UIValue<T,C> add(String title, StringConverter<T> converter, T defaultValue);
 
     <T> void add(String title, UIComponent<T,C> component);
+
+    <T> void add(UIComponent<T,C> component);
 
 }

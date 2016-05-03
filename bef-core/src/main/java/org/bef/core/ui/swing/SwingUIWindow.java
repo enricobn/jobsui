@@ -1,5 +1,6 @@
 package org.bef.core.ui.swing;
 
+import org.bef.core.ui.StringConverterString;
 import org.bef.core.ui.UIChoice;
 import org.bef.core.ui.UIContainer;
 import org.bef.core.ui.UIWindow;
@@ -13,6 +14,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Created by enrico on 2/14/16.
@@ -26,14 +28,32 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     private boolean ok;
 
     public static void main(String[] args) {
-        SwingUIWindow window = new SwingUIWindow("Test");
+        UIWindow<JComponent> window = new SwingUIWindow("Test");
+
         UIContainer<JComponent> container = window.addContainer();
 
-        final UIChoice<String,JComponent> version = container.addChoice("Version", new String[]{"1.0", "2.0"});
+        SwingUIChoice<String> version = new SwingUIChoice<>();
+        version.setItems(new String[]{"1.0", "2.0"});
+        container.add("Version", version);
 
-        final UIChoice<String,JComponent> db = container.addChoice("DB", new String[]{});
+        final SwingUIChoice<String> db = new SwingUIChoice<>();
+        container.add("DB", db);
 
-        final UIChoice<String,JComponent> user = container.addChoice("User", new String[]{});
+        final SwingUIChoice<String> user = new SwingUIChoice<>();
+        container.add("User", user);
+
+        SwingUIValue<String> name = new SwingUIValue<>();
+        name.setConverter(new StringConverterString());
+        name.setDefaultValue("hello");
+        container.add("Name", name);
+
+//        final UIChoice<String,JComponent> version = container.addChoice("Version", new String[]{"1.0", "2.0"});
+
+//        final UIChoice<String,JComponent> db = container.addChoice("DB", new String[]{});
+
+//        final UIChoice<String,JComponent> user = container.addChoice("User", new String[]{});
+
+//        UIValue<String,JComponent> name = container.add("Name", new StringConverterString(), "hello");
 
         version.getObservable().subscribe(new Action1<String>() {
             @Override
@@ -63,7 +83,7 @@ public class SwingUIWindow implements UIWindow<JComponent> {
             }
         });
 
-        Observable.combineLatest(version.getObservable(), db.getObservable(), new Func2<String,String,Tuple2<String,String>>() {
+        Observable.combineLatest(version.getObservable(), db.getObservable(), new Func2<String, String, Tuple2<String, String>>() {
             @Override
             public Tuple2<String,String> call(String version, String db) {
                 return new Tuple2<>(version, db);
@@ -79,7 +99,36 @@ public class SwingUIWindow implements UIWindow<JComponent> {
             }
         });
 
+
+        UIContainer<JComponent> listContainer = window.addContainer();
+        final SwingUIList<String> list = new SwingUIList<>();
+        list.setItems(Arrays.asList("First", "Second"));
+        listContainer.add("Datasources", list);
+
+//        final UIList<String,JComponent> list = listContainer.addList(Arrays.asList("First", "Second"), true);
+
+        UIContainer<JComponent> buttonsContainer = window.addContainer();
+
+        SwingUIButton button = new SwingUIButton();
+        button.setText("Add");
+        buttonsContainer.add(button);
+
+        button.getObservable().subscribe(new Action1<Void>() {
+            @Override
+            public void call(Void o) {
+                list.addItem("Other");
+            }
+        });
+
+//        buttonsContainer.addButton("Add").getObservable().subscribe(new Action1<Void>() {
+//            @Override
+//            public void call(Void o) {
+//                list.addItem("Other");
+//            }
+//        });
+
         System.out.println("OK = " + window.show());
+        System.out.println("items = " + list.getItems());
 //        System.exit(0);
     }
 
