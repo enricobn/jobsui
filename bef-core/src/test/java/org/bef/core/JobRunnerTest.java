@@ -8,6 +8,7 @@ import org.bef.core.ui.swing.SwingUI;
 import org.junit.Test;
 import rx.Observable;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -30,7 +31,7 @@ public class JobRunnerTest {
                 new NotEmptyStringValidator()) {
             @Override
             public JobParameterDefUIComponent<String> addToUI(UIContainer container) {
-                final UIValue<String> uiValue = container.add("Name", new StringConverterString(), "Enrico");
+                final UIValue<String,?> uiValue = container.add("Name", new StringConverterString(), "Enrico");
                 return new JobParameterDefUIComponent<String>() {
                     @Override
                     public Observable<String> getObservable() {
@@ -50,7 +51,7 @@ public class JobRunnerTest {
                 new NotEmptyStringValidator()) {
             @Override
             public JobParameterDefUIComponent<String> addToUI(UIContainer container) {
-                final UIValue<String> uiValue = container.add("Surname", new StringConverterString(), null);
+                final UIValue<String,?> uiValue = container.add("Surname", new StringConverterString(), null);
                 return new JobParameterDefUIComponent<String>() {
                     @Override
                     public Observable<String> getObservable() {

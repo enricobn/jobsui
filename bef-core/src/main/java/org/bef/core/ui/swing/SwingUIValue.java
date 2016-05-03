@@ -13,7 +13,7 @@ import java.awt.event.FocusListener;
 /**
  * Created by enrico on 5/1/16.
  */
-public class SwingUIValue<T> implements UIValue<T> {
+public class SwingUIValue<T> implements UIValue<T,JComponent> {
     private final JTextField component = new JTextField();
     private final Observable<T> observable;
     private StringConverter<T> converter;

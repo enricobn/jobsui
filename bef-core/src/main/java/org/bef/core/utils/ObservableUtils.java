@@ -60,25 +60,25 @@ public abstract class ObservableUtils {
                 });
     }
 
-    public static <T1,T2> Observable<Tuple2<T1,T2>> combineLatest(
-            UIChoice<T1> c1, UIChoice<T2> c2) {
-        return combineLatest(c1.getObservable(), c2.getObservable());
-    }
+//    public static <T1,T2> Observable<Tuple2<T1,T2>> combineLatest(
+//            UIChoice<T1> c1, UIChoice<T2> c2) {
+//        return combineLatest(c1.getObservable(), c2.getObservable());
+//    }
 
-    public static <T1,T2,T3> Observable<Tuple3<T1,T2,T3>> combineLatest(
-            UIChoice<T1> c1, UIChoice<T2> c2, UIChoice<T3> c3) {
-        return combineLatest(c1.getObservable(), c2.getObservable(), c3.getObservable());
-    }
-
-    public static <T1,T2,T3,T4> Observable<Tuple4<T1,T2,T3,T4>> combineLatest(
-            UIChoice<T1> c1, UIChoice<T2> c2, UIChoice<T3> c3, UIChoice<T4> c4) {
-        return combineLatest(c1.getObservable(), c2.getObservable(), c3.getObservable(), c4.getObservable());
-    }
-
-    public static <T1,T2,T3,T4,T5> Observable<Tuple5<T1,T2,T3,T4,T5>> combineLatest(
-            UIChoice<T1> c1, UIChoice<T2> c2, UIChoice<T3> c3, UIChoice<T4> c4, UIChoice<T5> c5) {
-        return combineLatest(c1.getObservable(), c2.getObservable(), c3.getObservable(), c4.getObservable(), c5.getObservable());
-    }
+//    public static <T1,T2,T3> Observable<Tuple3<T1,T2,T3>> combineLatest(
+//            UIChoice<T1> c1, UIChoice<T2> c2, UIChoice<T3> c3) {
+//        return combineLatest(c1.getObservable(), c2.getObservable(), c3.getObservable());
+//    }
+//
+//    public static <T1,T2,T3,T4> Observable<Tuple4<T1,T2,T3,T4>> combineLatest(
+//            UIChoice<T1> c1, UIChoice<T2> c2, UIChoice<T3> c3, UIChoice<T4> c4) {
+//        return combineLatest(c1.getObservable(), c2.getObservable(), c3.getObservable(), c4.getObservable());
+//    }
+//
+//    public static <T1,T2,T3,T4,T5> Observable<Tuple5<T1,T2,T3,T4,T5>> combineLatest(
+//            UIChoice<T1> c1, UIChoice<T2> c2, UIChoice<T3> c3, UIChoice<T4> c4, UIChoice<T5> c5) {
+//        return combineLatest(c1.getObservable(), c2.getObservable(), c3.getObservable(), c4.getObservable(), c5.getObservable());
+//    }
 
 
 }

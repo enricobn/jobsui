@@ -5,7 +5,7 @@ import rx.Observable;
 /**
  * Created by enrico on 2/14/16.
  */
-public interface UIChoice<T> {
+public interface UIChoice<T,C> extends UIComponent<T,C> {
 
     Observable<T> getObservable();
 

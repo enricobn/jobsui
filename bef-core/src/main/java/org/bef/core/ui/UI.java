@@ -3,13 +3,13 @@ package org.bef.core.ui;
 /**
  * Created by enrico on 11/2/15.
  */
-public interface UI {
+public interface UI<T> {
 
 //    <T> T get(String title, T[] values);
 
     void showMessage(String message);
 
-    UIWindow createWindow(String title);
+    UIWindow<T> createWindow(String title);
 
     void log(String message);
 

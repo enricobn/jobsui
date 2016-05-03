@@ -3,40 +3,33 @@ package org.bef.core.ui.swing;
 import org.bef.core.ui.*;
 import org.bef.core.utils.Tuple2;
 import rx.Observable;
-import rx.Subscriber;
 import rx.functions.Action1;
 import rx.functions.Func2;
 
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.beans.IntrospectionException;
-import java.util.*;
+import java.util.Arrays;
 import java.util.List;
 
 /**
  * Created by enrico on 2/14/16.
  */
-public class SwingUIContainer extends JPanel implements UIContainer {
+public class SwingUIContainer extends JPanel implements UIContainer<JComponent> {
 //    private final Map<JComboBox, Boolean> choices = new HashMap<>();
     private int rows = 0;
 
     public static void main(String[] args) {
-        SwingUIWindow window = new SwingUIWindow("Tetst");
+        UIWindow<JComponent> window = new SwingUIWindow("Tetst");
 
-        UIContainer container = window.addContainer();
+        UIContainer<JComponent> container = window.addContainer();
 
-        final UIChoice<String> version = container.addChoice("Version", new String[]{"1.0", "2.0"});
+        final UIChoice<String,JComponent> version = container.addChoice("Version", new String[]{"1.0", "2.0"});
 
-        final UIChoice<String> db = container.addChoice("DB", new String[]{});
+        final UIChoice<String,JComponent> db = container.addChoice("DB", new String[]{});
 
-        final UIChoice<String> user = container.addChoice("User", new String[]{});
+        final UIChoice<String,JComponent> user = container.addChoice("User", new String[]{});
 
-        UIValue<String> name = container.add("Name", new StringConverterString(), "hello");
+        UIValue<String,JComponent> name = container.add("Name", new StringConverterString(), "hello");
 
         version.getObservable().subscribe(new Action1<String>() {
             @Override
@@ -83,10 +76,10 @@ public class SwingUIContainer extends JPanel implements UIContainer {
         });
 
 
-        UIContainer listContainer = window.addContainer();
-        final UIList<String> list = listContainer.addList(Arrays.asList("First", "Second"), true);
+        UIContainer<JComponent> listContainer = window.addContainer();
+        final UIList<String,JComponent> list = listContainer.addList(Arrays.asList("First", "Second"), true);
 
-        UIContainer buttonsContainer = window.addContainer();
+        UIContainer<JComponent> buttonsContainer = window.addContainer();
 
         buttonsContainer.addButton("Add").getObservable().subscribe(new Action1<Void>() {
             @Override
@@ -105,7 +98,7 @@ public class SwingUIContainer extends JPanel implements UIContainer {
     }
 
     @Override
-    public <T> UIChoice<T> addChoice(String title, final T[] items) {
+    public <T> UIChoice<T,JComponent> addChoice(String title, final T[] items) {
         SwingUIChoice<T> choice = new SwingUIChoice<>();
         choice.setItems(items);
 
@@ -115,7 +108,7 @@ public class SwingUIContainer extends JPanel implements UIContainer {
     }
 
     @Override
-    public UIButton addButton(String title) {
+    public UIButton<JComponent> addButton(String title) {
         SwingUIButton button = new SwingUIButton();
         button.setText(title);
 
@@ -131,7 +124,7 @@ public class SwingUIContainer extends JPanel implements UIContainer {
     }
 
     @Override
-    public <T> UIList<T> addList(List<T> items, boolean allowRemove) {
+    public <T> UIList<T,JComponent> addList(List<T> items, boolean allowRemove) {
         SwingUIList<T> list = new SwingUIList<>();
         list.setItems(items);
         list.setAllowRemove(allowRemove);
@@ -148,7 +141,7 @@ public class SwingUIContainer extends JPanel implements UIContainer {
     }
 
     @Override
-    public <T> UIValue<T> add(final String title, final StringConverter<T> converter, final T defaultValue) {
+    public <T> UIValue<T,JComponent> add(final String title, final StringConverter<T> converter, final T defaultValue) {
         SwingUIValue<T> uiValue = new SwingUIValue<>();
         uiValue.setConverter(converter);
         uiValue.setDefaultValue(defaultValue);
@@ -156,6 +149,11 @@ public class SwingUIContainer extends JPanel implements UIContainer {
         addRow(title, uiValue.getComponent());
 
         return uiValue;
+    }
+
+    @Override
+    public <T> void add(String title, UIComponent<T, JComponent> component) {
+        addRow(title, component.getComponent());
     }
 
     public void addFiller() {

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 /**
  * Created by enrico on 2/14/16.
  */
-public class SwingUIWindow implements UIWindow {
+public class SwingUIWindow implements UIWindow<JComponent> {
     private final JFrame frame;
     private final JPanel containersPanel = new JPanel();
     private final JButton okButton = new JButton("OK");
@@ -27,13 +27,13 @@ public class SwingUIWindow implements UIWindow {
 
     public static void main(String[] args) {
         SwingUIWindow window = new SwingUIWindow("Test");
-        UIContainer container = window.addContainer();
+        UIContainer<JComponent> container = window.addContainer();
 
-        final UIChoice<String> version = container.addChoice("Version", new String[]{"1.0", "2.0"});
+        final UIChoice<String,JComponent> version = container.addChoice("Version", new String[]{"1.0", "2.0"});
 
-        final UIChoice<String> db = container.addChoice("DB", new String[]{});
+        final UIChoice<String,JComponent> db = container.addChoice("DB", new String[]{});
 
-        final UIChoice<String> user = container.addChoice("User", new String[]{});
+        final UIChoice<String,JComponent> user = container.addChoice("User", new String[]{});
 
         version.getObservable().subscribe(new Action1<String>() {
             @Override
@@ -160,7 +160,7 @@ public class SwingUIWindow implements UIWindow {
     }
 
     @Override
-    public UIContainer addContainer() {
+    public UIContainer<JComponent> addContainer() {
         SwingUIContainer container = new SwingUIContainer();
         containers.add(container);
 

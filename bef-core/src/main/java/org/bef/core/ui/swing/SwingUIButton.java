@@ -14,7 +14,7 @@ import java.beans.IntrospectionException;
 /**
  * Created by enrico on 2/24/16.
  */
-public class SwingUIButton implements UIButton {
+public class SwingUIButton implements UIButton<JComponent> {
     private final JButton component = new JButton();
     private final Observable<Void> observable;
 

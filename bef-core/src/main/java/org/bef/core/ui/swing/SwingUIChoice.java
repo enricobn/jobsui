@@ -13,7 +13,7 @@ import java.util.Objects;
 /**
  * Created by enrico on 5/1/16.
  */
-public class SwingUIChoice<T> implements UIChoice<T> {
+public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
     private final JComboBox<T> component = new JComboBox<>();
     private final Observable<T> observable;
 

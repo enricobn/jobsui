@@ -1,6 +1,8 @@
 package org.bef.core.ui.swing;
 
 import org.bef.core.ui.UIList;
+import rx.Observable;
+import rx.Subscriber;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,13 +16,23 @@ import java.util.List;
 /**
  * Created by enrico on 2/24/16.
  */
-public class SwingUIList<T> implements UIList<T> {
+public class SwingUIList<T> implements UIList<T,JComponent> {
     private final JPanel component = new JPanel();
+    private final Observable<List<T>> observable;
+    private final List<Subscriber<? super List<T>>> subscribers = new ArrayList<>();
     private List<T> items;
     private boolean allowRemove = true;
 
     public SwingUIList() {
         component.setLayout(new GridBagLayout());
+        observable = Observable.create(new Observable.OnSubscribe<List<T>>() {
+
+            @Override
+            public void call(Subscriber<? super List<T>> subscriber) {
+                subscriber.onStart();
+                subscribers.add(subscriber);
+            }
+        });
     }
 
     @Override
@@ -32,7 +44,6 @@ public class SwingUIList<T> implements UIList<T> {
     @Override
     public void setItems(final List<T> items) {
         this.items = new ArrayList<>(items);
-
         updateItems();
     }
 
@@ -54,6 +65,9 @@ public class SwingUIList<T> implements UIList<T> {
                     i++;
                 }
                 component.revalidate();
+                for (Subscriber<? super List<T>> subscriber : subscribers) {
+                    subscriber.onNext(items);
+                }
             }
         });
     }
@@ -71,7 +85,12 @@ public class SwingUIList<T> implements UIList<T> {
         this.allowRemove = allowRemove;
     }
 
-    class Item extends JPanel {
+    @Override
+    public Observable<List<T>> getObservable() {
+        return observable;
+    }
+
+    private class Item extends JPanel {
 
         Item(final T item) {
             setLayout(new GridBagLayout());
