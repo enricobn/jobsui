@@ -3,12 +3,12 @@ package org.bef.core.ui;
 /**
  * Created by enrico on 2/24/16.
  */
-public interface UIWindow<T> {
+public interface UIWindow<T> extends UIContainer<T> {
 
     boolean show();
 
     void setValid(boolean valid);
 
-    UIContainer<T> addContainer();
+//    UIContainer<T> addContainer();
 
 }

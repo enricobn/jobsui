@@ -1,9 +1,6 @@
 package org.bef.core.ui.swing;
 
-import org.bef.core.ui.StringConverterString;
-import org.bef.core.ui.UIChoice;
-import org.bef.core.ui.UIContainer;
-import org.bef.core.ui.UIWindow;
+import org.bef.core.ui.*;
 import org.bef.core.utils.Tuple2;
 import rx.Observable;
 import rx.functions.Action1;
@@ -21,30 +18,31 @@ import java.util.Arrays;
  */
 public class SwingUIWindow implements UIWindow<JComponent> {
     private final JFrame frame;
-    private final JPanel containersPanel = new JPanel();
+//    private final JPanel containersPanel = new JPanel();
     private final JButton okButton = new JButton("OK");
-    private final java.util.List<SwingUIContainer> containers = new ArrayList<>();
+//    private final java.util.List<SwingUIContainer> containers = new ArrayList<>();
+    private final SwingUIContainer container;
     private boolean ok;
 
     public static void main(String[] args) {
         UIWindow<JComponent> window = new SwingUIWindow("Test");
 
-        UIContainer<JComponent> container = window.addContainer();
+//        UIContainer<JComponent> container = window.addContainer();
 
         SwingUIChoice<String> version = new SwingUIChoice<>();
         version.setItems(new String[]{"1.0", "2.0"});
-        container.add("Version", version);
+        window.add("Version", version);
 
         final SwingUIChoice<String> db = new SwingUIChoice<>();
-        container.add("DB", db);
+        window.add("DB", db);
 
         final SwingUIChoice<String> user = new SwingUIChoice<>();
-        container.add("User", user);
+        window.add("User", user);
 
         SwingUIValue<String> name = new SwingUIValue<>();
         name.setConverter(new StringConverterString());
         name.setDefaultValue("hello");
-        container.add("Name", name);
+        window.add("Name", name);
 
         version.getObservable().subscribe(new Action1<String>() {
             @Override
@@ -91,16 +89,16 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         });
 
 
-        UIContainer<JComponent> listContainer = window.addContainer();
+//        UIContainer<JComponent> listContainer = window.addContainer();
         final SwingUIList<String> list = new SwingUIList<>();
         list.setItems(Arrays.asList("First", "Second"));
-        listContainer.add("Datasources", list);
+        window.add("Datasources", list);
 
-        UIContainer<JComponent> buttonsContainer = window.addContainer();
+//        UIContainer<JComponent> buttonsContainer = window.addContainer();
 
         SwingUIButton button = new SwingUIButton();
         button.setText("Add");
-        buttonsContainer.add(button);
+        window.add(button);
 
         button.getObservable().subscribe(new Action1<Void>() {
             @Override
@@ -125,40 +123,55 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         // to center on the screen
         frame.setLocationRelativeTo(null);
 
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.weightx = 1.0;
-        constraints.weighty = 1.0;
-        containersPanel.setLayout(new GridBagLayout());
-        contentPane.add(containersPanel, constraints);
+        // container
+        container = new SwingUIContainer();
+
+        {
+            GridBagConstraints constraints = new GridBagConstraints();
+            constraints.fill = GridBagConstraints.BOTH;
+            constraints.weightx = 1.0;
+            constraints.weighty = 1.0;
+//            containersPanel.setLayout(new GridBagLayout());
+            contentPane.add(container.getComponent(), constraints);
+        }
 
         // buttons
 
         JPanel buttonsPanel = new JPanel();
-        constraints = new GridBagConstraints();
-        constraints.weightx = 1.0;
-        constraints.gridy = 1;
-        constraints.anchor = GridBagConstraints.SOUTH;
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        contentPane.add(buttonsPanel, constraints);
-
         buttonsPanel.setLayout(new GridBagLayout());
 
+        {
+            GridBagConstraints constraints;
+            constraints = new GridBagConstraints();
+            constraints.weightx = 1.0;
+            constraints.gridy = 1;
+            constraints.anchor = GridBagConstraints.SOUTH;
+            constraints.fill = GridBagConstraints.HORIZONTAL;
+            contentPane.add(buttonsPanel, constraints);
+        }
+
+
         // filler
-        constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.HORIZONTAL;
-        constraints.weightx = 1.0;
-        buttonsPanel.add(new JPanel(), constraints);
+        {
+            GridBagConstraints constraints;
+            constraints = new GridBagConstraints();
+            constraints.fill = GridBagConstraints.HORIZONTAL;
+            constraints.weightx = 1.0;
+            buttonsPanel.add(new JPanel(), constraints);
+        }
 
         // OK
-        constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.NONE;
-        constraints.gridx = 1;
-        constraints.insets.top = 5;
-        constraints.insets.bottom = 5;
-        constraints.insets.right = 5;
+        {
+            GridBagConstraints constraints;
+            constraints = new GridBagConstraints();
+            constraints.fill = GridBagConstraints.NONE;
+            constraints.gridx = 1;
+            constraints.insets.top = 5;
+            constraints.insets.bottom = 5;
+            constraints.insets.right = 5;
 
-        buttonsPanel.add(okButton, constraints);
+            buttonsPanel.add(okButton, constraints);
+        }
 
         okButton.addActionListener(new ActionListener() {
             @Override
@@ -170,15 +183,18 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         });
 
         // Cancel
-        constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.NONE;
-        constraints.gridx = 2;
-        constraints.insets.top = 5;
-        constraints.insets.bottom = 5;
-        constraints.insets.right = 5;
-
         JButton cancelButton = new JButton("Cancel");
-        buttonsPanel.add(cancelButton, constraints);
+        {
+            GridBagConstraints constraints;
+            constraints = new GridBagConstraints();
+            constraints.fill = GridBagConstraints.NONE;
+            constraints.gridx = 2;
+            constraints.insets.top = 5;
+            constraints.insets.bottom = 5;
+            constraints.insets.right = 5;
+
+            buttonsPanel.add(cancelButton, constraints);
+        }
 
         cancelButton.addActionListener(new ActionListener() {
             @Override
@@ -190,37 +206,39 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         });
     }
 
-    @Override
-    public UIContainer<JComponent> addContainer() {
-        SwingUIContainer container = new SwingUIContainer();
-        containers.add(container);
-
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.weightx = 1.0;
-        constraints.weighty = 1.0;
-        constraints.gridy = containersPanel.getComponentCount();
-        constraints.insets.top = 5;
-        constraints.anchor = GridBagConstraints.NORTH;
-
-        containersPanel.add(container.getComponent(), constraints);
-        return container;
-    }
+//    @Override
+//    public UIContainer<JComponent> addContainer() {
+//        SwingUIContainer container = new SwingUIContainer();
+//        containers.add(container);
+//
+//        GridBagConstraints constraints = new GridBagConstraints();
+//        constraints.fill = GridBagConstraints.BOTH;
+//        constraints.weightx = 1.0;
+//        constraints.weighty = 1.0;
+//        constraints.gridy = containersPanel.getComponentCount();
+//        constraints.insets.top = 5;
+//        constraints.anchor = GridBagConstraints.NORTH;
+//
+//        containersPanel.add(container.getComponent(), constraints);
+//        return container;
+//    }
 
     @Override
     public boolean show() {
-        for (SwingUIContainer container : containers) {
-            container.addFiller();
-        }
+//        for (SwingUIContainer container : containers) {
+//            container.addFiller();
+//        }
 
-        GridBagConstraints constraints = new GridBagConstraints();
-        constraints.fill = GridBagConstraints.BOTH;
-        constraints.weightx = 1.0;
-        constraints.weighty = 1.0;
-        constraints.gridy = containersPanel.getComponentCount();
+
+
+//        GridBagConstraints constraints = new GridBagConstraints();
+//        constraints.fill = GridBagConstraints.BOTH;
+//        constraints.weightx = 1.0;
+//        constraints.weighty = 1.0;
+//        constraints.gridy = 1; //containersPanel.getComponentCount();
 
         // filler
-        containersPanel.add(new JLabel(), constraints);
+        container.addFiller();//sPanel.add(new JLabel(), constraints);
 
         frame.setVisible(true);
         while (frame.isVisible()) {
@@ -236,5 +254,25 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     @Override
     public void setValid(boolean valid) {
         okButton.setEnabled(valid);
+    }
+
+    @Override
+    public <T> void add(String title, UIComponent<T, JComponent> component) {
+        container.add(title, component);
+    }
+
+    @Override
+    public <T> void add(UIComponent<T, JComponent> component) {
+        container.add(component);
+    }
+
+    @Override
+    public void add(UIContainer<JComponent> container) {
+        this.container.add(container);
+    }
+
+    @Override
+    public JComponent getComponent() {
+        return container.getComponent();
     }
 }

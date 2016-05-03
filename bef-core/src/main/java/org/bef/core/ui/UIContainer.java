@@ -9,6 +9,8 @@ public interface UIContainer<C> {
 
     <T> void add(UIComponent<T,C> component);
 
+    void add(UIContainer<C> container);
+
     C getComponent();
 
 }

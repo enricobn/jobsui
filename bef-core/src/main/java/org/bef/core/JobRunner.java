@@ -16,12 +16,12 @@ public class JobRunner {
 
     public <T> JobFuture<T> run(UI ui, final Job<T> job) {
         final UIWindow window = ui.createWindow("Test");
-        final UIContainer uiContainer = window.addContainer();
+//        final UIContainer uiContainer = window.addContainer();
 
         final Map<JobParameterDef<?>, JobParameterDefUIComponent<?>> componentsMap = new LinkedHashMap<>();
 
         for (JobParameterDef<?> jobParameterDef : job.getParameterDefs()) {
-            final JobParameterDefUIComponent<?> component = jobParameterDef.addToUI(uiContainer);
+            final JobParameterDefUIComponent<?> component = jobParameterDef.addToUI(window);
             componentsMap.put(jobParameterDef, component);
         }
 

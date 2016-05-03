@@ -39,6 +39,23 @@ public class SwingUIContainer implements UIContainer<JComponent> {
     }
 
     @Override
+    public void add(UIContainer<JComponent> container) {
+        {
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = rows;
+            gbc.insets.right = 5;
+            gbc.insets.top = 5;
+            gbc.insets.left = 5;
+            gbc.anchor = GridBagConstraints.WEST;
+            gbc.fill = GridBagConstraints.HORIZONTAL;
+            this.component.add(container.getComponent(), gbc);
+        }
+        rows++;
+
+    }
+
+    @Override
     public JComponent getComponent() {
         return component;
     }
