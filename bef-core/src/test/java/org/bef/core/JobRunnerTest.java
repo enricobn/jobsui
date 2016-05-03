@@ -30,7 +30,7 @@ public class JobRunnerTest {
                 new NotEmptyStringValidator()) {
             @Override
             public JobParameterDefUIComponent<String> addToUI(UIContainer container) {
-                final UIValue<String> uiValue = container.add("Name", new StringConverterString(), null);
+                final UIValue<String> uiValue = container.add("Name", new StringConverterString(), "Enrico");
                 return new JobParameterDefUIComponent<String>() {
                     @Override
                     public Observable<String> getObservable() {

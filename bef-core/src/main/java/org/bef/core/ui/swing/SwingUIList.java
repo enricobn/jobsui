@@ -14,15 +14,13 @@ import java.util.List;
 /**
  * Created by enrico on 2/24/16.
  */
-public class SwingUIList<T> extends JPanel implements UIList<T> {
-    private final boolean allowRemove;
+public class SwingUIList<T> implements UIList<T> {
+    private final JPanel component = new JPanel();
     private List<T> items;
+    private boolean allowRemove = true;
 
-
-    public SwingUIList(List<T> items, boolean allowRemove) {
-        this.allowRemove = allowRemove;
-        setLayout(new GridBagLayout());
-        setItems(new ArrayList<>(items));
+    public SwingUIList() {
+        component.setLayout(new GridBagLayout());
     }
 
     @Override
@@ -33,7 +31,7 @@ public class SwingUIList<T> extends JPanel implements UIList<T> {
 
     @Override
     public void setItems(final List<T> items) {
-        this.items = items;
+        this.items = new ArrayList<>(items);
 
         updateItems();
     }
@@ -42,7 +40,7 @@ public class SwingUIList<T> extends JPanel implements UIList<T> {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                removeAll();
+                component.removeAll();
                 int i = 0;
                 for (final T item : items) {
                     GridBagConstraints constraints = new GridBagConstraints();
@@ -52,10 +50,10 @@ public class SwingUIList<T> extends JPanel implements UIList<T> {
                     constraints.gridy = i;
                     constraints.gridx = 0;
 
-                    add(new Item(item), constraints);
+                    component.add(new Item(item), constraints);
                     i++;
                 }
-                revalidate();
+                component.revalidate();
             }
         });
     }
@@ -63,6 +61,14 @@ public class SwingUIList<T> extends JPanel implements UIList<T> {
     @Override
     public List<T> getItems() {
         return Collections.unmodifiableList(items);
+    }
+
+    public JComponent getComponent() {
+        return component;
+    }
+
+    public void setAllowRemove(boolean allowRemove) {
+        this.allowRemove = allowRemove;
     }
 
     class Item extends JPanel {

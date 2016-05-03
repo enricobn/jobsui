@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.beans.IntrospectionException;
 import java.util.*;
 import java.util.List;
 
@@ -35,7 +36,7 @@ public class SwingUIContainer extends JPanel implements UIContainer {
 
         final UIChoice<String> user = container.addChoice("User", new String[]{});
 
-        UIValue<String> name = container.add("Name", new StringConverterString(), null);
+        UIValue<String> name = container.add("Name", new StringConverterString(), "hello");
 
         version.getObservable().subscribe(new Action1<String>() {
             @Override
@@ -121,7 +122,7 @@ public class SwingUIContainer extends JPanel implements UIContainer {
         {
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridy = rows;
-            add(button, gbc);
+            add(button.getComponent(), gbc);
         }
 
         rows++;
@@ -131,12 +132,14 @@ public class SwingUIContainer extends JPanel implements UIContainer {
 
     @Override
     public <T> UIList<T> addList(List<T> items, boolean allowRemove) {
-        SwingUIList<T> list = new SwingUIList<>(items, allowRemove);
+        SwingUIList<T> list = new SwingUIList<>();
+        list.setItems(items);
+        list.setAllowRemove(allowRemove);
 
         {
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridy = rows;
-            add(list, gbc);
+            add(list.getComponent(), gbc);
         }
 
         rows++;
@@ -146,7 +149,9 @@ public class SwingUIContainer extends JPanel implements UIContainer {
 
     @Override
     public <T> UIValue<T> add(final String title, final StringConverter<T> converter, final T defaultValue) {
-        SwingUIValue<T> uiValue = new SwingUIValue<>(converter, defaultValue);
+        SwingUIValue<T> uiValue = new SwingUIValue<>();
+        uiValue.setConverter(converter);
+        uiValue.setDefaultValue(defaultValue);
 
         addRow(title, uiValue.getComponent());
 

@@ -15,14 +15,11 @@ import java.awt.event.FocusListener;
  */
 public class SwingUIValue<T> implements UIValue<T> {
     private final JTextField component = new JTextField();
-    private final StringConverter<T> converter;
     private final Observable<T> observable;
+    private StringConverter<T> converter;
+    private T defaultValue;
 
-    public SwingUIValue(final StringConverter<T> converter, final T defaultValue) {
-        this.converter = converter;
-        if (defaultValue != null) {
-            component.setText(converter.toString(defaultValue));
-        }
+    public SwingUIValue() {
         observable = Observable.create(new Observable.OnSubscribe<T>() {
             @Override
             public void call(final Subscriber<? super T> subscriber) {
@@ -54,7 +51,16 @@ public class SwingUIValue<T> implements UIValue<T> {
         return converter.fromString(component.getText());
     }
 
-    public Component getComponent() {
+    public JComponent getComponent() {
         return component;
+    }
+
+    public void setDefaultValue(T value) {
+        this.defaultValue = value;
+        component.setText(converter.toString(value));
+    }
+
+    public void setConverter(StringConverter<T> converter) {
+        this.converter = converter;
     }
 }

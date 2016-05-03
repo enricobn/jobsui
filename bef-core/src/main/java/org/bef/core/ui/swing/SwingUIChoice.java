@@ -99,7 +99,7 @@ public class SwingUIChoice<T> implements UIChoice<T> {
         });
     }
 
-    public Component getComponent() {
+    public JComponent getComponent() {
         return component;
     }
 }
