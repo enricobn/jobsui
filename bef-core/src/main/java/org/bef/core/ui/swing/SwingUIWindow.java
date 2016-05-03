@@ -24,7 +24,6 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     private final JPanel containersPanel = new JPanel();
     private final JButton okButton = new JButton("OK");
     private final java.util.List<SwingUIContainer> containers = new ArrayList<>();
-    //    private final Map<JComboBox, Boolean> choices = new HashMap<>();
     private boolean ok;
 
     public static void main(String[] args) {
@@ -46,14 +45,6 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         name.setConverter(new StringConverterString());
         name.setDefaultValue("hello");
         container.add("Name", name);
-
-//        final UIChoice<String,JComponent> version = container.addChoice("Version", new String[]{"1.0", "2.0"});
-
-//        final UIChoice<String,JComponent> db = container.addChoice("DB", new String[]{});
-
-//        final UIChoice<String,JComponent> user = container.addChoice("User", new String[]{});
-
-//        UIValue<String,JComponent> name = container.add("Name", new StringConverterString(), "hello");
 
         version.getObservable().subscribe(new Action1<String>() {
             @Override
@@ -105,8 +96,6 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         list.setItems(Arrays.asList("First", "Second"));
         listContainer.add("Datasources", list);
 
-//        final UIList<String,JComponent> list = listContainer.addList(Arrays.asList("First", "Second"), true);
-
         UIContainer<JComponent> buttonsContainer = window.addContainer();
 
         SwingUIButton button = new SwingUIButton();
@@ -119,13 +108,6 @@ public class SwingUIWindow implements UIWindow<JComponent> {
                 list.addItem("Other");
             }
         });
-
-//        buttonsContainer.addButton("Add").getObservable().subscribe(new Action1<Void>() {
-//            @Override
-//            public void call(Void o) {
-//                list.addItem("Other");
-//            }
-//        });
 
         System.out.println("OK = " + window.show());
         System.out.println("items = " + list.getItems());
@@ -221,7 +203,7 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         constraints.insets.top = 5;
         constraints.anchor = GridBagConstraints.NORTH;
 
-        containersPanel.add(container, constraints);
+        containersPanel.add(container.getComponent(), constraints);
         return container;
     }
 

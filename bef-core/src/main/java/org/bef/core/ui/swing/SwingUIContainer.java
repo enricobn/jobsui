@@ -9,67 +9,13 @@ import java.awt.*;
 /**
  * Created by enrico on 2/14/16.
  */
-public class SwingUIContainer extends JPanel implements UIContainer<JComponent> {
-//    private final Map<JComboBox, Boolean> choices = new HashMap<>();
+public class SwingUIContainer implements UIContainer<JComponent> {
+    private final JPanel component = new JPanel();
     private int rows = 0;
 
     public SwingUIContainer() {
-        setLayout(new GridBagLayout());
+        component.setLayout(new GridBagLayout());
     }
-//
-//    @Override
-//    public <T> UIChoice<T,JComponent> addChoice(String title, final T[] items) {
-//        SwingUIChoice<T> choice = new SwingUIChoice<>();
-//        choice.setItems(items);
-//
-//        addRow(title, choice.getComponent());
-//
-//        return choice;
-//    }
-//
-//    @Override
-//    public UIButton<JComponent> addButton(String title) {
-//        SwingUIButton button = new SwingUIButton();
-//        button.setText(title);
-//
-//        {
-//            GridBagConstraints gbc = new GridBagConstraints();
-//            gbc.gridy = rows;
-//            add(button.getComponent(), gbc);
-//        }
-//
-//        rows++;
-//
-//        return button;
-//    }
-//
-//    @Override
-//    public <T> UIList<T,JComponent> addList(List<T> items, boolean allowRemove) {
-//        SwingUIList<T> list = new SwingUIList<>();
-//        list.setItems(items);
-//        list.setAllowRemove(allowRemove);
-//
-//        {
-//            GridBagConstraints gbc = new GridBagConstraints();
-//            gbc.gridy = rows;
-//            add(list.getComponent(), gbc);
-//        }
-//
-//        rows++;
-//
-//        return list;
-//    }
-//
-//    @Override
-//    public <T> UIValue<T,JComponent> add(final String title, final StringConverter<T> converter, final T defaultValue) {
-//        SwingUIValue<T> uiValue = new SwingUIValue<>();
-//        uiValue.setConverter(converter);
-//        uiValue.setDefaultValue(defaultValue);
-//
-//        addRow(title, uiValue.getComponent());
-//
-//        return uiValue;
-//    }
 
     @Override
     public <T> void add(String title, UIComponent<T, JComponent> component) {
@@ -87,12 +33,15 @@ public class SwingUIContainer extends JPanel implements UIContainer<JComponent> 
             gbc.insets.left = 5;
             gbc.anchor = GridBagConstraints.WEST;
 //            gbc.fill = GridBagConstraints.HORIZONTAL;
-            add(component.getComponent(), gbc);
-//            textField.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+            this.component.add(component.getComponent(), gbc);
         }
         rows++;
     }
 
+    @Override
+    public JComponent getComponent() {
+        return component;
+    }
 
     void addFiller() {
         GridBagConstraints constraints = new GridBagConstraints();
@@ -102,7 +51,7 @@ public class SwingUIContainer extends JPanel implements UIContainer<JComponent> 
         constraints.gridy = rows++;
 
         // filler
-        add(new JLabel(), constraints);
+        component.add(new JLabel(), constraints);
     }
 
     private void addRow(String label, Component component) {
@@ -117,8 +66,7 @@ public class SwingUIContainer extends JPanel implements UIContainer<JComponent> 
             gbc.weightx = 0;
             gbc.fill = GridBagConstraints.HORIZONTAL;
             final JLabel jlabel = new JLabel(label);
-//            jlabel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-            add(jlabel, gbc);
+            this.component.add(jlabel, gbc);
         }
 
         {
@@ -131,8 +79,7 @@ public class SwingUIContainer extends JPanel implements UIContainer<JComponent> 
             gbc.insets.left = 5;
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.HORIZONTAL;
-            add(component, gbc);
-//            textField.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
+            this.component.add(component, gbc);
         }
 
         rows++;

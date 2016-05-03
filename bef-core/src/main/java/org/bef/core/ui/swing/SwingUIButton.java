@@ -1,15 +1,12 @@
 package org.bef.core.ui.swing;
 
 import org.bef.core.ui.UIButton;
-import org.bef.core.ui.UIComponentAbstract;
 import rx.Observable;
 import rx.Subscriber;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.IntrospectionException;
 
 /**
  * Created by enrico on 2/24/16.

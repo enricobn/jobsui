@@ -5,7 +5,6 @@ import rx.Observable;
 import rx.Subscriber;
 
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Objects;
@@ -27,13 +26,9 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
-//                        if (!choices.get(choice)) {
-//                            return;
-//                        }
                         if (!Objects.equals(selectedItem, component.getSelectedItem())) {
                             selectedItem = getSelectedItem();
                             subscriber.onNext(selectedItem);
-//                        subscriber.onCompleted();
                         }
                     }
                 });
@@ -68,7 +63,6 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-//                choices.put(choice, false);
 
                 component.removeAllItems();
 
@@ -86,9 +80,7 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
 
                 if (found) {
                     component.setSelectedItem(selectedItem);
-//                    choices.put(choice, true);
                 } else {
-//                    choices.put(choice, true);
                     if (items.length == 1) {
                         component.setSelectedItem(items[0]);
                     } else {
@@ -99,6 +91,7 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
         });
     }
 
+    @Override
     public JComponent getComponent() {
         return component;
     }

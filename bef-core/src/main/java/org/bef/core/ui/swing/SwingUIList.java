@@ -77,10 +77,12 @@ public class SwingUIList<T> implements UIList<T,JComponent> {
         return Collections.unmodifiableList(items);
     }
 
+    @Override
     public JComponent getComponent() {
         return component;
     }
 
+    @Override
     public void setAllowRemove(boolean allowRemove) {
         this.allowRemove = allowRemove;
     }

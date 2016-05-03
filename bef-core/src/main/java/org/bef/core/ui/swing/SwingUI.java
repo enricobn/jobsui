@@ -10,23 +10,6 @@ import javax.swing.*;
  */
 public class SwingUI implements UI {
 
-//    @Override
-//    public <T> T get(String title, T[] values) {
-//        if (values == null || values.length == 0) {
-//            return null;
-//        } else if(values.length == 1) {
-//            return values[0];
-//        }
-//        return (T) JOptionPane.showInputDialog(
-//                null,
-//                title,
-//                "TGKDevContainer",
-//                JOptionPane.QUESTION_MESSAGE,
-//                null,
-//                values,
-//                values[0]);
-//    }
-
     @Override
     public void showMessage(String message) {
         JOptionPane.showMessageDialog(null, message, "TGKDevContainer", JOptionPane.INFORMATION_MESSAGE);
