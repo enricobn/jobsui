@@ -16,8 +16,7 @@ import java.util.*;
 public class JobRunner {
 
     public <T> JobFuture<T> run(UI ui, final Job<T> job) throws UnsupportedComponentException {
-        final UIWindow window = ui.createWindow("Test");
-//        final UIContainer uiContainer = window.addContainer();
+        final UIWindow window = ui.createWindow(job.getName());
 
         final Map<JobParameterDef<?>, UIComponent> componentsMap = new LinkedHashMap<>();
 

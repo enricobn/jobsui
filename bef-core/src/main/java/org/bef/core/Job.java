@@ -8,6 +8,8 @@ import java.util.Map;
  */
 public interface Job<T> {
 
+    String getName();
+
     List<JobParameterDef<?>> getParameterDefs();
 
     JobFuture<T> run(Map<String,Object> parameters);

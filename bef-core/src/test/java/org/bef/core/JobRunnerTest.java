@@ -66,6 +66,11 @@ public class JobRunnerTest {
 
         Job<String> job = new Job<String>() {
             @Override
+            public String getName() {
+                return "Test";
+            }
+
+            @Override
             public List<JobParameterDef<?>> getParameterDefs() {
                 return parameterDefs;
             }
