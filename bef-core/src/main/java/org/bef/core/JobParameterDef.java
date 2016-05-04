@@ -16,7 +16,7 @@ public interface JobParameterDef<T> {
 
     String getKey();
 
-//    String getName();
+    String getName();
 
     Class<T> getType();
 

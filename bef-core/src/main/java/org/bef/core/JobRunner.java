@@ -23,8 +23,7 @@ public class JobRunner {
 
         for (JobParameterDef<?> jobParameterDef : job.getParameterDefs()) {
             final UIComponent component = jobParameterDef.createComponent(ui);
-            // TODO title
-            window.add(jobParameterDef.getKey(), component);
+            window.add(jobParameterDef.getName(), component);
             componentsMap.put(jobParameterDef, component);
         }
 

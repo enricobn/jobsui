@@ -9,14 +9,15 @@ import java.util.List;
  */
 public abstract class JobParameterDefAbstract<T> implements JobParameterDef<T> {
     private final String key;
-//    private final String name;
+    private final String name;
     private final Class<T> type;
 //    private final StringConverter<T> converter;
     private final ParameterValidator<T> validator;
     private final List<JobParameterDef<?>> dependencies = new ArrayList<>();
 
-    public JobParameterDefAbstract(String key, Class<T> type, ParameterValidator<T> validator) {
+    public JobParameterDefAbstract(String key, String name, Class<T> type, ParameterValidator<T> validator) {
         this.key = key;
+        this.name = name;
         this.type = type;
 //        this.converter = converter;
         this.validator = validator;
@@ -27,10 +28,10 @@ public abstract class JobParameterDefAbstract<T> implements JobParameterDef<T> {
         return key;
     }
 
-//    @Override
-//    public String getName() {
-//        return name;
-//    }
+    @Override
+    public String getName() {
+        return name;
+    }
 
     @Override
     public Class<T> getType() {

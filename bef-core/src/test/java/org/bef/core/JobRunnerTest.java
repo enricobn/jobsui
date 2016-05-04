@@ -24,7 +24,9 @@ public class JobRunnerTest {
 
         final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
 
-        final JobParameterDefAbstract<String> name = new JobParameterDefAbstract<String>("name",
+        final JobParameterDefAbstract<String> name = new JobParameterDefAbstract<String>(
+                "name",
+                "Name",
                 String.class,
                 new NotEmptyStringValidator()) {
             @Override
@@ -41,7 +43,9 @@ public class JobRunnerTest {
         };
         parameterDefs.add(name);
 
-        final JobParameterDefAbstract<String> surname = new JobParameterDefAbstract<String>("surname",
+        final JobParameterDefAbstract<String> surname = new JobParameterDefAbstract<String>(
+                "surname",
+                "Surname",
                 String.class,
                 new NotEmptyStringValidator()) {
             @Override
