@@ -1,8 +1,6 @@
 package org.bef.core;
 
-import org.bef.core.ui.StringConverterString;
-import org.bef.core.ui.UI;
-import org.bef.core.ui.UIContainer;
+import org.bef.core.ui.*;
 import org.bef.core.ui.swing.SwingUI;
 import org.bef.core.ui.swing.SwingUIValue;
 import org.junit.Test;
@@ -19,32 +17,26 @@ import java.util.Map;
 public class JobRunnerTest {
 
     @Test
-    public void run() {
+    public void run() throws UnsupportedComponentException {
         JobRunner runner = new JobRunner();
 
         UI ui = new SwingUI();
 
         final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
+
         final JobParameterDefAbstract<String> name = new JobParameterDefAbstract<String>("name",
                 String.class,
                 new NotEmptyStringValidator()) {
             @Override
-            public JobParameterDefUIComponent<String> addToUI(UIContainer container) {
-                final SwingUIValue<String> uiValue = new SwingUIValue<>();
+            public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
+                final UIValue<String,?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
                 uiValue.setConverter(new StringConverterString());
                 uiValue.setDefaultValue("Enrico");
-                container.add("Name", uiValue);
+                return uiValue;
+            }
 
-                return new JobParameterDefUIComponent<String>() {
-                    @Override
-                    public Observable<String> getObservable() {
-                        return uiValue.getObservable();
-                    }
-
-                    @Override
-                    public void onDependenciesChange(Map<String,Object> values) {
-                    }
-                };
+            @Override
+            public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
             }
         };
         parameterDefs.add(name);
@@ -53,22 +45,15 @@ public class JobRunnerTest {
                 String.class,
                 new NotEmptyStringValidator()) {
             @Override
-            public JobParameterDefUIComponent<String> addToUI(UIContainer container) {
-                final SwingUIValue<String> uiValue = new SwingUIValue<>();
+            public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
+                final UIValue<String,?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
                 uiValue.setConverter(new StringConverterString());
-                container.add("Surname", uiValue);
+                return uiValue;
+            }
 
-                return new JobParameterDefUIComponent<String>() {
-                    @Override
-                    public Observable<String> getObservable() {
-                        return uiValue.getObservable();
-                    }
-
-                    @Override
-                    public void onDependenciesChange(Map<String,Object> values) {
-                        System.out.println("name=" + values.get("name"));
-                    }
-                };
+            @Override
+            public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
+                System.out.println("name=" + values.get("name"));
             }
         };
         surname.addDependency(name);

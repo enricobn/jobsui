@@ -1,5 +1,6 @@
 package org.bef.core;
 
+import org.bef.core.ui.UIComponent;
 import rx.Observable;
 
 import java.util.Map;
@@ -7,9 +8,9 @@ import java.util.Map;
 /**
  * Created by enrico on 5/1/16.
  */
-public interface JobParameterDefUIComponent<T> {
+public interface JobParameterDefUIComponent {
 
-    Observable<T> getObservable();
+    UIComponent getComponent();
 
     /**
      *

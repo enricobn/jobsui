@@ -1,8 +1,9 @@
 package org.bef.core;
 
 import org.bef.core.ui.UI;
-import org.bef.core.ui.UIContainer;
+import org.bef.core.ui.UIComponent;
 import org.bef.core.ui.UIWindow;
+import org.bef.core.ui.UnsupportedComponentException;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.FuncN;
@@ -14,14 +15,16 @@ import java.util.*;
  */
 public class JobRunner {
 
-    public <T> JobFuture<T> run(UI ui, final Job<T> job) {
+    public <T> JobFuture<T> run(UI ui, final Job<T> job) throws UnsupportedComponentException {
         final UIWindow window = ui.createWindow("Test");
 //        final UIContainer uiContainer = window.addContainer();
 
-        final Map<JobParameterDef<?>, JobParameterDefUIComponent<?>> componentsMap = new LinkedHashMap<>();
+        final Map<JobParameterDef<?>, UIComponent> componentsMap = new LinkedHashMap<>();
 
         for (JobParameterDef<?> jobParameterDef : job.getParameterDefs()) {
-            final JobParameterDefUIComponent<?> component = jobParameterDef.addToUI(window);
+            final UIComponent component = jobParameterDef.createComponent(ui);
+            // TODO title
+            window.add(jobParameterDef.getKey(), component);
             componentsMap.put(jobParameterDef, component);
         }
 
@@ -30,7 +33,7 @@ public class JobRunner {
             if (!dependencies.isEmpty()) {
                 List<Observable<?>> observables = new ArrayList<>();
                 for (JobParameterDef<?> dependency : dependencies) {
-                    final JobParameterDefUIComponent<?> component = componentsMap.get(dependency);
+                    final UIComponent component = componentsMap.get(dependency);
                     observables.add(component.getObservable());
                 }
 
@@ -51,7 +54,8 @@ public class JobRunner {
                     @Override
                     public void call(Map<String,Object> objects) {
                         // TODO only if are valid
-                        componentsMap.get(jobParameterDef).onDependenciesChange(objects);
+                        final UIComponent component = componentsMap.get(jobParameterDef);
+                        jobParameterDef.onDependenciesChange(component, objects);
                     }
                 });
             }
@@ -61,7 +65,7 @@ public class JobRunner {
 
         List<Observable<?>> observables = new ArrayList<>();
 
-        for (JobParameterDefUIComponent<?> jobParameterDefUIComponent : componentsMap.values()) {
+        for (UIComponent jobParameterDefUIComponent : componentsMap.values()) {
             observables.add(jobParameterDefUIComponent.getObservable());
         }
 
@@ -73,7 +77,7 @@ public class JobRunner {
 
                 int i = 0;
 
-                for (final Map.Entry<JobParameterDef<?>, JobParameterDefUIComponent<?>> entry : componentsMap.entrySet()) {
+                for (final Map.Entry<JobParameterDef<?>, UIComponent> entry : componentsMap.entrySet()) {
                     final Object value = args[i++];
                     // TODO where must I put the validation messages?
                     final JobParameterDef<Object> parameterDef = (JobParameterDef<Object>) entry.getKey();
