@@ -1,0 +1,55 @@
+<Job name="Test" returnType="java.lang.String">
+    <Parameter key="name" name="Name" type="java.lang.String">
+        <Validate>
+            <![CDATA[
+                return new org.bef.core.NotEmptyStringValidator().validate(value);
+            ]]>
+        </Validate>
+        <CreateComponent>
+            <![CDATA[
+                import org.bef.core.ui.UIValue;
+                import org.bef.core.ui.StringConverterString;
+
+                def uiValue = ui.create(UIValue.class);
+                uiValue.setConverter(new StringConverterString());
+                uiValue.setDefaultValue("Enrico");
+                return uiValue;
+            ]]>
+        </CreateComponent>
+    </Parameter>
+    <Parameter key="surname" name="Surname" type="java.lang.String" validator="org.bef.core.NotEmptyStringValidator">
+        <Validate>
+            <![CDATA[
+                return new org.bef.core.NotEmptyStringValidator().validate(value);
+            ]]>
+        </Validate>
+        <CreateComponent>
+            <![CDATA[
+                import org.bef.core.ui.UIValue;
+                import org.bef.core.ui.StringConverterString;
+
+                def uiValue = ui.create(UIValue.class);
+                uiValue.setConverter(new StringConverterString());
+                return uiValue;
+            ]]>
+        </CreateComponent>
+
+        <Dependency key="name"/>
+
+        <OnDependenciesChange>
+            <![CDATA[
+                System.out.println("name=" + values.get("name"));
+            ]]>
+        </OnDependenciesChange>
+    </Parameter>
+    <Run>
+        <![CDATA[
+            return parameters.get("name") + " " + parameters.get("surname");
+        ]]>
+    </Run>
+    <!--Validate>
+        <![CDATA[
+                return new org.bef.core.NotEmptyStringValidator().validate(value);
+            ]]>
+    </Validate-->
+</Job>
