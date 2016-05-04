@@ -10,4 +10,6 @@ public interface UIButton<C> extends UIComponent<Void,C> {
     Observable<Void> getObservable();
 
     void setEnabled(boolean enabled);
+
+    void setText(String add);
 }

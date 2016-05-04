@@ -11,4 +11,8 @@ public interface UIValue<T,C> extends UIComponent<T,C>{
 
     T getValue();
 
+    void setConverter(StringConverter<T> converter);
+
+    void setDefaultValue(T value);
+
 }

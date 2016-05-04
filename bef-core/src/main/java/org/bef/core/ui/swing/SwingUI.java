@@ -1,14 +1,13 @@
 package org.bef.core.ui.swing;
 
-import org.bef.core.ui.UI;
-import org.bef.core.ui.UIWindow;
+import org.bef.core.ui.*;
 
 import javax.swing.*;
 
 /**
  * Created by enrico on 11/2/15.
  */
-public class SwingUI implements UI {
+public class SwingUI implements UI<JComponent> {
 
     @Override
     public void showMessage(String message) {
@@ -28,5 +27,19 @@ public class SwingUI implements UI {
     @Override
     public void log(String message, Throwable th) {
         // TODO
+    }
+
+    @Override
+    public <COMP extends UIComponent> COMP create(Class<COMP> componentType) throws UnsupportedComponentException {
+        if (componentType == UIButton.class) {
+            return (COMP) new SwingUIButton();
+        } else if (componentType == UIChoice.class) {
+            return (COMP) new SwingUIChoice<>();
+        } else if (componentType == UIList.class) {
+            return (COMP) new SwingUIList<>();
+        } else if (componentType == UIValue.class) {
+            return (COMP) new SwingUIValue<>();
+        }
+        throw new UnsupportedComponentException("SWING: cannot find component for " + componentType.getName());
     }
 }
