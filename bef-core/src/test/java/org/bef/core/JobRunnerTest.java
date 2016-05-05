@@ -2,13 +2,14 @@ package org.bef.core;
 
 import org.bef.core.groovy.JobParameterDefGroovy;
 import org.bef.core.ui.*;
+import org.bef.core.utils.Tuple2;
 import org.junit.Before;
 import org.junit.Test;
+import rx.Observable;
+import rx.functions.Action1;
+import rx.functions.Func2;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
@@ -26,7 +27,6 @@ public class JobRunnerTest {
     @Before
     public void init() {
         runner = new JobRunner();
-
         ui = mock(UI.class);
         window = mock(UIWindow.class);
         when(window.show()).thenReturn(true);
@@ -34,7 +34,7 @@ public class JobRunnerTest {
     }
 
     @Test
-    public void run() throws UnsupportedComponentException {
+    public void runSimple() throws UnsupportedComponentException {
         FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
         FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
@@ -117,7 +117,7 @@ public class JobRunnerTest {
     }
 
     @Test
-    public void runGroovy() throws UnsupportedComponentException {
+    public void runSimpleGroovy() throws UnsupportedComponentException {
         FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
         FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
@@ -190,6 +190,118 @@ public class JobRunnerTest {
 
         assertEquals("Enrico Benedetti", future.get());
 
+    }
+
+    @Test
+    public void runComplex() throws UnsupportedComponentException {
+        final FakeUIChoice<String,?> uiChoiceVersion = new FakeUIChoice<>();
+        final FakeUIChoice<String,?> uiChoiceDb = new FakeUIChoice<>();
+        final FakeUIChoice<String,?> uiChoiceUser = new FakeUIChoice<>();
+
+        when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
+
+        final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
+
+        final JobParameterDefAbstract<String> version = new JobParameterDefAbstract<String>(
+                "version",
+                "Version",
+                String.class,
+                new NotEmptyStringValidator()) {
+            @Override
+            public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
+                return uiChoiceVersion;
+            }
+
+            @Override
+            public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
+            }
+        };
+        parameterDefs.add(version);
+
+        final JobParameterDefAbstract<String> db = new JobParameterDefAbstract<String>(
+                "db",
+                "DB",
+                String.class,
+                new NotEmptyStringValidator()) {
+            @Override
+            public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
+                return uiChoiceDb;
+            }
+
+            @Override
+            public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
+                String version = (String) values.get("version");
+                if (version == null) {
+                    uiChoiceDb.setItems(new String[0]);
+                } else if (version.equals("1.0")) {
+                    uiChoiceDb.setItems(new String[]{"Dev-1.0", "Cons-1.0", "Dev"});
+                } else {
+                    uiChoiceDb.setItems(new String[]{"Dev-2.0", "Cons-2.0", "Dev"});
+                }
+            }
+        };
+        parameterDefs.add(db);
+        db.addDependency(version);
+
+        final JobParameterDefAbstract<String> user = new JobParameterDefAbstract<String>(
+                "user",
+                "User",
+                String.class,
+                new NotEmptyStringValidator()) {
+            @Override
+            public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
+                return uiChoiceUser;
+            }
+
+            @Override
+            public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
+                String version = (String) values.get("version");
+                String db = (String) values.get("db");
+                if (version == null || db == null) {
+                    uiChoiceUser.setItems(new String[0]);
+                } else {
+                    uiChoiceUser.setItems(new String[]{version + " " + db});
+                }
+
+            }
+        };
+        parameterDefs.add(user);
+        user.addDependency(db);
+        user.addDependency(version);
+
+        Job<String> job = new Job<String>() {
+            @Override
+            public String getName() {
+                return "Test";
+            }
+
+            @Override
+            public List<JobParameterDef<?>> getParameterDefs() {
+                return parameterDefs;
+            }
+
+            @Override
+            public JobFuture<String> run(final Map<String, Object> parameters) {
+                return new JobFuture<String>() {
+                    @Override
+                    public String get() {
+                        return (String) parameters.get("user");
+                    }
+                };
+            }
+
+            @Override
+            public List<String> validate(Map<String, Object> parameters) {
+                return Collections.emptyList();
+            }
+        };
+
+        final JobFuture<String> future = runner.run(ui, job);
+
+        uiChoiceVersion.setSelectedItem("1.0");
+        uiChoiceDb.setSelectedItem("Dev-1.0");
+
+        assertEquals("1.0 Dev-1.0", future.get());
     }
 
 }
