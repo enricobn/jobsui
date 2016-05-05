@@ -2,8 +2,7 @@ package org.bef.core;
 
 import org.bef.core.groovy.JobParameterDefGroovy;
 import org.bef.core.ui.*;
-import org.bef.core.ui.swing.SwingUI;
-import org.junit.Ignore;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -11,17 +10,34 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
  * Created by enrico on 4/30/16.
  */
 public class JobRunnerTest {
+    private JobRunner runner;
+    private UI ui;
+    private UIWindow window;
+
+    @Before
+    public void init() {
+        runner = new JobRunner();
+
+        ui = mock(UI.class);
+        window = mock(UIWindow.class);
+        when(window.show()).thenReturn(true);
+        when(ui.createWindow(anyString())).thenReturn(window);
+    }
 
     @Test
-    @Ignore
     public void run() throws UnsupportedComponentException {
-        JobRunner runner = new JobRunner();
-
-        UI ui = new SwingUI();
+        FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
+        FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
         final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
 
@@ -32,7 +48,7 @@ public class JobRunnerTest {
                 new NotEmptyStringValidator()) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-                final UIValue<String,?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
+                final UIValue<String, ?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
                 uiValue.setConverter(new StringConverterString());
                 uiValue.setDefaultValue("Enrico");
                 return uiValue;
@@ -51,7 +67,7 @@ public class JobRunnerTest {
                 new NotEmptyStringValidator()) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-                final UIValue<String,?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
+                final UIValue<String, ?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
                 uiValue.setConverter(new StringConverterString());
                 return uiValue;
             }
@@ -77,7 +93,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public JobFuture<String> run(final Map<String,Object> parameters) {
+            public JobFuture<String> run(final Map<String, Object> parameters) {
                 return new JobFuture<String>() {
                     @Override
                     public String get() {
@@ -87,25 +103,24 @@ public class JobRunnerTest {
             }
 
             @Override
-            public List<String> validate(Map<String,Object> parameters) {
+            public List<String> validate(Map<String, Object> parameters) {
                 return Collections.emptyList();
             }
         };
 
         final JobFuture<String> future = runner.run(ui, job);
 
-        if (future == null) {
-            System.out.println("Cancelled");
-        } else {
-            System.out.println(future.get());
-        }
+        uiValueName.setValue("Enrico");
+        uiValueSurname.setValue("Benedetti");
+
+        assertEquals("Enrico Benedetti", future.get());
     }
 
     @Test
     public void runGroovy() throws UnsupportedComponentException {
-        JobRunner runner = new JobRunner();
-
-        UI ui = new SwingUI();
+        FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
+        FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
         final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
 
@@ -114,12 +129,12 @@ public class JobRunnerTest {
                 "Name",
                 String.class,
                 "import org.bef.core.ui.UIValue;\n" +
-                "import org.bef.core.ui.StringConverterString;\n" +
-                "\n" +
-                "def uiValue = ui.create(UIValue.class);\n" +
-                "uiValue.setConverter(new StringConverterString());\n" +
-                "uiValue.setDefaultValue(\"Enrico\");\n" +
-                "return uiValue;",
+                        "import org.bef.core.ui.StringConverterString;\n" +
+                        "\n" +
+                        "def uiValue = ui.create(UIValue.class);\n" +
+                        "uiValue.setConverter(new StringConverterString());\n" +
+                        "uiValue.setDefaultValue(\"Enrico\");\n" +
+                        "return uiValue;",
                 null,
                 null) {
             @Override
@@ -133,8 +148,8 @@ public class JobRunnerTest {
                 "Surname",
                 String.class,
                 "def uiValue = ui.create(org.bef.core.ui.UIValue.class);\n" +
-                "uiValue.setConverter(new org.bef.core.ui.StringConverterString());\n" +
-                "return uiValue;",
+                        "uiValue.setConverter(new org.bef.core.ui.StringConverterString());\n" +
+                        "return uiValue;",
                 "System.out.println(\"name=\" + values.get(\"name\"));",
                 null) {
         };
@@ -153,7 +168,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public JobFuture<String> run(final Map<String,Object> parameters) {
+            public JobFuture<String> run(final Map<String, Object> parameters) {
                 return new JobFuture<String>() {
                     @Override
                     public String get() {
@@ -163,18 +178,18 @@ public class JobRunnerTest {
             }
 
             @Override
-            public List<String> validate(Map<String,Object> parameters) {
+            public List<String> validate(Map<String, Object> parameters) {
                 return Collections.emptyList();
             }
         };
 
         final JobFuture<String> future = runner.run(ui, job);
 
-        if (future == null) {
-            System.out.println("Cancelled");
-        } else {
-            System.out.println(future.get());
-        }
+        uiValueName.setValue("Enrico");
+        uiValueSurname.setValue("Benedetti");
+
+        assertEquals("Enrico Benedetti", future.get());
+
     }
 
 }
