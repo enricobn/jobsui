@@ -1,5 +1,8 @@
 package org.bef.core.groovy;
 
+import groovy.lang.GroovyClassLoader;
+import groovy.lang.GroovyCodeSource;
+import groovy.lang.GroovyShell;
 import org.bef.core.Job;
 import org.bef.core.JobParameterDef;
 import org.bef.core.JobParameterDefAbstract;
@@ -10,18 +13,50 @@ import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by enrico on 5/4/16.
  */
 public class JobParser {
 
-    public <T> Job<T> parse(InputStream is) throws Exception {
+    public Map<String,Job<?>> parseAll(File folder) throws Exception {
+        GroovyClassLoader cl = new GroovyClassLoader();
+        final File lib = new File(folder, "lib");
+        if (lib.exists()) {
+            for (File file : lib.listFiles()) {
+                cl.addURL(file.toURI().toURL());
+            }
+        }
+        GroovyShell shell = new GroovyShell(cl);
+
+        for (File file : folder.listFiles()) {
+            if (file.getName().endsWith(".groovy")) {
+                cl.parseClass(new GroovyCodeSource(file));
+            }
+        }
+
+        Map<String,Job<?>> result = new HashMap<>();
+        for (File file : folder.listFiles()) {
+            if (file.getName().endsWith(".befjob")) {
+                try (InputStream is = new FileInputStream(file)) {
+                    JobGroovy<?> job;
+                    try {
+                        job = parse(shell, is);
+                    } catch (Exception e) {
+                        throw new Exception("Cannot parse file " + file, e);
+                    }
+                    result.put(job.getKey(), job);
+                }
+            }
+        }
+        return result;
+    }
+
+    public <T> JobGroovy<T> parse(GroovyShell shell, InputStream is) throws Exception {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         Document doc = dBuilder.parse(is);
@@ -31,6 +66,13 @@ public class JobParser {
         doc.getDocumentElement().normalize();
 
         String name = doc.getDocumentElement().getAttribute("name");
+        if (name == null || name.isEmpty()) {
+            throw new BefParseException("Cannot find property \"name\"");
+        }
+        String key = doc.getDocumentElement().getAttribute("key");
+        if (key == null || key.isEmpty()) {
+            throw new BefParseException("Cannot find property \"key\"");
+        }
         Map<String,JobParameterDef<?>> parameterDefs = new LinkedHashMap<>();
 
         String runScript = getElementContent(doc.getDocumentElement(), "Run", true);
@@ -40,7 +82,7 @@ public class JobParser {
 
         for (int i = 0; i < parametersList.getLength(); i++) {
             Element element = (Element) parametersList.item(i);
-            String key = element.getAttribute("key");
+            String parameterKey = element.getAttribute("key");
             String parameterName = element.getAttribute("name");;
             String typeString = element.getAttribute("type");
             Class<?> type = Class.forName(typeString);
@@ -51,8 +93,8 @@ public class JobParser {
 
             String onDependenciesChangeScript = getElementContent(element, "OnDependenciesChange", false);
 
-            JobParameterDefAbstract<?> parameterDef = new JobParameterDefGroovy<>(key, parameterName, type,
-                    createComponentScript, onDependenciesChangeScript, parameterValidateScript);
+            JobParameterDefAbstract<?> parameterDef = new JobParameterDefGroovy<>(shell, parameterKey, parameterName,
+                    type, createComponentScript, onDependenciesChangeScript, parameterValidateScript);
             parameterDefs.put(parameterDef.getKey(), parameterDef);
 
             final NodeList dependenciesList = element.getElementsByTagName("Dependency");
@@ -63,7 +105,7 @@ public class JobParser {
             }
         }
 
-        return new JobGroovy<>(name, new ArrayList(parameterDefs.values()), runScript, validateScript);
+        return new JobGroovy<>(shell, key, name, new ArrayList(parameterDefs.values()), runScript, validateScript);
     }
 
     private static String getElementContent(Element parent, String name, boolean mandatory) throws BefParseException {

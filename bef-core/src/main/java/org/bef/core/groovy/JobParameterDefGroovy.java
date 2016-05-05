@@ -16,13 +16,15 @@ import java.util.Map;
  * Created by enrico on 5/4/16.
  */
 public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
+    private final GroovyShell shell;
     private final String createComponentScript;
     private final String onDependenciesChangeScript;
     private final String validateScript;
 
-    public JobParameterDefGroovy(String key, String name, Class<T> type,
+    public JobParameterDefGroovy(GroovyShell shell, String key, String name, Class<T> type,
                                  String createComponentScript, String onDependenciesChangeScript, String validateScript) {
         super(key, name, type, null);
+        this.shell = shell;
         this.createComponentScript = createComponentScript;
         this.onDependenciesChangeScript = onDependenciesChangeScript;
         this.validateScript = validateScript;
@@ -30,19 +32,15 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
 
     @Override
     public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-        Binding binding = new Binding();
-        binding.setProperty("ui", ui);
-        GroovyShell shell = new GroovyShell(binding);
+        shell.setProperty("ui", ui);
         return (UIComponent) shell.evaluate(createComponentScript);
     }
 
     @Override
     public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
         if (onDependenciesChangeScript != null) {
-            Binding binding = new Binding();
-            binding.setProperty("component", component);
-            binding.setProperty("values", values);
-            GroovyShell shell = new GroovyShell(binding);
+            shell.setProperty("component", component);
+            shell.setProperty("values", values);
             shell.evaluate(onDependenciesChangeScript);
         }
     }
@@ -52,9 +50,7 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
         if (validateScript == null) {
             return Collections.emptyList();
         }
-        Binding binding = new Binding();
-        binding.setProperty("value", value);
-        GroovyShell shell = new GroovyShell(binding);
+        shell.setProperty("value", value);
         return (List<String>) shell.evaluate(validateScript);
     }
 }

@@ -14,12 +14,16 @@ import java.util.Map;
  * Created by enrico on 5/4/16.
  */
 public class JobGroovy<T> implements Job<T> {
+    private final GroovyShell shell;
+    private final String key;
     private final String name;
     private final List<JobParameterDef<?>> parameterDefs;
     private final String runScript;
     private final String validateScript;
 
-    public JobGroovy(String name, List<JobParameterDef<?>> parameterDefs, String runScript, String validateScript) {
+    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDef<?>> parameterDefs, String runScript, String validateScript) {
+        this.shell = shell;
+        this.key = key;
         this.name = name;
         this.parameterDefs = parameterDefs;
         this.runScript = runScript;
@@ -42,8 +46,7 @@ public class JobGroovy<T> implements Job<T> {
             @Override
             public T get() {
                 Binding binding = new Binding();
-                binding.setProperty("parameters", parameters);
-                GroovyShell shell = new GroovyShell(binding);
+                shell.setProperty("parameters", parameters);
                 return (T) shell.evaluate(runScript);
             }
         };
@@ -54,9 +57,11 @@ public class JobGroovy<T> implements Job<T> {
         if (validateScript == null) {
             return Collections.emptyList();
         }
-        Binding binding = new Binding();
-        binding.setProperty("parameters", parameters);
-        GroovyShell shell = new GroovyShell(binding);
+        shell.setProperty("parameters", parameters);
         return (List<String>) shell.evaluate(validateScript);
+    }
+
+    public String getKey() {
+        return key;
     }
 }

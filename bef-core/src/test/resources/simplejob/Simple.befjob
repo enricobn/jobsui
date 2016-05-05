@@ -1,4 +1,4 @@
-<Job name="Test" returnType="java.lang.String">
+<Job key="simple" name="Simple" returnType="java.lang.String">
     <Parameter key="name" name="Name" type="java.lang.String">
         <Validate>
             <![CDATA[
@@ -38,13 +38,14 @@
 
         <!--OnDependenciesChange>
             <![CDATA[
-                System.out.println("name=" + values.get("name"));
+                test.Foo.doIt()
+                //System.out.println("name=" + values.get("name"));
             ]]>
         </OnDependenciesChange-->
     </Parameter>
     <Run>
         <![CDATA[
-            return parameters.get("name") + " " + parameters.get("surname");
+            return test.Foo.concat(parameters.get("name"), parameters.get("surname"))
         ]]>
     </Run>
     <!--Validate>

@@ -1,5 +1,6 @@
 package org.bef.core;
 
+import groovy.lang.GroovyShell;
 import org.bef.core.groovy.JobParameterDefGroovy;
 import org.bef.core.ui.*;
 import org.bef.core.utils.Tuple2;
@@ -124,7 +125,10 @@ public class JobRunnerTest {
 
         final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
 
+        GroovyShell shell = new GroovyShell();
+
         final JobParameterDefAbstract<String> name = new JobParameterDefGroovy<String>(
+                shell,
                 "name",
                 "Name",
                 String.class,
@@ -144,6 +148,7 @@ public class JobRunnerTest {
         parameterDefs.add(name);
 
         final JobParameterDefAbstract<String> surname = new JobParameterDefGroovy<String>(
+                shell,
                 "surname",
                 "Surname",
                 String.class,
