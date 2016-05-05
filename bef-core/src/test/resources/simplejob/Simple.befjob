@@ -36,11 +36,11 @@
 
         <Dependency key="name"/>
 
-        <OnDependenciesChange>
+        <!--OnDependenciesChange>
             <![CDATA[
                 System.out.println("name=" + values.get("name"));
             ]]>
-        </OnDependenciesChange>
+        </OnDependenciesChange-->
     </Parameter>
     <Run>
         <![CDATA[

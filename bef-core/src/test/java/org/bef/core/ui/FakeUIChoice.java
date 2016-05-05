@@ -2,6 +2,10 @@ package org.bef.core.ui;
 
 import rx.functions.Action1;
 
+import java.util.Objects;
+
+import static org.junit.Assert.assertTrue;
+
 /**
  * Created by enrico on 5/5/16.
  */
@@ -35,6 +39,16 @@ public class FakeUIChoice<T, C> extends FakeUIComponent<T, C> implements UIChoic
     }
 
     public void setSelectedItem(T item) {
+        boolean found = false;
+        for (T t : items) {
+            if (t.equals(item)) {
+                found = true;
+                break;
+            }
+        }
+
+        assertTrue(Objects.toString(item), found);
+
         this.selectedItem = item;
         for (Action1 action1 : actions) {
             action1.call(item);

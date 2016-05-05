@@ -75,7 +75,6 @@ public class JobRunnerTest {
 
             @Override
             public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
-                System.out.println("name=" + values.get("name"));
             }
         };
         surname.addDependency(name);
@@ -151,7 +150,7 @@ public class JobRunnerTest {
                 "def uiValue = ui.create(org.bef.core.ui.UIValue.class);\n" +
                         "uiValue.setConverter(new org.bef.core.ui.StringConverterString());\n" +
                         "return uiValue;",
-                "System.out.println(\"name=\" + values.get(\"name\"));",
+                null,
                 null) {
         };
         surname.addDependency(name);
@@ -298,6 +297,8 @@ public class JobRunnerTest {
         };
 
         final JobFuture<String> future = runner.run(ui, job);
+
+        uiChoiceVersion.setItems(new String[]{"1.0", "2.0"});
 
         uiChoiceVersion.setSelectedItem("1.0");
         uiChoiceDb.setSelectedItem("Dev-1.0");
