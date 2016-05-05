@@ -11,6 +11,7 @@ import rx.functions.Func2;
 
 import java.util.*;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -302,6 +303,8 @@ public class JobRunnerTest {
         uiChoiceDb.setSelectedItem("Dev-1.0");
 
         assertEquals("1.0 Dev-1.0", future.get());
+        assertArrayEquals(new String[]{"Dev-1.0", "Cons-1.0", "Dev"}, uiChoiceDb.getItems());
+        assertArrayEquals(new String[]{"1.0 Dev-1.0"}, uiChoiceUser.getItems());
     }
 
 }

@@ -40,4 +40,8 @@ public class FakeUIChoice<T, C> extends FakeUIComponent<T, C> implements UIChoic
             action1.call(item);
         }
     }
+
+    public T[] getItems() {
+        return items;
+    }
 }
