@@ -61,4 +61,9 @@ public abstract class JobParameterDefAbstract<T> implements JobParameterDef<T> {
     public void addDependency(JobParameterDef<?> parameterDef) {
         dependencies.add(parameterDef);
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }
