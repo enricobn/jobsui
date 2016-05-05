@@ -24,23 +24,33 @@ import java.util.*;
 public class JobParser {
 
     public Map<String,Job<?>> parseAll(File folder) throws Exception {
+
+        final File[] files = folder.listFiles();
+
+        if (files == null) {
+            throw new Exception("Cannot find files in " + folder);
+        }
+
         GroovyClassLoader cl = new GroovyClassLoader();
         final File lib = new File(folder, "lib");
         if (lib.exists()) {
-            for (File file : lib.listFiles()) {
-                cl.addURL(file.toURI().toURL());
+            final File[] libFiles = lib.listFiles();
+            if (libFiles != null) {
+                for (File file : libFiles) {
+                    cl.addURL(file.toURI().toURL());
+                }
             }
         }
         GroovyShell shell = new GroovyShell(cl);
 
-        for (File file : folder.listFiles()) {
+        for (File file : files) {
             if (file.getName().endsWith(".groovy")) {
                 cl.parseClass(new GroovyCodeSource(file));
             }
         }
 
         Map<String,Job<?>> result = new HashMap<>();
-        for (File file : folder.listFiles()) {
+        for (File file : files) {
             if (file.getName().endsWith(".befjob")) {
                 try (InputStream is = new FileInputStream(file)) {
                     JobGroovy<?> job;
@@ -83,7 +93,7 @@ public class JobParser {
         for (int i = 0; i < parametersList.getLength(); i++) {
             Element element = (Element) parametersList.item(i);
             String parameterKey = element.getAttribute("key");
-            String parameterName = element.getAttribute("name");;
+            String parameterName = element.getAttribute("name");
             String typeString = element.getAttribute("type");
             Class<?> type = Class.forName(typeString);
 
@@ -105,7 +115,7 @@ public class JobParser {
             }
         }
 
-        return new JobGroovy<>(shell, key, name, new ArrayList(parameterDefs.values()), runScript, validateScript);
+        return new JobGroovy<>(shell, key, name, new ArrayList<>(parameterDefs.values()), runScript, validateScript);
     }
 
     private static String getElementContent(Element parent, String name, boolean mandatory) throws BefParseException {
