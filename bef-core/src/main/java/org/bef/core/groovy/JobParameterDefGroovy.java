@@ -1,9 +1,7 @@
 package org.bef.core.groovy;
 
-import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import org.bef.core.JobParameterDefAbstract;
-import org.bef.core.ParameterValidator;
 import org.bef.core.ui.UI;
 import org.bef.core.ui.UIComponent;
 import org.bef.core.ui.UnsupportedComponentException;
@@ -16,6 +14,8 @@ import java.util.Map;
  * Created by enrico on 5/4/16.
  */
 public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
+    private static final String CREATE_COMPONENT_IMPORTS =
+            "import org.bef.core.ui.*;\n";
     private final GroovyShell shell;
     private final String createComponentScript;
     private final String onDependenciesChangeScript;
@@ -25,7 +25,7 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
                                  String createComponentScript, String onDependenciesChangeScript, String validateScript) {
         super(key, name, type, null);
         this.shell = shell;
-        this.createComponentScript = createComponentScript;
+        this.createComponentScript = CREATE_COMPONENT_IMPORTS + createComponentScript;
         this.onDependenciesChangeScript = onDependenciesChangeScript;
         this.validateScript = validateScript;
     }

@@ -7,9 +7,6 @@
         </Validate>
         <CreateComponent>
             <![CDATA[
-                import org.bef.core.ui.UIValue;
-                import org.bef.core.ui.StringConverterString;
-
                 def uiValue = ui.create(UIValue.class);
                 uiValue.setConverter(new StringConverterString());
                 uiValue.setDefaultValue("Enrico");
@@ -17,7 +14,7 @@
             ]]>
         </CreateComponent>
     </Parameter>
-    <Parameter key="surname" name="Surname" type="java.lang.String" validator="org.bef.core.NotEmptyStringValidator">
+    <Parameter key="surname" name="Surname" type="java.lang.String">
         <Validate>
             <![CDATA[
                 return new org.bef.core.NotEmptyStringValidator().validate(value);
@@ -25,9 +22,6 @@
         </Validate>
         <CreateComponent>
             <![CDATA[
-                import org.bef.core.ui.UIValue;
-                import org.bef.core.ui.StringConverterString;
-
                 def uiValue = ui.create(UIValue.class);
                 uiValue.setConverter(new StringConverterString());
                 return uiValue;
