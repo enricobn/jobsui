@@ -1,0 +1,35 @@
+package org.bef.core.ui;
+
+import rx.Observable;
+import rx.Subscriber;
+import rx.functions.Action1;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created by enrico on 5/5/16.
+ */
+public abstract class FakeUIComponent<T, C> implements UIComponent<T, C> {
+    private final Observable<T> observable;
+    protected final List<Action1<T>> actions = new ArrayList<>();
+
+    public FakeUIComponent() {
+        observable = Observable.create(new Observable.OnSubscribe<T>() {
+            @Override
+            public void call(final Subscriber<? super T> subscriber) {
+                actions.add(new Action1<T>() {
+                    @Override
+                    public void call(T o) {
+                        subscriber.onNext(o);
+                    }
+                });
+            }
+        });
+    }
+
+    @Override
+    public Observable<T> getObservable() {
+        return observable;
+    }
+}
