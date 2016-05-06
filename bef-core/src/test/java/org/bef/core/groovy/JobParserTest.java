@@ -1,8 +1,6 @@
 package org.bef.core.groovy;
 
-import groovy.lang.GroovyClassLoader;
-import groovy.lang.GroovyCodeSource;
-import groovy.lang.GroovyShell;
+import org.bef.core.Project;
 import org.bef.core.Job;
 import org.bef.core.JobFuture;
 import org.bef.core.JobRunner;
@@ -10,12 +8,9 @@ import org.bef.core.ui.FakeUiValue;
 import org.bef.core.ui.UI;
 import org.bef.core.ui.UIValue;
 import org.bef.core.ui.UIWindow;
-import org.codehaus.groovy.control.CompilerConfiguration;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.InputStream;
-import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
@@ -42,8 +37,8 @@ public class JobParserTest {
 
         JobParser parser = new JobParser();
 
-        final Map<String, Job<?>> jobs = parser.parseAll(new File("src/test/resources/simplejob"));
-        final Job<?> job = jobs.get("simple");
+        Project project = parser.loadProject(new File("src/test/resources/simplejob"));
+        final Job<?> job = project.getJob("simple");
 
         JobRunner runner = new JobRunner();
 

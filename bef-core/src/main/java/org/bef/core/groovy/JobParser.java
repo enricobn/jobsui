@@ -6,9 +6,9 @@ import groovy.lang.GroovyShell;
 import org.bef.core.Job;
 import org.bef.core.JobParameterDef;
 import org.bef.core.JobParameterDefAbstract;
+import org.bef.core.Project;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -23,7 +23,7 @@ import java.util.*;
  */
 public class JobParser {
 
-    public Map<String,Job<?>> parseAll(File folder) throws Exception {
+    public Project loadProject(File folder) throws Exception {
 
         final File[] files = folder.listFiles();
 
@@ -49,7 +49,8 @@ public class JobParser {
             }
         }
 
-        Map<String,Job<?>> result = new HashMap<>();
+        final Map<String,Job<?>> jobs = new HashMap<>();
+
         for (File file : files) {
             if (file.getName().endsWith(".befjob")) {
                 try (InputStream is = new FileInputStream(file)) {
@@ -59,11 +60,23 @@ public class JobParser {
                     } catch (Exception e) {
                         throw new Exception("Cannot parse file " + file, e);
                     }
-                    result.put(job.getKey(), job);
+                    jobs.put(job.getKey(), job);
                 }
             }
         }
-        return result;
+
+
+        return new Project() {
+            @Override
+            public <T> Job<T> getJob(String key) {
+                return (Job<T>) jobs.get(key);
+            }
+
+            @Override
+            public Set<String> getKeys() {
+                return jobs.keySet();
+            }
+        };
     }
 
     public <T> JobGroovy<T> parse(GroovyShell shell, InputStream is) throws Exception {

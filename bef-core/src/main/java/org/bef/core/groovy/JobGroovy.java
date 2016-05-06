@@ -1,6 +1,5 @@
 package org.bef.core.groovy;
 
-import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import org.bef.core.Job;
 import org.bef.core.JobFuture;
@@ -45,7 +44,6 @@ public class JobGroovy<T> implements Job<T> {
         return new JobFuture<T>() {
             @Override
             public T get() {
-                Binding binding = new Binding();
                 shell.setProperty("parameters", parameters);
                 return (T) shell.evaluate(runScript);
             }

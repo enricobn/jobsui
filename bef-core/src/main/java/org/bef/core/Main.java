@@ -4,7 +4,6 @@ import org.bef.core.groovy.JobParser;
 import org.bef.core.ui.swing.SwingUI;
 
 import java.io.File;
-import java.util.Map;
 
 /**
  * Created by enrico on 5/5/16.
@@ -25,11 +24,11 @@ public class Main {
         }
 
         JobParser parser = new JobParser();
-        final Map<String, Job<?>> jobs = parser.parseAll(projectFolder);
+        final Project project = parser.loadProject(projectFolder);
 
         String key = args[1];
 
-        final Job<?> job = jobs.get(key);
+        final Job<?> job = project.getJob(key);
 
         if (job == null) {
             System.out.println("Cannot find project with key \"" + key + "\" in folder " + projectFolder + " .");
@@ -39,6 +38,6 @@ public class Main {
         JobRunner runner = new JobRunner();
 
         final JobFuture<?> future = runner.run(new SwingUI(), job);
-
+        future.get();
     }
 }
