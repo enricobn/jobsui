@@ -108,7 +108,7 @@ public class JobParser {
             String parameterKey = element.getAttribute("key");
             String parameterName = element.getAttribute("name");
             String typeString = element.getAttribute("type");
-            Class<?> type = Class.forName(typeString);
+            Class<?> type = shell.getClassLoader().loadClass(typeString);
 
             String parameterValidateScript = getElementContent(element, "Validate", false);
 
