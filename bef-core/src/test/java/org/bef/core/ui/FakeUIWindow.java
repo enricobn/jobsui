@@ -48,6 +48,9 @@ public class FakeUIWindow<T> implements UIWindow<T> {
     }
 
     public boolean isValid() {
+        if (!started) {
+            throw new IllegalStateException();
+        }
         return valid;
     }
 
