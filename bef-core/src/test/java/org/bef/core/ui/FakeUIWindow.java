@@ -4,6 +4,7 @@ package org.bef.core.ui;
  * Created by enrico on 5/8/16.
  */
 public class FakeUIWindow<T> implements UIWindow<T> {
+    private static final int TIMEOUT = 1000;
     private static final int SLEEP = 50;
     private boolean exit = false;
     private boolean valid = false;
@@ -11,12 +12,16 @@ public class FakeUIWindow<T> implements UIWindow<T> {
 
     @Override
     public boolean show() {
+        long start = System.currentTimeMillis();
         started = true;
         while (!exit) {
             try {
                 Thread.sleep(SLEEP);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            }
+            if (System.currentTimeMillis() - start > TIMEOUT) {
+                throw new IllegalStateException("Timeout on show.");
             }
         }
         return valid;
@@ -59,11 +64,15 @@ public class FakeUIWindow<T> implements UIWindow<T> {
     }
 
     public void waitUntilStarted() {
+        long start = System.currentTimeMillis();
         while (!started) {
             try {
                 Thread.sleep(SLEEP);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
+            }
+            if (System.currentTimeMillis() - start > TIMEOUT) {
+                throw new IllegalStateException("Timeout on waitUntilStarted.");
             }
         }
     }
