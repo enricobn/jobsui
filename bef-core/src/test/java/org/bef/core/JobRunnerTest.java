@@ -7,7 +7,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
@@ -27,17 +30,20 @@ public class JobRunnerTest {
         runner = new JobRunner();
         ui = mock(UI.class);
         window = new FakeUIWindow();
-//        when(window.show()).thenReturn(true);
         when(ui.createWindow(anyString())).thenReturn(window);
     }
 
 
     @Test public void assert_that_simplejob_is_valid_when_run_with_valid_parameters() throws Exception {
+        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+
         SimpleJobRunner simpleJobRunner = new SimpleJobRunner() {
             @Override
             protected void interact() {
-                getUiValueName().setValue("Enrico");
-                getUiValueSurname().setValue("Benedetti");
+                uiValueName.setValue("Enrico");
+                uiValueSurname.setValue("Benedetti");
             }
         };
 
@@ -47,11 +53,15 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
+        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+
         SimpleJobRunner simpleJobRunner = new SimpleJobRunner() {
             @Override
             protected void interact() {
-                getUiValueName().setValue("Enrico");
-                getUiValueSurname().setValue("Benedetti");
+                uiValueName.setValue("Enrico");
+                uiValueSurname.setValue("Benedetti");
             }
         };
 
@@ -61,6 +71,10 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters() throws Exception {
+        FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
+        FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+
         SimpleJobRunner simpleJobRunner = new SimpleJobRunner() {
             @Override
             protected void interact() {
@@ -77,7 +91,7 @@ public class JobRunnerTest {
         FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        final Future<JobFuture<String>> future = runJob(runner, createGroovySimpleJob());
+        final Future<JobFuture<String>> future = runJob(createGroovySimpleJob());
 
         window.waitUntilStarted();
 
@@ -98,7 +112,7 @@ public class JobRunnerTest {
 
         when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
-        final Future<JobFuture<String>> future = runJob(runner, createComplexJob());
+        final Future<JobFuture<String>> future = runJob(createComplexJob());
 
         window.waitUntilStarted();
 
@@ -117,23 +131,10 @@ public class JobRunnerTest {
     }
 
     private abstract class SimpleJobRunner {
-        private FakeUiValue<String, ?> uiValueName;
-        private FakeUiValue<String, ?> uiValueSurname;
-
-        public FakeUiValue<String, ?> getUiValueName() {
-            return uiValueName;
-        }
-
-        public FakeUiValue<String, ?> getUiValueSurname() {
-            return uiValueSurname;
-        }
 
         public JobFuture<String> start() throws Exception {
-            uiValueName = new FakeUiValue<>();
-            uiValueSurname = new FakeUiValue<>();
-            when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-            final Future<JobFuture<String>> future = runJob(runner, createSimpleJob());
+            final Future<JobFuture<String>> future = runJob(createSimpleJob());
 
             window.waitUntilStarted();
 
@@ -383,12 +384,11 @@ public class JobRunnerTest {
 
     private final ExecutorService pool = Executors.newFixedThreadPool(1);
 
-    public <T> Future<JobFuture<T>> runJob(final JobRunner runner, final Job<T> job) {
+    public <T> Future<JobFuture<T>> runJob(final Job<T> job) {
         return pool.submit(new Callable<JobFuture<T>>() {
             @Override
             public JobFuture<T> call() throws Exception {
-                final JobFuture<T> jobFuture = runner.run(ui, job);
-                return jobFuture;
+                return runner.run(ui, job);
             }
         });
     }
