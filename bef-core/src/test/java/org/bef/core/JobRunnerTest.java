@@ -3,17 +3,16 @@ package org.bef.core;
 import groovy.lang.GroovyShell;
 import org.bef.core.groovy.JobParameterDefGroovy;
 import org.bef.core.ui.*;
-import org.bef.core.utils.Tuple2;
 import org.junit.Before;
 import org.junit.Test;
-import rx.Observable;
-import rx.functions.Action1;
-import rx.functions.Func2;
 
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,101 +23,74 @@ import static org.mockito.Mockito.when;
 public class JobRunnerTest {
     private JobRunner runner;
     private UI ui;
-    private UIWindow window;
+    private FakeUIWindow window;
 
     @Before
     public void init() {
         runner = new JobRunner();
         ui = mock(UI.class);
-        window = mock(UIWindow.class);
-        when(window.show()).thenReturn(true);
+        window = new FakeUIWindow();
+//        when(window.show()).thenReturn(true);
         when(ui.createWindow(anyString())).thenReturn(window);
     }
 
-    @Test
-    public void runSimple() throws UnsupportedComponentException {
-        FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
-        FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
-        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
+    @Test public void assert_that_simplejob_is_valid_when_run_with_valid_parameters() throws Exception {
+        SimpleJob simpleJob = new SimpleJob().init();
+        Job<String> job = simpleJob.getJob();
+        FakeUiValue<String, ?> uiValueName = simpleJob.getUiValueName();
+        FakeUiValue<String, ?> uiValueSurname = simpleJob.getUiValueSurname();
 
-        final JobParameterDefAbstract<String> name = new JobParameterDefAbstract<String>(
-                "name",
-                "Name",
-                String.class,
-                new NotEmptyStringValidator()) {
-            @Override
-            public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-                final UIValue<String, ?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
-                uiValue.setConverter(new StringConverterString());
-                uiValue.setDefaultValue("Enrico");
-                return uiValue;
-            }
+        final Future<JobFuture<String>> future = runJob(runner, job);
 
-            @Override
-            public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
-            }
-        };
-        parameterDefs.add(name);
-
-        final JobParameterDefAbstract<String> surname = new JobParameterDefAbstract<String>(
-                "surname",
-                "Surname",
-                String.class,
-                new NotEmptyStringValidator()) {
-            @Override
-            public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-                final UIValue<String, ?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
-                uiValue.setConverter(new StringConverterString());
-                return uiValue;
-            }
-
-            @Override
-            public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
-            }
-        };
-        surname.addDependency(name);
-        parameterDefs.add(surname);
-
-
-        Job<String> job = new Job<String>() {
-            @Override
-            public String getName() {
-                return "Test";
-            }
-
-            @Override
-            public List<JobParameterDef<?>> getParameterDefs() {
-                return parameterDefs;
-            }
-
-            @Override
-            public JobFuture<String> run(final Map<String, Object> parameters) {
-                return new JobFuture<String>() {
-                    @Override
-                    public String get() {
-                        return parameters.get("name") + " " + parameters.get("surname");
-                    }
-                };
-            }
-
-            @Override
-            public List<String> validate(Map<String, Object> parameters) {
-                return Collections.emptyList();
-            }
-        };
-
-        final JobFuture<String> future = runner.run(ui, job);
+        window.waitUntilStarted();
 
         uiValueName.setValue("Enrico");
         uiValueSurname.setValue("Benedetti");
 
-        assertEquals("Enrico Benedetti", future.get());
+        window.exit();
+
+        future.get();
+
+        assertTrue(window.isValid());
     }
 
-    @Test
-    public void runSimpleGroovy() throws UnsupportedComponentException {
+    @Test public void assert_that_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
+        SimpleJob simpleJob = new SimpleJob().init();
+        Job<String> job = simpleJob.getJob();
+        FakeUiValue<String, ?> uiValueName = simpleJob.getUiValueName();
+        FakeUiValue<String, ?> uiValueSurname = simpleJob.getUiValueSurname();
+
+        final Future<JobFuture<String>> future = runJob(runner, job);
+
+        window.waitUntilStarted();
+
+        uiValueName.setValue("Enrico");
+        uiValueSurname.setValue("Benedetti");
+
+        window.exit();
+
+        final JobFuture<String> jobFuture = future.get();
+
+        assertEquals("Enrico Benedetti", jobFuture.get());
+    }
+
+    @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters() throws Exception {
+        SimpleJob simpleJob = new SimpleJob().init();
+        Job<String> job = simpleJob.getJob();
+
+        final Future<JobFuture<String>> future = runJob(runner, job);
+
+        window.waitUntilStarted();
+
+        window.exit();
+
+        future.get();
+
+        assertFalse(window.isValid());
+    }
+
+    @Test public void assert_that_groovy_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
         FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
         FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
@@ -188,17 +160,21 @@ public class JobRunnerTest {
             }
         };
 
-        final JobFuture<String> future = runner.run(ui, job);
+        final Future<JobFuture<String>> future = runJob(runner, job);
+
+        window.waitUntilStarted();
 
         uiValueName.setValue("Enrico");
         uiValueSurname.setValue("Benedetti");
 
-        assertEquals("Enrico Benedetti", future.get());
+        window.exit();
 
+        final JobFuture<String> jobFuture = future.get();
+
+        assertEquals("Enrico Benedetti", jobFuture.get());
     }
 
-    @Test
-    public void runComplex() throws UnsupportedComponentException {
+    @Test public void assert_that_complexjob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
         final FakeUIChoice<String,?> uiChoiceVersion = new FakeUIChoice<>();
         final FakeUIChoice<String,?> uiChoiceDb = new FakeUIChoice<>();
         final FakeUIChoice<String,?> uiChoiceUser = new FakeUIChoice<>();
@@ -301,16 +277,126 @@ public class JobRunnerTest {
             }
         };
 
-        final JobFuture<String> future = runner.run(ui, job);
+        final Future<JobFuture<String>> future = runJob(runner, job);
+
+        window.waitUntilStarted();
 
         uiChoiceVersion.setItems(Arrays.asList("1.0", "2.0"));
 
         uiChoiceVersion.setSelectedItem("1.0");
         uiChoiceDb.setSelectedItem("Dev-1.0");
 
-        assertEquals("1.0 Dev-1.0", future.get());
+        window.exit();
+
+        final JobFuture<String> jobFuture = future.get();
+
+        assertEquals("1.0 Dev-1.0", jobFuture.get());
         assertEquals(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev"), uiChoiceDb.getItems());
         assertEquals(Arrays.asList("1.0 Dev-1.0"), uiChoiceUser.getItems());
+
     }
 
+    private class SimpleJob {
+        private FakeUiValue<String, ?> uiValueName;
+        private FakeUiValue<String, ?> uiValueSurname;
+        private Job<String> job;
+
+        public FakeUiValue<String, ?> getUiValueName() {
+            return uiValueName;
+        }
+
+        public FakeUiValue<String, ?> getUiValueSurname() {
+            return uiValueSurname;
+        }
+
+        public Job<String> getJob() {
+            return job;
+        }
+
+        public SimpleJob init() throws UnsupportedComponentException {
+            uiValueName = new FakeUiValue<>();
+            uiValueSurname = new FakeUiValue<>();
+            when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+
+            final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
+
+            final JobParameterDefAbstract<String> name = new JobParameterDefAbstract<String>(
+                    "name",
+                    "Name",
+                    String.class,
+                    new NotEmptyStringValidator()) {
+                @Override
+                public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
+                    final UIValue<String, ?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
+                    uiValue.setConverter(new StringConverterString());
+                    uiValue.setDefaultValue("Enrico");
+                    return uiValue;
+                }
+
+                @Override
+                public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
+                }
+            };
+            parameterDefs.add(name);
+
+            final JobParameterDefAbstract<String> surname = new JobParameterDefAbstract<String>(
+                    "surname",
+                    "Surname",
+                    String.class,
+                    new NotEmptyStringValidator()) {
+                @Override
+                public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
+                    final UIValue<String, ?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
+                    uiValue.setConverter(new StringConverterString());
+                    return uiValue;
+                }
+
+                @Override
+                public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
+                }
+            };
+            surname.addDependency(name);
+            parameterDefs.add(surname);
+
+            job = new Job<String>() {
+                @Override
+                public String getName() {
+                    return "Test";
+                }
+
+                @Override
+                public List<JobParameterDef<?>> getParameterDefs() {
+                    return parameterDefs;
+                }
+
+                @Override
+                public JobFuture<String> run(final Map<String, Object> parameters) {
+                    return new JobFuture<String>() {
+                        @Override
+                        public String get() {
+                            return parameters.get("name") + " " + parameters.get("surname");
+                        }
+                    };
+                }
+
+                @Override
+                public List<String> validate(Map<String, Object> parameters) {
+                    return Collections.emptyList();
+                }
+            };
+            return this;
+        }
+    }
+
+    private final ExecutorService pool = Executors.newFixedThreadPool(1);
+
+    public <T> Future<JobFuture<T>> runJob(final JobRunner runner, final Job<T> job) {
+        return pool.submit(new Callable<JobFuture<T>>() {
+            @Override
+            public JobFuture<T> call() throws Exception {
+                final JobFuture<T> jobFuture = runner.run(ui, job);
+                return jobFuture;
+            }
+        });
+    }
 }
