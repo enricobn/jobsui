@@ -1,0 +1,54 @@
+<!--
+repoTypeChoice = repoContainer.addChoice("Repo type", dbCatalog.toArray(new DBCatalog[dbCatalog.size()]));
+repoDbTypeChoice = repoContainer.addChoice("Repo DB type", DBType.values());
+
+versionChoice = repoContainer.addChoice("Version", new String[0]);
+deployChoice = repoContainer.addChoice("Deploy", new Deploy[0]);
+repoChoice = repoContainer.addChoice("Repo", new DBConnection[0]);
+
+UIContainer mainContainer = window.addContainer();
+
+typeChoice = mainContainer.addChoice("Type", dbCatalog.toArray(new DBCatalog[dbCatalog.size()]));
+refRepoDbTypeChoice = mainContainer.addChoice("Ref repo DB type", DBType.values());
+refRepoChoice = mainContainer.addChoice("Ref repo", new DBConnection[0]);
+usersChoice = mainContainer.addChoice("User", new String[0]);
+mainDbTypeChoice = mainContainer.addChoice("Main DB type", DBType.values());
+mainDBChoice = mainContainer.addChoice("Database", new String[0]);
+-->
+<Job key="complex" name="Complex" returnType="java.lang.Void">
+    <Parameter key="repoType" name="Repo type" type="DBCatalog">
+        <Validate>
+            <![CDATA[
+                println("repoType " + value)
+                new NotNullValidator().validate(value)
+            ]]>
+        </Validate>
+        <CreateComponent>
+            <![CDATA[
+                def component = ui.create(UIChoice.class)
+                component.setItems([new DBCatalog(name: 'Dev')])
+                return component
+            ]]>
+        </CreateComponent>
+    </Parameter>
+    <Parameter key="repoDbType" name="Repo DB type" type="DBType">
+        <Validate>
+            <![CDATA[
+                println("repoDBType " + value)
+                new NotNullValidator().validate(value)
+            ]]>
+        </Validate>
+        <CreateComponent>
+            <![CDATA[
+                def component = ui.create(UIChoice.class)
+                component.setItems(DBType.values().toList())
+                return component
+            ]]>
+        </CreateComponent>
+    </Parameter>
+    <Run>
+        <![CDATA[
+            return null;
+        ]]>
+    </Run>
+</Job>
