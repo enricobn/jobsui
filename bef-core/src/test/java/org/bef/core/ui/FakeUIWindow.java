@@ -4,7 +4,7 @@ package org.bef.core.ui;
  * Created by enrico on 5/8/16.
  */
 public class FakeUIWindow<T> implements UIWindow<T> {
-    private static final int TIMEOUT = 1000;
+    private static final int TIMEOUT = 5000;
     private static final int SLEEP = 50;
     private boolean exit = false;
     private boolean valid = false;

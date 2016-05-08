@@ -12,6 +12,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -33,13 +35,12 @@ public class JobRunnerTest {
         when(ui.createWindow(anyString())).thenReturn(window);
     }
 
-
     @Test public void assert_that_simplejob_is_valid_when_run_with_valid_parameters() throws Exception {
         final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
         final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        SimpleJobRunner simpleJobRunner = new SimpleJobRunner() {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>() {
             @Override
             protected void interact() {
                 uiValueName.setValue("Enrico");
@@ -47,9 +48,9 @@ public class JobRunnerTest {
             }
         };
 
-        simpleJobRunner.start();
+        jobRunnerWrapper.start(createSimpleJob());
 
-        assertTrue(window.isValid());
+        assertThat(window.isValid(), is(true));
     }
 
     @Test public void assert_that_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
@@ -57,7 +58,7 @@ public class JobRunnerTest {
         final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        SimpleJobRunner simpleJobRunner = new SimpleJobRunner() {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>() {
             @Override
             protected void interact() {
                 uiValueName.setValue("Enrico");
@@ -65,9 +66,9 @@ public class JobRunnerTest {
             }
         };
 
-        final JobFuture<String> jobFuture = simpleJobRunner.start();
+        final JobFuture<String> jobFuture = jobRunnerWrapper.start(createSimpleJob());
 
-        assertEquals("Enrico Benedetti", jobFuture.get());
+        assertThat("Enrico Benedetti", equalTo(jobFuture.get()));
     }
 
     @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters() throws Exception {
@@ -75,66 +76,63 @@ public class JobRunnerTest {
         FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        SimpleJobRunner simpleJobRunner = new SimpleJobRunner() {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>() {
             @Override
             protected void interact() {
             }
         };
 
-        simpleJobRunner.start();
+        jobRunnerWrapper.start(createSimpleJob());
 
-        assertFalse(window.isValid());
+        assertThat(window.isValid(), is(false));
     }
 
     @Test public void assert_that_groovy_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
-        FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        final Future<JobFuture<String>> future = runJob(createGroovySimpleJob());
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>() {
+            @Override
+            protected void interact() {
+                uiValueName.setValue("Enrico");
+                uiValueSurname.setValue("Benedetti");
 
-        window.waitUntilStarted();
+            }
+        };
 
-        uiValueName.setValue("Enrico");
-        uiValueSurname.setValue("Benedetti");
+        final JobFuture<String> jobFuture = jobRunnerWrapper.start(createGroovySimpleJob());
 
-        window.exit();
-
-        final JobFuture<String> jobFuture = future.get();
-
-        assertEquals("Enrico Benedetti", jobFuture.get());
+        assertThat("Enrico Benedetti", equalTo(jobFuture.get()));
     }
 
     @Test public void assert_that_complexjob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
         final FakeUIChoice<String,?> uiChoiceVersion = new FakeUIChoice<>();
         final FakeUIChoice<String,?> uiChoiceDb = new FakeUIChoice<>();
         final FakeUIChoice<String,?> uiChoiceUser = new FakeUIChoice<>();
-
         when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
-        final Future<JobFuture<String>> future = runJob(createComplexJob());
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>() {
+            @Override
+            protected void interact() {
+                uiChoiceVersion.setItems(Arrays.asList("1.0", "2.0"));
+                uiChoiceVersion.setSelectedItem("1.0");
+                uiChoiceDb.setSelectedItem("Dev-1.0");
+            }
+        };
 
-        window.waitUntilStarted();
+        final JobFuture<String> jobFuture = jobRunnerWrapper.start(createComplexJob());
 
-        uiChoiceVersion.setItems(Arrays.asList("1.0", "2.0"));
-
-        uiChoiceVersion.setSelectedItem("1.0");
-        uiChoiceDb.setSelectedItem("Dev-1.0");
-
-        window.exit();
-
-        final JobFuture<String> jobFuture = future.get();
-
-        assertEquals("1.0 Dev-1.0", jobFuture.get());
-        assertEquals(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev"), uiChoiceDb.getItems());
-        assertEquals(Arrays.asList("1.0 Dev-1.0"), uiChoiceUser.getItems());
+        assertThat("1.0 Dev-1.0", equalTo(jobFuture.get()));
+        assertThat(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev"), equalTo(uiChoiceDb.getItems()));
+        assertThat(Collections.singletonList("1.0 Dev-1.0"), equalTo(uiChoiceUser.getItems()));
     }
 
-    private abstract class SimpleJobRunner {
+    private abstract class JobRunnerWrapper<T> {
 
-        public JobFuture<String> start() throws Exception {
+        public JobFuture<T> start(Job<T> job) throws Exception {
 
-            final Future<JobFuture<String>> future = runJob(createSimpleJob());
+            final Future<JobFuture<T>> future = runJob(job);
 
             window.waitUntilStarted();
 

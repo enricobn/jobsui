@@ -14,7 +14,7 @@ subprojects {
 
     dependencies {
         testCompile 'junit:junit:4.11'
-        testCompile 'org.mockito:mockito-all:1.10.19'
+        testCompile 'org.mockito:mockito-core:1.10.19'
     }
 
     // to add resources from java and test source dirs since gradle does not copy them
