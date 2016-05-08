@@ -10,8 +10,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * Created by enrico on 2/14/16.
@@ -26,7 +26,7 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         UIWindow<T> window = ui.createWindow("Test");
 
         final UIChoice<String,T> version = ui.create(UIChoice.class);
-        version.setItems(new String[]{"1.0", "2.0"});
+        version.setItems(Arrays.asList("1.0", "2.0"));
         window.add("Version", version);
 
         final UIChoice<String,T> db = ui.create(UIChoice.class);
@@ -45,11 +45,11 @@ public class SwingUIWindow implements UIWindow<JComponent> {
             public void call(String s) {
                 System.out.println("Version " + s);
                 if (s == null) {
-                    db.setItems(new String[0]);
+                    db.setItems(Collections.<String>emptyList());
                 } else if (s.equals("1.0")) {
-                    db.setItems(new String[]{"Dev-1.0", "Cons-1.0", "Dev"});
+                    db.setItems(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev"));
                 } else {
-                    db.setItems(new String[]{"Dev-2.0", "Cons-2.0", "Dev"});
+                    db.setItems(Arrays.asList("Dev-2.0", "Cons-2.0", "Dev"));
                 }
             }
         });
@@ -77,9 +77,9 @@ public class SwingUIWindow implements UIWindow<JComponent> {
             @Override
             public void call(Tuple2<String, String> versionDB) {
                 if (versionDB.first == null || versionDB.second == null) {
-                    user.setItems(new String[0]);
+                    user.setItems(Collections.<String>emptyList());
                 } else {
-                    user.setItems(new String[]{versionDB.toString()});
+                    user.setItems(Arrays.asList(versionDB.toString()));
                 }
             }
         });

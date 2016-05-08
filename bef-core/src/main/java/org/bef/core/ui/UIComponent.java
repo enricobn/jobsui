@@ -11,4 +11,6 @@ public interface UIComponent<T,C> {
 
     C getComponent();
 
+    T getValue();
+
 }

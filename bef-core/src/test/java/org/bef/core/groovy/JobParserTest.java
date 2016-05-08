@@ -8,6 +8,7 @@ import org.bef.core.ui.FakeUiValue;
 import org.bef.core.ui.UI;
 import org.bef.core.ui.UIValue;
 import org.bef.core.ui.UIWindow;
+import org.bef.core.ui.swing.SwingUI;
 import org.junit.Test;
 
 import java.io.File;

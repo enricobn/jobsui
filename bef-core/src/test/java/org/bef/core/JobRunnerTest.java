@@ -237,11 +237,11 @@ public class JobRunnerTest {
             public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
                 String version = (String) values.get("version");
                 if (version == null) {
-                    uiChoiceDb.setItems(new String[0]);
+                    uiChoiceDb.setItems(Collections.<String>emptyList());
                 } else if (version.equals("1.0")) {
-                    uiChoiceDb.setItems(new String[]{"Dev-1.0", "Cons-1.0", "Dev"});
+                    uiChoiceDb.setItems(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev"));
                 } else {
-                    uiChoiceDb.setItems(new String[]{"Dev-2.0", "Cons-2.0", "Dev"});
+                    uiChoiceDb.setItems(Arrays.asList("Dev-2.0", "Cons-2.0", "Dev"));
                 }
             }
         };
@@ -263,9 +263,9 @@ public class JobRunnerTest {
                 String version = (String) values.get("version");
                 String db = (String) values.get("db");
                 if (version == null || db == null) {
-                    uiChoiceUser.setItems(new String[0]);
+                    uiChoiceUser.setItems(Collections.<String>emptyList());
                 } else {
-                    uiChoiceUser.setItems(new String[]{version + " " + db});
+                    uiChoiceUser.setItems(Arrays.asList(version + " " + db));
                 }
 
             }
@@ -303,14 +303,14 @@ public class JobRunnerTest {
 
         final JobFuture<String> future = runner.run(ui, job);
 
-        uiChoiceVersion.setItems(new String[]{"1.0", "2.0"});
+        uiChoiceVersion.setItems(Arrays.asList("1.0", "2.0"));
 
         uiChoiceVersion.setSelectedItem("1.0");
         uiChoiceDb.setSelectedItem("Dev-1.0");
 
         assertEquals("1.0 Dev-1.0", future.get());
-        assertArrayEquals(new String[]{"Dev-1.0", "Cons-1.0", "Dev"}, uiChoiceDb.getItems());
-        assertArrayEquals(new String[]{"1.0 Dev-1.0"}, uiChoiceUser.getItems());
+        assertEquals(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev"), uiChoiceDb.getItems());
+        assertEquals(Arrays.asList("1.0 Dev-1.0"), uiChoiceUser.getItems());
     }
 
 }

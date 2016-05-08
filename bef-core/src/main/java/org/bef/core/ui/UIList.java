@@ -11,8 +11,6 @@ public interface UIList<T,C> extends UIComponent<List<T>,C> {
 
     void addItem(T item);
 
-    List<T> getItems();
-
     void setAllowRemove(boolean allowRemove);
 
 }

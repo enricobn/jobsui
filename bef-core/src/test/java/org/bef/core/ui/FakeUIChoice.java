@@ -2,6 +2,7 @@ package org.bef.core.ui;
 
 import rx.functions.Action1;
 
+import java.util.List;
 import java.util.Objects;
 
 import static org.junit.Assert.assertTrue;
@@ -10,7 +11,7 @@ import static org.junit.Assert.assertTrue;
  * Created by enrico on 5/5/16.
  */
 public class FakeUIChoice<T, C> extends FakeUIComponent<T, C> implements UIChoice<T, C> {
-    private T[] items;
+    private List<T> items;
     private T selectedItem;
 
     @Override
@@ -24,17 +25,17 @@ public class FakeUIChoice<T, C> extends FakeUIComponent<T, C> implements UIChoic
     }
 
     @Override
-    public T getSelectedItem() {
+    public T getValue() {
         return selectedItem;
     }
 
     @Override
-    public void setItems(T[] items) {
+    public void setItems(List<T> items) {
         this.items = items;
-        if (items.length == 0) {
+        if (items.size() == 0) {
             setSelectedItem(null);
-        } else if (items.length == 1) {
-            setSelectedItem(items[0]);
+        } else if (items.size() == 1) {
+            setSelectedItem(items.get(0));
         }
     }
 
@@ -55,7 +56,7 @@ public class FakeUIChoice<T, C> extends FakeUIComponent<T, C> implements UIChoic
         }
     }
 
-    public T[] getItems() {
+    public List<T> getItems() {
         return items;
     }
 }

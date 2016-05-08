@@ -73,7 +73,7 @@ public class SwingUIList<T> implements UIList<T,JComponent> {
     }
 
     @Override
-    public List<T> getItems() {
+    public List<T> getValue() {
         return Collections.unmodifiableList(items);
     }
 

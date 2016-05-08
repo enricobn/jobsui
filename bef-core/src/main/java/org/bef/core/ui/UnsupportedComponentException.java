@@ -10,4 +10,8 @@ public class UnsupportedComponentException extends Exception {
     public UnsupportedComponentException(String message) {
         super(message);
     }
+
+    public UnsupportedComponentException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

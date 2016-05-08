@@ -27,4 +27,9 @@ public class FakeUIButton<C> extends FakeUIComponent<Void,C> implements UIButton
             action.call(null);
         }
     }
+
+    @Override
+    public Void getValue() {
+        return null;
+    }
 }

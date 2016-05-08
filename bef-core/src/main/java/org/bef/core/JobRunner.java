@@ -101,6 +101,8 @@ public class JobRunner {
             }
         });
 
+        window.setValid(false);
+
         if (window.show()) {
             return job.run(parameters);
         }

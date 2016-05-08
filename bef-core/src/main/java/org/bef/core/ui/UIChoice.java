@@ -2,6 +2,8 @@ package org.bef.core.ui;
 
 import rx.Observable;
 
+import java.util.List;
+
 /**
  * Created by enrico on 2/14/16.
  */
@@ -11,8 +13,6 @@ public interface UIChoice<T,C> extends UIComponent<T,C> {
 
     void setEnabled(boolean enable);
 
-    T getSelectedItem();
-
-    void setItems(T[] items);
+    void setItems(List<T> items);
 
 }

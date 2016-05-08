@@ -55,4 +55,9 @@ public class SwingUIButton implements UIButton<JComponent> {
     public String getText() {
         return component.getText();
     }
+
+    @Override
+    public Void getValue() {
+        return null;
+    }
 }

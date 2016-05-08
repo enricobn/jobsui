@@ -7,6 +7,8 @@ import rx.Subscriber;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -14,6 +16,7 @@ import java.util.Objects;
  */
 public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
     private final JComboBox<T> component = new JComboBox<>();
+    private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
     private final Observable<T> observable;
 
     public SwingUIChoice() {
@@ -27,11 +30,12 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         if (!Objects.equals(selectedItem, component.getSelectedItem())) {
-                            selectedItem = getSelectedItem();
+                            selectedItem = getValue();
                             subscriber.onNext(selectedItem);
                         }
                     }
                 });
+                subscribers.add(subscriber);
             }
         });
     }
@@ -47,7 +51,7 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
     }
 
     @Override
-    public T getSelectedItem() {
+    public T getValue() {
         int selectedIndex = component.getSelectedIndex();
         if (selectedIndex < 0) {
             return null;
@@ -57,7 +61,7 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
     }
 
     @Override
-    public void setItems(final T[] items) {
+    public void setItems(final List<T> items) {
         final Object selectedItem = component.getSelectedItem();
 
         SwingUtilities.invokeLater(new Runnable() {
@@ -66,7 +70,7 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
 
                 component.removeAllItems();
 
-                if (items.length > 1) {
+                if (items.size() > 1) {
                     component.addItem(null);
                 }
 
@@ -81,12 +85,16 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
                 if (found) {
                     component.setSelectedItem(selectedItem);
                 } else {
-                    if (items.length == 1) {
-                        component.setSelectedItem(items[0]);
+                    if (items.size() == 1) {
+                        component.setSelectedItem(items.get(0));
                     } else {
                         component.setSelectedItem(null);
                     }
                 }
+                for (Subscriber<? super T> subscriber : subscribers) {
+                    subscriber.onNext(getValue());
+                }
+
             }
         });
     }
