@@ -38,6 +38,8 @@ public class Main {
         JobRunner runner = new JobRunner();
 
         final JobFuture<?> future = runner.run(new SwingUI(), job);
-        future.get();
+        if (future != null) {
+            future.get();
+        }
     }
 }
