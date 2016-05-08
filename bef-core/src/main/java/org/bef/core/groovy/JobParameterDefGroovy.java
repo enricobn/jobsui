@@ -14,7 +14,8 @@ import java.util.Map;
  * Created by enrico on 5/4/16.
  */
 public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
-    private static final String CREATE_COMPONENT_IMPORTS =
+    private static final String IMPORTS =
+            "import org.bef.core.*;\n" +
             "import org.bef.core.ui.*;\n";
     private final GroovyShell shell;
     private final String createComponentScript;
@@ -25,7 +26,7 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
                                  String createComponentScript, String onDependenciesChangeScript, String validateScript) {
         super(key, name, type, null);
         this.shell = shell;
-        this.createComponentScript = CREATE_COMPONENT_IMPORTS + createComponentScript;
+        this.createComponentScript = createComponentScript;
         this.onDependenciesChangeScript = onDependenciesChangeScript;
         this.validateScript = validateScript;
     }
@@ -33,7 +34,12 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
     @Override
     public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
         shell.setProperty("ui", ui);
-        return (UIComponent) shell.evaluate(createComponentScript);
+        try {
+            return (UIComponent) shell.evaluate(IMPORTS + createComponentScript);
+        } catch (Throwable e) {
+            throw new RuntimeException("Error in createComponent script for parameter whit key \"" +
+                    getKey() + "\"", e);
+        }
     }
 
     @Override
@@ -41,7 +47,12 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
         if (onDependenciesChangeScript != null) {
             shell.setProperty("component", component);
             shell.setProperty("values", values);
-            shell.evaluate(onDependenciesChangeScript);
+            try {
+                shell.evaluate(IMPORTS + onDependenciesChangeScript);
+            } catch (Throwable e) {
+                throw new RuntimeException("Error in onDependenciesChange script for parameter whit key \"" +
+                        getKey() + "\"", e);
+            }
         }
     }
 
@@ -51,6 +62,11 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
             return Collections.emptyList();
         }
         shell.setProperty("value", value);
-        return (List<String>) shell.evaluate(validateScript);
+        try {
+            return (List<String>) shell.evaluate(IMPORTS + validateScript);
+        } catch (Throwable e) {
+            throw new RuntimeException("Error in validate script for parameter whit key \"" +
+                    getKey() + "\"", e);
+        }
     }
 }
