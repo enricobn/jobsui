@@ -6,9 +6,9 @@ package org.bef.core.ui;
 public class FakeUIWindow<T> implements UIWindow<T> {
     private static final int TIMEOUT = 5000;
     private static final int SLEEP = 50;
-    private boolean exit = false;
-    private boolean valid = false;
-    private boolean started = false;
+    private volatile boolean exit = false;
+    private volatile boolean started = false;
+    private volatile boolean valid = false;
 
     @Override
     public boolean show() {
