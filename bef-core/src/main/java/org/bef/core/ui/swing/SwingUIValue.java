@@ -8,6 +8,8 @@ import rx.Subscriber;
 import javax.swing.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by enrico on 5/1/16.
@@ -15,6 +17,7 @@ import java.awt.event.FocusListener;
 public class SwingUIValue<T> implements UIValue<T,JComponent> {
     private final JTextField component = new JTextField();
     private final Observable<T> observable;
+    private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
     private StringConverter<T> converter;
     private T defaultValue;
 
@@ -35,7 +38,8 @@ public class SwingUIValue<T> implements UIValue<T,JComponent> {
                         subscriber.onNext(value);
                     }
                 });
-                subscriber.onNext(defaultValue);
+//                subscriber.onNext(defaultValue);
+                subscribers.add(subscriber);
             }
         });
     }
@@ -62,4 +66,12 @@ public class SwingUIValue<T> implements UIValue<T,JComponent> {
     public void setConverter(StringConverter<T> converter) {
         this.converter = converter;
     }
+
+    @Override
+    public void notifySubscribers() {
+        for (Subscriber<? super T> subscriber : subscribers) {
+            subscriber.onNext(getValue());
+        }
+    }
+
 }

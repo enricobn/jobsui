@@ -65,11 +65,16 @@ public class SwingUIList<T> implements UIList<T,JComponent> {
                     i++;
                 }
                 component.revalidate();
-                for (Subscriber<? super List<T>> subscriber : subscribers) {
-                    subscriber.onNext(items);
-                }
+                notifySubscribers();
             }
         });
+    }
+
+    @Override
+    public void notifySubscribers() {
+        for (Subscriber<? super List<T>> subscriber : subscribers) {
+            subscriber.onNext(getValue());
+        }
     }
 
     @Override

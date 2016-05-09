@@ -13,6 +13,7 @@ import java.util.List;
 public abstract class FakeUIComponent<T, C> implements UIComponent<T, C> {
     private final Observable<T> observable;
     protected final List<Action1<T>> actions = new ArrayList<>();
+    private List<Subscriber<? super T>> subscribers = new ArrayList<>();
 
     public FakeUIComponent() {
         observable = Observable.create(new Observable.OnSubscribe<T>() {
@@ -24,6 +25,7 @@ public abstract class FakeUIComponent<T, C> implements UIComponent<T, C> {
                         subscriber.onNext(o);
                     }
                 });
+                subscribers.add(subscriber);
             }
         });
     }
@@ -31,5 +33,12 @@ public abstract class FakeUIComponent<T, C> implements UIComponent<T, C> {
     @Override
     public Observable<T> getObservable() {
         return observable;
+    }
+
+    @Override
+    public void notifySubscribers() {
+        for (Subscriber<? super T> subscriber : subscribers) {
+            subscriber.onNext(getValue());
+        }
     }
 }

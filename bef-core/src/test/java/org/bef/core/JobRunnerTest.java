@@ -2,19 +2,17 @@ package org.bef.core;
 
 import groovy.lang.GroovyShell;
 import org.bef.core.groovy.JobParameterDefGroovy;
+import org.bef.core.groovy.JobParser;
 import org.bef.core.ui.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.*;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.*;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -128,7 +126,34 @@ public class JobRunnerTest {
         assertThat(Collections.singletonList("1.0 Dev-1.0"), equalTo(uiChoiceUser.getItems()));
     }
 
+
+    @Test public void assert_that_the_default_value_of_a_parameter_triggers_validation() throws Exception {
+        final FakeUIChoice<String,?> uiChoiceRepoType = new FakeUIChoice<>();
+        final FakeUIChoice<String,?> uiChoiceRepoDBType = new FakeUIChoice<>();
+        when(ui.create(UIChoice.class)).thenReturn(uiChoiceRepoType, uiChoiceRepoDBType);
+
+        JobParser parser = new JobParser();
+        Project project = parser.loadProject(new File("src/test/resources/complexjob"));
+        final Job<?> job = project.getJob("complex");
+
+        JobRunnerWrapper jobRunnerWrapper = new JobRunnerWrapper() {
+            @Override
+            protected void interact() {
+                uiChoiceRepoDBType.setSelectedItemByToString("SQLServer");
+            }
+        };
+
+
+        jobRunnerWrapper.start(job);
+
+        // this is not a real assertion, it's a prerequisite
+        assertThat(uiChoiceRepoType.getValue(), is(notNullValue()));
+
+        assertThat(window.isValid(), is(true));
+    }
+
     private abstract class JobRunnerWrapper<T> {
+        private final ExecutorService pool = Executors.newFixedThreadPool(1);
 
         public JobFuture<T> start(Job<T> job) throws Exception {
 
@@ -141,6 +166,20 @@ public class JobRunnerTest {
             window.exit();
 
             return future.get();
+        }
+
+        private <T> Future<JobFuture<T>> runJob(final Job<T> job) {
+            return pool.submit(new Callable<JobFuture<T>>() {
+                @Override
+                public JobFuture<T> call() throws Exception {
+                    try {
+                        return runner.run(ui, job);
+                    } catch(Throwable th) {
+                        th.printStackTrace();
+                        return null;
+                    }
+                }
+            });
         }
 
         protected abstract void interact();
@@ -378,16 +417,5 @@ public class JobRunnerTest {
             }
         };
 
-    }
-
-    private final ExecutorService pool = Executors.newFixedThreadPool(1);
-
-    public <T> Future<JobFuture<T>> runJob(final Job<T> job) {
-        return pool.submit(new Callable<JobFuture<T>>() {
-            @Override
-            public JobFuture<T> call() throws Exception {
-                return runner.run(ui, job);
-            }
-        });
     }
 }

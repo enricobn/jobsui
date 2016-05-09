@@ -60,4 +60,8 @@ public class SwingUIButton implements UIButton<JComponent> {
     public Void getValue() {
         return null;
     }
+
+    @Override
+    public void notifySubscribers() {
+    }
 }

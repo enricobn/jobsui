@@ -42,7 +42,7 @@ public class FakeUIChoice<T, C> extends FakeUIComponent<T, C> implements UIChoic
     public void setSelectedItem(T item) {
         boolean found = false;
         for (T t : items) {
-            if (t.equals(item)) {
+            if (Objects.equals(t, item)) {
                 found = true;
                 break;
             }
@@ -54,6 +54,16 @@ public class FakeUIChoice<T, C> extends FakeUIComponent<T, C> implements UIChoic
         for (Action1 action1 : actions) {
             action1.call(item);
         }
+    }
+
+    public void setSelectedItemByToString(String s) {
+        for (T item : items) {
+            if (Objects.equals(s, item == null ? null : item.toString())) {
+                setSelectedItem(item);
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Cannot find item do \"" + s + "\".");
     }
 
     public List<T> getItems() {

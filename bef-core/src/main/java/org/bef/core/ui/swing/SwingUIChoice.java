@@ -103,4 +103,11 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
     public JComponent getComponent() {
         return component;
     }
+
+    @Override
+    public void notifySubscribers() {
+        for (Subscriber<? super T> subscriber : subscribers) {
+            subscriber.onNext(getValue());
+        }
+    }
 }

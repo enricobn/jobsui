@@ -18,19 +18,19 @@ public class JobRunner {
     public <T> JobFuture<T> run(UI ui, final Job<T> job) throws UnsupportedComponentException {
         final UIWindow window = ui.createWindow(job.getName());
 
-        final Map<JobParameterDef<?>, UIComponent> componentsMap = new LinkedHashMap<>();
+        final Map<JobParameterDef, UIComponent> componentsMap = new LinkedHashMap<>();
 
-        for (JobParameterDef<?> jobParameterDef : job.getParameterDefs()) {
+        for (JobParameterDef jobParameterDef : job.getParameterDefs()) {
             final UIComponent component = jobParameterDef.createComponent(ui);
             window.add(jobParameterDef.getName(), component);
             componentsMap.put(jobParameterDef, component);
         }
 
-        for (final JobParameterDef<?> jobParameterDef : job.getParameterDefs()) {
-            final List<JobParameterDef<?>> dependencies = jobParameterDef.getDependencies();
+        for (final JobParameterDef jobParameterDef : job.getParameterDefs()) {
+            final List<JobParameterDef> dependencies = jobParameterDef.getDependencies();
             if (!dependencies.isEmpty()) {
                 List<Observable<?>> observables = new ArrayList<>();
-                for (JobParameterDef<?> dependency : dependencies) {
+                for (JobParameterDef dependency : dependencies) {
                     final UIComponent component = componentsMap.get(dependency);
                     observables.add(component.getObservable());
                 }
@@ -75,7 +75,7 @@ public class JobRunner {
 
                 int i = 0;
 
-                for (final Map.Entry<JobParameterDef<?>, UIComponent> entry : componentsMap.entrySet()) {
+                for (final Map.Entry<JobParameterDef, UIComponent> entry : componentsMap.entrySet()) {
                     final Object value = args[i++];
                     // TODO where must I put the validation messages?
                     final JobParameterDef<Object> parameterDef = (JobParameterDef<Object>) entry.getKey();
@@ -102,6 +102,13 @@ public class JobRunner {
         });
 
         window.setValid(false);
+
+        for (Map.Entry<JobParameterDef, UIComponent> entry : componentsMap.entrySet()) {
+            final Object value = entry.getValue().getValue();
+            if (entry.getKey().validate(value).isEmpty()) {
+                entry.getValue().notifySubscribers();
+            }
+        }
 
         if (window.show()) {
             return job.run(parameters);
