@@ -19,7 +19,6 @@ mainDBChoice = mainContainer.addChoice("Database", new String[0]);
     <Parameter key="repoType" name="Repo type" type="DBCatalog">
         <Validate>
             <![CDATA[
-                println("repoType " + value)
                 new NotNullValidator().validate(value)
             ]]>
         </Validate>
@@ -34,7 +33,6 @@ mainDBChoice = mainContainer.addChoice("Database", new String[0]);
     <Parameter key="repoDbType" name="Repo DB type" type="DBType">
         <Validate>
             <![CDATA[
-                println("repoDBType " + value)
                 new NotNullValidator().validate(value)
             ]]>
         </Validate>
