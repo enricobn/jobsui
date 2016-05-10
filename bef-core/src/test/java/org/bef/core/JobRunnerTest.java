@@ -2,16 +2,14 @@ package org.bef.core;
 
 import groovy.lang.GroovyShell;
 import org.bef.core.groovy.JobParameterDefGroovy;
-import org.bef.core.groovy.JobParser;
 import org.bef.core.ui.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.*;
-import java.util.concurrent.*;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -38,7 +36,7 @@ public class JobRunnerTest {
         final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>() {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
             @Override
             protected void interact() {
                 uiValueName.setValue("Enrico");
@@ -56,7 +54,7 @@ public class JobRunnerTest {
         final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>() {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
             @Override
             protected void interact() {
                 uiValueName.setValue("Enrico");
@@ -74,7 +72,7 @@ public class JobRunnerTest {
         FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>() {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
             @Override
             protected void interact() {
             }
@@ -90,7 +88,7 @@ public class JobRunnerTest {
         final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>() {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
             @Override
             protected void interact() {
                 uiValueName.setValue("Enrico");
@@ -110,12 +108,12 @@ public class JobRunnerTest {
         final FakeUIChoice<String,?> uiChoiceUser = new FakeUIChoice<>();
         when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>() {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
             @Override
             protected void interact() {
                 uiChoiceVersion.setItems(Arrays.asList("1.0", "2.0"));
-                uiChoiceVersion.setSelectedItem("1.0");
-                uiChoiceDb.setSelectedItem("Dev-1.0");
+                uiChoiceVersion.setValue("1.0");
+                uiChoiceDb.setValue("Dev-1.0");
             }
         };
 
@@ -126,63 +124,24 @@ public class JobRunnerTest {
         assertThat(Collections.singletonList("1.0 Dev-1.0"), equalTo(uiChoiceUser.getItems()));
     }
 
-
     @Test public void assert_that_the_default_value_of_a_parameter_triggers_validation() throws Exception {
-        final FakeUIChoice<String,?> uiChoiceRepoType = new FakeUIChoice<>();
-        final FakeUIChoice<String,?> uiChoiceRepoDBType = new FakeUIChoice<>();
-        when(ui.create(UIChoice.class)).thenReturn(uiChoiceRepoType, uiChoiceRepoDBType);
+        final FakeUIChoice<String,?> uiChoiceVersion = new FakeUIChoice<>();
+        final FakeUIChoice<String,?> uiChoiceDb = new FakeUIChoice<>();
+        final FakeUIChoice<String,?> uiChoiceUser = new FakeUIChoice<>();
+        when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
-        JobParser parser = new JobParser();
-        Project project = parser.loadProject(new File("src/test/resources/complexjob"));
-        final Job<?> job = project.getJob("complex");
-
-        JobRunnerWrapper jobRunnerWrapper = new JobRunnerWrapper() {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
             @Override
             protected void interact() {
-                uiChoiceRepoDBType.setSelectedItemByToString("SQLServer");
+                uiChoiceVersion.setItems(Arrays.asList("1.0"));
+                uiChoiceDb.setItems(Arrays.asList("Dev-1.0"));
+                uiChoiceUser.setItems(Arrays.asList("Enrico"));
             }
         };
 
-
-        jobRunnerWrapper.start(job);
-
-        // this is not a real assertion, it's a prerequisite
-        assertThat(uiChoiceRepoType.getValue(), is(notNullValue()));
+        jobRunnerWrapper.start(createComplexJob());
 
         assertThat(window.isValid(), is(true));
-    }
-
-    private abstract class JobRunnerWrapper<T> {
-        private final ExecutorService pool = Executors.newFixedThreadPool(1);
-
-        public JobFuture<T> start(Job<T> job) throws Exception {
-
-            final Future<JobFuture<T>> future = runJob(job);
-
-            window.waitUntilStarted();
-
-            interact();
-
-            window.exit();
-
-            return future.get();
-        }
-
-        private <T> Future<JobFuture<T>> runJob(final Job<T> job) {
-            return pool.submit(new Callable<JobFuture<T>>() {
-                @Override
-                public JobFuture<T> call() throws Exception {
-                    try {
-                        return runner.run(ui, job);
-                    } catch(Throwable th) {
-                        th.printStackTrace();
-                        return null;
-                    }
-                }
-            });
-        }
-
-        protected abstract void interact();
     }
 
     private Job<String> createSimpleJob() {
@@ -202,7 +161,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
+            public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
             }
         };
         parameterDefs.add(name);
@@ -220,7 +179,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
+            public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
             }
         };
         surname.addDependency(name);
@@ -274,7 +233,7 @@ public class JobRunnerTest {
                 null,
                 null) {
             @Override
-            public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
+            public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
             }
         };
         parameterDefs.add(name);
@@ -335,7 +294,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
+            public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
             }
         };
         parameterDefs.add(version);
@@ -351,14 +310,14 @@ public class JobRunnerTest {
             }
 
             @Override
-            public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
+            public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
                 String version = (String) values.get("version");
                 if (version == null) {
-                    ((UIChoice)component).setItems(Collections.<String>emptyList());
+                    ((UIChoice)widget.getComponent()).setItems(Collections.<String>emptyList());
                 } else if (version.equals("1.0")) {
-                    ((UIChoice)component).setItems(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev"));
+                    ((UIChoice)widget.getComponent()).setItems(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev"));
                 } else {
-                    ((UIChoice)component).setItems(Arrays.asList("Dev-2.0", "Cons-2.0", "Dev"));
+                    ((UIChoice)widget.getComponent()).setItems(Arrays.asList("Dev-2.0", "Cons-2.0", "Dev"));
                 }
             }
         };
@@ -376,13 +335,13 @@ public class JobRunnerTest {
             }
 
             @Override
-            public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
+            public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
                 String version = (String) values.get("version");
                 String db = (String) values.get("db");
                 if (version == null || db == null) {
-                    ((UIChoice)component).setItems(Collections.<String>emptyList());
+                    ((UIChoice)widget.getComponent()).setItems(Collections.<String>emptyList());
                 } else {
-                    ((UIChoice)component).setItems(Arrays.asList(version + " " + db));
+                    ((UIChoice)widget.getComponent()).setItems(Arrays.asList(version + " " + db));
                 }
             }
         };

@@ -4,6 +4,7 @@ import groovy.lang.GroovyShell;
 import org.bef.core.JobParameterDefAbstract;
 import org.bef.core.ui.UI;
 import org.bef.core.ui.UIComponent;
+import org.bef.core.ui.UIWidget;
 import org.bef.core.ui.UnsupportedComponentException;
 
 import java.util.Collections;
@@ -43,9 +44,9 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
     }
 
     @Override
-    public void onDependenciesChange(UIComponent component, Map<String, Object> values) {
+    public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
         if (onDependenciesChangeScript != null) {
-            shell.setProperty("component", component);
+            shell.setProperty("widget", widget);
             shell.setProperty("values", values);
             try {
                 shell.evaluate(IMPORTS + onDependenciesChangeScript);

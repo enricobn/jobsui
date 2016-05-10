@@ -16,7 +16,7 @@ mainDbTypeChoice = mainContainer.addChoice("Main DB type", DBType.values());
 mainDBChoice = mainContainer.addChoice("Database", new String[0]);
 -->
 <Job key="complex" name="Complex" returnType="java.lang.Void">
-    <Parameter key="repoType" name="Repo type" type="DBCatalog">
+    <Parameter key="version" name="Version" type="java.lang.String">
         <Validate>
             <![CDATA[
                 new NotNullValidator().validate(value)
@@ -25,12 +25,26 @@ mainDBChoice = mainContainer.addChoice("Database", new String[0]);
         <CreateComponent>
             <![CDATA[
                 def component = ui.create(UIChoice.class)
-                component.setItems([new DBCatalog(name: 'Dev')])
+                component.setItems(["4.3.2","5.0.2","5.1.0","5.1.1","5.1.2","5.2.0","5.2.1","trunk"])
                 return component
             ]]>
         </CreateComponent>
     </Parameter>
-    <Parameter key="repoDbType" name="Repo DB type" type="DBType">
+    <Parameter key="type" name="Type" type="java.lang.String">
+        <Validate>
+            <![CDATA[
+                new NotNullValidator().validate(value)
+            ]]>
+        </Validate>
+        <CreateComponent>
+            <![CDATA[
+                def component = ui.create(UIChoice.class)
+                component.setItems(["Cons", "Threeagnostic"])
+                return component
+            ]]>
+        </CreateComponent>
+    </Parameter>
+    <Parameter key="dbType" name="DB type" type="DBType">
         <Validate>
             <![CDATA[
                 new NotNullValidator().validate(value)
@@ -43,6 +57,60 @@ mainDBChoice = mainContainer.addChoice("Database", new String[0]);
                 return component
             ]]>
         </CreateComponent>
+
+        <Dependency key="type"/>
+
+        <OnDependenciesChange>
+            <![CDATA[
+                def type = values.get("type")
+                if (type == "Cons") {
+                    widget.setVisible(true)
+                    widget.getComponent().setValue(null)
+                } else {
+                    widget.setVisible(false)
+                    widget.getComponent().setValue(DBType.SQLServer)
+                }
+            ]]>
+        </OnDependenciesChange>
+    </Parameter>
+    <Parameter key="db" name="DB" type="java.lang.String">
+        <Validate>
+            <![CDATA[
+                new NotNullValidator().validate(value)
+            ]]>
+        </Validate>
+        <CreateComponent>
+            <![CDATA[
+                def component = ui.create(UIChoice.class)
+                component.setItems(DBType.values().toList())
+                return component
+            ]]>
+        </CreateComponent>
+
+        <Dependency key="type"/>
+        <Dependency key="version"/>
+
+        <OnDependenciesChange>
+            <![CDATA[
+                def type = values.get("type")
+                def version = values.get("version")
+                if (type == "Cons") {
+                    widget.setVisible(true)
+                    widget.getComponent().setItems(["UNICREDIT_" + version, "TALANX_" + version])
+                    widget.getComponent().setValue(null)
+                } else {
+                    widget.setVisible(false)
+                    if (version == "4.3.2") {
+                        widget.getComponent().setValue(null)
+                    } else if (version == "5.2.0") {
+                        widget.getComponent().setItems(["TGK_TREEAGNOSTIC_520"])
+                        widget.getComponent().setValue("TGK_TREEAGNOSTIC_520")
+                    } else {
+                        widget.getComponent().setValue(null)
+                    }
+                }
+            ]]>
+        </OnDependenciesChange>
     </Parameter>
     <Run>
         <![CDATA[

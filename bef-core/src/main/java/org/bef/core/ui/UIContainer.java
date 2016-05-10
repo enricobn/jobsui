@@ -5,9 +5,9 @@ package org.bef.core.ui;
  */
 public interface UIContainer<C> {
 
-    <T> void add(String title, UIComponent<T,C> component);
+    <T> UIWidget<T,C> add(String title, UIComponent<T,C> component);
 
-    <T> void add(UIComponent<T,C> component);
+    <T> UIWidget<T,C> add(UIComponent<T,C> component);
 
     void add(UIContainer<C> container);
 

@@ -64,4 +64,14 @@ public class SwingUIButton implements UIButton<JComponent> {
     @Override
     public void notifySubscribers() {
     }
+
+    @Override
+    public void setVisible(boolean visible) {
+        component.setVisible(visible);
+    }
+
+    @Override
+    public void setValue(Void value) {
+    }
+
 }

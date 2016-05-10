@@ -33,13 +33,14 @@ public class FakeUIChoice<T, C> extends FakeUIComponent<T, C> implements UIChoic
     public void setItems(List<T> items) {
         this.items = items;
         if (items.size() == 0) {
-            setSelectedItem(null);
+            setValue(null);
         } else if (items.size() == 1) {
-            setSelectedItem(items.get(0));
+            setValue(items.get(0));
         }
     }
 
-    public void setSelectedItem(T item) {
+    @Override
+    public void setValue(T item) {
         boolean found = false;
         for (T t : items) {
             if (Objects.equals(t, item)) {
@@ -59,7 +60,7 @@ public class FakeUIChoice<T, C> extends FakeUIComponent<T, C> implements UIChoic
     public void setSelectedItemByToString(String s) {
         for (T item : items) {
             if (Objects.equals(s, item == null ? null : item.toString())) {
-                setSelectedItem(item);
+                setValue(item);
                 return;
             }
         }

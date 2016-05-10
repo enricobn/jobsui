@@ -32,4 +32,8 @@ public class FakeUIButton<C> extends FakeUIComponent<Void,C> implements UIButton
     public Void getValue() {
         return null;
     }
+
+    @Override
+    public void setValue(Void value) {
+    }
 }

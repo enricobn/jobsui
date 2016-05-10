@@ -14,4 +14,9 @@ public interface UIComponent<T,C> {
     T getValue();
 
     void notifySubscribers();
+
+    void setVisible(boolean visible);
+
+    void setValue(T value);
+
 }

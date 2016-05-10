@@ -14,6 +14,7 @@ public abstract class FakeUIComponent<T, C> implements UIComponent<T, C> {
     private final Observable<T> observable;
     protected final List<Action1<T>> actions = new ArrayList<>();
     private List<Subscriber<? super T>> subscribers = new ArrayList<>();
+    private boolean visible = true;
 
     public FakeUIComponent() {
         observable = Observable.create(new Observable.OnSubscribe<T>() {
@@ -40,5 +41,15 @@ public abstract class FakeUIComponent<T, C> implements UIComponent<T, C> {
         for (Subscriber<? super T> subscriber : subscribers) {
             subscriber.onNext(getValue());
         }
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
+
+    public boolean isVisible() {
+        return visible;
     }
 }

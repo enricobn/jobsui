@@ -7,7 +7,7 @@ import java.util.List;
  */
 public interface UIList<T,C> extends UIComponent<List<T>,C> {
 
-    void setItems(List<T> items);
+//    void setItems(List<T> items);
 
     void addItem(T item);
 

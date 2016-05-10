@@ -42,7 +42,7 @@ public class SwingUIList<T> implements UIList<T,JComponent> {
     }
 
     @Override
-    public void setItems(final List<T> items) {
+    public void setValue(final List<T> items) {
         this.items = new ArrayList<>(items);
         updateItems();
     }
@@ -135,4 +135,10 @@ public class SwingUIList<T> implements UIList<T,JComponent> {
             add(label, constraints);
         }
     }
+
+    @Override
+    public void setVisible(boolean visible) {
+        component.setVisible(visible);
+    }
+
 }

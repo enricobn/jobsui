@@ -1,9 +1,6 @@
 package org.bef.core;
 
-import org.bef.core.ui.UI;
-import org.bef.core.ui.UIComponent;
-import org.bef.core.ui.UIWindow;
-import org.bef.core.ui.UnsupportedComponentException;
+import org.bef.core.ui.*;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.FuncN;
@@ -18,12 +15,22 @@ public class JobRunner {
     public <T> JobFuture<T> run(UI ui, final Job<T> job) throws UnsupportedComponentException {
         final UIWindow window = ui.createWindow(job.getName());
 
-        final Map<JobParameterDef, UIComponent> componentsMap = new LinkedHashMap<>();
+        final Map<JobParameterDef, UIWidget> widgetsMap = new LinkedHashMap<>();
 
         for (JobParameterDef jobParameterDef : job.getParameterDefs()) {
             final UIComponent component = jobParameterDef.createComponent(ui);
-            window.add(jobParameterDef.getName(), component);
-            componentsMap.put(jobParameterDef, component);
+            if (component == null) {
+                throw new IllegalStateException("Cannot create component for parameter with key \""
+                        + jobParameterDef.getKey() + "\"");
+            }
+
+            final UIWidget widget = window.add(jobParameterDef.getName(), component);
+            if (widget == null) {
+                throw new IllegalStateException("Cannot create widget for parameter with key \""
+                        + jobParameterDef.getKey() + "\"");
+            }
+
+            widgetsMap.put(jobParameterDef, widget);
         }
 
         for (final JobParameterDef jobParameterDef : job.getParameterDefs()) {
@@ -31,8 +38,12 @@ public class JobRunner {
             if (!dependencies.isEmpty()) {
                 List<Observable<?>> observables = new ArrayList<>();
                 for (JobParameterDef dependency : dependencies) {
-                    final UIComponent component = componentsMap.get(dependency);
-                    observables.add(component.getObservable());
+                    final UIWidget widget = widgetsMap.get(dependency);
+                    if (widget == null) {
+                        throw new IllegalStateException("Cannot find widget for dependency with key \"" +
+                                dependency.getKey() + "\".");
+                    }
+                    observables.add(widget.getComponent().getObservable());
                 }
 
                 final Observable<Map<String,Object>> observable = Observable.combineLatest(observables, new FuncN<Map<String,Object>>() {
@@ -52,8 +63,8 @@ public class JobRunner {
                     @Override
                     public void call(Map<String,Object> objects) {
                         // TODO only if are valid
-                        final UIComponent component = componentsMap.get(jobParameterDef);
-                        jobParameterDef.onDependenciesChange(component, objects);
+                        final UIWidget widget = widgetsMap.get(jobParameterDef);
+                        jobParameterDef.onDependenciesChange(widget, objects);
                     }
                 });
             }
@@ -63,8 +74,8 @@ public class JobRunner {
 
         List<Observable<?>> observables = new ArrayList<>();
 
-        for (UIComponent jobParameterDefUIComponent : componentsMap.values()) {
-            observables.add(jobParameterDefUIComponent.getObservable());
+        for (UIWidget widget : widgetsMap.values()) {
+            observables.add(widget.getComponent().getObservable());
         }
 
 
@@ -75,7 +86,7 @@ public class JobRunner {
 
                 int i = 0;
 
-                for (final Map.Entry<JobParameterDef, UIComponent> entry : componentsMap.entrySet()) {
+                for (final Map.Entry<JobParameterDef, UIWidget> entry : widgetsMap.entrySet()) {
                     final Object value = args[i++];
                     // TODO where must I put the validation messages?
                     final JobParameterDef<Object> parameterDef = (JobParameterDef<Object>) entry.getKey();
@@ -103,10 +114,10 @@ public class JobRunner {
 
         window.setValid(false);
 
-        for (Map.Entry<JobParameterDef, UIComponent> entry : componentsMap.entrySet()) {
-            final Object value = entry.getValue().getValue();
+        for (Map.Entry<JobParameterDef, UIWidget> entry : widgetsMap.entrySet()) {
+            final Object value = entry.getValue().getComponent().getValue();
             if (entry.getKey().validate(value).isEmpty()) {
-                entry.getValue().notifySubscribers();
+                entry.getValue().getComponent().notifySubscribers();
             }
         }
 

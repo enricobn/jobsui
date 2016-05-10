@@ -86,7 +86,7 @@ public class SwingUIWindow implements UIWindow<JComponent> {
 
 
         final UIList<String,T> list = ui.create(UIList.class);
-        list.setItems(Arrays.asList("First", "Second"));
+        list.setValue(Arrays.asList("First", "Second"));
         window.add("Datasources", list);
 
         UIButton<T> button = ui.create(UIButton.class);
@@ -226,13 +226,13 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     }
 
     @Override
-    public <T> void add(String title, UIComponent<T, JComponent> component) {
-        container.add(title, component);
+    public <T> UIWidget<T,JComponent> add(String title, UIComponent<T, JComponent> component) {
+        return container.add(title, component);
     }
 
     @Override
-    public <T> void add(UIComponent<T, JComponent> component) {
-        container.add(component);
+    public <T> UIWidget<T,JComponent> add(UIComponent<T, JComponent> component) {
+        return container.add(component);
     }
 
     @Override

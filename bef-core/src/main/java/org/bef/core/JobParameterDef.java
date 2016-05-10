@@ -2,9 +2,8 @@ package org.bef.core;
 
 import org.bef.core.ui.UI;
 import org.bef.core.ui.UIComponent;
-import org.bef.core.ui.UIContainer;
+import org.bef.core.ui.UIWidget;
 import org.bef.core.ui.UnsupportedComponentException;
-import rx.Observable;
 
 import java.util.List;
 import java.util.Map;
@@ -34,6 +33,6 @@ public interface JobParameterDef<T> {
      *
      * @param values key = parameterDef key
      */
-    void onDependenciesChange(UIComponent component, Map<String,Object> values);
+    void onDependenciesChange(UIWidget widget, Map<String,Object> values);
 
 }

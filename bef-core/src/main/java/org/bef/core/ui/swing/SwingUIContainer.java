@@ -2,6 +2,7 @@ package org.bef.core.ui.swing;
 
 import org.bef.core.ui.UIComponent;
 import org.bef.core.ui.UIContainer;
+import org.bef.core.ui.UIWidget;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,12 +19,12 @@ public class SwingUIContainer implements UIContainer<JComponent> {
     }
 
     @Override
-    public <T> void add(String title, UIComponent<T, JComponent> component) {
-        addRow(title, component.getComponent());
+    public <T> UIWidget<T, JComponent> add(String title, UIComponent<T, JComponent> component) {
+        return addRow(title, component);
     }
 
     @Override
-    public <T> void add(UIComponent<T, JComponent> component) {
+    public <T> UIWidget<T, JComponent> add(final UIComponent<T, JComponent> component) {
         {
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
@@ -36,6 +37,18 @@ public class SwingUIContainer implements UIContainer<JComponent> {
             this.component.add(component.getComponent(), gbc);
         }
         rows++;
+
+        return new UIWidget<T, JComponent>() {
+            @Override
+            public void setVisible(boolean visible) {
+                getComponent().setVisible(visible);
+            }
+
+            @Override
+            public UIComponent<T, JComponent> getComponent() {
+                return component;
+            }
+        };
     }
 
     @Override
@@ -71,7 +84,8 @@ public class SwingUIContainer implements UIContainer<JComponent> {
         component.add(new JLabel(), constraints);
     }
 
-    private void addRow(String label, Component component) {
+    private <T> UIWidget<T, JComponent> addRow(String label, final UIComponent<T, JComponent> component) {
+        final JLabel jlabel;
         {
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
@@ -82,7 +96,7 @@ public class SwingUIContainer implements UIContainer<JComponent> {
             gbc.anchor = GridBagConstraints.EAST;
             gbc.weightx = 0;
             gbc.fill = GridBagConstraints.HORIZONTAL;
-            final JLabel jlabel = new JLabel(label);
+            jlabel = new JLabel(label);
             this.component.add(jlabel, gbc);
         }
 
@@ -96,10 +110,23 @@ public class SwingUIContainer implements UIContainer<JComponent> {
             gbc.insets.left = 5;
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.HORIZONTAL;
-            this.component.add(component, gbc);
+            this.component.add(component.getComponent(), gbc);
         }
 
         rows++;
+
+        return new UIWidget<T, JComponent>() {
+            @Override
+            public void setVisible(boolean visible) {
+                component.setVisible(visible);
+                jlabel.setVisible(visible);
+            }
+
+            @Override
+            public UIComponent<T, JComponent> getComponent() {
+                return component;
+            }
+        };
 
     }
 

@@ -124,7 +124,12 @@ public class JobParser {
             for (int iDep = 0; iDep < dependenciesList.getLength(); iDep++) {
                 final Element dependency = (Element) dependenciesList.item(iDep);
                 final String depKey = dependency.getAttribute("key");
-                parameterDef.addDependency(parameterDefs.get(depKey));
+                final JobParameterDef<?> jobParameterDefDep = parameterDefs.get(depKey);
+                if (jobParameterDefDep == null) {
+                    throw new IllegalStateException("Cannot find dependency with key \"" + depKey + "\" for " +
+                    "parameter with key \"" + parameterKey + "\".");
+                }
+                parameterDef.addDependency(jobParameterDefDep);
             }
         }
 

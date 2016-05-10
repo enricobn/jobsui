@@ -60,7 +60,7 @@ public class SwingUIValue<T> implements UIValue<T,JComponent> {
 
     public void setDefaultValue(T value) {
         this.defaultValue = value;
-        component.setText(converter.toString(value));
+        setValue(value);
     }
 
     public void setConverter(StringConverter<T> converter) {
@@ -72,6 +72,16 @@ public class SwingUIValue<T> implements UIValue<T,JComponent> {
         for (Subscriber<? super T> subscriber : subscribers) {
             subscriber.onNext(getValue());
         }
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        component.setVisible(visible);
+    }
+
+    @Override
+    public void setValue(T value) {
+        component.setText(converter.toString(value));
     }
 
 }

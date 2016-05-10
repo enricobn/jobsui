@@ -64,9 +64,9 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
     public void setItems(final List<T> items) {
         final Object selectedItem = component.getSelectedItem();
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
+//        SwingUtilities.invokeLater(new Runnable() {
+//            @Override
+//            public void run() {
 
                 component.removeAllItems();
 
@@ -95,8 +95,8 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
                     subscriber.onNext(getValue());
                 }
 
-            }
-        });
+//            }
+//        });
     }
 
     @Override
@@ -110,4 +110,32 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
             subscriber.onNext(getValue());
         }
     }
+
+    @Override
+    public void setVisible(boolean visible) {
+        component.setVisible(visible);
+    }
+
+    @Override
+    public void setValue(T value) {
+        if (value != null) {
+            boolean found = false;
+            for (int i = 0; i < component.getItemCount(); i++) {
+                final T item = component.getItemAt(i);
+                if (Objects.equals(item, value)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                throw new RuntimeException("Cannot find item " + value);
+            }
+        }
+        component.setSelectedItem(value);
+        if (!component.isVisible()) {
+            notifySubscribers();
+        }
+    }
+
 }
