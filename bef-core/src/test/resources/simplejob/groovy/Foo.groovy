@@ -1,4 +1,4 @@
-package test
+package simplejob.groovy
 class Foo {
 
     static String concat(a,b) {

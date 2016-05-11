@@ -2,10 +2,12 @@ package org.bef.core;
 
 import groovy.lang.GroovyShell;
 import org.bef.core.groovy.JobParameterDefGroovy;
+import org.bef.core.groovy.JobParser;
 import org.bef.core.ui.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.util.*;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -64,7 +66,7 @@ public class JobRunnerTest {
 
         final JobFuture<String> jobFuture = jobRunnerWrapper.start(createSimpleJob());
 
-        assertThat("Enrico Benedetti", equalTo(jobFuture.get()));
+        assertThat(jobFuture.get(), equalTo("Enrico Benedetti"));
     }
 
     @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters() throws Exception {
@@ -99,7 +101,30 @@ public class JobRunnerTest {
 
         final JobFuture<String> jobFuture = jobRunnerWrapper.start(createGroovySimpleJob());
 
-        assertThat("Enrico Benedetti", equalTo(jobFuture.get()));
+        assertThat(jobFuture.get(), equalTo("Enrico Benedetti"));
+    }
+
+    @Test public void assert_that_groovy_loaded_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
+        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+            @Override
+            protected void interact() {
+                uiValueName.setValue("Enrico");
+                uiValueSurname.setValue("Benedetti");
+
+            }
+        };
+
+        JobParser parser = new JobParser();
+        Project project = parser.loadProject(new File("src/test/resources/simplejob"));
+        final Job<String> job = project.getJob("simple");
+
+        final JobFuture<String> jobFuture = jobRunnerWrapper.start(job);
+
+        assertThat(jobFuture.get(), equalTo("(Enrico,Benedetti)"));
     }
 
     @Test public void assert_that_complexjob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
@@ -119,9 +144,9 @@ public class JobRunnerTest {
 
         final JobFuture<String> jobFuture = jobRunnerWrapper.start(createComplexJob());
 
-        assertThat("1.0 Dev-1.0", equalTo(jobFuture.get()));
-        assertThat(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev"), equalTo(uiChoiceDb.getItems()));
-        assertThat(Collections.singletonList("1.0 Dev-1.0"), equalTo(uiChoiceUser.getItems()));
+        assertThat(jobFuture.get(), equalTo("1.0 Dev-1.0"));
+        assertThat(uiChoiceDb.getItems(), equalTo(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev")));
+        assertThat(uiChoiceUser.getItems(), equalTo(Collections.singletonList("1.0 Dev-1.0")));
     }
 
     @Test public void assert_that_the_default_value_of_a_parameter_triggers_validation() throws Exception {

@@ -39,7 +39,7 @@
     </Parameter>
     <Run>
         <![CDATA[
-            return test.Foo.concat(parameters.get("name"), parameters.get("surname"))
+            return Foo.concat(parameters.get("name"), parameters.get("surname"))
         ]]>
     </Run>
     <!--Validate>

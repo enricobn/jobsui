@@ -1,8 +1,8 @@
 package org.bef.core.groovy;
 
 import groovy.lang.GroovyClassLoader;
-import groovy.lang.GroovyCodeSource;
 import groovy.lang.GroovyShell;
+import groovy.util.GroovyScriptEngine;
 import org.bef.core.Job;
 import org.bef.core.JobParameterDef;
 import org.bef.core.JobParameterDefAbstract;
@@ -16,6 +16,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -31,7 +32,16 @@ public class JobParser {
             throw new Exception("Cannot find files in " + folder);
         }
 
-        GroovyClassLoader cl = new GroovyClassLoader();
+        GroovyClassLoader cl;
+
+        final File groovy = new File(folder, "groovy");
+        if (groovy.exists()) {
+            GroovyScriptEngine engine = new GroovyScriptEngine(new URL[]{groovy.toURI().toURL()});
+            cl = engine.getGroovyClassLoader();
+        } else {
+            cl = new GroovyClassLoader();
+        }
+
         final File lib = new File(folder, "lib");
         if (lib.exists()) {
             final File[] libFiles = lib.listFiles();
@@ -41,13 +51,8 @@ public class JobParser {
                 }
             }
         }
-        GroovyShell shell = new GroovyShell(cl);
 
-        for (File file : files) {
-            if (file.getName().endsWith(".groovy")) {
-                cl.parseClass(new GroovyCodeSource(file));
-            }
-        }
+        GroovyShell shell = new GroovyShell(cl);
 
         final Map<String,Job<?>> jobs = new HashMap<>();
 
@@ -64,7 +69,6 @@ public class JobParser {
                 }
             }
         }
-
 
         return new Project() {
             @Override
