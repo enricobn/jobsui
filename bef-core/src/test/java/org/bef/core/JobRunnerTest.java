@@ -158,9 +158,9 @@ public class JobRunnerTest {
         JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
             @Override
             protected void interact() {
-                uiChoiceVersion.setItems(Arrays.asList("1.0"));
-                uiChoiceDb.setItems(Arrays.asList("Dev-1.0"));
-                uiChoiceUser.setItems(Arrays.asList("Enrico"));
+                uiChoiceVersion.setItems(Collections.singletonList("1.0"));
+                uiChoiceDb.setItems(Collections.singletonList("Dev-1.0"));
+                uiChoiceUser.setItems(Collections.singletonList("Enrico"));
             }
         };
 
@@ -366,7 +366,7 @@ public class JobRunnerTest {
                 if (version == null || db == null) {
                     ((UIChoice)widget.getComponent()).setItems(Collections.<String>emptyList());
                 } else {
-                    ((UIChoice)widget.getComponent()).setItems(Arrays.asList(version + " " + db));
+                    ((UIChoice)widget.getComponent()).setItems(Collections.singletonList(version + " " + db));
                 }
             }
         };
