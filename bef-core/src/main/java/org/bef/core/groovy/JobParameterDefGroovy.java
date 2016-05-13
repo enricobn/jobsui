@@ -1,6 +1,7 @@
 package org.bef.core.groovy;
 
 import groovy.lang.GroovyShell;
+import groovy.lang.Script;
 import org.bef.core.JobParameterDefAbstract;
 import org.bef.core.ui.UI;
 import org.bef.core.ui.UIComponent;
@@ -19,25 +20,25 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
             "import org.bef.core.*;\n" +
             "import org.bef.core.ui.*;\n";
     private final GroovyShell shell;
-    private final String createComponentScript;
-    private final String onDependenciesChangeScript;
-    private final String validateScript;
+    private final Script createComponent;
+    private final Script onDependenciesChange;
+    private final Script validate;
 
     public JobParameterDefGroovy(GroovyShell shell, String key, String name, Class<T> type,
                                  String createComponentScript, String onDependenciesChangeScript,
                                  String validateScript, boolean visible) {
         super(key, name, type, null, visible);
         this.shell = shell;
-        this.createComponentScript = createComponentScript;
-        this.onDependenciesChangeScript = onDependenciesChangeScript;
-        this.validateScript = validateScript;
+        this.createComponent = shell.parse(IMPORTS + createComponentScript);
+        this.onDependenciesChange = shell.parse(IMPORTS + onDependenciesChangeScript);
+        this.validate =validateScript == null ? null : shell.parse(IMPORTS + validateScript);
     }
 
     @Override
     public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
         shell.setProperty("ui", ui);
         try {
-            return (UIComponent) shell.evaluate(IMPORTS + createComponentScript);
+            return (UIComponent) createComponent.run();
         } catch (Throwable e) {
             throw new RuntimeException("Error in createComponent script for parameter whit key \"" +
                     getKey() + "\"", e);
@@ -46,11 +47,11 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
 
     @Override
     public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
-        if (onDependenciesChangeScript != null) {
+        if (onDependenciesChange != null) {
             shell.setProperty("widget", widget);
             shell.setProperty("values", values);
             try {
-                shell.evaluate(IMPORTS + onDependenciesChangeScript);
+                onDependenciesChange.run();
             } catch (Throwable e) {
                 throw new RuntimeException("Error in onDependenciesChange script for parameter whit key \"" +
                         getKey() + "\"", e);
@@ -60,12 +61,12 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
 
     @Override
     public List<String> validate(T value) {
-        if (validateScript == null) {
+        if (validate == null) {
             return Collections.emptyList();
         }
         shell.setProperty("value", value);
         try {
-            return (List<String>) shell.evaluate(IMPORTS + validateScript);
+            return (List<String>) validate.run();
         } catch (Throwable e) {
             throw new RuntimeException("Error in validate script for parameter whit key \"" +
                     getKey() + "\"", e);

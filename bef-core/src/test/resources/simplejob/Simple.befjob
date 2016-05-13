@@ -2,7 +2,7 @@
     <Parameter key="name" name="Name" type="java.lang.String">
         <Validate>
             <![CDATA[
-                return new org.bef.core.NotEmptyStringValidator().validate(value);
+                return new NotEmptyStringValidator().validate(value);
             ]]>
         </Validate>
         <CreateComponent>
@@ -17,7 +17,7 @@
     <Parameter key="surname" name="Surname" type="java.lang.String">
         <Validate>
             <![CDATA[
-                return new org.bef.core.NotEmptyStringValidator().validate(value);
+                return new NotEmptyStringValidator().validate(value);
             ]]>
         </Validate>
         <CreateComponent>
@@ -31,7 +31,7 @@
     <Parameter key="inv" name="Inv" type="java.lang.String" visible="false">
         <Validate>
             <![CDATA[
-                return new org.bef.core.NotNullValidator().validate(value);
+                return new NotNullValidator().validate(value);
             ]]>
         </Validate>
 
