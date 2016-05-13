@@ -19,7 +19,6 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
     private static final String IMPORTS =
             "import org.bef.core.*;\n" +
             "import org.bef.core.ui.*;\n";
-    private final GroovyShell shell;
     private final Script createComponent;
     private final Script onDependenciesChange;
     private final Script validate;
@@ -28,7 +27,6 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
                                  String createComponentScript, String onDependenciesChangeScript,
                                  String validateScript, boolean visible) {
         super(key, name, type, null, visible);
-        this.shell = shell;
         this.createComponent = shell.parse(IMPORTS + createComponentScript);
         this.onDependenciesChange = shell.parse(IMPORTS + onDependenciesChangeScript);
         this.validate =validateScript == null ? null : shell.parse(IMPORTS + validateScript);
@@ -36,7 +34,7 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
 
     @Override
     public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-        shell.setProperty("ui", ui);
+        createComponent.setProperty("ui", ui);
         try {
             return (UIComponent) createComponent.run();
         } catch (Throwable e) {
@@ -48,8 +46,8 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
     @Override
     public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
         if (onDependenciesChange != null) {
-            shell.setProperty("widget", widget);
-            shell.setProperty("values", values);
+            onDependenciesChange.setProperty("widget", widget);
+            onDependenciesChange.setProperty("values", values);
             try {
                 onDependenciesChange.run();
             } catch (Throwable e) {
@@ -64,7 +62,7 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
         if (validate == null) {
             return Collections.emptyList();
         }
-        shell.setProperty("value", value);
+        validate.setProperty("value", value);
         try {
             return (List<String>) validate.run();
         } catch (Throwable e) {
