@@ -92,14 +92,8 @@ public class JobParser {
         //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
         doc.getDocumentElement().normalize();
 
-        String name = doc.getDocumentElement().getAttribute("name");
-        if (name == null || name.isEmpty()) {
-            throw new BefParseException("Cannot find property \"name\"");
-        }
-        String key = doc.getDocumentElement().getAttribute("key");
-        if (key == null || key.isEmpty()) {
-            throw new BefParseException("Cannot find property \"key\"");
-        }
+        String name = getMandatoryAttribute(doc.getDocumentElement(), "name");
+        String key = getMandatoryAttribute(doc.getDocumentElement(), "key");
         Map<String,JobParameterDef<?>> parameterDefs = new LinkedHashMap<>();
 
         String runScript = getElementContent(doc.getDocumentElement(), "Run", true);
@@ -109,11 +103,11 @@ public class JobParser {
 
         for (int i = 0; i < parametersList.getLength(); i++) {
             Element element = (Element) parametersList.item(i);
-            String parameterKey = element.getAttribute("key");
-            String parameterName = element.getAttribute("name");
-            String typeString = element.getAttribute("type");
+            String parameterKey = getMandatoryAttribute(element, "key");
+            String parameterName = getMandatoryAttribute(element, "name");
+//            String typeString = getMandatoryAttribute(element, "type");
             String visibleString = element.getAttribute("visible");
-            Class<?> type = Class.forName(typeString, false, shell.getClassLoader());
+//            Class<?> type = Class.forName(typeString, false, shell.getClassLoader());
 
             String parameterValidateScript = getElementContent(element, "Validate", false);
 
@@ -124,13 +118,13 @@ public class JobParser {
             boolean visible = visibleString == null || visibleString.isEmpty() || Boolean.parseBoolean(visibleString);
 
             JobParameterDefAbstract<?> parameterDef = new JobParameterDefGroovy<>(shell, parameterKey, parameterName,
-                    type, createComponentScript, onDependenciesChangeScript, parameterValidateScript, visible);
+                    createComponentScript, onDependenciesChangeScript, parameterValidateScript, visible);
             parameterDefs.put(parameterDef.getKey(), parameterDef);
 
             final NodeList dependenciesList = element.getElementsByTagName("Dependency");
             for (int iDep = 0; iDep < dependenciesList.getLength(); iDep++) {
                 final Element dependency = (Element) dependenciesList.item(iDep);
-                final String depKey = dependency.getAttribute("key");
+                final String depKey = getMandatoryAttribute(dependency, "key");
                 final JobParameterDef<?> jobParameterDefDep = parameterDefs.get(depKey);
                 if (jobParameterDefDep == null) {
                     throw new IllegalStateException("Cannot find dependency with key \"" + depKey + "\" for " +
@@ -152,9 +146,17 @@ public class JobParser {
             }
         }
         if (mandatory) {
-            throw new BefParseException("Cannot find " + name + " element in " + parent);
+            throw new BefParseException("Cannot find mandatory element \"" + name + "\" in " + parent);
         } else {
             return null;
         }
+    }
+
+    private static String getMandatoryAttribute(Element parent, String name) throws BefParseException {
+        final String attribute = parent.getAttribute(name);
+        if (attribute == null || attribute.length() == 0) {
+            throw new BefParseException("Cannot find mandatory attribute \"" + name + "\" in " + parent);
+        }
+        return attribute;
     }
 }

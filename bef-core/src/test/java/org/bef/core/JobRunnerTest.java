@@ -176,7 +176,6 @@ public class JobRunnerTest {
         final JobParameterDefAbstract<String> name = new JobParameterDefAbstract<String>(
                 "name",
                 "Name",
-                String.class,
                 new NotEmptyStringValidator(), true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
@@ -195,7 +194,6 @@ public class JobRunnerTest {
         final JobParameterDefAbstract<String> surname = new JobParameterDefAbstract<String>(
                 "surname",
                 "Surname",
-                String.class,
                 new NotEmptyStringValidator(), true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
@@ -248,7 +246,6 @@ public class JobRunnerTest {
                 shell,
                 "name",
                 "Name",
-                String.class,
                 "import org.bef.core.ui.UIValue;\n" +
                         "import org.bef.core.ui.StringConverterString;\n" +
                         "\n" +
@@ -269,7 +266,6 @@ public class JobRunnerTest {
                 shell,
                 "surname",
                 "Surname",
-                String.class,
                 "def uiValue = ui.create(org.bef.core.ui.UIValue.class);\n" +
                         "uiValue.setConverter(new org.bef.core.ui.StringConverterString());\n" +
                         "return uiValue;",
@@ -314,7 +310,6 @@ public class JobRunnerTest {
         final JobParameterDefAbstract<String> version = new JobParameterDefAbstract<String>(
                 "version",
                 "Version",
-                String.class,
                 new NotEmptyStringValidator(),
                 true) {
             @Override
@@ -331,7 +326,6 @@ public class JobRunnerTest {
         final JobParameterDefAbstract<String> db = new JobParameterDefAbstract<String>(
                 "db",
                 "DB",
-                String.class,
                 new NotEmptyStringValidator(),
                 true) {
             @Override
@@ -357,7 +351,6 @@ public class JobRunnerTest {
         final JobParameterDefAbstract<String> user = new JobParameterDefAbstract<String>(
                 "user",
                 "User",
-                String.class,
                 new NotEmptyStringValidator(),
                 true) {
             @Override

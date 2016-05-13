@@ -17,8 +17,6 @@ public interface JobParameterDef<T> {
 
     String getName();
 
-    Class<T> getType();
-
     boolean isOptional();
 
     T getDefaultValue();
