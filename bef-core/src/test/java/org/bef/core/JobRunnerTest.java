@@ -108,6 +108,7 @@ public class JobRunnerTest {
         final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
         final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+        when(ui.create(UIChoice.class)).thenReturn(new FakeUIChoice());
 
         JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
             @Override
@@ -176,7 +177,7 @@ public class JobRunnerTest {
                 "name",
                 "Name",
                 String.class,
-                new NotEmptyStringValidator()) {
+                new NotEmptyStringValidator(), true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
                 final UIValue<String, ?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
@@ -195,7 +196,7 @@ public class JobRunnerTest {
                 "surname",
                 "Surname",
                 String.class,
-                new NotEmptyStringValidator()) {
+                new NotEmptyStringValidator(), true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
                 final UIValue<String, ?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
@@ -210,7 +211,7 @@ public class JobRunnerTest {
         surname.addDependency(name);
         parameterDefs.add(surname);
 
-        return new Job<String>() {
+        return new JobAbstract<String>() {
             @Override
             public String getName() {
                 return "Test";
@@ -256,7 +257,8 @@ public class JobRunnerTest {
                         "uiValue.setDefaultValue(\"Enrico\");\n" +
                         "return uiValue;",
                 null,
-                null) {
+                null,
+                true) {
             @Override
             public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
             }
@@ -272,12 +274,13 @@ public class JobRunnerTest {
                         "uiValue.setConverter(new org.bef.core.ui.StringConverterString());\n" +
                         "return uiValue;",
                 null,
-                null) {
+                null,
+                true) {
         };
         surname.addDependency(name);
         parameterDefs.add(surname);
 
-        return new Job<String>() {
+        return new JobAbstract<String>() {
             @Override
             public String getName() {
                 return "Test";
@@ -312,7 +315,8 @@ public class JobRunnerTest {
                 "version",
                 "Version",
                 String.class,
-                new NotEmptyStringValidator()) {
+                new NotEmptyStringValidator(),
+                true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
                 return ui.create(UIChoice.class);
@@ -328,7 +332,8 @@ public class JobRunnerTest {
                 "db",
                 "DB",
                 String.class,
-                new NotEmptyStringValidator()) {
+                new NotEmptyStringValidator(),
+                true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
                 return ui.create(UIChoice.class);
@@ -353,7 +358,8 @@ public class JobRunnerTest {
                 "user",
                 "User",
                 String.class,
-                new NotEmptyStringValidator()) {
+                new NotEmptyStringValidator(),
+                true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
                 return ui.create(UIChoice.class);
@@ -374,7 +380,7 @@ public class JobRunnerTest {
         user.addDependency(db);
         user.addDependency(version);
 
-        return new Job<String>() {
+        return new JobAbstract<String>() {
             @Override
             public String getName() {
                 return "Test";

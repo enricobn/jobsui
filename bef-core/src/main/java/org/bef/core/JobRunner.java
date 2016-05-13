@@ -30,6 +30,8 @@ public class JobRunner {
                         + jobParameterDef.getKey() + "\"");
             }
 
+            widget.setVisible(jobParameterDef.isVisible());
+
             widgetsMap.put(jobParameterDef, widget);
         }
 

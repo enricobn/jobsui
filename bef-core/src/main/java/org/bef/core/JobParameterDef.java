@@ -35,4 +35,5 @@ public interface JobParameterDef<T> {
      */
     void onDependenciesChange(UIWidget widget, Map<String,Object> values);
 
+    boolean isVisible();
 }

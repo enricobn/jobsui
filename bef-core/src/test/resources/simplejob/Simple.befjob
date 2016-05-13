@@ -27,19 +27,32 @@
                 return uiValue;
             ]]>
         </CreateComponent>
+    </Parameter>
+    <Parameter key="inv" name="Inv" type="java.lang.String" visible="false">
+        <Validate>
+            <![CDATA[
+                return new org.bef.core.NotNullValidator().validate(value);
+            ]]>
+        </Validate>
+
+        <CreateComponent>
+            <![CDATA[
+                return ui.create(UIChoice.class);
+            ]]>
+        </CreateComponent>
 
         <Dependency key="name"/>
+        <Dependency key="surname"/>
 
-        <!--OnDependenciesChange>
+        <OnDependenciesChange>
             <![CDATA[
-                test.Foo.doIt()
-                //System.out.println("name=" + values.get("name"));
+                widget.getComponent().setItems([Foo.concat(values.get('name'), values.get('surname'))])
             ]]>
-        </OnDependenciesChange-->
+        </OnDependenciesChange>
     </Parameter>
     <Run>
         <![CDATA[
-            return Foo.concat(parameters.get("name"), parameters.get("surname"))
+            return values.get('inv')
         ]]>
     </Run>
     <!--Validate>

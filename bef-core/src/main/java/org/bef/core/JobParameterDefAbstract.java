@@ -14,13 +14,15 @@ public abstract class JobParameterDefAbstract<T> implements JobParameterDef<T> {
 //    private final StringConverter<T> converter;
     private final ParameterValidator<T> validator;
     private final List<JobParameterDef<?>> dependencies = new ArrayList<>();
+    private final boolean visible;
 
-    public JobParameterDefAbstract(String key, String name, Class<T> type, ParameterValidator<T> validator) {
+    public JobParameterDefAbstract(String key, String name, Class<T> type, ParameterValidator<T> validator, boolean visible) {
         this.key = key;
         this.name = name;
         this.type = type;
 //        this.converter = converter;
         this.validator = validator;
+        this.visible = visible;
     }
 
     @Override
@@ -56,6 +58,11 @@ public abstract class JobParameterDefAbstract<T> implements JobParameterDef<T> {
     @Override
     public List<String> validate(T value) {
         return validator.validate(value);
+    }
+
+    @Override
+    public boolean isVisible() {
+        return visible;
     }
 
     public void addDependency(JobParameterDef<?> parameterDef) {

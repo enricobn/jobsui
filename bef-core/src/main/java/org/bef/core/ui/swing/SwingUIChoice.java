@@ -119,9 +119,13 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
     @Override
     public void setValue(T value) {
         if (value != null) {
+//            System.out.println("SwingUIChoice.setValue " + System.identityHashCode(value.getClass()));
             boolean found = false;
             for (int i = 0; i < component.getItemCount(); i++) {
                 final T item = component.getItemAt(i);
+//                if (item != null) {
+//                    System.out.println("SwingUIChoice.setValue item " + System.identityHashCode(item.getClass()));
+//                }
                 if (Objects.equals(item, value)) {
                     found = true;
                     break;

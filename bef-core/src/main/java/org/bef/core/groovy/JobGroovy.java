@@ -1,7 +1,7 @@
 package org.bef.core.groovy;
 
 import groovy.lang.GroovyShell;
-import org.bef.core.Job;
+import org.bef.core.JobAbstract;
 import org.bef.core.JobFuture;
 import org.bef.core.JobParameterDef;
 
@@ -12,7 +12,7 @@ import java.util.Map;
 /**
  * Created by enrico on 5/4/16.
  */
-public class JobGroovy<T> implements Job<T> {
+public class JobGroovy<T> extends JobAbstract<T> {
     private final GroovyShell shell;
     private final String key;
     private final String name;
@@ -44,7 +44,7 @@ public class JobGroovy<T> implements Job<T> {
         return new JobFuture<T>() {
             @Override
             public T get() {
-                shell.setProperty("parameters", parameters);
+                shell.setProperty("values", parameters);
                 return (T) shell.evaluate(runScript);
             }
         };
@@ -55,7 +55,7 @@ public class JobGroovy<T> implements Job<T> {
         if (validateScript == null) {
             return Collections.emptyList();
         }
-        shell.setProperty("parameters", parameters);
+        shell.setProperty("values", parameters);
         return (List<String>) shell.evaluate(validateScript);
     }
 

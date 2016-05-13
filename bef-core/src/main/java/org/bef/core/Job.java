@@ -16,4 +16,5 @@ public interface Job<T> {
 
     List<String> validate(Map<String,Object> parameters);
 
+    JobParameterDef getParameter(String key);
 }

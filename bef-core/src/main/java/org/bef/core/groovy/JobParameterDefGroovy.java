@@ -24,8 +24,9 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
     private final String validateScript;
 
     public JobParameterDefGroovy(GroovyShell shell, String key, String name, Class<T> type,
-                                 String createComponentScript, String onDependenciesChangeScript, String validateScript) {
-        super(key, name, type, null);
+                                 String createComponentScript, String onDependenciesChangeScript,
+                                 String validateScript, boolean visible) {
+        super(key, name, type, null, visible);
         this.shell = shell;
         this.createComponentScript = createComponentScript;
         this.onDependenciesChangeScript = onDependenciesChangeScript;
