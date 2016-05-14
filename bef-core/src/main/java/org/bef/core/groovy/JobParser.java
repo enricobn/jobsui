@@ -86,7 +86,7 @@ public class JobParser {
                 try (InputStream is = new FileInputStream(file)) {
                     JobGroovy<?> job;
                     try {
-                        job = parse(shell, is);
+                        job = parse(shell, is, folder);
                     } catch (Exception e) {
                         throw new Exception("Cannot parse file " + file, e);
                     }
@@ -108,7 +108,7 @@ public class JobParser {
         };
     }
 
-    private <T> JobGroovy<T> parse(GroovyShell shell, InputStream is) throws Exception {
+    private <T> JobGroovy<T> parse(GroovyShell shell, InputStream is, File projectFolder) throws Exception {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setValidating(false);
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -161,7 +161,8 @@ public class JobParser {
             }
         }
 
-        return new JobGroovy<>(shell, key, name, new ArrayList<>(parameterDefs.values()), runScript, validateScript);
+        return new JobGroovy<>(shell, key, name, new ArrayList<>(parameterDefs.values()), runScript, validateScript,
+                projectFolder);
     }
 
     private static String getElementContent(Element parent, String name, boolean mandatory) throws BefParseException {

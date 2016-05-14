@@ -6,6 +6,7 @@ import org.bef.core.JobAbstract;
 import org.bef.core.JobFuture;
 import org.bef.core.JobParameterDef;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +20,14 @@ public class JobGroovy<T> extends JobAbstract<T> {
     private final List<JobParameterDef<?>> parameterDefs;
     private final Script run;
     private final Script validate;
+    private final File projectFolder;
 
-    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDef<?>> parameterDefs, String runScript, String validateScript) {
+    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDef<?>> parameterDefs,
+                     String runScript, String validateScript, File projectFolder) {
         this.key = key;
         this.name = name;
         this.parameterDefs = parameterDefs;
+        this.projectFolder = projectFolder;
         this.run = shell.parse(runScript);
         this.validate = validateScript == null ? null : shell.parse(validateScript);
     }
@@ -44,6 +48,7 @@ public class JobGroovy<T> extends JobAbstract<T> {
             @Override
             public T get() {
                 run.setProperty("values", parameters);
+                run.setProperty("projectFolder", projectFolder);
                 return (T) run.run();
             }
         };
