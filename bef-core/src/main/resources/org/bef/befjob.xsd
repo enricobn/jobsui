@@ -21,7 +21,8 @@
                         </xs:sequence>
                         <xs:attribute type="xs:string" name="key" use="required"/>
                         <xs:attribute type="xs:string" name="name" use="required"/>
-                        <xs:attribute type="xs:string" name="visible" use="optional"/>
+                        <xs:attribute type="xs:boolean" name="visible" use="optional"/>
+                        <xs:attribute type="xs:boolean" name="optional" use="optional"/>
                     </xs:complexType>
                 </xs:element>
                 <xs:element type="xs:string" name="Validate" minOccurs="0"/>

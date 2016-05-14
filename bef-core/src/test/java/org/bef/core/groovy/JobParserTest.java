@@ -9,8 +9,7 @@ import org.junit.Test;
 import java.io.File;
 
 import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 /**
  * Created by enrico on 5/4/16.
@@ -36,6 +35,8 @@ public class JobParserTest {
 
         assertEquals(job.getParameter("inv").getDependencies().get(0), job.getParameter("name"));
         assertEquals(job.getParameter("inv").getDependencies().get(1), job.getParameter("surname"));
+
+        assertFalse(job.getParameter("inv").isOptional());
     }
 
     @Test

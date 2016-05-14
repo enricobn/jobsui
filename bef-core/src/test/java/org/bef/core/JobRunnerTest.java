@@ -176,7 +176,7 @@ public class JobRunnerTest {
         final JobParameterDefAbstract<String> name = new JobParameterDefAbstract<String>(
                 "name",
                 "Name",
-                new NotEmptyStringValidator(), true) {
+                new NotEmptyStringValidator(), false, true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
                 final UIValue<String, ?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
@@ -194,7 +194,7 @@ public class JobRunnerTest {
         final JobParameterDefAbstract<String> surname = new JobParameterDefAbstract<String>(
                 "surname",
                 "Surname",
-                new NotEmptyStringValidator(), true) {
+                new NotEmptyStringValidator(), false, true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
                 final UIValue<String, ?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
@@ -255,6 +255,7 @@ public class JobRunnerTest {
                         "return uiValue;",
                 null,
                 null,
+                false,
                 true) {
             @Override
             public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
@@ -271,6 +272,7 @@ public class JobRunnerTest {
                         "return uiValue;",
                 null,
                 null,
+                false,
                 true) {
         };
         surname.addDependency(name);
@@ -311,6 +313,7 @@ public class JobRunnerTest {
                 "version",
                 "Version",
                 new NotEmptyStringValidator(),
+                false,
                 true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
@@ -327,6 +330,7 @@ public class JobRunnerTest {
                 "db",
                 "DB",
                 new NotEmptyStringValidator(),
+                false,
                 true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
@@ -352,6 +356,7 @@ public class JobRunnerTest {
                 "user",
                 "User",
                 new NotEmptyStringValidator(),
+                false,
                 true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {

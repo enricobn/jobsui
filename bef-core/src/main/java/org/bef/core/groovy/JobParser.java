@@ -134,6 +134,7 @@ public class JobParser {
             String parameterName = getMandatoryAttribute(element, "name");
 //            String typeString = getMandatoryAttribute(element, "type");
             String visibleString = element.getAttribute("visible");
+            String optionalString = element.getAttribute("optional");
 //            Class<?> type = Class.forName(typeString, false, shell.getClassLoader());
 
             String parameterValidateScript = getElementContent(element, "Validate", false);
@@ -143,9 +144,10 @@ public class JobParser {
             String onDependenciesChangeScript = getElementContent(element, "OnDependenciesChange", false);
 
             boolean visible = visibleString == null || visibleString.isEmpty() || Boolean.parseBoolean(visibleString);
+            boolean optional = optionalString != null && !optionalString.isEmpty() && Boolean.parseBoolean(optionalString);
 
             JobParameterDefAbstract<?> parameterDef = new JobParameterDefGroovy<>(shell, parameterKey, parameterName,
-                    createComponentScript, onDependenciesChangeScript, parameterValidateScript, visible);
+                    createComponentScript, onDependenciesChangeScript, parameterValidateScript, optional, visible);
             parameterDefs.put(parameterDef.getKey(), parameterDef);
 
             final NodeList dependenciesList = element.getElementsByTagName("Dependency");

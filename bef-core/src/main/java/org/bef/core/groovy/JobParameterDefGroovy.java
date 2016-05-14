@@ -25,8 +25,8 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
 
     public JobParameterDefGroovy(GroovyShell shell, String key, String name,
                                  String createComponentScript, String onDependenciesChangeScript,
-                                 String validateScript, boolean visible) {
-        super(key, name, null, visible);
+                                 String validateScript, boolean optional, boolean visible) {
+        super(key, name, null, optional, visible);
         this.createComponent = shell.parse(IMPORTS + createComponentScript);
         this.onDependenciesChange = shell.parse(IMPORTS + onDependenciesChangeScript);
         this.validate =validateScript == null ? null : shell.parse(IMPORTS + validateScript);
@@ -59,12 +59,16 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
 
     @Override
     public List<String> validate(T value) {
-        if (validate == null) {
+        final List<String> validation = super.validate(value);
+        if (!validation.isEmpty()) {
+            return validation;
+        }
+        if (this.validate == null) {
             return Collections.emptyList();
         }
-        validate.setProperty("value", value);
+        this.validate.setProperty("value", value);
         try {
-            return (List<String>) validate.run();
+            return (List<String>) this.validate.run();
         } catch (Throwable e) {
             throw new RuntimeException("Error in validate script for parameter whit key \"" +
                     getKey() + "\"", e);
