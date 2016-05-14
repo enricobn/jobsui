@@ -36,10 +36,10 @@ public abstract class JobRunnerWrapper<T> {
         return future.get();
     }
 
-    private <T> Future<JobFuture<T>> runJob(final Job<T> job) {
-        return pool.submit(new Callable<JobFuture<T>>() {
+    private <T1> Future<JobFuture<T1>> runJob(final Job<T1> job) {
+        return pool.submit(new Callable<JobFuture<T1>>() {
             @Override
-            public JobFuture<T> call() throws Exception {
+            public JobFuture<T1> call() throws Exception {
                 try {
                     return runner.run(ui, job);
                 } catch (Throwable th) {

@@ -1,6 +1,5 @@
 package org.bef.core.utils;
 
-import org.bef.core.ui.UIChoice;
 import rx.Observable;
 import rx.functions.Func2;
 import rx.functions.Func3;

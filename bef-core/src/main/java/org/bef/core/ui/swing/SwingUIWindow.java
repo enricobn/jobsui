@@ -79,7 +79,7 @@ public class SwingUIWindow implements UIWindow<JComponent> {
                 if (versionDB.first == null || versionDB.second == null) {
                     user.setItems(Collections.<String>emptyList());
                 } else {
-                    user.setItems(Arrays.asList(versionDB.toString()));
+                    user.setItems(Collections.singletonList(versionDB.toString()));
                 }
             }
         });

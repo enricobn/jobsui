@@ -1,7 +1,6 @@
 package org.bef.core;
 
 import org.bef.core.ui.UIComponent;
-import rx.Observable;
 
 import java.util.Map;
 

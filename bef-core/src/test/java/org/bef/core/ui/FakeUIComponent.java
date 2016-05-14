@@ -13,7 +13,7 @@ import java.util.List;
 public abstract class FakeUIComponent<T, C> implements UIComponent<T, C> {
     private final Observable<T> observable;
     protected final List<Action1<T>> actions = new ArrayList<>();
-    private List<Subscriber<? super T>> subscribers = new ArrayList<>();
+    private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
     private boolean visible = true;
 
     public FakeUIComponent() {
