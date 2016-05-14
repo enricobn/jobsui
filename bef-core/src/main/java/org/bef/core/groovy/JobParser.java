@@ -10,9 +10,15 @@ import org.bef.core.Project;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -23,6 +29,15 @@ import java.util.*;
  * Created by enrico on 5/4/16.
  */
 public class JobParser {
+
+    private final Validator validator;
+
+    public JobParser() throws SAXException {
+        String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
+        SchemaFactory factory = SchemaFactory.newInstance(language);
+        Schema schema = factory.newSchema(getClass().getResource("/org/bef/befjob.xsd"));
+        validator = schema.newValidator();
+    }
 
     public Project loadProject(File folder) throws Exception {
 
@@ -58,6 +73,16 @@ public class JobParser {
 
         for (File file : files) {
             if (file.getName().endsWith(".befjob")) {
+
+                try (InputStream is = new FileInputStream(file)) {
+                    final StreamSource source = new StreamSource(is);
+                    try {
+                        validator.validate(source);
+                    } catch (Exception e) {
+                        throw new Exception("Cannot parse file " + file, e);
+                    }
+                }
+
                 try (InputStream is = new FileInputStream(file)) {
                     JobGroovy<?> job;
                     try {
@@ -83,9 +108,11 @@ public class JobParser {
         };
     }
 
-    public <T> JobGroovy<T> parse(GroovyShell shell, InputStream is) throws Exception {
+    private <T> JobGroovy<T> parse(GroovyShell shell, InputStream is) throws Exception {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        dbFactory.setValidating(false);
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+
         Document doc = dBuilder.parse(is);
 
         //optional, but recommended
@@ -146,7 +173,12 @@ public class JobParser {
             }
         }
         if (mandatory) {
-            throw new BefParseException("Cannot find mandatory element \"" + name + "\" in " + parent);
+//            if (parent.getUserData("lineNumber") != null) {
+//                throw new BefParseException("Cannot find mandatory element \"" + name + "\" in " + parent +
+//                        parent.getUserData("lineNumber"));
+//            } else {
+                throw new BefParseException("Cannot find mandatory element \"" + name + "\" in " + parent);
+//            }
         } else {
             return null;
         }
@@ -154,8 +186,14 @@ public class JobParser {
 
     private static String getMandatoryAttribute(Element parent, String name) throws BefParseException {
         final String attribute = parent.getAttribute(name);
+
         if (attribute == null || attribute.length() == 0) {
-            throw new BefParseException("Cannot find mandatory attribute \"" + name + "\" in " + parent);
+//            if (parent instanceof DeferredNode) {
+//                throw new BefParseException("Cannot find mandatory attribute \"" + name + "\" in " + parent + " at line " +
+//                        ((DeferredNode)parent).getNodeIndex());
+//            } else {
+                throw new BefParseException("Cannot find mandatory attribute \"" + name + "\" in " + parent);
+//            }
         }
         return attribute;
     }

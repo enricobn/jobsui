@@ -1,10 +1,8 @@
-<Job key="simple" name="Simple" returnType="java.lang.String">
+<?xml version="1.0"?>
+<Job key="simple" name="Simple">
+
     <Parameter key="name" name="Name">
-        <Validate>
-            <![CDATA[
-                return new NotEmptyStringValidator().validate(value);
-            ]]>
-        </Validate>
+
         <CreateComponent>
             <![CDATA[
                 def uiValue = ui.create(UIValue.class);
@@ -13,13 +11,16 @@
                 return uiValue;
             ]]>
         </CreateComponent>
-    </Parameter>
-    <Parameter key="surname" name="Surname">
+
         <Validate>
             <![CDATA[
                 return new NotEmptyStringValidator().validate(value);
             ]]>
         </Validate>
+
+    </Parameter>
+
+    <Parameter key="surname" name="Surname">
         <CreateComponent>
             <![CDATA[
                 def uiValue = ui.create(UIValue.class);
@@ -27,19 +28,27 @@
                 return uiValue;
             ]]>
         </CreateComponent>
-    </Parameter>
-    <Parameter key="inv" name="Inv" visible="false">
+
         <Validate>
             <![CDATA[
-                return new NotNullValidator().validate(value);
+                return new NotEmptyStringValidator().validate(value);
             ]]>
         </Validate>
+
+    </Parameter>
+    <Parameter key="inv" name="Inv" visible="false">
 
         <CreateComponent>
             <![CDATA[
                 return ui.create(UIChoice.class);
             ]]>
         </CreateComponent>
+
+        <Validate>
+            <![CDATA[
+                return new NotNullValidator().validate(value);
+            ]]>
+        </Validate>
 
         <Dependency key="name"/>
         <Dependency key="surname"/>
@@ -49,7 +58,9 @@
                 widget.getComponent().setItems([Foo.concat(values.get('name'), values.get('surname'))])
             ]]>
         </OnDependenciesChange>
+
     </Parameter>
+
     <Run>
         <![CDATA[
             return values.get('inv')

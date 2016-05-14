@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="Job">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="Parameter" maxOccurs="unbounded" minOccurs="1">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element type="xs:string" name="CreateComponent"/>
+                            <xs:element type="xs:string" name="Validate" minOccurs="0"/>
+                            <xs:element name="Dependency" maxOccurs="unbounded" minOccurs="0">
+                                <xs:complexType>
+                                    <xs:simpleContent>
+                                        <xs:extension base="xs:string">
+                                            <xs:attribute type="xs:string" name="key" use="required"/>
+                                        </xs:extension>
+                                    </xs:simpleContent>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element type="xs:string" name="OnDependenciesChange" minOccurs="0"/>
+                        </xs:sequence>
+                        <xs:attribute type="xs:string" name="key" use="required"/>
+                        <xs:attribute type="xs:string" name="name" use="required"/>
+                        <xs:attribute type="xs:string" name="visible" use="optional"/>
+                    </xs:complexType>
+                </xs:element>
+                <xs:element type="xs:string" name="Validate" minOccurs="0"/>
+                <xs:element type="xs:string" name="Run"/>
+            </xs:sequence>
+            <xs:attribute type="xs:string" name="key" use="required"/>
+            <xs:attribute type="xs:string" name="name" use="required"/>
+        </xs:complexType>
+    </xs:element>
+</xs:schema>
