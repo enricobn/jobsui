@@ -10,7 +10,7 @@ public class NotNullValidator implements ParameterValidator<Object> {
     @Override
     public List<String> validate(Object value) {
         if (value == null) {
-            return Collections.singletonList("Value is null.");
+            return Collections.singletonList("Value is mandatory.");
         }
         return Collections.emptyList();
     }
