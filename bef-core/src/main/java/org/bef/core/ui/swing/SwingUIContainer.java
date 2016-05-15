@@ -89,31 +89,29 @@ public class SwingUIContainer implements UIContainer<JComponent> {
         {
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
-            gbc.gridy = rows;
-            gbc.insets.right = 5;
+            gbc.gridy = rows++;
+//            gbc.insets.right = 5;
             gbc.insets.left = 5;
-            gbc.insets.top = 5;
-            gbc.anchor = GridBagConstraints.EAST;
+            gbc.insets.top = 10;
+            gbc.anchor = GridBagConstraints.WEST;
             gbc.weightx = 0;
-            gbc.fill = GridBagConstraints.HORIZONTAL;
+            gbc.fill = GridBagConstraints.NONE;
             jlabel = new JLabel(label);
             this.component.add(jlabel, gbc);
         }
 
         {
             GridBagConstraints gbc = new GridBagConstraints();
-            gbc.gridx = 1;
-            gbc.gridy = rows;
+            gbc.gridx = 0;
+            gbc.gridy = rows++;
             gbc.weightx = 10.0; // why 1.0 does not work ???
-            gbc.insets.right = 5;
-            gbc.insets.top = 5;
+//            gbc.insets.right = 5;
+            gbc.insets.top = 2;
             gbc.insets.left = 5;
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.HORIZONTAL;
             this.component.add(component.getComponent(), gbc);
         }
-
-        rows++;
 
         return new UIWidget<T, JComponent>() {
             @Override
