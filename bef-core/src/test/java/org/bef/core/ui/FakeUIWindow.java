@@ -1,5 +1,11 @@
 package org.bef.core.ui;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 /**
  * Created by enrico on 5/8/16.
  */
@@ -9,6 +15,7 @@ public class FakeUIWindow<T> implements UIWindow<T> {
     private volatile boolean exit = false;
     private volatile boolean started = false;
     private volatile boolean valid = false;
+    private Map<String, UIWidget> widgets = new HashMap<>();
 
     @Override
     public boolean show() {
@@ -34,16 +41,10 @@ public class FakeUIWindow<T> implements UIWindow<T> {
 
     @Override
     public <T1> UIWidget<T1, T> add(String title, final UIComponent<T1, T> component) {
-        return new UIWidget<T1, T>() {
-            @Override
-            public void setVisible(boolean visible) {
-            }
-
-            @Override
-            public UIComponent<T1, T> getComponent() {
-                return component;
-            }
-        };
+        final UIWidget widget = mock(UIWidget.class);
+        when(widget.getComponent()).thenReturn(component);
+        widgets.put(title, widget);
+        return widget;
     }
 
     @Override
@@ -84,5 +85,9 @@ public class FakeUIWindow<T> implements UIWindow<T> {
                 throw new IllegalStateException("Timeout on waitUntilStarted.");
             }
         }
+    }
+
+    public UIWidget getWidget(String title) {
+        return widgets.get(title);
     }
 }
