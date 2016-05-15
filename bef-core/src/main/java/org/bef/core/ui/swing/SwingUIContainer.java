@@ -90,7 +90,7 @@ public class SwingUIContainer implements UIContainer<JComponent> {
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
             gbc.gridy = rows++;
-//            gbc.insets.right = 5;
+            gbc.insets.right = 5;
             gbc.insets.left = 5;
             gbc.insets.top = 10;
             gbc.anchor = GridBagConstraints.WEST;
@@ -104,10 +104,10 @@ public class SwingUIContainer implements UIContainer<JComponent> {
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
             gbc.gridy = rows++;
-            gbc.weightx = 10.0; // why 1.0 does not work ???
-//            gbc.insets.right = 5;
+            gbc.weightx = 1.0; // why 1.0 does not work ???
             gbc.insets.top = 2;
             gbc.insets.left = 5;
+            gbc.insets.right = 5;
             gbc.anchor = GridBagConstraints.WEST;
             gbc.fill = GridBagConstraints.HORIZONTAL;
             this.component.add(component.getComponent(), gbc);
