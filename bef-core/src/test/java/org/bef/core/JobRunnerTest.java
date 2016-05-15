@@ -6,6 +6,7 @@ import org.bef.core.groovy.JobParser;
 import org.bef.core.ui.*;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.io.File;
 import java.util.*;
@@ -13,9 +14,9 @@ import java.util.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by enrico on 4/30/16.
@@ -169,6 +170,84 @@ public class JobRunnerTest {
 
         assertThat(window.isValid(), is(true));
     }
+
+    @Test public void assert_that_not_valid_parameter_invokes_set_validation_on_widget() throws Exception {
+        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+        when(ui.create(UIChoice.class)).thenReturn(new FakeUIChoice());
+
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+            @Override
+            protected void interact() {
+                uiValueName.setValue(null);
+            }
+        };
+
+        JobParser parser = new JobParser();
+        Project project = parser.loadProject(new File("src/test/resources/simplejob"));
+        final Job<String> job = project.getJob("simple");
+
+        jobRunnerWrapper.start(job);
+
+        ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
+
+        verify(window.getWidget("Name"), times(2)).setValidationMessages(captor.capture());
+
+        final List<String> messages1 = captor.getAllValues().get(0);
+        // the first time is true since, in the script, there's a set to a default value
+        assertThat(messages1.isEmpty(), is(true));
+
+        final List<String> messages2 = captor.getAllValues().get(1);
+        assertThat(messages2.isEmpty(), is(false));
+    }
+
+    @Test public void assert_that_validation_does_not_occur_if_dependencies_are_not_valid() throws Exception {
+        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+        final FakeUIChoice uiChoiceInv = new FakeUIChoice();
+        when(this.ui.create(UIChoice.class)).thenReturn(uiChoiceInv);
+
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, JobRunnerTest.this.ui, window) {
+            @Override
+            protected void interact() {
+                uiValueSurname.setValue(null);
+            }
+        };
+
+        JobParser parser = new JobParser();
+        Project project = parser.loadProject(new File("src/test/resources/simplejob"));
+        final Job<String> job = project.getJob("simple");
+
+        jobRunnerWrapper.start(job);
+
+        verify(window.getWidget("Inv"), never()).setValidationMessages(anyList());
+    }
+
+    @Test public void assert_that_validation_occurs_if_dependencies_are_valid() throws Exception {
+        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+        final FakeUIChoice uiChoiceInv = new FakeUIChoice();
+        when(this.ui.create(UIChoice.class)).thenReturn(uiChoiceInv);
+
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, JobRunnerTest.this.ui, window) {
+            @Override
+            protected void interact() {
+                uiValueSurname.setValue("Benedetti");
+            }
+        };
+
+        JobParser parser = new JobParser();
+        Project project = parser.loadProject(new File("src/test/resources/simplejob"));
+        final Job<String> job = project.getJob("simple");
+
+        jobRunnerWrapper.start(job);
+
+        verify(window.getWidget("Inv"), times(2)).setValidationMessages(anyList());
+    }
+
 
     private Job<String> createSimpleJob() {
         final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();

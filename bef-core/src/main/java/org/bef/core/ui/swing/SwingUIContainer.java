@@ -6,6 +6,7 @@ import org.bef.core.ui.UIWidget;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 /**
  * Created by enrico on 2/14/16.
@@ -28,7 +29,7 @@ public class SwingUIContainer implements UIContainer<JComponent> {
         {
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
-            gbc.gridy = rows;
+            gbc.gridy = rows++;
             gbc.insets.right = 5;
             gbc.insets.top = 5;
             gbc.insets.left = 5;
@@ -36,7 +37,23 @@ public class SwingUIContainer implements UIContainer<JComponent> {
 //            gbc.fill = GridBagConstraints.HORIZONTAL;
             this.component.add(component.getComponent(), gbc);
         }
-        rows++;
+
+        final JLabel jMessages;
+        {
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = rows++;
+            gbc.insets.right = 5;
+            gbc.insets.left = 5;
+            gbc.insets.top = 10;
+            gbc.anchor = GridBagConstraints.WEST;
+            gbc.weightx = 0;
+            gbc.fill = GridBagConstraints.NONE;
+            jMessages = new JLabel("");
+            jMessages.setForeground(Color.RED);
+            jMessages.setVisible(false);
+            this.component.add(jMessages, gbc);
+        }
 
         return new UIWidget<T, JComponent>() {
             @Override
@@ -47,6 +64,16 @@ public class SwingUIContainer implements UIContainer<JComponent> {
             @Override
             public UIComponent<T, JComponent> getComponent() {
                 return component;
+            }
+
+            @Override
+            public void setValidationMessages(List<String> messages) {
+                if (messages.isEmpty()) {
+                    jMessages.setVisible(false);
+                } else {
+                    jMessages.setVisible(true);
+                    jMessages.setText(getMessagesAsString(messages).toString());
+                }
             }
         };
     }
@@ -113,6 +140,23 @@ public class SwingUIContainer implements UIContainer<JComponent> {
             this.component.add(component.getComponent(), gbc);
         }
 
+        final JLabel jMessages;
+        {
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = rows++;
+            gbc.insets.right = 5;
+            gbc.insets.left = 5;
+            gbc.insets.top = 10;
+            gbc.anchor = GridBagConstraints.WEST;
+            gbc.weightx = 0;
+            gbc.fill = GridBagConstraints.NONE;
+            jMessages = new JLabel("");
+            jMessages.setForeground(Color.RED);
+            jMessages.setVisible(false);
+            this.component.add(jMessages, gbc);
+        }
+
         return new UIWidget<T, JComponent>() {
             @Override
             public void setVisible(boolean visible) {
@@ -124,8 +168,29 @@ public class SwingUIContainer implements UIContainer<JComponent> {
             public UIComponent<T, JComponent> getComponent() {
                 return component;
             }
+
+            @Override
+            public void setValidationMessages(List<String> messages) {
+                if (messages.isEmpty()) {
+                    jMessages.setVisible(false);
+                } else {
+                    jMessages.setVisible(true);
+                    jMessages.setText(getMessagesAsString(messages).toString());
+                }
+            }
         };
 
+    }
+
+    private StringBuilder getMessagesAsString(List<String> messages) {
+        StringBuilder sb = new StringBuilder();
+        for (String message : messages) {
+            if (sb.length() > 0) {
+                sb.append('\n');
+            }
+            sb.append(message);
+        }
+        return sb;
     }
 
 }
