@@ -18,6 +18,7 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
     private final JComboBox<T> component = new JComboBox<>();
     private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
     private final Observable<T> observable;
+    private List<T> items = new ArrayList<>();
 
     public SwingUIChoice() {
         observable = Observable.create(new Observable.OnSubscribe<T>() {
@@ -62,6 +63,10 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
 
     @Override
     public void setItems(final List<T> items) {
+        if (items.equals(this.items)) {
+            return;
+        }
+        this.items = items;
         final Object selectedItem = component.getSelectedItem();
 
 //        SwingUtilities.invokeLater(new Runnable() {
@@ -91,9 +96,9 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
                         component.setSelectedItem(null);
                     }
                 }
-                for (Subscriber<? super T> subscriber : subscribers) {
-                    subscriber.onNext(getValue());
-                }
+//                for (Subscriber<? super T> subscriber : subscribers) {
+//                    subscriber.onNext(getValue());
+//                }
 
 //            }
 //        });
@@ -120,19 +125,19 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
     public void setValue(T value) {
         if (value != null) {
 //            System.out.println("SwingUIChoice.setValue " + System.identityHashCode(value.getClass()));
-            boolean found = false;
-            for (int i = 0; i < component.getItemCount(); i++) {
-                final T item = component.getItemAt(i);
-//                if (item != null) {
-//                    System.out.println("SwingUIChoice.setValue item " + System.identityHashCode(item.getClass()));
+//            boolean found = false;
+//            for (int i = 0; i < component.getItemCount(); i++) {
+//                final T item = component.getItemAt(i);
+////                if (item != null) {
+////                    System.out.println("SwingUIChoice.setValue item " + System.identityHashCode(item.getClass()));
+////                }
+//                if (Objects.equals(item, value)) {
+//                    found = true;
+//                    break;
 //                }
-                if (Objects.equals(item, value)) {
-                    found = true;
-                    break;
-                }
-            }
+//            }
 
-            if (!found) {
+            if (!items.contains(value)) {
                 throw new RuntimeException("Cannot find item " + value);
             }
         }
