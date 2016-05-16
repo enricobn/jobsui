@@ -11,7 +11,7 @@ public class SwingUI implements UI<JComponent> {
 
     @Override
     public void showMessage(String message) {
-        JOptionPane.showMessageDialog(null, message, "TGKDevContainer", JOptionPane.INFORMATION_MESSAGE);
+        JOptionPane.showMessageDialog(null, message, "BEF", JOptionPane.INFORMATION_MESSAGE);
     }
 
     @Override
