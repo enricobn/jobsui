@@ -84,4 +84,9 @@ public class SwingUIValue<T> implements UIValue<T,JComponent> {
         component.setText(converter.toString(value));
     }
 
+    @Override
+    public void setTitle(String label) {
+
+    }
+
 }

@@ -8,8 +8,6 @@ import rx.functions.Func2;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -18,9 +16,9 @@ import java.util.Collections;
  */
 public class SwingUIWindow implements UIWindow<JComponent> {
     private final JFrame frame;
-    private final JButton okButton = new JButton("OK");
+//    private final JButton okButton = new JButton("OK");
     private final SwingUIContainer container;
-    private boolean ok;
+    private final OKCancelHandler okCancelHandler;
 
     private static <T> UIWindow<T> createWindow(UI<T> ui) throws UnsupportedComponentException {
         UIWindow<T> window = ui.createWindow("Test");
@@ -124,84 +122,7 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         // container
         container = new SwingUIContainer();
 
-        {
-            GridBagConstraints constraints = new GridBagConstraints();
-            constraints.fill = GridBagConstraints.BOTH;
-            constraints.weightx = 1.0;
-            constraints.weighty = 1.0;
-//            containersPanel.setLayout(new GridBagLayout());
-            contentPane.add(container.getComponent(), constraints);
-        }
-
-        // buttons
-
-        JPanel buttonsPanel = new JPanel();
-        buttonsPanel.setLayout(new GridBagLayout());
-
-        {
-            GridBagConstraints constraints;
-            constraints = new GridBagConstraints();
-            constraints.weightx = 1.0;
-            constraints.gridy = 1;
-            constraints.anchor = GridBagConstraints.SOUTH;
-            constraints.fill = GridBagConstraints.HORIZONTAL;
-            contentPane.add(buttonsPanel, constraints);
-        }
-
-//
-//        // filler
-//        {
-//            GridBagConstraints constraints;
-//            constraints = new GridBagConstraints();
-//            constraints.fill = GridBagConstraints.HORIZONTAL;
-//            constraints.weightx = 1.0;
-//            buttonsPanel.add(new JPanel(), constraints);
-//        }
-
-        // OK
-        {
-            GridBagConstraints constraints;
-            constraints = new GridBagConstraints();
-            constraints.fill = GridBagConstraints.NONE;
-            constraints.gridx = 1;
-            constraints.insets.top = 5;
-            constraints.insets.bottom = 5;
-            constraints.insets.right = 5;
-
-            buttonsPanel.add(okButton, constraints);
-        }
-
-        okButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.setVisible(false);
-                frame.dispose();
-                ok = true;
-            }
-        });
-
-        // Cancel
-        JButton cancelButton = new JButton("Cancel");
-        {
-            GridBagConstraints constraints;
-            constraints = new GridBagConstraints();
-            constraints.fill = GridBagConstraints.NONE;
-            constraints.gridx = 2;
-            constraints.insets.top = 5;
-            constraints.insets.bottom = 5;
-            constraints.insets.right = 5;
-
-            buttonsPanel.add(cancelButton, constraints);
-        }
-
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                frame.setVisible(false);
-                frame.dispose();
-                ok = false;
-            }
-        });
+        okCancelHandler = new OKCancelHandler(frame, (JComponent) frame.getContentPane(), container.getComponent());
     }
 
 
@@ -217,12 +138,12 @@ public class SwingUIWindow implements UIWindow<JComponent> {
                 e.printStackTrace();
             }
         }
-        return ok;
+        return okCancelHandler.isOk();
     }
 
     @Override
     public void setValid(boolean valid) {
-        okButton.setEnabled(valid);
+        okCancelHandler.setOKButtonEnabled(valid);
     }
 
     @Override

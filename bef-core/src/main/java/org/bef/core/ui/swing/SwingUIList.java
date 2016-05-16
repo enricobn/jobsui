@@ -47,6 +47,11 @@ public class SwingUIList<T> implements UIList<T,JComponent> {
         updateItems();
     }
 
+    @Override
+    public void setTitle(String label) {
+
+    }
+
     private void updateItems() {
         SwingUtilities.invokeLater(new Runnable() {
             @Override

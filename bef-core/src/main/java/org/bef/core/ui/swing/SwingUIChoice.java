@@ -5,6 +5,7 @@ import rx.Observable;
 import rx.Subscriber;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -15,22 +16,26 @@ import java.util.Objects;
  * Created by enrico on 5/1/16.
  */
 public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
-    private final JComboBox<T> component = new JComboBox<>();
+    private final JPanel component = new JPanel();
+    private final JComboBox<T> combo = new JComboBox<>();
+    private final JButton button = new JButton("...");
     private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
     private final Observable<T> observable;
     private List<T> items = new ArrayList<>();
+    private String title;
 
     public SwingUIChoice() {
+        button.setMargin(new Insets(2, 2, 2, 2));
         observable = Observable.create(new Observable.OnSubscribe<T>() {
             @Override
             public void call(final Subscriber<? super T> subscriber) {
                 subscriber.onStart();
-                component.addActionListener(new ActionListener() {
+                combo.addActionListener(new ActionListener() {
                     private T selectedItem = null;
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        if (!Objects.equals(selectedItem, component.getSelectedItem())) {
+                        if (!Objects.equals(selectedItem, combo.getSelectedItem())) {
                             selectedItem = getValue();
                             subscriber.onNext(selectedItem);
                         }
@@ -39,6 +44,34 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
                 subscribers.add(subscriber);
             }
         });
+
+        component.setLayout(new GridBagLayout());
+        {
+            GridBagConstraints gc = new GridBagConstraints();
+            gc.fill = GridBagConstraints.HORIZONTAL;
+            gc.weightx = 1.0;
+            component.add(combo, gc);
+        }
+
+        {
+            GridBagConstraints gc = new GridBagConstraints();
+            gc.fill = GridBagConstraints.NONE;
+            gc.weightx = 0.0;
+            gc.insets.left = 5;
+            component.add(button, gc);
+        }
+
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                final SwingFilteredList<T> filteredList = new SwingFilteredList<>(title, items, (T) combo.getSelectedItem());
+                filteredList.show();
+                if (filteredList.isOk()) {
+                    setValue(filteredList.getSelectedItem());
+                }
+            }
+        });
+
     }
 
     @Override
@@ -53,11 +86,11 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
 
     @Override
     public T getValue() {
-        int selectedIndex = component.getSelectedIndex();
+        int selectedIndex = combo.getSelectedIndex();
         if (selectedIndex < 0) {
             return null;
         } else {
-            return component.getItemAt(selectedIndex);
+            return combo.getItemAt(selectedIndex);
         }
     }
 
@@ -67,33 +100,33 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
             return;
         }
         this.items = items;
-        final Object selectedItem = component.getSelectedItem();
+        final Object selectedItem = combo.getSelectedItem();
 
 //        SwingUtilities.invokeLater(new Runnable() {
 //            @Override
 //            public void run() {
 
-                component.removeAllItems();
+                combo.removeAllItems();
 
                 if (items.size() > 1) {
-                    component.addItem(null);
+                    combo.addItem(null);
                 }
 
                 boolean found = false;
                 for (T v : items) {
-                    component.addItem(v);
+                    combo.addItem(v);
                     if (Objects.equals(selectedItem, v)) {
                         found = true;
                     }
                 }
 
                 if (found) {
-                    component.setSelectedItem(selectedItem);
+                    combo.setSelectedItem(selectedItem);
                 } else {
                     if (items.size() == 1) {
-                        component.setSelectedItem(items.get(0));
+                        combo.setSelectedItem(items.get(0));
                     } else {
-                        component.setSelectedItem(null);
+                        combo.setSelectedItem(null);
                     }
                 }
 //                for (Subscriber<? super T> subscriber : subscribers) {
@@ -141,10 +174,15 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
                 throw new RuntimeException("Cannot find item " + value);
             }
         }
-        component.setSelectedItem(value);
-        if (!component.isVisible()) {
+        combo.setSelectedItem(value);
+        if (!combo.isVisible()) {
             notifySubscribers();
         }
+    }
+
+    @Override
+    public void setTitle(String label) {
+        this.title = label;
     }
 
 }

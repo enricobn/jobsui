@@ -52,4 +52,9 @@ public abstract class FakeUIComponent<T, C> implements UIComponent<T, C> {
     public boolean isVisible() {
         return visible;
     }
+
+    @Override
+    public void setTitle(String label) {
+
+    }
 }

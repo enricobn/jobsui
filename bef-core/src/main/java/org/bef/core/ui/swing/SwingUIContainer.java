@@ -112,6 +112,8 @@ public class SwingUIContainer implements UIContainer<JComponent> {
     }
 
     private <T> UIWidget<T, JComponent> addRow(String label, final UIComponent<T, JComponent> component) {
+        component.setTitle(label);
+
         final JLabel jlabel;
         {
             GridBagConstraints gbc = new GridBagConstraints();

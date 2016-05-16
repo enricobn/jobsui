@@ -74,4 +74,9 @@ public class SwingUIButton implements UIButton<JComponent> {
     public void setValue(Void value) {
     }
 
+    @Override
+    public void setTitle(String label) {
+
+    }
+
 }
