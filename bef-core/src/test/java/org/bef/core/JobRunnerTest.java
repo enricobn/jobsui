@@ -7,6 +7,12 @@ import org.bef.core.ui.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.MockSettings;
+import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.listeners.InvocationListener;
+import org.mockito.listeners.MethodInvocationReport;
+import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.util.*;
@@ -14,7 +20,6 @@ import java.util.*;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyList;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -202,50 +207,116 @@ public class JobRunnerTest {
         assertThat(messages2.isEmpty(), is(false));
     }
 
-    @Test public void assert_that_validation_does_not_occur_if_dependencies_are_not_valid() throws Exception {
-        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+    @Test public void assert_that_validation_does_NOT_occur_if_dependencies_are_NOT_valid() throws Exception {
+        final FakeUiValue uiValueName = new FakeUiValue<>();
+        final FakeUiValue uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+
         final FakeUIChoice uiChoiceInv = new FakeUIChoice();
         when(this.ui.create(UIChoice.class)).thenReturn(uiChoiceInv);
+
+        final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
 
         JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, JobRunnerTest.this.ui, window) {
             @Override
             protected void interact() {
+                // I want to ignore all validations at startup
+                Mockito.reset(job.getParameter("inv"));
                 uiValueSurname.setValue(null);
             }
         };
 
-        JobParser parser = new JobParser();
-        Project project = parser.loadProject(new File("src/test/resources/simplejob"));
-        final Job<String> job = project.getJob("simple");
-
         jobRunnerWrapper.start(job);
 
-        verify(window.getWidget("Inv"), never()).setValidationMessages(anyList());
+        final JobParameterDef inv = job.getParameter("inv");
+        verify(inv, never()).validate(isNull());
+        verify(inv, never()).validate(isNotNull());
     }
 
-    @Test public void assert_that_validation_occurs_if_dependencies_are_valid() throws Exception {
-        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+    @Test public void assert_that_onDepependencyChange_occurs_if_dependencies_are_valid() throws Exception {
+        final FakeUiValue uiValueName = new FakeUiValue<>();
+        final FakeUiValue uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+
         final FakeUIChoice uiChoiceInv = new FakeUIChoice();
         when(this.ui.create(UIChoice.class)).thenReturn(uiChoiceInv);
+
+        final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
 
         JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, JobRunnerTest.this.ui, window) {
             @Override
             protected void interact() {
+                // I want to ignore all validations at startup
+                Mockito.reset(job.getParameter("inv"));
+                uiValueName.setValue("Enrico");
                 uiValueSurname.setValue("Benedetti");
             }
         };
 
-        JobParser parser = new JobParser();
-        Project project = parser.loadProject(new File("src/test/resources/simplejob"));
-        final Job<String> job = project.getJob("simple");
-
         jobRunnerWrapper.start(job);
 
-        verify(window.getWidget("Inv"), times(2)).setValidationMessages(anyList());
+        final JobParameterDef inv = job.getParameter("inv");
+        verify(inv).onDependenciesChange(any(UIWidget.class), anyMap());
+        verify(inv).validate(isNull());
+    }
+
+    private Job<String> getMockedSimpleJob(FakeUiValue<String, ?> uiValueName, FakeUiValue<String, ?> uiValueSurname, FakeUIChoice uiChoiceInv) throws UnsupportedComponentException {
+        final Job<String> job = mock(Job.class);
+
+        final Map<String,JobParameterDef> parameters = new LinkedHashMap<>();
+        final JobParameterDef name = mock(JobParameterDef.class, "name");
+        parameters.put("name", name);
+        final JobParameterDef surname = mock(JobParameterDef.class, "surname");
+        parameters.put("surname", surname);
+        final JobParameterDef inv = mock(JobParameterDef.class, "inv");
+        parameters.put("inv", inv);
+
+        List<JobParameterDef<?>> parametersList = new ArrayList(parameters.values());
+        when(job.getParameterDefs()).thenReturn(parametersList);
+
+        when(name.createComponent(any(UI.class))).thenReturn(uiValueName);
+        when(name.getKey()).thenReturn("name");
+        when(name.getName()).thenReturn("Name");
+        when(name.isVisible()).thenReturn(true);
+        when(name.isOptional()).thenReturn(false);
+        when(name.validate(isNull())).thenReturn(Collections.singletonList("Error"));
+        when(name.validate(isNotNull())).thenReturn(Collections.emptyList());
+
+        when(surname.createComponent(any(UI.class))).thenReturn(uiValueSurname);
+        when(surname.getKey()).thenReturn("surname");
+        when(surname.getName()).thenReturn("Surname");
+        when(surname.isVisible()).thenReturn(true);
+        when(surname.isOptional()).thenReturn(false);
+        when(surname.validate(isNull())).thenReturn(Collections.singletonList("Error"));
+        when(surname.validate(isNotNull())).thenReturn(Collections.emptyList());
+
+        when(inv.createComponent(any(UI.class))).thenReturn(uiChoiceInv);
+        when(inv.getKey()).thenReturn("inv");
+        when(inv.getName()).thenReturn("Inv");
+        when(inv.isVisible()).thenReturn(false);
+        when(inv.isOptional()).thenReturn(false);
+        when(inv.getDependencies()).thenReturn(
+                Collections.<JobParameterDef<?>>singletonList(name));
+
+        when(job.getParameter(anyString())).thenAnswer(new Answer<JobParameterDef>() {
+            @Override
+            public JobParameterDef answer(InvocationOnMock invocation) throws Throwable {
+                final JobParameterDef jobParameterDef = parameters.get(invocation.getArguments()[0]);
+                return jobParameterDef;
+            }
+        });
+        return job;
+    }
+
+    private MockSettings printInvocation(String name, final CharSequence methodName) {
+        return Mockito.withSettings().name(name).invocationListeners(new InvocationListener() {
+            @Override
+            public void reportInvocation(MethodInvocationReport methodInvocationReport) {
+                if (methodInvocationReport.getInvocation().toString().contains(methodName)) {
+                    new RuntimeException().printStackTrace();
+                }
+            }
+        });
     }
 
 
@@ -322,6 +393,7 @@ public class JobRunnerTest {
         final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
 
         final JobParameterDefAbstract<String> name = new JobParameterDefGroovy<String>(
+                null,
                 shell,
                 "name",
                 "Name",
@@ -343,6 +415,7 @@ public class JobRunnerTest {
         parameterDefs.add(name);
 
         final JobParameterDefAbstract<String> surname = new JobParameterDefGroovy<String>(
+                null,
                 shell,
                 "surname",
                 "Surname",

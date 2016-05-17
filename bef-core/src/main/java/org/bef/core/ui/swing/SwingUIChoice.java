@@ -23,6 +23,7 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
     private final Observable<T> observable;
     private List<T> items = new ArrayList<>();
     private String title;
+    private boolean disableListener = false;
 
     public SwingUIChoice() {
         button.setMargin(new Insets(2, 2, 2, 2));
@@ -35,7 +36,7 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
 
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        if (!Objects.equals(selectedItem, combo.getSelectedItem())) {
+                        if (!disableListener && !Objects.equals(selectedItem, getValue())) {
                             selectedItem = getValue();
                             subscriber.onNext(selectedItem);
                         }
@@ -96,9 +97,10 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
 
     @Override
     public void setItems(final List<T> items) {
-        if (items.equals(this.items)) {
-            return;
-        }
+//        System.out.println("SwingUIChoice.setItems " + items);
+//        if (items.equals(this.items)) {
+//            return;
+//        }
         this.items = items;
         final Object selectedItem = combo.getSelectedItem();
 
@@ -106,7 +108,9 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
 //            @Override
 //            public void run() {
 
+                disableListener = true;
                 combo.removeAllItems();
+                disableListener = false;
 
                 if (items.size() > 1) {
                     combo.addItem(null);
@@ -126,12 +130,15 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
                     if (items.size() == 1) {
                         combo.setSelectedItem(items.get(0));
                     } else {
+                        // when no items are set, I want to be sure that subscribers are notified,
+                        // even if the value was already null, but I want to do it only once
+                        // so I disable listener
+                        disableListener = true;
                         combo.setSelectedItem(null);
+                        disableListener = false;
+                        notifySubscribers();
                     }
                 }
-//                for (Subscriber<? super T> subscriber : subscribers) {
-//                    subscriber.onNext(getValue());
-//                }
 
 //            }
 //        });

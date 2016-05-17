@@ -1,6 +1,7 @@
 package org.bef.core;
 
 import org.bef.core.ui.*;
+import org.bef.core.utils.BEFUtils;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.FuncN;
@@ -12,7 +13,7 @@ import java.util.*;
  */
 public class JobRunner {
 
-    public <T> JobFuture<T> run(UI ui, final Job<T> job) throws UnsupportedComponentException {
+    public <T> JobFuture<T> run(final UI ui, final Job<T> job) throws UnsupportedComponentException {
         final UIWindow window = ui.createWindow(job.getName());
 
         final Map<JobParameterDef, UIWidget> widgetsMap = new LinkedHashMap<>();
@@ -34,11 +35,12 @@ public class JobRunner {
 
             widgetsMap.put(jobParameterDef, widget);
 
-            widget.getComponent().getObservable().subscribe(new Action1() {
+            final Observable observable = widget.getComponent().getObservable();
+
+            observable.subscribe(new Action1() {
                 @Override
                 public void call(Object o) {
-                    final List validate = jobParameterDef.validate(o);
-                    widget.setValidationMessages(validate);
+                    setValidationMessage(jobParameterDef.validate(o), jobParameterDef, widget, ui);
                 }
             });
         }
@@ -106,7 +108,9 @@ public class JobRunner {
                     final Object value = args[i++];
                     final JobParameterDef<Object> parameterDef = (JobParameterDef<Object>) entry.getKey();
                     final List<String> validate = parameterDef.validate(value);
-                    entry.getValue().setValidationMessages(validate);
+
+                    setValidationMessage(validate, parameterDef, entry.getValue(), ui);
+
                     if (!validate.isEmpty()) {
                         break;
                     }
@@ -131,6 +135,7 @@ public class JobRunner {
 
         window.setValid(false);
 
+        // I notify subscribers for initial valid value
         for (Map.Entry<JobParameterDef, UIWidget> entry : widgetsMap.entrySet()) {
             final Object value = entry.getValue().getComponent().getValue();
             if (entry.getKey().validate(value).isEmpty()) {
@@ -143,5 +148,16 @@ public class JobRunner {
         }
 
         return null;
+    }
+
+    private void setValidationMessage(List<String> validate, JobParameterDef jobParameterDef,
+                                      UIWidget widget, UI ui) {
+        if (!jobParameterDef.isVisible()) {
+            if (!validate.isEmpty()) {
+                ui.showMessage(jobParameterDef.getName() + ": " + BEFUtils.getMessagesAsString(validate));
+            }
+        } else {
+            widget.setValidationMessages(validate);
+        }
     }
 }

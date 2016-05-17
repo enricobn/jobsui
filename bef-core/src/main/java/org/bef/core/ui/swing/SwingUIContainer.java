@@ -3,6 +3,7 @@ package org.bef.core.ui.swing;
 import org.bef.core.ui.UIComponent;
 import org.bef.core.ui.UIContainer;
 import org.bef.core.ui.UIWidget;
+import org.bef.core.utils.BEFUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -72,7 +73,7 @@ public class SwingUIContainer implements UIContainer<JComponent> {
                     jMessages.setVisible(false);
                 } else {
                     jMessages.setVisible(true);
-                    jMessages.setText(getMessagesAsString(messages).toString());
+                    jMessages.setText(BEFUtils.getMessagesAsString(messages));
                 }
             }
         };
@@ -177,22 +178,11 @@ public class SwingUIContainer implements UIContainer<JComponent> {
                     jMessages.setVisible(false);
                 } else {
                     jMessages.setVisible(true);
-                    jMessages.setText(getMessagesAsString(messages).toString());
+                    jMessages.setText(BEFUtils.getMessagesAsString(messages));
                 }
             }
         };
 
-    }
-
-    private StringBuilder getMessagesAsString(List<String> messages) {
-        StringBuilder sb = new StringBuilder();
-        for (String message : messages) {
-            if (sb.length() > 0) {
-                sb.append('\n');
-            }
-            sb.append(message);
-        }
-        return sb;
     }
 
 }

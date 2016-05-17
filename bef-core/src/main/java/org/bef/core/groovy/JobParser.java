@@ -146,7 +146,7 @@ public class JobParser {
             boolean visible = visibleString == null || visibleString.isEmpty() || Boolean.parseBoolean(visibleString);
             boolean optional = optionalString != null && !optionalString.isEmpty() && Boolean.parseBoolean(optionalString);
 
-            JobParameterDefAbstract<?> parameterDef = new JobParameterDefGroovy<>(shell, parameterKey, parameterName,
+            JobParameterDefAbstract<?> parameterDef = new JobParameterDefGroovy<>(projectFolder, shell, parameterKey, parameterName,
                     createComponentScript, onDependenciesChangeScript, parameterValidateScript, optional, visible);
             parameterDefs.put(parameterDef.getKey(), parameterDef);
 

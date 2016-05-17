@@ -2,6 +2,7 @@ package org.bef.core.ui;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,7 @@ public class FakeUIWindow<T> implements UIWindow<T> {
     private volatile boolean exit = false;
     private volatile boolean started = false;
     private volatile boolean valid = false;
+    private volatile AtomicInteger unnamed = new AtomicInteger(0);
     private Map<String, UIWidget> widgets = new HashMap<>();
 
     @Override
@@ -49,7 +51,7 @@ public class FakeUIWindow<T> implements UIWindow<T> {
 
     @Override
     public <T1> UIWidget<T1, T> add(UIComponent<T1, T> component) {
-        return add(null, component);
+        return add(Integer.toString(unnamed.addAndGet(1)), component);
     }
 
     @Override
