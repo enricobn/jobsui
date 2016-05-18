@@ -371,17 +371,17 @@ public class JobRunnerTest {
             }
 
             @Override
-            public JobFuture<String> run(final Map<String, Object> parameters) {
+            public JobFuture<String> run(final Map<String, Object> values) {
                 return new JobFuture<String>() {
                     @Override
                     public String get() {
-                        return parameters.get("name") + " " + parameters.get("surname");
+                        return values.get("name") + " " + values.get("surname");
                     }
                 };
             }
 
             @Override
-            public List<String> validate(Map<String, Object> parameters) {
+            public List<String> validate(Map<String, Object> values) {
                 return Collections.emptyList();
             }
         };
@@ -442,17 +442,17 @@ public class JobRunnerTest {
             }
 
             @Override
-            public JobFuture<String> run(final Map<String, Object> parameters) {
+            public JobFuture<String> run(final Map<String, Object> values) {
                 return new JobFuture<String>() {
                     @Override
                     public String get() {
-                        return parameters.get("name") + " " + parameters.get("surname");
+                        return values.get("name") + " " + values.get("surname");
                     }
                 };
             }
 
             @Override
-            public List<String> validate(Map<String, Object> parameters) {
+            public List<String> validate(Map<String, Object> values) {
                 return Collections.emptyList();
             }
         };
@@ -542,17 +542,17 @@ public class JobRunnerTest {
             }
 
             @Override
-            public JobFuture<String> run(final Map<String, Object> parameters) {
+            public JobFuture<String> run(final Map<String, Object> values) {
                 return new JobFuture<String>() {
                     @Override
                     public String get() {
-                        return (String) parameters.get("user");
+                        return (String) values.get("user");
                     }
                 };
             }
 
             @Override
-            public List<String> validate(Map<String, Object> parameters) {
+            public List<String> validate(Map<String, Object> values) {
                 return Collections.emptyList();
             }
         };

@@ -43,11 +43,11 @@ public class JobGroovy<T> extends JobAbstract<T> {
     }
 
     @Override
-    public JobFuture<T> run(final Map<String, Object> parameters) {
+    public JobFuture<T> run(final Map<String, Object> values) {
         return new JobFuture<T>() {
             @Override
             public T get() {
-                run.setProperty("values", parameters);
+                run.setProperty("values", values);
                 run.setProperty("projectFolder", projectFolder);
                 return (T) run.run();
             }
@@ -55,11 +55,11 @@ public class JobGroovy<T> extends JobAbstract<T> {
     }
 
     @Override
-    public List<String> validate(Map<String, Object> parameters) {
+    public List<String> validate(Map<String, Object> values) {
         if (validate == null) {
             return Collections.emptyList();
         }
-        validate.setProperty("values", parameters);
+        validate.setProperty("values", values);
         return (List<String>) validate.run();
     }
 

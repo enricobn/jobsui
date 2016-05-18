@@ -16,6 +16,24 @@ public class JobRunner {
     public <T> JobFuture<T> run(final UI ui, final Job<T> job) throws UnsupportedComponentException {
         final UIWindow window = ui.createWindow(job.getName());
 
+        final Map<JobParameterDef, UIWidget> widgets = createWidgets(ui, job, window);
+
+        observeDependencies(job, widgets);
+
+        final Map<String, Object> values = observeValues(ui, job, window, widgets);
+
+        window.setValid(false);
+
+        notifyInitialValue(widgets);
+
+        if (window.show()) {
+            return job.run(values);
+        }
+
+        return null;
+    }
+
+    private <T> Map<JobParameterDef, UIWidget> createWidgets(final UI ui, Job<T> job, UIWindow window) throws UnsupportedComponentException {
         final Map<JobParameterDef, UIWidget> widgetsMap = new LinkedHashMap<>();
 
         for (final JobParameterDef jobParameterDef : job.getParameterDefs()) {
@@ -44,51 +62,19 @@ public class JobRunner {
                 }
             });
         }
+        return widgetsMap;
+    }
 
-        for (final JobParameterDef jobParameterDef : job.getParameterDefs()) {
-            final List<JobParameterDef> dependencies = jobParameterDef.getDependencies();
-            if (!dependencies.isEmpty()) {
-                List<Observable<?>> observables = new ArrayList<>();
-                for (JobParameterDef dependency : dependencies) {
-                    final UIWidget widget = widgetsMap.get(dependency);
-                    if (widget == null) {
-                        throw new IllegalStateException("Cannot find widget for dependency with key \"" +
-                                dependency.getKey() + "\".");
-                    }
-                    observables.add(widget.getComponent().getObservable());
-                }
-
-                final Observable<Map<String,Object>> observable = Observable.combineLatest(observables, new FuncN<Map<String,Object>>() {
-                    @Override
-                    public Map<String,Object> call(Object... args) {
-                        Map<String,Object> result = new HashMap<>();
-
-                        int i = 0;
-                        for (JobParameterDef dependency : dependencies) {
-                            final Object arg = args[i++];
-                            final List validate = dependency.validate(arg);
-                            if (!validate.isEmpty()) {
-                                break;
-                            }
-                            result.put(dependency.getKey(), arg);
-                        }
-                        return result;
-                    }
-                });
-
-                observable.subscribe(new Action1<Map<String,Object>>() {
-                    @Override
-                    public void call(Map<String,Object> objects) {
-                        // all dependencies are valid
-                        if (objects.size() == dependencies.size()) {
-                            final UIWidget widget = widgetsMap.get(jobParameterDef);
-                            jobParameterDef.onDependenciesChange(widget, objects);
-                        }
-                    }
-                });
+    private void notifyInitialValue(Map<JobParameterDef, UIWidget> widgetsMap) {
+        for (Map.Entry<JobParameterDef, UIWidget> entry : widgetsMap.entrySet()) {
+            final Object value = entry.getValue().getComponent().getValue();
+            if (entry.getKey().validate(value).isEmpty()) {
+                entry.getValue().getComponent().notifySubscribers();
             }
         }
+    }
 
+    private <T> Map<String, Object> observeValues(final UI ui, final Job<T> job, final UIWindow window, final Map<JobParameterDef, UIWidget> widgetsMap) {
         final Map<String,Object> parameters = new HashMap<>();
 
         List<Observable<?>> observables = new ArrayList<>();
@@ -132,22 +118,62 @@ public class JobRunner {
                 window.setValid(valid);
             }
         });
+        return parameters;
+    }
 
-        window.setValid(false);
+    private <T> void observeDependencies(Job<T> job, final Map<JobParameterDef, UIWidget> widgetsMap) {
+        for (final JobParameterDef jobParameterDef : job.getParameterDefs()) {
+            final List<JobParameterDef> dependencies = jobParameterDef.getDependencies();
+            if (!dependencies.isEmpty()) {
+                List<Observable<?>> observables = getDependenciesObservables(widgetsMap, dependencies);
 
-        // I notify subscribers for initial valid value
-        for (Map.Entry<JobParameterDef, UIWidget> entry : widgetsMap.entrySet()) {
-            final Object value = entry.getValue().getComponent().getValue();
-            if (entry.getKey().validate(value).isEmpty()) {
-                entry.getValue().getComponent().notifySubscribers();
+                final Observable<Map<String, Object>> observable = combineDependeciesObservables(dependencies, observables);
+
+                observable.subscribe(new Action1<Map<String,Object>>() {
+                    @Override
+                    public void call(Map<String,Object> objects) {
+                        // all dependencies are valid
+                        if (objects.size() == dependencies.size()) {
+                            final UIWidget widget = widgetsMap.get(jobParameterDef);
+                            jobParameterDef.onDependenciesChange(widget, objects);
+                        }
+                    }
+                });
             }
         }
+    }
 
-        if (window.show()) {
-            return job.run(parameters);
+    private Observable<Map<String, Object>> combineDependeciesObservables(final List<JobParameterDef> dependencies, List<Observable<?>> observables) {
+        return Observable.combineLatest(observables, new FuncN<Map<String,Object>>() {
+            @Override
+            public Map<String,Object> call(Object... args) {
+                Map<String,Object> result = new HashMap<>();
+
+                int i = 0;
+                for (JobParameterDef dependency : dependencies) {
+                    final Object arg = args[i++];
+                    final List validate = dependency.validate(arg);
+                    if (!validate.isEmpty()) {
+                        break;
+                    }
+                    result.put(dependency.getKey(), arg);
+                }
+                return result;
+            }
+        });
+    }
+
+    private List<Observable<?>> getDependenciesObservables(Map<JobParameterDef, UIWidget> widgetsMap, List<JobParameterDef> dependencies) {
+        List<Observable<?>> observables = new ArrayList<>();
+        for (JobParameterDef dependency : dependencies) {
+            final UIWidget widget = widgetsMap.get(dependency);
+            if (widget == null) {
+                throw new IllegalStateException("Cannot find widget for dependency with key \"" +
+                        dependency.getKey() + "\".");
+            }
+            observables.add(widget.getComponent().getObservable());
         }
-
-        return null;
+        return observables;
     }
 
     private void setValidationMessage(List<String> validate, JobParameterDef jobParameterDef,

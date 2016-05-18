@@ -12,9 +12,9 @@ public interface Job<T> {
 
     List<JobParameterDef<?>> getParameterDefs();
 
-    JobFuture<T> run(Map<String,Object> parameters);
+    JobFuture<T> run(Map<String,Object> values);
 
-    List<String> validate(Map<String,Object> parameters);
+    List<String> validate(Map<String,Object> values);
 
     JobParameterDef getParameter(String key);
 }
