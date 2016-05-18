@@ -1,6 +1,8 @@
 package org.bef.core.ui;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -18,6 +20,7 @@ public class FakeUIWindow<T> implements UIWindow<T> {
     private volatile boolean valid = false;
     private volatile AtomicInteger unnamed = new AtomicInteger(0);
     private Map<String, UIWidget> widgets = new HashMap<>();
+    private List<String> validationMessages = new ArrayList<>();
 
     @Override
     public boolean show() {
@@ -39,6 +42,11 @@ public class FakeUIWindow<T> implements UIWindow<T> {
     @Override
     public void setValid(boolean valid) {
         this.valid = valid;
+    }
+
+    @Override
+    public void showValidationMessage(String message) {
+        validationMessages.add(message);
     }
 
     @Override
@@ -91,5 +99,9 @@ public class FakeUIWindow<T> implements UIWindow<T> {
 
     public UIWidget getWidget(String title) {
         return widgets.get(title);
+    }
+
+    public List<String> getValidationMessages() {
+        return validationMessages;
     }
 }

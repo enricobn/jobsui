@@ -7,6 +7,7 @@ import org.bef.core.ui.UI;
 import org.bef.core.ui.UIComponent;
 import org.bef.core.ui.UIWidget;
 import org.bef.core.ui.UnsupportedComponentException;
+import org.codehaus.groovy.control.CompilationFailedException;
 
 import java.io.File;
 import java.util.Collections;
@@ -30,9 +31,21 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
                                  String validateScript, boolean optional, boolean visible) {
         super(key, name, null, optional, visible);
         this.projectFolder = projectFolder;
-        this.createComponent = shell.parse(IMPORTS + createComponentScript);
-        this.onDependenciesChange = shell.parse(IMPORTS + onDependenciesChangeScript);
-        this.validate =validateScript == null ? null : shell.parse(IMPORTS + validateScript);
+        try {
+            this.createComponent = shell.parse(IMPORTS + createComponentScript);
+        } catch (CompilationFailedException e) {
+            throw new RuntimeException("Error parsing createComponent for parameter with key \"" + key + "\".", e);
+        }
+        try {
+            this.onDependenciesChange = shell.parse(IMPORTS + onDependenciesChangeScript);
+        } catch (CompilationFailedException e) {
+            throw new RuntimeException("Error parsing onDependenciesChange for parameter with key \"" + key + "\".", e);
+        }
+        try {
+            this.validate = validateScript == null ? null : shell.parse(IMPORTS + validateScript);
+        } catch (CompilationFailedException e) {
+            throw new RuntimeException("Error parsing validate for parameter with key \"" + key + "\".", e);
+        }
     }
 
     @Override

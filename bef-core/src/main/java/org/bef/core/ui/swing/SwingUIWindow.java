@@ -111,9 +111,8 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     public SwingUIWindow(String title) {
         frame = new JFrame(title);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        Container contentPane = frame.getContentPane();
 
-        contentPane.setLayout(new GridBagLayout());
+        frame.getContentPane().setLayout(new GridBagLayout());
         frame.setSize(300, 500);
 
         // to center on the screen
@@ -144,6 +143,11 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     @Override
     public void setValid(boolean valid) {
         okCancelHandler.setOKButtonEnabled(valid);
+    }
+
+    @Override
+    public void showValidationMessage(String message) {
+        new SwingUI().showMessage(message);
     }
 
     @Override

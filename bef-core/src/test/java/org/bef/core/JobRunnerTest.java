@@ -19,6 +19,7 @@ import java.util.*;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
@@ -207,7 +208,7 @@ public class JobRunnerTest {
         assertThat(messages2.isEmpty(), is(false));
     }
 
-    @Test public void assert_that_validation_does_NOT_occur_if_dependencies_are_NOT_valid() throws Exception {
+    @Test public void verify_that_validation_does_NOT_occur_if_dependencies_are_NOT_valid() throws Exception {
         final FakeUiValue uiValueName = new FakeUiValue<>();
         final FakeUiValue uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
@@ -233,7 +234,7 @@ public class JobRunnerTest {
         verify(inv, never()).validate(isNotNull());
     }
 
-    @Test public void assert_that_onDepependencyChange_occurs_if_dependencies_are_valid() throws Exception {
+    @Test public void verify_that_onDepependencyChange_occurs_if_dependencies_are_valid() throws Exception {
         final FakeUiValue uiValueName = new FakeUiValue<>();
         final FakeUiValue uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
@@ -259,6 +260,31 @@ public class JobRunnerTest {
         verify(inv).onDependenciesChange(any(UIWidget.class), anyMap());
         verify(inv).validate(isNull());
     }
+
+    @Test public void verify_that_a_message_is_shown_when_job_is_not_valid() throws Exception {
+        final FakeUiValue uiValueName = new FakeUiValue<>();
+        final FakeUiValue uiValueSurname = new FakeUiValue<>();
+        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+
+        final FakeUIChoice uiChoiceInv = new FakeUIChoice();
+        when(this.ui.create(UIChoice.class)).thenReturn(uiChoiceInv);
+
+        final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
+        when(job.validate(anyMap())).thenReturn(Collections.singletonList("Error"));
+
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, JobRunnerTest.this.ui, window) {
+            @Override
+            protected void interact() {
+                uiValueName.setValue("Enrico");
+                uiValueSurname.setValue("Benedetti");
+            }
+        };
+
+        jobRunnerWrapper.start(job);
+
+        assertEquals(Collections.singletonList("Error"), window.getValidationMessages());
+    }
+
 
     private Job<String> getMockedSimpleJob(FakeUiValue<String, ?> uiValueName, FakeUiValue<String, ?> uiValueSurname, FakeUIChoice uiChoiceInv) throws UnsupportedComponentException {
         final Job<String> job = mock(Job.class);

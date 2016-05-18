@@ -49,7 +49,11 @@ public class JobGroovy<T> extends JobAbstract<T> {
             public T get() {
                 run.setProperty("values", values);
                 run.setProperty("projectFolder", projectFolder);
-                return (T) run.run();
+                try {
+                    return (T) run.run();
+                } catch (Exception e) {
+                    throw new RuntimeException("Cannot execute run for job with key \"" + getKey() + "\".", e);
+                }
             }
         };
     }

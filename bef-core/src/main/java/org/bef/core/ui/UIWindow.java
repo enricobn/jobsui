@@ -9,6 +9,8 @@ public interface UIWindow<T> extends UIContainer<T> {
 
     void setValid(boolean valid);
 
+    void showValidationMessage(String message);
+
 //    UIContainer<T> addContainer();
 
 }

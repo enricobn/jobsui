@@ -107,8 +107,11 @@ public class JobRunner {
                     return false;
                 }
 
-                // TODO where must I put the validation messages?
-                return job.validate(parameters).isEmpty();
+                final List<String> validate = job.validate(parameters);
+                if (!validate.isEmpty()) {
+                    window.showValidationMessage(BEFUtils.getMessagesAsString(validate));
+                }
+                return validate.isEmpty();
             }
         });
 
