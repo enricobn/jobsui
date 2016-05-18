@@ -261,7 +261,7 @@ public class JobRunnerTest {
         verify(inv).validate(isNull());
     }
 
-    @Test public void verify_that_a_message_is_shown_when_job_is_not_valid() throws Exception {
+    @Test public void assert_that_a_message_is_shown_when_job_is_not_valid() throws Exception {
         final FakeUiValue uiValueName = new FakeUiValue<>();
         final FakeUiValue uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
@@ -284,7 +284,6 @@ public class JobRunnerTest {
 
         assertEquals(Collections.singletonList("Error"), window.getValidationMessages());
     }
-
 
     private Job<String> getMockedSimpleJob(FakeUiValue<String, ?> uiValueName, FakeUiValue<String, ?> uiValueSurname, FakeUIChoice uiChoiceInv) throws UnsupportedComponentException {
         final Job<String> job = mock(Job.class);
