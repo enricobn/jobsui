@@ -2,7 +2,11 @@ version = '1.0.0-SNAPSHOT'
 
 subprojects {
     apply plugin: 'java'
-    
+
+    apply plugin: 'application'
+
+    mainClassName = 'org.bef.core.Main'
+
     group = 'org.bef'
     
     sourceCompatibility = '1.7'
@@ -32,3 +36,4 @@ subprojects {
     }
 
 }
+
