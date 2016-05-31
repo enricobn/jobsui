@@ -4,7 +4,6 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
 import org.bef.core.Job;
-import org.bef.core.JobParameterDef;
 import org.bef.core.JobParameterDefAbstract;
 import org.bef.core.Project;
 import org.w3c.dom.Document;
@@ -29,7 +28,6 @@ import java.util.*;
  * Created by enrico on 5/4/16.
  */
 public class JobParser {
-
     private final Validator validator;
 
     public JobParser() throws SAXException {
@@ -121,7 +119,7 @@ public class JobParser {
 
         String name = getMandatoryAttribute(doc.getDocumentElement(), "name");
         String key = getMandatoryAttribute(doc.getDocumentElement(), "key");
-        Map<String,JobParameterDef<?>> parameterDefs = new LinkedHashMap<>();
+        Map<String,JobParameterDefAbstract<?>> parameterDefs = new LinkedHashMap<>();
 
         String runScript = getElementContent(doc.getDocumentElement(), "Run", true);
 
@@ -149,22 +147,48 @@ public class JobParser {
             JobParameterDefAbstract<?> parameterDef = new JobParameterDefGroovy<>(projectFolder, shell, parameterKey, parameterName,
                     createComponentScript, onDependenciesChangeScript, parameterValidateScript, optional, visible);
             parameterDefs.put(parameterDef.getKey(), parameterDef);
+        }
+
+        NodeList expressionsList = doc.getElementsByTagName("Expression");
+        for (int i = 0; i < expressionsList.getLength(); i++) {
+            Element element = (Element) expressionsList.item(i);
+            String parameterKey = getMandatoryAttribute(element, "key");
+            String parameterName = getMandatoryAttribute(element, "name");
+
+            String evaluateScript = getElementContent(element, "Evaluate", false);
+
+            JobParameterDefAbstract<?> parameterDef = new JobExpressionDefGroovy<>(projectFolder, shell, parameterKey,
+                    parameterName,
+                    evaluateScript);
+            parameterDefs.put(parameterDef.getKey(), parameterDef);
+        }
+
+        addDependencies(parameterDefs, parametersList);
+        addDependencies(parameterDefs, expressionsList);
+
+        return new JobGroovy<>(shell, key, name, new ArrayList(parameterDefs.values()), runScript, validateScript,
+            projectFolder);
+    }
+
+    private void addDependencies(Map<String, JobParameterDefAbstract<?>> parameterDefs, NodeList parametersList) throws BefParseException {
+        for (int i = 0; i < parametersList.getLength(); i++) {
+            Element element = (Element) parametersList.item(i);
+            String parameterKey = getMandatoryAttribute(element, "key");
+
+            JobParameterDefAbstract parameterDef = parameterDefs.get(parameterKey);
 
             final NodeList dependenciesList = element.getElementsByTagName("Dependency");
             for (int iDep = 0; iDep < dependenciesList.getLength(); iDep++) {
                 final Element dependency = (Element) dependenciesList.item(iDep);
                 final String depKey = getMandatoryAttribute(dependency, "key");
-                final JobParameterDef<?> jobParameterDefDep = parameterDefs.get(depKey);
+                final JobParameterDefAbstract<?> jobParameterDefDep = parameterDefs.get(depKey);
                 if (jobParameterDefDep == null) {
                     throw new IllegalStateException("Cannot find dependency with key \"" + depKey + "\" for " +
-                    "parameter with key \"" + parameterKey + "\".");
+                            "parameter with key \"" + parameterKey + "\".");
                 }
                 parameterDef.addDependency(jobParameterDefDep);
             }
         }
-
-        return new JobGroovy<>(shell, key, name, new ArrayList<>(parameterDefs.values()), runScript, validateScript,
-                projectFolder);
     }
 
     private static String getElementContent(Element parent, String name, boolean mandatory) throws BefParseException {

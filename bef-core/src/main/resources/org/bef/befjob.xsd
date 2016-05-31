@@ -25,9 +25,28 @@
                         <xs:attribute type="xs:boolean" name="optional" use="optional"/>
                     </xs:complexType>
                 </xs:element>
+                <xs:element name="Expression" maxOccurs="unbounded" minOccurs="0">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:element name="Dependency" maxOccurs="unbounded" minOccurs="0">
+                                <xs:complexType>
+                                    <xs:simpleContent>
+                                        <xs:extension base="xs:string">
+                                            <xs:attribute type="xs:string" name="key" use="required"/>
+                                        </xs:extension>
+                                    </xs:simpleContent>
+                                </xs:complexType>
+                            </xs:element>
+                            <xs:element type="xs:string" name="Evaluate"/>
+                        </xs:sequence>
+                        <xs:attribute type="xs:string" name="key" use="required"/>
+                        <xs:attribute type="xs:string" name="name" use="required"/>
+                    </xs:complexType>
+                </xs:element>
                 <xs:element type="xs:string" name="Validate" minOccurs="0"/>
                 <xs:element type="xs:string" name="Run"/>
             </xs:sequence>
+
             <xs:attribute type="xs:string" name="key" use="required"/>
             <xs:attribute type="xs:string" name="name" use="required"/>
         </xs:complexType>
