@@ -48,14 +48,6 @@ public class SwingUIButton implements UIButton<JComponent> {
         return component;
     }
 
-    public void setText(String title) {
-        component.setText(title);
-    }
-
-    public String getText() {
-        return component.getText();
-    }
-
     @Override
     public Void getValue() {
         return null;
@@ -76,7 +68,7 @@ public class SwingUIButton implements UIButton<JComponent> {
 
     @Override
     public void setTitle(String label) {
-
+        component.setText(label);
     }
 
 }

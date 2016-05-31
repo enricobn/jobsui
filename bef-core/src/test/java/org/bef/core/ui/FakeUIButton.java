@@ -13,11 +13,6 @@ public class FakeUIButton<C> extends FakeUIComponent<Void,C> implements UIButton
     }
 
     @Override
-    public void setText(String add) {
-
-    }
-
-    @Override
     public C getComponent() {
         return null;
     }

@@ -16,7 +16,6 @@ import java.util.Collections;
  */
 public class SwingUIWindow implements UIWindow<JComponent> {
     private final JFrame frame;
-//    private final JButton okButton = new JButton("OK");
     private final SwingUIContainer container;
     private final OKCancelHandler okCancelHandler;
 
@@ -88,7 +87,7 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         window.add("Datasources", list);
 
         UIButton<T> button = ui.create(UIButton.class);
-        button.setText("Add");
+        button.setTitle("Add");
         window.add(button);
 
         button.getObservable().subscribe(new Action1<Void>() {

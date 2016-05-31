@@ -11,5 +11,4 @@ public interface UIButton<C> extends UIComponent<Void,C> {
 
     void setEnabled(boolean enabled);
 
-    void setText(String add);
 }
