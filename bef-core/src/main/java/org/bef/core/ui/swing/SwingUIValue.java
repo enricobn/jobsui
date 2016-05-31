@@ -89,4 +89,8 @@ public class SwingUIValue<T> implements UIValue<T,JComponent> {
 
     }
 
+    @Override
+    public void setEnabled(boolean enable) {
+        component.setEnabled(enable);
+    }
 }

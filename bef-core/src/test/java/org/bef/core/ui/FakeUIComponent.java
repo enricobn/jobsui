@@ -15,6 +15,7 @@ public abstract class FakeUIComponent<T, C> implements UIComponent<T, C> {
     protected final List<Action1<T>> actions = new ArrayList<>();
     private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
     private boolean visible = true;
+    private boolean enabled = true;
 
     public FakeUIComponent() {
         observable = Observable.create(new Observable.OnSubscribe<T>() {
@@ -55,6 +56,14 @@ public abstract class FakeUIComponent<T, C> implements UIComponent<T, C> {
 
     @Override
     public void setTitle(String label) {
+    }
 
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 }

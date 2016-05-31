@@ -39,6 +39,8 @@ public class SwingUI implements UI<JComponent> {
             return (COMP) new SwingUIList<>();
         } else if (componentType == UIValue.class) {
             return (COMP) new SwingUIValue<>();
+        } else if (componentType == UICheckBox.class) {
+            return (COMP) new SwingUICheckBox();
         }
         throw new UnsupportedComponentException("SWING: cannot find component for " + componentType.getName());
     }

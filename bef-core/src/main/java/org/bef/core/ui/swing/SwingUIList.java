@@ -146,4 +146,8 @@ public class SwingUIList<T> implements UIList<T,JComponent> {
         component.setVisible(visible);
     }
 
+    @Override
+    public void setEnabled(boolean enable) {
+        component.setEnabled(enable);
+    }
 }

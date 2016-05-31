@@ -20,4 +20,7 @@ public interface UIComponent<T,C> {
     void setValue(T value);
 
     void setTitle(String label);
+
+    void setEnabled(boolean enable);
+
 }
