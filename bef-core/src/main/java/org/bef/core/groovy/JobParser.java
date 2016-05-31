@@ -129,6 +129,9 @@ public class JobParser {
         for (int i = 0; i < parametersList.getLength(); i++) {
             Element element = (Element) parametersList.item(i);
             String parameterKey = getMandatoryAttribute(element, "key");
+            if (parameterDefs.containsKey(parameterKey)) {
+                throw new BefParseException("Duplicate key \"" + parameterKey + "\".");
+            }
             String parameterName = getMandatoryAttribute(element, "name");
 //            String typeString = getMandatoryAttribute(element, "type");
             String visibleString = element.getAttribute("visible");
@@ -153,6 +156,9 @@ public class JobParser {
         for (int i = 0; i < expressionsList.getLength(); i++) {
             Element element = (Element) expressionsList.item(i);
             String parameterKey = getMandatoryAttribute(element, "key");
+            if (parameterDefs.containsKey(parameterKey)) {
+                throw new BefParseException("Duplicate key \"" + parameterKey + "\".");
+            }
             String parameterName = getMandatoryAttribute(element, "name");
 
             String evaluateScript = getElementContent(element, "Evaluate", false);
