@@ -69,7 +69,7 @@ public class SwingUICheckBox implements UICheckBox<JComponent> {
 
     @Override
     public void setTitle(String label) {
-        component.setText(label);
+//        component.setText(label);
     }
 
     @Override
