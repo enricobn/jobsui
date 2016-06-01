@@ -1,0 +1,7 @@
+description = 'JobsUI core'
+
+dependencies {
+    compile 'io.reactivex:rxjava:1.1.1'
+    compile 'org.codehaus.groovy:groovy-all:2.4.6'
+}
+

@@ -5,9 +5,9 @@ subprojects {
 
     apply plugin: 'application'
 
-    mainClassName = 'org.bef.core.Main'
+    mainClassName = 'org.jobsui.core.Main'
 
-    group = 'org.bef'
+    group = 'org.jobsui'
     
     sourceCompatibility = '1.7'
 

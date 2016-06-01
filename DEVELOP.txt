@@ -1,3 +1,3 @@
 TASKS
 ------
-- distZIp or distTar: Bundles the project as a JVM application with libs and OS specific scripts in bef-core/build/distributions/
+- distZIp or distTar: Bundles the project as a JVM application with libs and OS specific scripts in jobsui-core/build/distributions/
