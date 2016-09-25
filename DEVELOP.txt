@@ -1,3 +1,4 @@
 TASKS
 ------
-- distZIp or distTar: Bundles the project as a JVM application with libs and OS specific scripts in jobsui-core/build/distributions/
+- distZip or distTar: Bundles the project as a JVM application with libs and OS specific scripts in
+  jobsui-core/build/distributions/
