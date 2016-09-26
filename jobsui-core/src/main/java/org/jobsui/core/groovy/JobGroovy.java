@@ -48,6 +48,10 @@ public class JobGroovy<T> extends JobAbstract<T> {
             @Override
             public T get() {
                 run.setProperty("values", values);
+                for (Map.Entry<String, Object> entry : values.entrySet()) {
+                    run.setProperty(entry.getKey(), entry.getValue());
+                }
+
                 run.setProperty("projectFolder", projectFolder);
                 try {
                     return (T) run.run();

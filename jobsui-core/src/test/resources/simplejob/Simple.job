@@ -49,7 +49,7 @@
 
         <OnDependenciesChange>
             <![CDATA[
-                widget.getComponent().setItems([Foo.concat(values.get('name'), values.get('surname'))])
+                widget.getComponent().setItems([Foo.concat(name, surname)])
             ]]>
         </OnDependenciesChange>
 
@@ -57,7 +57,7 @@
 
     <Run>
         <![CDATA[
-            return values.get('inv')
+            return inv
         ]]>
     </Run>
     <!--Validate>

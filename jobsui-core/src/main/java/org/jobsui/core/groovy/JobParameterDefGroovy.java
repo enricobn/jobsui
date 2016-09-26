@@ -65,6 +65,9 @@ public class JobParameterDefGroovy<T> extends JobParameterDefAbstract<T> {
         if (onDependenciesChange != null) {
             onDependenciesChange.setProperty("widget", widget);
             onDependenciesChange.setProperty("values", values);
+            for (Map.Entry<String, Object> entry : values.entrySet()) {
+                onDependenciesChange.setProperty(entry.getKey(), entry.getValue());
+            }
             onDependenciesChange.setProperty("projectFolder", projectFolder);
             try {
                 onDependenciesChange.run();

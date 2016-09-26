@@ -47,6 +47,10 @@ public class JobExpressionDefGroovy<T> extends JobParameterDefAbstract<T> {
 
     private void evaluate(UIChoice component, Map<String, Object> values) {
         evaluate.setProperty("values", values);
+        for (Map.Entry<String, Object> entry : values.entrySet()) {
+            evaluate.setProperty(entry.getKey(), entry.getValue());
+        }
+
         evaluate.setProperty("projectFolder", projectFolder);
         try {
             Object value = evaluate.run();
