@@ -18,9 +18,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.*;
 
@@ -60,6 +58,9 @@ public class JobParser {
         }
 
         File project = new File(folder, "project.xml");
+
+        ProjectXML projectXML = null;
+
         if (project.exists()) {
             try (FileInputStream is = new FileInputStream(project)) {
                 final StreamSource source = new StreamSource(is);
@@ -71,7 +72,7 @@ public class JobParser {
             }
 
             try (FileInputStream is = new FileInputStream(project)) {
-                ProjectXML projectXML = parseProject(is);
+                projectXML = parseProject(folder, is);
                 for (String library : projectXML.getLibraries()) {
                     String[] split = library.split(":");
                     File file = IvyUtils.resolveArtifact(split[0], split[1], split[2]);
@@ -109,7 +110,7 @@ public class JobParser {
                 try (InputStream is = new FileInputStream(file)) {
                     JobGroovy<?> job;
                     try {
-                        job = parse(shell, is, folder);
+                        job = parse(shell, is, folder, projectXML);
                     } catch (Exception e) {
                         throw new Exception("Cannot parse file " + file, e);
                     }
@@ -131,8 +132,8 @@ public class JobParser {
         };
     }
 
-    private ProjectXML parseProject(InputStream is) throws Exception {
-        ProjectXML projectXML = new ProjectXML();
+    private ProjectXML parseProject(File projectFolder, InputStream is) throws Exception {
+        ProjectXML projectXML = new ProjectXML(projectFolder);
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setValidating(false);
@@ -148,22 +149,45 @@ public class JobParser {
             projectXML.addLibrary(library);
         }
 
+        NodeList imports = doc.getElementsByTagName("Import");
+
+        for (int i = 0; i < imports.getLength(); i++) {
+            Element element = (Element) imports.item(i);
+            String imp = getElementContent(element, "#text", false);
+            String name = getMandatoryAttribute(element, "name");
+            projectXML.addImport(name, imp);
+        }
+
         return projectXML;
     }
 
-    private static class ProjectXML {
+    private class ProjectXML {
+        private final File projectFolder;
         private final List<String> libraries = new ArrayList<>();
+        private final Map<String, Project> imports = new HashMap<>();
+
+        private ProjectXML(File projectFolder) {
+            this.projectFolder = projectFolder;
+        }
 
         public void addLibrary(String library) {
             libraries.add(library);
+        }
+        public void addImport(String name, String uri) throws Exception {
+            Project project = loadProject(new File(projectFolder, uri));
+            imports.put(name, project);
         }
 
         public List<String> getLibraries() {
             return libraries;
         }
+
+        public Map<String, Project> getImports() {
+            return imports;
+        }
     }
 
-    private <T> JobGroovy<T> parse(GroovyShell shell, InputStream is, File projectFolder) throws Exception {
+    private <T> JobGroovy<T> parse(GroovyShell shell, InputStream is, File projectFolder, ProjectXML projectXML) throws Exception {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setValidating(false);
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -180,8 +204,113 @@ public class JobParser {
 
         String runScript = getElementContent(doc.getDocumentElement(), "Run", true);
 
-        NodeList parametersList = doc.getElementsByTagName("Parameter");
         String validateScript = getElementContent(doc.getDocumentElement(), "Validate", false);
+
+        NodeList parametersList = parseParameters(shell, projectFolder, doc, parameterDefs);
+
+        NodeList expressionsList = parseExpressions(shell, projectFolder, doc, parameterDefs);
+
+        List<JobCallDefGroovy<?>> callDefs = parseCalls(doc, parameterDefs, projectXML);
+
+        addDependencies(parameterDefs, parametersList);
+        addDependencies(parameterDefs, expressionsList);
+        addDependenciesForCalls(parameterDefs, callDefs);
+
+        return new JobGroovy<>(shell, key, name, new ArrayList(parameterDefs.values()), runScript, validateScript,
+            projectFolder);
+    }
+
+    private NodeList parseExpressions(GroovyShell shell, File projectFolder, Document doc, Map<String,
+            JobParameterDefAbstract<?>> parameterDefs)
+    throws JobsUIParseException {
+        NodeList expressionsList = doc.getElementsByTagName("Expression");
+        for (int i = 0; i < expressionsList.getLength(); i++) {
+            Element element = (Element) expressionsList.item(i);
+            String parameterKey = getMandatoryAttribute(element, "key");
+            if (parameterDefs.containsKey(parameterKey)) {
+                throw new JobsUIParseException("Duplicate key \"" + parameterKey + "\".");
+            }
+            String parameterName = getMandatoryAttribute(element, "name");
+
+            String evaluateScript = getElementContent(element, "Evaluate", false);
+
+            JobParameterDefAbstract<?> parameterDef = new JobExpressionDefGroovy<>(projectFolder, shell, parameterKey,
+                    parameterName,
+                    evaluateScript);
+            parameterDefs.put(parameterDef.getKey(), parameterDef);
+        }
+        return expressionsList;
+    }
+
+    private List<JobCallDefGroovy<?>> parseCalls(Document doc, Map<String, JobParameterDefAbstract<?>> parameterDefs,
+                                                 ProjectXML projectXML)
+    throws JobsUIParseException {
+        List<JobCallDefGroovy<?>> calls = new ArrayList<>();
+
+        NodeList callsList = doc.getElementsByTagName("Call");
+        for (int i = 0; i < callsList.getLength(); i++) {
+            Element element = (Element) callsList.item(i);
+
+            String key = getMandatoryAttribute(element, "key");
+
+            if (parameterDefs.containsKey(key)) {
+                throw new JobsUIParseException("Duplicate key \"" + key + "\".");
+            }
+            String name = getMandatoryAttribute(element, "name");
+            String project = getMandatoryAttribute(element, "project");
+            String job = getMandatoryAttribute(element, "job");
+
+            Map<String, String> mapArguments = new HashMap<>();
+
+            NodeList maps = element.getElementsByTagName("Map");
+            for (int j = 0; j < maps.getLength(); j++) {
+                Element mapElement = (Element) maps.item(j);
+                String in = getMandatoryAttribute(mapElement, "in");
+                String out = getMandatoryAttribute(mapElement, "out");
+                mapArguments.put(in, out);
+            }
+
+            Project projectToCall = projectXML.getImports().get(project);
+            if (projectToCall == null) {
+                throw new JobsUIParseException("Cannot find project \"" + project + "\" for Call \"" + name + "\".");
+            }
+
+            Job<Object> jobToCall = projectToCall.getJob(job);
+            if (jobToCall == null) {
+                throw new JobsUIParseException("Cannot find job \"" + job + "\" in project \"" + project + "\" for Call \"" + name + "\".");
+            }
+
+            JobCallDefGroovy<?> call = new JobCallDefGroovy<>(key, name, jobToCall, mapArguments);
+            parameterDefs.put(key, call);
+            calls.add(call);
+        }
+        return calls;
+    }
+
+    private void addDependenciesForCalls(Map<String, JobParameterDefAbstract<?>> parameterDefs,
+                                         List<JobCallDefGroovy<?>> callDefs)
+    throws JobsUIParseException {
+        for (JobCallDefGroovy<?> callDef : callDefs) {
+            String parameterKey = callDef.getKey();
+
+            JobParameterDefAbstract parameterDef = parameterDefs.get(parameterKey);
+
+            for (Map.Entry<String, String> entry : callDef.getMapArguments().entrySet()) {
+                final String depKey = entry.getKey();
+                final JobParameterDefAbstract<?> jobParameterDefDep = parameterDefs.get(depKey);
+                if (jobParameterDefDep == null) {
+                    throw new IllegalStateException("Cannot find dependency with key \"" + depKey + "\" for " +
+                            "parameter with key \"" + parameterKey + "\".");
+                }
+                parameterDef.addDependency(jobParameterDefDep);
+            }
+        }
+    }
+
+    private NodeList parseParameters(GroovyShell shell, File projectFolder, Document doc,
+                                     Map<String, JobParameterDefAbstract<?>> parameterDefs)
+    throws JobsUIParseException {
+        NodeList parametersList = doc.getElementsByTagName("Parameter");
 
         for (int i = 0; i < parametersList.getLength(); i++) {
             Element element = (Element) parametersList.item(i);
@@ -208,32 +337,11 @@ public class JobParser {
                     createComponentScript, onDependenciesChangeScript, parameterValidateScript, optional, visible);
             parameterDefs.put(parameterDef.getKey(), parameterDef);
         }
-
-        NodeList expressionsList = doc.getElementsByTagName("Expression");
-        for (int i = 0; i < expressionsList.getLength(); i++) {
-            Element element = (Element) expressionsList.item(i);
-            String parameterKey = getMandatoryAttribute(element, "key");
-            if (parameterDefs.containsKey(parameterKey)) {
-                throw new JobsUIParseException("Duplicate key \"" + parameterKey + "\".");
-            }
-            String parameterName = getMandatoryAttribute(element, "name");
-
-            String evaluateScript = getElementContent(element, "Evaluate", false);
-
-            JobParameterDefAbstract<?> parameterDef = new JobExpressionDefGroovy<>(projectFolder, shell, parameterKey,
-                    parameterName,
-                    evaluateScript);
-            parameterDefs.put(parameterDef.getKey(), parameterDef);
-        }
-
-        addDependencies(parameterDefs, parametersList);
-        addDependencies(parameterDefs, expressionsList);
-
-        return new JobGroovy<>(shell, key, name, new ArrayList(parameterDefs.values()), runScript, validateScript,
-            projectFolder);
+        return parametersList;
     }
 
-    private void addDependencies(Map<String, JobParameterDefAbstract<?>> parameterDefs, NodeList parametersList) throws JobsUIParseException {
+    private void addDependencies(Map<String, JobParameterDefAbstract<?>> parameterDefs,
+                                 NodeList parametersList) throws JobsUIParseException {
         for (int i = 0; i < parametersList.getLength(); i++) {
             Element element = (Element) parametersList.item(i);
             String parameterKey = getMandatoryAttribute(element, "key");

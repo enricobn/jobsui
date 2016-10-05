@@ -308,6 +308,32 @@ public class JobRunnerTest {
         assertThat(jobFuture.get(), equalTo("firstsecond"));
     }
 
+    @Test public void assert_that_groovy_simple_with_ext_job_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
+        final FakeUiValue<String, ?> uiValueFirst = new FakeUiValue<>();
+        final FakeUiValue<String, ?> uiValueSecond = new FakeUiValue<>();
+        final FakeUIChoice<String, ?> uiValueInv = new FakeUIChoice<>();
+
+        when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
+        when(ui.create(UIChoice.class)).thenReturn(uiValueInv);
+
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+            @Override
+            protected void interact() {
+                uiValueFirst.setValue("first");
+                uiValueSecond.setValue("second");
+
+            }
+        };
+
+        JobParser parser = new JobParser();
+        Project project = parser.loadProject(new File("src/test/resources/simplejob"));
+        final Job<String> job = project.getJob("simpleWithExt");
+
+        final JobFuture<String> jobFuture = jobRunnerWrapper.start(job);
+
+        assertThat(jobFuture.get(), equalTo("firstsecond"));
+    }
+
     private Job<String> getMockedSimpleJob(FakeUiValue<String, ?> uiValueName, FakeUiValue<String, ?> uiValueSurname, FakeUIChoice uiChoiceInv) throws UnsupportedComponentException {
         final Job<String> job = mock(Job.class);
 

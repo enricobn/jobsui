@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<Job key="simpleWithExt" name="Simple with ext">
+
+    <Parameter key="name" name="Name">
+
+        <CreateComponent>
+            <![CDATA[
+                def uiValue = ui.create(UIValue.class);
+                uiValue.setConverter(new StringConverterString());
+                uiValue.setDefaultValue("Enrico");
+                return uiValue;
+            ]]>
+        </CreateComponent>
+
+        <Validate>
+            <![CDATA[
+                return new NotEmptyStringValidator().validate(value);
+            ]]>
+        </Validate>
+
+    </Parameter>
+
+    <Parameter key="surname" name="Surname">
+        <CreateComponent>
+            <![CDATA[
+                def uiValue = ui.create(UIValue.class);
+                uiValue.setConverter(new StringConverterString());
+                return uiValue;
+            ]]>
+        </CreateComponent>
+
+        <Validate>
+            <![CDATA[
+                return new NotEmptyStringValidator().validate(value);
+            ]]>
+        </Validate>
+
+    </Parameter>
+
+    <Call key="inv" name="Inv" project="ext" job="concat">
+        <Map in="name" out="first"/>
+        <Map in="surname" out="second"/>
+    </Call>
+
+    <Run>
+        <![CDATA[
+            return inv
+        ]]>
+    </Run>
+    <!--Validate>
+        <![CDATA[
+                return new NotEmptyStringValidator().validate(value);
+            ]]>
+    </Validate-->
+</Job>
