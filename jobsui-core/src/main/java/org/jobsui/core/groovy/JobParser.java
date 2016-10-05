@@ -28,13 +28,17 @@ import java.util.*;
  * Created by enrico on 5/4/16.
  */
 public class JobParser {
-    private final Validator validator;
+    private final Validator jobValidator;
+    private final Validator projectValidator;
 
     public JobParser() throws SAXException {
         String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
         SchemaFactory factory = SchemaFactory.newInstance(language);
-        Schema schema = factory.newSchema(getClass().getResource("/org/jobsui/jobsui.xsd"));
-        validator = schema.newValidator();
+        Schema jobSchema = factory.newSchema(getClass().getResource("/org/jobsui/jobsui.xsd"));
+        jobValidator = jobSchema.newValidator();
+        Schema projectSchema = factory.newSchema(getClass().getResource("/org/jobsui/project.xsd"));
+        projectValidator = projectSchema.newValidator();
+
     }
 
     public Project loadProject(File folder) throws Exception {
@@ -57,6 +61,15 @@ public class JobParser {
 
         File project = new File(folder, "project.xml");
         if (project.exists()) {
+            try (FileInputStream is = new FileInputStream(project)) {
+                final StreamSource source = new StreamSource(is);
+                try {
+                    projectValidator.validate(source);
+                } catch (Exception e) {
+                    throw new Exception("Cannot parse file " + project, e);
+                }
+            }
+
             try (FileInputStream is = new FileInputStream(project)) {
                 ProjectXML projectXML = parseProject(is);
                 for (String library : projectXML.getLibraries()) {
@@ -87,7 +100,7 @@ public class JobParser {
                 try (InputStream is = new FileInputStream(file)) {
                     final StreamSource source = new StreamSource(is);
                     try {
-                        validator.validate(source);
+                        jobValidator.validate(source);
                     } catch (Exception e) {
                         throw new Exception("Cannot parse file " + file, e);
                     }

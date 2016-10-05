@@ -3,8 +3,6 @@ package org.jobsui.core.groovy;
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.event.IvyEvent;
 import org.apache.ivy.core.event.IvyListener;
-import org.apache.ivy.core.event.download.NeedArtifactEvent;
-import org.apache.ivy.core.event.download.PrepareDownloadEvent;
 import org.apache.ivy.core.event.download.StartArtifactDownloadEvent;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
@@ -16,7 +14,6 @@ import org.apache.ivy.plugins.parser.xml.XmlModuleDescriptorWriter;
 import org.apache.ivy.plugins.resolver.URLResolver;
 import org.apache.ivy.util.DefaultMessageLogger;
 import org.apache.ivy.util.Message;
-import org.apache.ivy.util.MessageLogger;
 
 import java.io.File;
 import java.io.IOException;
