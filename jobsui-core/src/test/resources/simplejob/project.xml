@@ -1,0 +1,3 @@
+<Project name="Simple">
+    <Library>org.apache.commons:commons-lang3:3.4</Library>
+</Project>

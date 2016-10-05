@@ -1,5 +1,7 @@
-build
+build/
 .gradle
 .idea
 *.iml
-tgk
+tgk/
+tgk_old/
+classes/

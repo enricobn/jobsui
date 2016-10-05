@@ -55,6 +55,18 @@ public class JobParser {
             cl = new GroovyClassLoader();
         }
 
+        File project = new File(folder, "project.xml");
+        if (project.exists()) {
+            try (FileInputStream is = new FileInputStream(project)) {
+                ProjectXML projectXML = parseProject(is);
+                for (String library : projectXML.getLibraries()) {
+                    String[] split = library.split(":");
+                    File file = IvyUtils.resolveArtifact(split[0], split[1], split[2]);
+                    cl.addURL(file.toURI().toURL());
+                }
+            }
+        }
+
         final File lib = new File(folder, "lib");
         if (lib.exists()) {
             final File[] libFiles = lib.listFiles();
@@ -104,6 +116,38 @@ public class JobParser {
                 return jobs.keySet();
             }
         };
+    }
+
+    private ProjectXML parseProject(InputStream is) throws Exception {
+        ProjectXML projectXML = new ProjectXML();
+
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        dbFactory.setValidating(false);
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+
+        Document doc = dBuilder.parse(is);
+
+        NodeList libraries = doc.getElementsByTagName("Library");
+
+        for (int i = 0; i < libraries.getLength(); i++) {
+            Element element = (Element) libraries.item(i);
+            String library = getElementContent(element, "#text", false);
+            projectXML.addLibrary(library);
+        }
+
+        return projectXML;
+    }
+
+    private static class ProjectXML {
+        private final List<String> libraries = new ArrayList<>();
+
+        public void addLibrary(String library) {
+            libraries.add(library);
+        }
+
+        public List<String> getLibraries() {
+            return libraries;
+        }
     }
 
     private <T> JobGroovy<T> parse(GroovyShell shell, InputStream is, File projectFolder) throws Exception {

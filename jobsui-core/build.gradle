@@ -3,5 +3,8 @@ description = 'JobsUI core'
 dependencies {
     compile 'io.reactivex:rxjava:1.1.1'
     compile 'org.codehaus.groovy:groovy-all:2.4.6'
+    // https://mvnrepository.com/artifact/org.apache.ivy/ivy
+    compile group: 'org.apache.ivy', name: 'ivy', version: '2.4.0'
+
 }
 
