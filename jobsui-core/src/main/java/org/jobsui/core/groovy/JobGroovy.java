@@ -23,7 +23,7 @@ public class JobGroovy<T> extends JobAbstract<T> {
     private final Script validate;
     private final File projectFolder;
 
-    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDefGroovy> parameterDefs,
+    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDefGroovy<?>> parameterDefs,
                      String runScript, String validateScript, File projectFolder) {
         this.key = key;
         this.name = name;

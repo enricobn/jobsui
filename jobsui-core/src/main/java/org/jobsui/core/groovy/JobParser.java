@@ -3,8 +3,6 @@ package org.jobsui.core.groovy;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
-import org.jobsui.core.Job;
-import org.jobsui.core.JobParameterDef;
 import org.jobsui.core.Project;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -36,7 +34,6 @@ public class JobParser {
         jobValidator = jobSchema.newValidator();
         Schema projectSchema = factory.newSchema(getClass().getResource("/org/jobsui/project.xsd"));
         projectValidator = projectSchema.newValidator();
-
     }
 
     public Project loadProject(File folder) throws Exception {
@@ -110,7 +107,7 @@ public class JobParser {
                 try (InputStream is = new FileInputStream(file)) {
                     JobGroovy<?> job;
                     try {
-                        job = parse(shell, is, folder, projectXML);
+                        job = parse(shell, is, folder);
                     } catch (Exception e) {
                         throw new Exception("Cannot parse file " + file, e);
                     }
@@ -157,7 +154,7 @@ public class JobParser {
         return projectXML;
     }
 
-    private <T> JobGroovy<T> parse(GroovyShell shell, InputStream is, File projectFolder, ProjectXML projectXML) throws Exception {
+    private <T> JobGroovy<T> parse(GroovyShell shell, InputStream is, File projectFolder) throws Exception {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setValidating(false);
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -180,17 +177,18 @@ public class JobParser {
 
         NodeList expressionsList = parseExpressions(shell, projectFolder, doc, parameterDefs);
 
-        List<JobCallDefGroovy<?>> callDefs = parseCalls(doc, parameterDefs, projectXML);
+        List<JobCallDefGroovy<?>> callDefs = parseCalls(doc, parameterDefs);
 
         addDependencies(parameterDefs, parametersList);
         addDependencies(parameterDefs, expressionsList);
         addDependenciesForCalls(parameterDefs, callDefs);
 
-        return new JobGroovy<>(shell, key, name, new ArrayList(parameterDefs.values()), runScript, validateScript,
+        return new JobGroovy<>(shell, key, name, new ArrayList<>(parameterDefs.values()), runScript, validateScript,
             projectFolder);
     }
 
-    private NodeList parseExpressions(GroovyShell shell, File projectFolder, Document doc, Map<String, JobParameterDefGroovy<?>> parameterDefs)
+    private NodeList parseExpressions(GroovyShell shell, File projectFolder, Document doc, Map<String,
+            JobParameterDefGroovy<?>> parameterDefs)
     throws JobsUIParseException {
         NodeList expressionsList = doc.getElementsByTagName("Expression");
         for (int i = 0; i < expressionsList.getLength(); i++) {
@@ -211,8 +209,7 @@ public class JobParser {
         return expressionsList;
     }
 
-    private List<JobCallDefGroovy<?>> parseCalls(Document doc, Map<String, JobParameterDefGroovy<?>> parameterDefs,
-                                                 ProjectXML projectXML)
+    private List<JobCallDefGroovy<?>> parseCalls(Document doc, Map<String, JobParameterDefGroovy<?>> parameterDefs)
     throws JobsUIParseException {
         List<JobCallDefGroovy<?>> calls = new ArrayList<>();
 
