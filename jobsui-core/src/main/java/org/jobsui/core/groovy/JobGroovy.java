@@ -80,4 +80,12 @@ public class JobGroovy<T> extends JobAbstract<T> {
     public String getKey() {
         return key;
     }
+
+    public void init(ProjectGroovy project) {
+        for (JobParameterDef jobParameterDef : getParameterDefs()) {
+            // TODO can I remove cast?
+            ((JobParameterDefGroovy)jobParameterDef).init(project);
+        }
+
+    }
 }

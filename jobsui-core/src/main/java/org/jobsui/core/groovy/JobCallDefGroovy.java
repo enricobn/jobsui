@@ -69,7 +69,7 @@ public class JobCallDefGroovy<T> extends JobParameterDefAbstract<T> implements J
     }
 
     @Override
-    public void setProject(ProjectGroovy project) {
+    public void init(ProjectGroovy project) {
         Project projectToCall;
         if ("this".equals(projectRef)) {
             projectToCall = project;

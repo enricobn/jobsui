@@ -67,7 +67,7 @@ public class JobExpressionDefGroovy<T> extends JobParameterDefAbstract<T> implem
     }
 
     @Override
-    public void setProject(ProjectGroovy projectGroovy) {
+    public void init(ProjectGroovy projectGroovy) {
 
     }
 }

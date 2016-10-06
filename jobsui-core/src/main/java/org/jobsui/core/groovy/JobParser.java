@@ -122,10 +122,7 @@ public class JobParser {
         ProjectGroovy project = new ProjectGroovy(projectXML, jobs);
 
         for (JobGroovy<?> job : jobs.values()) {
-            for (JobParameterDef jobParameterDef : job.getParameterDefs()) {
-                // TODO can I remove cast?
-                ((JobParameterDefGroovy)jobParameterDef).setProject(project);
-            }
+            job.init(project);
         }
 
         return new ProjectGroovy(projectXML, jobs);

@@ -9,6 +9,6 @@ public interface JobParameterDefGroovy<T> extends JobParameterDef<T> {
 
     void addDependency(JobParameterDef<?> parameterDef);
 
-    void setProject(ProjectGroovy project);
+    void init(ProjectGroovy project);
 
 }

@@ -98,7 +98,7 @@ public class JobParameterDefGroovySimple<T> extends JobParameterDefAbstract<T> i
     }
 
     @Override
-    public void setProject(ProjectGroovy projectGroovy) {
+    public void init(ProjectGroovy projectGroovy) {
 
     }
 }
