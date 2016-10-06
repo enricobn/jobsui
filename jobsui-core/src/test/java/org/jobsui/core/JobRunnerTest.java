@@ -361,7 +361,7 @@ public class JobRunnerTest {
     private Job<String> getMockedSimpleJob(FakeUiValue<String, ?> uiValueName, FakeUiValue<String, ?> uiValueSurname, FakeUIChoice uiChoiceInv) throws UnsupportedComponentException {
         final Job<String> job = mock(Job.class);
 
-        final Map<String, JobParameterDef> parameters = new LinkedHashMap<>();
+        final Map<String, JobParameterDef<?>> parameters = new LinkedHashMap<>();
         final JobParameterDef name = mock(JobParameterDef.class, "name");
         parameters.put("name", name);
         final JobParameterDef surname = mock(JobParameterDef.class, "surname");
@@ -369,7 +369,7 @@ public class JobRunnerTest {
         final JobParameterDef inv = mock(JobParameterDef.class, "inv");
         parameters.put("inv", inv);
 
-        List<JobParameterDef> parametersList = new ArrayList<>(parameters.values());
+        List<JobParameterDef<?>> parametersList = new ArrayList<>(parameters.values());
         when(job.getParameterDefs()).thenReturn(parametersList);
 
         when(name.createComponent(any(UI.class))).thenReturn(uiValueName);
@@ -419,7 +419,7 @@ public class JobRunnerTest {
 
 
     private Job<String> createSimpleJob() {
-        final List<JobParameterDef> parameterDefs = new ArrayList<>();
+        final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
 
         final JobParameterDefAbstract<String> name = new JobParameterDefAbstract<String>(
                 "name",
@@ -464,7 +464,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public List<JobParameterDef> getParameterDefs() {
+            public List<JobParameterDef<?>> getParameterDefs() {
                 return parameterDefs;
             }
 
@@ -488,7 +488,7 @@ public class JobRunnerTest {
 
     private Job<String> createGroovySimpleJob() {
         GroovyShell shell = new GroovyShell();
-        final List<JobParameterDef> parameterDefs = new ArrayList<>();
+        final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
 
         final JobParameterDefAbstract<String> name = new JobParameterDefGroovySimple<String>(
                 null,
@@ -532,7 +532,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public List<JobParameterDef> getParameterDefs() {
+            public List<JobParameterDef<?>> getParameterDefs() {
                 return parameterDefs;
             }
 
@@ -554,7 +554,7 @@ public class JobRunnerTest {
     }
 
     private Job<String> createComplexJob() {
-        final List<JobParameterDef> parameterDefs = new ArrayList<>();
+        final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
 
         final JobParameterDefAbstract<String> version = new JobParameterDefAbstract<String>(
                 "version",
@@ -632,7 +632,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public List<JobParameterDef> getParameterDefs() {
+            public List<JobParameterDef<?>> getParameterDefs() {
                 return parameterDefs;
             }
 

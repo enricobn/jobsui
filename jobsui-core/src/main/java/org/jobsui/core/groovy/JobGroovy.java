@@ -18,7 +18,7 @@ import java.util.Map;
 public class JobGroovy<T> extends JobAbstract<T> {
     private final String key;
     private final String name;
-    private final List<JobParameterDef> parameterDefs;
+    private final List<JobParameterDef<?>> parameterDefs;
     private final Script run;
     private final Script validate;
     private final File projectFolder;
@@ -44,7 +44,7 @@ public class JobGroovy<T> extends JobAbstract<T> {
     }
 
     @Override
-    public List<JobParameterDef> getParameterDefs() {
+    public List<JobParameterDef<?>> getParameterDefs() {
         return parameterDefs;
     }
 

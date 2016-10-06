@@ -10,7 +10,7 @@ public interface Job<T> {
 
     String getName();
 
-    List<JobParameterDef> getParameterDefs();
+    List<JobParameterDef<?>> getParameterDefs();
 
     JobFuture<T> run(Map<String,Object> values);
 
