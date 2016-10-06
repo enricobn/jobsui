@@ -3,6 +3,7 @@ package org.jobsui.core.groovy;
 import org.jobsui.core.Job;
 import org.jobsui.core.JobFuture;
 import org.jobsui.core.JobParameterDefAbstract;
+import org.jobsui.core.Project;
 import org.jobsui.core.ui.*;
 
 import java.util.Collections;
@@ -12,14 +13,16 @@ import java.util.Map;
 /**
  * Created by enrico on 5/4/16.
  */
-public class JobCallDefGroovy<T> extends JobParameterDefAbstract<T> {
-    private final Job job;
+public class JobCallDefGroovy<T> extends JobParameterDefAbstract<T> implements JobParameterDefGroovy<T> {
+    private final String projectRef;
+    private final String jobRef;
     private final Map<String, String> mapArguments;
+    private Job job = null;
 
-    public JobCallDefGroovy(String key, String name,
-                            Job job, Map<String, String> mapArguments) {
+    public JobCallDefGroovy(String key, String name, String projectRef, String jobRef, Map<String, String> mapArguments) {
         super(key, name, null, false, false);
-        this.job = job;
+        this.projectRef = projectRef;
+        this.jobRef = jobRef;
         this.mapArguments = mapArguments;
     }
 
@@ -63,5 +66,25 @@ public class JobCallDefGroovy<T> extends JobParameterDefAbstract<T> {
 
     public Map<String, String> getMapArguments() {
         return mapArguments;
+    }
+
+    @Override
+    public void setProject(ProjectGroovy project) {
+        Project projectToCall;
+        if ("this".equals(projectRef)) {
+            projectToCall = project;
+        } else {
+            projectToCall = project.getProjectXML().getImports().get(projectRef);
+        }
+        if (projectToCall == null) {
+            throw new IllegalStateException("Cannot find project \"" + projectRef + "\" for Call \"" + getName() + "\".");
+        }
+
+        Job<Object> jobToCall = projectToCall.getJob(jobRef);
+        if (jobToCall == null) {
+            throw new IllegalStateException("Cannot find job \"" + jobRef + "\" in project \"" + projectRef +
+                    "\" for Call \"" + getName() + "\".");
+        }
+        job = jobToCall;
     }
 }

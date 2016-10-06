@@ -7,6 +7,7 @@ import org.jobsui.core.JobFuture;
 import org.jobsui.core.JobParameterDef;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -17,16 +18,21 @@ import java.util.Map;
 public class JobGroovy<T> extends JobAbstract<T> {
     private final String key;
     private final String name;
-    private final List<JobParameterDef<?>> parameterDefs;
+    private final List<JobParameterDef> parameterDefs;
     private final Script run;
     private final Script validate;
     private final File projectFolder;
 
-    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDef<?>> parameterDefs,
+    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDefGroovy> parameterDefs,
                      String runScript, String validateScript, File projectFolder) {
         this.key = key;
         this.name = name;
-        this.parameterDefs = parameterDefs;
+        this.parameterDefs = new ArrayList<>();
+        // TODO can I remove this loop?
+        for (JobParameterDefGroovy parameterDef : parameterDefs) {
+            this.parameterDefs.add(parameterDef);
+        }
+
         this.projectFolder = projectFolder;
         this.run = shell.parse(runScript);
         this.validate = validateScript == null ? null : shell.parse(validateScript);
@@ -38,7 +44,7 @@ public class JobGroovy<T> extends JobAbstract<T> {
     }
 
     @Override
-    public List<JobParameterDef<?>> getParameterDefs() {
+    public List<JobParameterDef> getParameterDefs() {
         return parameterDefs;
     }
 

@@ -4,7 +4,7 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
 import org.jobsui.core.Job;
-import org.jobsui.core.JobParameterDefAbstract;
+import org.jobsui.core.JobParameterDef;
 import org.jobsui.core.Project;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -57,21 +57,21 @@ public class JobParser {
             cl = new GroovyClassLoader();
         }
 
-        File project = new File(folder, "project.xml");
+        File projectFile = new File(folder, "project.xml");
 
         ProjectXML projectXML = null;
 
-        if (project.exists()) {
-            try (FileInputStream is = new FileInputStream(project)) {
+        if (projectFile.exists()) {
+            try (FileInputStream is = new FileInputStream(projectFile)) {
                 final StreamSource source = new StreamSource(is);
                 try {
                     projectValidator.validate(source);
                 } catch (Exception e) {
-                    throw new Exception("Cannot parse file " + project, e);
+                    throw new Exception("Cannot parse file " + projectFile, e);
                 }
             }
 
-            try (FileInputStream is = new FileInputStream(project)) {
+            try (FileInputStream is = new FileInputStream(projectFile)) {
                 projectXML = parseProject(folder, is);
                 for (String library : projectXML.getLibraries()) {
                     String[] split = library.split(":");
@@ -93,7 +93,7 @@ public class JobParser {
 
         GroovyShell shell = new GroovyShell(cl);
 
-        final Map<String,Job<?>> jobs = new HashMap<>();
+        final Map<String,JobGroovy<?>> jobs = new HashMap<>();
 
         for (File file : files) {
             if (file.getName().endsWith(".job")) {
@@ -119,17 +119,16 @@ public class JobParser {
             }
         }
 
-        return new Project() {
-            @Override
-            public <T> Job<T> getJob(String key) {
-                return (Job<T>) jobs.get(key);
-            }
+        ProjectGroovy project = new ProjectGroovy(projectXML, jobs);
 
-            @Override
-            public Set<String> getKeys() {
-                return jobs.keySet();
+        for (JobGroovy<?> job : jobs.values()) {
+            for (JobParameterDef jobParameterDef : job.getParameterDefs()) {
+                // TODO can I remove cast?
+                ((JobParameterDefGroovy)jobParameterDef).setProject(project);
             }
-        };
+        }
+
+        return new ProjectGroovy(projectXML, jobs);
     }
 
     private ProjectXML parseProject(File projectFolder, InputStream is) throws Exception {
@@ -161,32 +160,6 @@ public class JobParser {
         return projectXML;
     }
 
-    private class ProjectXML {
-        private final File projectFolder;
-        private final List<String> libraries = new ArrayList<>();
-        private final Map<String, Project> imports = new HashMap<>();
-
-        private ProjectXML(File projectFolder) {
-            this.projectFolder = projectFolder;
-        }
-
-        public void addLibrary(String library) {
-            libraries.add(library);
-        }
-        public void addImport(String name, String uri) throws Exception {
-            Project project = loadProject(new File(projectFolder, uri));
-            imports.put(name, project);
-        }
-
-        public List<String> getLibraries() {
-            return libraries;
-        }
-
-        public Map<String, Project> getImports() {
-            return imports;
-        }
-    }
-
     private <T> JobGroovy<T> parse(GroovyShell shell, InputStream is, File projectFolder, ProjectXML projectXML) throws Exception {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setValidating(false);
@@ -200,7 +173,7 @@ public class JobParser {
 
         String name = getMandatoryAttribute(doc.getDocumentElement(), "name");
         String key = getMandatoryAttribute(doc.getDocumentElement(), "key");
-        Map<String,JobParameterDefAbstract<?>> parameterDefs = new LinkedHashMap<>();
+        Map<String, JobParameterDefGroovy<?>> parameterDefs = new LinkedHashMap<>();
 
         String runScript = getElementContent(doc.getDocumentElement(), "Run", true);
 
@@ -220,8 +193,7 @@ public class JobParser {
             projectFolder);
     }
 
-    private NodeList parseExpressions(GroovyShell shell, File projectFolder, Document doc, Map<String,
-            JobParameterDefAbstract<?>> parameterDefs)
+    private NodeList parseExpressions(GroovyShell shell, File projectFolder, Document doc, Map<String, JobParameterDefGroovy<?>> parameterDefs)
     throws JobsUIParseException {
         NodeList expressionsList = doc.getElementsByTagName("Expression");
         for (int i = 0; i < expressionsList.getLength(); i++) {
@@ -234,7 +206,7 @@ public class JobParser {
 
             String evaluateScript = getElementContent(element, "Evaluate", false);
 
-            JobParameterDefAbstract<?> parameterDef = new JobExpressionDefGroovy<>(projectFolder, shell, parameterKey,
+            JobParameterDefGroovy<?> parameterDef = new JobExpressionDefGroovy<>(projectFolder, shell, parameterKey,
                     parameterName,
                     evaluateScript);
             parameterDefs.put(parameterDef.getKey(), parameterDef);
@@ -242,7 +214,7 @@ public class JobParser {
         return expressionsList;
     }
 
-    private List<JobCallDefGroovy<?>> parseCalls(Document doc, Map<String, JobParameterDefAbstract<?>> parameterDefs,
+    private List<JobCallDefGroovy<?>> parseCalls(Document doc, Map<String, JobParameterDefGroovy<?>> parameterDefs,
                                                  ProjectXML projectXML)
     throws JobsUIParseException {
         List<JobCallDefGroovy<?>> calls = new ArrayList<>();
@@ -270,34 +242,24 @@ public class JobParser {
                 mapArguments.put(in, out);
             }
 
-            Project projectToCall = projectXML.getImports().get(project);
-            if (projectToCall == null) {
-                throw new JobsUIParseException("Cannot find project \"" + project + "\" for Call \"" + name + "\".");
-            }
-
-            Job<Object> jobToCall = projectToCall.getJob(job);
-            if (jobToCall == null) {
-                throw new JobsUIParseException("Cannot find job \"" + job + "\" in project \"" + project + "\" for Call \"" + name + "\".");
-            }
-
-            JobCallDefGroovy<?> call = new JobCallDefGroovy<>(key, name, jobToCall, mapArguments);
+            JobCallDefGroovy<?> call = new JobCallDefGroovy<>(key, name, project, job, mapArguments);
             parameterDefs.put(key, call);
             calls.add(call);
         }
         return calls;
     }
 
-    private void addDependenciesForCalls(Map<String, JobParameterDefAbstract<?>> parameterDefs,
+    private void addDependenciesForCalls(Map<String, JobParameterDefGroovy<?>> parameterDefs,
                                          List<JobCallDefGroovy<?>> callDefs)
     throws JobsUIParseException {
         for (JobCallDefGroovy<?> callDef : callDefs) {
             String parameterKey = callDef.getKey();
 
-            JobParameterDefAbstract parameterDef = parameterDefs.get(parameterKey);
+            JobParameterDefGroovy<?> parameterDef = parameterDefs.get(parameterKey);
 
             for (Map.Entry<String, String> entry : callDef.getMapArguments().entrySet()) {
                 final String depKey = entry.getKey();
-                final JobParameterDefAbstract<?> jobParameterDefDep = parameterDefs.get(depKey);
+                final JobParameterDefGroovy<?> jobParameterDefDep = parameterDefs.get(depKey);
                 if (jobParameterDefDep == null) {
                     throw new IllegalStateException("Cannot find dependency with key \"" + depKey + "\" for " +
                             "parameter with key \"" + parameterKey + "\".");
@@ -308,7 +270,7 @@ public class JobParser {
     }
 
     private NodeList parseParameters(GroovyShell shell, File projectFolder, Document doc,
-                                     Map<String, JobParameterDefAbstract<?>> parameterDefs)
+                                     Map<String, JobParameterDefGroovy<?>> parameterDefs)
     throws JobsUIParseException {
         NodeList parametersList = doc.getElementsByTagName("Parameter");
 
@@ -333,26 +295,26 @@ public class JobParser {
             boolean visible = visibleString == null || visibleString.isEmpty() || Boolean.parseBoolean(visibleString);
             boolean optional = optionalString != null && !optionalString.isEmpty() && Boolean.parseBoolean(optionalString);
 
-            JobParameterDefAbstract<?> parameterDef = new JobParameterDefGroovy<>(projectFolder, shell, parameterKey, parameterName,
+            JobParameterDefGroovy<?> parameterDef = new JobParameterDefGroovySimple<>(projectFolder, shell, parameterKey, parameterName,
                     createComponentScript, onDependenciesChangeScript, parameterValidateScript, optional, visible);
             parameterDefs.put(parameterDef.getKey(), parameterDef);
         }
         return parametersList;
     }
 
-    private void addDependencies(Map<String, JobParameterDefAbstract<?>> parameterDefs,
+    private void addDependencies(Map<String, JobParameterDefGroovy<?>> parameterDefs,
                                  NodeList parametersList) throws JobsUIParseException {
         for (int i = 0; i < parametersList.getLength(); i++) {
             Element element = (Element) parametersList.item(i);
             String parameterKey = getMandatoryAttribute(element, "key");
 
-            JobParameterDefAbstract parameterDef = parameterDefs.get(parameterKey);
+            JobParameterDefGroovy<?> parameterDef = parameterDefs.get(parameterKey);
 
             final NodeList dependenciesList = element.getElementsByTagName("Dependency");
             for (int iDep = 0; iDep < dependenciesList.getLength(); iDep++) {
                 final Element dependency = (Element) dependenciesList.item(iDep);
                 final String depKey = getMandatoryAttribute(dependency, "key");
-                final JobParameterDefAbstract<?> jobParameterDefDep = parameterDefs.get(depKey);
+                final JobParameterDefGroovy<?> jobParameterDefDep = parameterDefs.get(depKey);
                 if (jobParameterDefDep == null) {
                     throw new IllegalStateException("Cannot find dependency with key \"" + depKey + "\" for " +
                             "parameter with key \"" + parameterKey + "\".");

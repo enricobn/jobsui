@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Created by enrico on 5/4/16.
  */
-public class JobExpressionDefGroovy<T> extends JobParameterDefAbstract<T> {
+public class JobExpressionDefGroovy<T> extends JobParameterDefAbstract<T> implements JobParameterDefGroovy<T> {
     private static final String IMPORTS =
             "import org.jobsui.core.*;\n" +
             "import org.jobsui.core.ui.*;\n";
@@ -66,4 +66,8 @@ public class JobExpressionDefGroovy<T> extends JobParameterDefAbstract<T> {
 
     }
 
+    @Override
+    public void setProject(ProjectGroovy projectGroovy) {
+
+    }
 }

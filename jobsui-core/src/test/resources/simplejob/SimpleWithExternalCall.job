@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Job key="simpleWithExt" name="Simple with ext">
+<Job key="simpleWithExternalCall" name="Simple with ext">
 
     <Parameter key="name" name="Name">
 
