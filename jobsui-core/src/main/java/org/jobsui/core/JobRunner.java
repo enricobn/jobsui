@@ -13,8 +13,8 @@ import java.util.*;
  */
 public class JobRunner {
 
-    public <T> JobFuture<T> run(final UI ui, final Job<T> job) throws UnsupportedComponentException {
-        final UIWindow window = ui.createWindow(job.getName());
+    public <T> JobFuture<T> run(final UI<?> ui, final Job<T> job) throws UnsupportedComponentException {
+        final UIWindow<?> window = ui.createWindow(job.getName());
 
         final Map<JobParameterDef, UIWidget> widgets = createWidgets(ui, job, window);
 
@@ -33,7 +33,8 @@ public class JobRunner {
         return null;
     }
 
-    private <T> Map<JobParameterDef, UIWidget> createWidgets(final UI ui, Job<T> job, UIWindow window) throws UnsupportedComponentException {
+    private <T> Map<JobParameterDef, UIWidget> createWidgets(final UI<?> ui, Job<T> job, UIWindow<?> window)
+    throws UnsupportedComponentException {
         final Map<JobParameterDef, UIWidget> widgetsMap = new LinkedHashMap<>();
 
         for (final JobParameterDef jobParameterDef : job.getParameterDefs()) {
@@ -74,7 +75,8 @@ public class JobRunner {
         }
     }
 
-    private <T> Map<String, Object> observeValues(final UI ui, final Job<T> job, final UIWindow window, final Map<JobParameterDef, UIWidget> widgetsMap) {
+    private <T> Map<String, Object> observeValues(final UI<?> ui, final Job<T> job, final UIWindow<?> window,
+                                                  final Map<JobParameterDef, UIWidget> widgetsMap) {
         final Map<String,Object> parameters = new HashMap<>();
 
         List<Observable<?>> observables = new ArrayList<>();
@@ -92,7 +94,7 @@ public class JobRunner {
 
                 for (final Map.Entry<JobParameterDef, UIWidget> entry : widgetsMap.entrySet()) {
                     final Object value = args[i++];
-                    final JobParameterDef<Object> parameterDef = (JobParameterDef<Object>) entry.getKey();
+                    final JobParameterDef parameterDef = entry.getKey();
                     final List<String> validate = parameterDef.validate(value);
 
                     setValidationMessage(validate, parameterDef, entry.getValue(), ui);
@@ -150,23 +152,29 @@ public class JobRunner {
         return Observable.combineLatest(observables, new FuncN<Map<String,Object>>() {
             @Override
             public Map<String,Object> call(Object... args) {
-                Map<String,Object> result = new HashMap<>();
+                Map<String, Object> result = new HashMap<>();
 
                 int i = 0;
                 for (JobParameterDef dependency : dependencies) {
                     final Object arg = args[i++];
-                    final List validate = dependency.validate(arg);
-                    if (!validate.isEmpty()) {
-                        break;
-                    }
-                    result.put(dependency.getKey(), arg);
+                    if (addValidatedValue(result, dependency, arg)) break;
                 }
                 return result;
+            }
+
+            private <T> boolean addValidatedValue(Map<String, Object> result, JobParameterDef<T> dependency, T arg) {
+                final List<String> validate = dependency.validate(arg);
+                if (!validate.isEmpty()) {
+                    return true;
+                }
+                result.put(dependency.getKey(), arg);
+                return false;
             }
         });
     }
 
-    private List<Observable<?>> getDependenciesObservables(Map<JobParameterDef, UIWidget> widgetsMap, List<JobParameterDef> dependencies) {
+    private List<Observable<?>> getDependenciesObservables(Map<JobParameterDef, UIWidget> widgetsMap,
+                                                           List<JobParameterDef> dependencies) {
         List<Observable<?>> observables = new ArrayList<>();
         for (JobParameterDef dependency : dependencies) {
             final UIWidget widget = widgetsMap.get(dependency);
@@ -179,8 +187,8 @@ public class JobRunner {
         return observables;
     }
 
-    private void setValidationMessage(List<String> validate, JobParameterDef jobParameterDef,
-                                      UIWidget widget, UI ui) {
+    private <T> void setValidationMessage(List<String> validate, JobParameterDef<T> jobParameterDef,
+                                      UIWidget<T, ?> widget, UI<?> ui) {
         if (!jobParameterDef.isVisible()) {
             if (!validate.isEmpty()) {
                 ui.showMessage(jobParameterDef.getName() + ": " + JobsUIUtils.getMessagesAsString(validate));
