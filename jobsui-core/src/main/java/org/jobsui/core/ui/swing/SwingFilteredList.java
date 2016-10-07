@@ -123,7 +123,7 @@ public class SwingFilteredList<T> {
                         if (search.getText().isEmpty()) {
                             list.setListData((T[]) items.toArray());
                         } else {
-                            List<T> found = new ArrayList<T>();
+                            List<T> found = new ArrayList<>();
                             for (T item : items) {
                                 if (item != null && item.toString().toLowerCase().contains(search.getText().toLowerCase())) {
                                     found.add(item);

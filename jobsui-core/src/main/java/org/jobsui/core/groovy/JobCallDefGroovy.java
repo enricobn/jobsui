@@ -27,8 +27,8 @@ public class JobCallDefGroovy<T> extends JobParameterDefAbstract<T> implements J
     }
 
     @Override
-    public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-        final UIChoice component = (UIChoice) ui.create(UIChoice.class);
+    public <C> UIComponent<T, C> createComponent(UI<C> ui) throws UnsupportedComponentException {
+        final UIChoice<T, C> component = ui.create(UIChoice.class);
         if (getDependencies().isEmpty()) {
             evaluate(component, Collections.<String, Object>emptyMap());
         }

@@ -141,16 +141,10 @@ class JobRunner {
                 int i = 0;
 
                 for (final ParameterAndWidget<?, C> entry : widgetsMap.getWidgets()) {
-                    final Object value = args[i++];
-                    final JobParameterDef parameterDef = entry.getJobParameterDef();
-                    final List<String> validate = parameterDef.validate(value);
+                    @SuppressWarnings("unchecked")
+                    ParameterAndWidget<Object, C> entry1 = (ParameterAndWidget<Object, C>) entry;
 
-                    setValidationMessage(validate, parameterDef, entry.getWidget(), ui);
-
-                    if (!validate.isEmpty()) {
-                        break;
-                    }
-                    parameters.put(parameterDef.getKey(), value);
+                    if (addParameter(entry1, args[i++])) break;
                 }
 
                 if (parameters.size() != args.length) {
@@ -162,6 +156,19 @@ class JobRunner {
                     window.showValidationMessage(JobsUIUtils.getMessagesAsString(validate));
                 }
                 return validate.isEmpty();
+            }
+
+            private boolean addParameter(ParameterAndWidget<Object, C> entry, Object value) {
+                final JobParameterDef<Object> parameterDef = entry.getJobParameterDef();
+                final List<String> validate = parameterDef.validate(value);
+
+                setValidationMessage(validate, parameterDef, entry.getWidget(), ui);
+
+                if (!validate.isEmpty()) {
+                    return true;
+                }
+                parameters.put(parameterDef.getKey(), value);
+                return false;
             }
         });
 
