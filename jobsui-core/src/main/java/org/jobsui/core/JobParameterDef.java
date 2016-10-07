@@ -21,7 +21,7 @@ public interface JobParameterDef<T> {
 
     T getDefaultValue();
 
-    UIComponent createComponent(UI ui) throws UnsupportedComponentException;
+    <C> UIComponent<T, C> createComponent(UI<C> ui) throws UnsupportedComponentException;
 
     List<JobParameterDef<?>> getDependencies();
 
