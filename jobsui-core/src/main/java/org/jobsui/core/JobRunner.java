@@ -175,8 +175,8 @@ class JobRunner {
     }
 
     private <T, C> void observeDependencies(Job<T> job, final WidgetsMap<C> widgets) {
-        for (final JobParameterDef jobParameterDef : job.getParameterDefs()) {
-            final List<JobParameterDef> dependencies = jobParameterDef.getDependencies();
+        for (final JobParameterDef<?> jobParameterDef : job.getParameterDefs()) {
+            final List<JobParameterDef<?>> dependencies = jobParameterDef.getDependencies();
             if (!dependencies.isEmpty()) {
                 List<Observable<?>> observables = getDependenciesObservables(widgets, dependencies);
 
@@ -196,7 +196,8 @@ class JobRunner {
         }
     }
 
-    private Observable<Map<String, Object>> combineDependeciesObservables(final List<JobParameterDef> dependencies, List<Observable<?>> observables) {
+    private Observable<Map<String, Object>> combineDependeciesObservables(final List<JobParameterDef<?>> dependencies,
+                                                                          List<Observable<?>> observables) {
         return Observable.combineLatest(observables, new FuncN<Map<String,Object>>() {
             @Override
             public Map<String,Object> call(Object... args) {
@@ -222,7 +223,7 @@ class JobRunner {
     }
 
     private <C> List<Observable<?>> getDependenciesObservables(WidgetsMap<C> widgetsMap,
-                                                           List<JobParameterDef> dependencies) {
+                                                           List<JobParameterDef<?>> dependencies) {
         List<Observable<?>> observables = new ArrayList<>();
         for (JobParameterDef dependency : dependencies) {
             final UIWidget widget = widgetsMap.get(dependency);
