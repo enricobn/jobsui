@@ -1,6 +1,8 @@
 package org.jobsui.core;
 
 import org.jobsui.core.groovy.JobParser;
+import org.jobsui.core.ui.UI;
+import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.ui.swing.SwingUI;
 
 import java.io.File;
@@ -37,7 +39,9 @@ public class Main {
 
         JobRunner runner = new JobRunner();
 
-        final JobFuture<?> future = runner.run(new SwingUI(), job);
+//        UI ui = new SwingUI();
+        UI ui = new JavaFXUI();
+        final JobFuture<?> future = runner.run(ui, job);
         if (future != null) {
             future.get();
         }
