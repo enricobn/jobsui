@@ -30,7 +30,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
     @Override
     public boolean show(Runnable callback) {
-        this.callback = callback;
+        JavaFXUIWindow.callback = callback;
 
         Application.launch(JavaFXApplication.class);
 
@@ -61,7 +61,8 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
     @Override
     public void add(UIContainer<Node> container) {
-        System.out.println("add container");
+        // TODO
+        throw new UnsupportedOperationException();
     }
 
     @Override

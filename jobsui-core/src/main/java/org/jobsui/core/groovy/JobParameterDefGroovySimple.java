@@ -49,7 +49,7 @@ public class JobParameterDefGroovySimple<T> extends JobParameterDefAbstract<T> i
     }
 
     @Override
-    public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
+    public <C> UIComponent<T, C> createComponent(UI<C> ui) throws UnsupportedComponentException {
         createComponent.setProperty("ui", ui);
         createComponent.setProperty("projectFolder", projectFolder);
         try {
