@@ -2,7 +2,6 @@ package org.jobsui.core.ui.javafx;
 
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -15,30 +14,29 @@ import rx.Subscriber;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by enrico on 10/7/16.
  */
-public class JavaFXUIChoice<T> implements UIChoice<T, Node> {
-    private FlowPane component = null;
-    private ComboBox<T> combo = null;
-    private Button button = null;
+class JavaFXUIChoice<T> implements UIChoice<T, Node> {
+    private final FlowPane component = new FlowPane();
+    private final ComboBox<T> combo = new ComboBox<>();
+    private final Button button = new Button("...");
     private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
     private Observable<T> observable;
     private List<T> items = new ArrayList<>();
     private String title;
     private boolean disableListener = false;
-    private AtomicBoolean initialized = new AtomicBoolean(false);
-    private boolean visible = true;
 
-    public JavaFXUIChoice() {
+    JavaFXUIChoice() {
         observable = Observable.create(new Observable.OnSubscribe<T>() {
             @Override
             public void call(final Subscriber<? super T> subscriber) {
+                subscriber.onStart();
                 subscribers.add(subscriber);
             }
         });
+        initialize();
     }
 
     @Override
@@ -53,30 +51,11 @@ public class JavaFXUIChoice<T> implements UIChoice<T, Node> {
 
     @Override
     public T getValue() {
-        if (!initialized.get()) {
-            if (items.size() == 1) {
-                return items.get(0);
-            }
-            return null;
-        }
         return combo.getSelectionModel().getSelectedItem();
     }
 
     @Override
     public void setItems(final List<T> items) {
-//        System.out.println("SwingUIChoice.setItems " + items);
-//        if (items.equals(this.items)) {
-//            return;
-//        }
-
-        this.items = items;
-
-        if (initialized.get()) {
-            updateItems();
-        }
-    }
-
-    private void updateItems() {
         final T selectedItem = combo.getSelectionModel().getSelectedItem();
 
         disableListener = true;
@@ -115,49 +94,36 @@ public class JavaFXUIChoice<T> implements UIChoice<T, Node> {
 
     @Override
     public Node getComponent() {
-        initialize();
         return component;
     }
 
     private void initialize() {
-        if (initialized.compareAndSet(false, true)) {
-            component = new FlowPane();
-            component.setHgap(5);
-            component.setVisible(visible);
+        component.setHgap(5);
 
-            combo = new ComboBox<>();
+        combo.setOnAction(new EventHandler<ActionEvent>() {
+            private T selectedItem = null;
 
-            combo.setOnAction(new EventHandler<ActionEvent>() {
-                private T selectedItem = null;
-
-                @Override
-                public void handle(ActionEvent event) {
-                    if (!disableListener && !Objects.equals(selectedItem, getValue())) {
-                        selectedItem = getValue();
-                        notifySubscribers();
-                    }
+            @Override
+            public void handle(ActionEvent event) {
+                if (!disableListener && !Objects.equals(selectedItem, getValue())) {
+                    selectedItem = getValue();
+                    notifySubscribers();
                 }
-            });
+            }
+        });
 
-            component.getChildren().add(combo);
+        component.getChildren().add(combo);
 
-            button = new Button("...");
-//            button.setPadding(new Insets(2, 2, 2, 2));
-            button.setOnAction(event -> {
-                final SwingFilteredList<T> filteredList = new SwingFilteredList<>(title, items,
-                        combo.getSelectionModel().getSelectedItem());
-                filteredList.show();
-                if (filteredList.isOk()) {
-                    setValue(filteredList.getSelectedItem());
-                }
-            });
+        button.setOnAction(event -> {
+            final SwingFilteredList<T> filteredList = new SwingFilteredList<>(title, items,
+                    combo.getSelectionModel().getSelectedItem());
+            filteredList.show();
+            if (filteredList.isOk()) {
+                setValue(filteredList.getSelectedItem());
+            }
+        });
 
-            component.getChildren().add(button);
-
-            subscribers.stream().forEach(Subscriber::onStart);
-
-            updateItems();
-        }
+        component.getChildren().add(button);
     }
 
     @Override
@@ -169,11 +135,7 @@ public class JavaFXUIChoice<T> implements UIChoice<T, Node> {
 
     @Override
     public void setVisible(boolean visible) {
-        if (initialized.get()) {
-            component.setVisible(visible);
-        } else {
-            this.visible = visible;
-        }
+        component.setVisible(visible);
     }
 
     @Override

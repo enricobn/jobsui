@@ -13,7 +13,7 @@ import java.io.File;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        if (args.length != 2) {
+        if (args.length < 2) {
             System.out.println("Usage: jobsui projectfolder jobkey");
             return;
         }
@@ -39,9 +39,17 @@ public class Main {
 
         JobRunner runner = new JobRunner();
 
-//        UI ui = new SwingUI();
-        UI ui = new JavaFXUI();
+        UI ui;
+        if (args.length < 3) {
+            ui = new JavaFXUI();
+        } else if ("swing".equals(args[2].toLowerCase())) {
+            ui = new SwingUI();
+        } else {
+            ui = new JavaFXUI();
+        }
+
         final JobFuture<?> future = runner.run(ui, job);
+
         if (future != null) {
             future.get();
         }
