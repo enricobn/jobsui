@@ -103,7 +103,7 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         UI<?> ui = new SwingUI();
         UIWindow window = createWindow(ui);
 
-        System.out.println("OK = " + window.show());
+        System.out.println("OK = " + window.show(() -> {}));
 //        System.exit(0);
     }
 
@@ -125,8 +125,10 @@ public class SwingUIWindow implements UIWindow<JComponent> {
 
 
     @Override
-    public boolean show() {
+    public boolean show(Runnable callback) {
         container.addFiller();
+
+        callback.run();
 
         frame.setVisible(true);
         while (frame.isVisible()) {

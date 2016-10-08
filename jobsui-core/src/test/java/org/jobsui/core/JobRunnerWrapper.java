@@ -3,7 +3,6 @@ package org.jobsui.core;
 import org.jobsui.core.ui.FakeUIWindow;
 import org.jobsui.core.ui.UI;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -11,19 +10,19 @@ import java.util.concurrent.Future;
 /**
  * Created by enrico on 5/10/16.
  */
-public abstract class JobRunnerWrapper<T> {
+abstract class JobRunnerWrapper<T> {
     private final ExecutorService pool = Executors.newFixedThreadPool(1);
     private final FakeUIWindow window;
     private final JobRunner runner;
-    private final UI ui;
+    private final UI<T> ui;
 
-    protected JobRunnerWrapper(JobRunner runner, UI ui, FakeUIWindow window) {
+    JobRunnerWrapper(JobRunner runner, UI<T> ui, FakeUIWindow window) {
         this.runner = runner;
         this.ui = ui;
         this.window = window;
     }
 
-    public JobFuture<T> start(Job<T> job) throws Exception {
+    JobFuture<T> start(Job<T> job) throws Exception {
 
         final Future<JobFuture<T>> future = runJob(job);
 
@@ -37,15 +36,12 @@ public abstract class JobRunnerWrapper<T> {
     }
 
     private <T1> Future<JobFuture<T1>> runJob(final Job<T1> job) {
-        return pool.submit(new Callable<JobFuture<T1>>() {
-            @Override
-            public JobFuture<T1> call() throws Exception {
-                try {
-                    return runner.run(ui, job);
-                } catch (Throwable th) {
-                    th.printStackTrace();
-                    return null;
-                }
+        return pool.submit(() -> {
+            try {
+                return runner.run(ui, job);
+            } catch (Throwable th) {
+                th.printStackTrace();
+                return null;
             }
         });
     }

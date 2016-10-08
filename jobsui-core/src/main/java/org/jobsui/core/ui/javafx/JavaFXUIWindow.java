@@ -22,13 +22,14 @@ import java.util.stream.Collectors;
  * Created by enrico on 10/7/16.
  */
 class JavaFXUIWindow implements UIWindow<Node> {
-    private final List<NodeUIWidget> components = new ArrayList<>();
+    private static final List<NodeUIWidget> components = new ArrayList<>();
 
     private static boolean ok = false;
+    private static Runnable callback;
 
     @Override
-    public boolean show() {
-        JavaFXApplication.components.addAll(components);
+    public boolean show(Runnable callback) {
+        this.callback = callback;
 
         Application.launch(JavaFXApplication.class);
 
@@ -70,7 +71,6 @@ class JavaFXUIWindow implements UIWindow<Node> {
     public static class JavaFXApplication extends Application {
         private Scene scene;
         private static VBox root;
-        private static List<NodeUIWidget> components = new ArrayList<>();
         private static Button okButton;
         private static boolean valid = false;
 
@@ -79,6 +79,8 @@ class JavaFXUIWindow implements UIWindow<Node> {
             root = new VBox();
             root.setSpacing(5);
             root.setPadding(new Insets(5, 5, 5, 5));
+
+            callback.run();
 
             for (NodeUIWidget widget : components) {
                 root.getChildren().add(widget.getNodeComponent());
@@ -104,6 +106,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
             stage.setTitle("JobsUI");
             stage.setScene(scene);
             stage.show();
+
         }
 
         static void setValid(boolean valid) {

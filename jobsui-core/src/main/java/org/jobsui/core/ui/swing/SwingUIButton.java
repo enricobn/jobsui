@@ -20,12 +20,7 @@ public class SwingUIButton implements UIButton<JComponent> {
             @Override
             public void call(final Subscriber<? super Void> subscriber) {
                 subscriber.onStart();
-                component.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        subscriber.onNext(null);
-                    }
-                });
+                component.addActionListener(e -> subscriber.onNext(null));
             }
         });
     }

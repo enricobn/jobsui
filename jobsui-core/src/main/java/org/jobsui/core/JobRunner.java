@@ -3,7 +3,7 @@ package org.jobsui.core;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
-import rx.functions.Action1;
+import rx.Subscriber;
 import rx.functions.FuncN;
 
 import java.util.*;
@@ -55,20 +55,36 @@ class JobRunner {
     public <T, C> JobFuture<T> run(final UI<C> ui, final Job<T> job) throws UnsupportedComponentException {
         final UIWindow<C> window = ui.createWindow(job.getName());
 
-        final WidgetsMap<C> widgets = createWidgets(ui, job, window);
+        final Map<String, Object> values = new HashMap<>();
 
-        observeDependencies(job, widgets);
+        List<UnsupportedComponentException> exceptions = new ArrayList<>();
 
-        final Map<String, Object> values = observeValues(ui, job, window, widgets);
+        if (window.show(() -> {
+            final WidgetsMap<C> widgets;
+            try {
+                widgets = createWidgets(ui, job, window);
+            } catch (UnsupportedComponentException e) {
+                exceptions.add(e);
+                return;
+            }
 
-        window.setValid(false);
+            observeDependencies(job, widgets);
 
-        notifyInitialValue(widgets);
+            Observable<Map<String, Object>> mapObservable = observeValues(ui, job, window, widgets);
+            mapObservable.subscribe(map -> {
+                values.clear();
+                values.putAll(map);
+            });
 
-        if (window.show()) {
+            window.setValid(false);
+
+            notifyInitialValue(widgets);
+        })) {
+            if (!exceptions.isEmpty()) {
+                throw exceptions.get(0);
+            }
             return job.run(values);
         }
-
         return null;
     }
 
@@ -102,11 +118,8 @@ class JobRunner {
 
         final Observable<T> observable = widget.getComponent().getObservable();
 
-        observable.subscribe(new Action1<T>() {
-            @Override
-            public void call(T o) {
-                setValidationMessage(jobParameterDef.validate(o), jobParameterDef, widget, ui);
-            }
+        observable.subscribe(o -> {
+            setValidationMessage(jobParameterDef.validate(o), jobParameterDef, widget, ui);
         });
     }
 
@@ -123,8 +136,11 @@ class JobRunner {
         }
     }
 
-    private <T, C> Map<String, Object> observeValues(final UI<?> ui, final Job<T> job, final UIWindow<?> window,
-                                                  final WidgetsMap<C> widgetsMap) {
+    private <T, C> Observable<Map<String, Object>> observeValues(final UI<?> ui, final Job<T> job, final UIWindow<?> window,
+                                                                 final WidgetsMap<C> widgetsMap) {
+        final List<Subscriber<? super Map<String, Object>>> subscribers = new ArrayList<>();
+        Observable<Map<String, Object>> result = Observable.create(subscribers::add);
+
         final Map<String,Object> parameters = new HashMap<>();
 
         List<Observable<?>> observables = new ArrayList<>();
@@ -137,6 +153,7 @@ class JobRunner {
             @Override
             public Boolean call(Object... args) {
                 parameters.clear();
+                subscribers.forEach(subscriber -> subscriber.onNext(parameters));
 
                 int i = 0;
 
@@ -168,17 +185,13 @@ class JobRunner {
                     return true;
                 }
                 parameters.put(parameterDef.getKey(), value);
+                subscribers.forEach(subscriber -> subscriber.onNext(parameters));
                 return false;
             }
         });
 
-        combined.subscribe(new Action1<Boolean>() {
-            @Override
-            public void call(Boolean valid) {
-                window.setValid(valid);
-            }
-        });
-        return parameters;
+        combined.subscribe(window::setValid);
+        return result;
     }
 
     private <T, C> void observeDependencies(Job<T> job, final WidgetsMap<C> widgets) {
@@ -189,14 +202,11 @@ class JobRunner {
 
                 final Observable<Map<String, Object>> observable = combineDependeciesObservables(dependencies, observables);
 
-                observable.subscribe(new Action1<Map<String,Object>>() {
-                    @Override
-                    public void call(Map<String,Object> objects) {
-                        // all dependencies are valid
-                        if (objects.size() == dependencies.size()) {
-                            final UIWidget widget = widgets.get(jobParameterDef);
-                            jobParameterDef.onDependenciesChange(widget, objects);
-                        }
+                observable.subscribe(objects -> {
+                    // all dependencies are valid
+                    if (objects.size() == dependencies.size()) {
+                        final UIWidget widget = widgets.get(jobParameterDef);
+                        jobParameterDef.onDependenciesChange(widget, objects);
                     }
                 });
             }

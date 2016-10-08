@@ -5,7 +5,7 @@ package org.jobsui.core.ui;
  */
 public interface UIWindow<T> extends UIContainer<T> {
 
-    boolean show();
+    boolean show(Runnable callback);
 
     void setValid(boolean valid);
 

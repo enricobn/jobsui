@@ -13,7 +13,7 @@ import static org.mockito.Mockito.when;
  * Created by enrico on 5/8/16.
  */
 public class FakeUIWindow<T> implements UIWindow<T> {
-    private static final int TIMEOUT = 5000;
+    private static final int TIMEOUT = 5_000;
     private static final int SLEEP = 50;
     private volatile boolean exit = false;
     private volatile boolean started = false;
@@ -23,7 +23,9 @@ public class FakeUIWindow<T> implements UIWindow<T> {
     private List<String> validationMessages = new ArrayList<>();
 
     @Override
-    public boolean show() {
+    public boolean show(Runnable callback) {
+        callback.run();
+
         long start = System.currentTimeMillis();
         started = true;
         while (!exit) {
@@ -64,7 +66,7 @@ public class FakeUIWindow<T> implements UIWindow<T> {
 
     @Override
     public void add(UIContainer<T> container) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
