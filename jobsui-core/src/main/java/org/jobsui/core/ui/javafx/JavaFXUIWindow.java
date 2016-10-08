@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.jobsui.core.ui.UIComponent;
@@ -76,8 +77,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
         @Override
         public void start(Stage stage) throws Exception {
-            root = new VBox();
-            root.setSpacing(5);
+            root = new VBox(5);
             root.setPadding(new Insets(5, 5, 5, 5));
 
             callback.run();
@@ -86,20 +86,24 @@ class JavaFXUIWindow implements UIWindow<Node> {
                 root.getChildren().add(widget.getNodeComponent());
             }
 
+            HBox okCancel = new HBox(5);
+
             okButton = new Button("OK");
             okButton.setDisable(!valid);
             okButton.setOnAction(event -> {
                 ok = true;
                 Platform.exit();
             });
-            root.getChildren().add(okButton);
+            okCancel.getChildren().add(okButton);
 
             Button cancelButton = new Button("Cancel");
             cancelButton.setOnAction(event -> {
                 ok = false;
                 Platform.exit();
             });
-            root.getChildren().add(cancelButton);
+            okCancel.getChildren().add(cancelButton);
+
+            root.getChildren().add(okCancel);
 
             scene = new Scene(root, 600, 800);
 
@@ -127,12 +131,10 @@ class JavaFXUIWindow implements UIWindow<Node> {
         NodeUIWidget(String title, UIComponent<T, Node> component) {
             this.title = title;
             this.component = component;
-            nodeComponent = new VBox();
-            VBox labeled = new VBox();
+            nodeComponent = new VBox(2);
             Label label = new Label(title);
-            labeled.getChildren().add(label);
-            labeled.getChildren().add(component.getComponent());
-            nodeComponent.getChildren().add(labeled);
+            nodeComponent.getChildren().add(label);
+            nodeComponent.getChildren().add(component.getComponent());
             messagesLabel = new Label();
             nodeComponent.getChildren().add(messagesLabel);
         }
