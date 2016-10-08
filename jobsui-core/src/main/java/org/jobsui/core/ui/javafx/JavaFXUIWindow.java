@@ -3,14 +3,10 @@ package org.jobsui.core.ui.javafx;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.jobsui.core.ui.UIComponent;
@@ -20,15 +16,15 @@ import org.jobsui.core.ui.UIWindow;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 10/7/16.
  */
-public class JavaFXUIWindow implements UIWindow<Node> {
-    private final List<LabeledComponent> components = new ArrayList<>();
+class JavaFXUIWindow implements UIWindow<Node> {
+    private final List<NodeUIWidget> components = new ArrayList<>();
 
     private static boolean ok = false;
-    private static boolean valid = false;
 
     @Override
     public boolean show() {
@@ -51,29 +47,14 @@ public class JavaFXUIWindow implements UIWindow<Node> {
 
     @Override
     public <T> UIWidget<T, Node> add(String title, final UIComponent<T, Node> component) {
-        components.add(new LabeledComponent(title, component));
-
-        return new UIWidget<T, Node>() {
-            @Override
-            public void setVisible(boolean visible) {
-                component.setVisible(visible);
-            }
-
-            @Override
-            public UIComponent<T, Node> getComponent() {
-                return component;
-            }
-
-            @Override
-            public void setValidationMessages(List<String> messages) {
-                // TODO
-            }
-        };
+        NodeUIWidget<T> widget = new NodeUIWidget<>(title, component);
+        components.add(widget);
+        return widget;
     }
 
     @Override
     public <T> UIWidget<T, Node> add(UIComponent<T, Node> component) {
-        return add("", component);
+        return add(null, component);
     }
 
     @Override
@@ -89,7 +70,7 @@ public class JavaFXUIWindow implements UIWindow<Node> {
     public static class JavaFXApplication extends Application {
         private Scene scene;
         private static VBox root;
-        private static List<LabeledComponent> components = new ArrayList<>();
+        private static List<NodeUIWidget> components = new ArrayList<>();
         private static Button okButton;
         private static boolean valid = false;
 
@@ -99,15 +80,8 @@ public class JavaFXUIWindow implements UIWindow<Node> {
             root.setSpacing(5);
             root.setPadding(new Insets(5, 5, 5, 5));
 
-            for (LabeledComponent component : components) {
-                VBox componentPane = new VBox();
-                VBox labeled = new VBox();
-                Label label = new Label(component.title);
-                labeled.getChildren().add(label);
-                labeled.getChildren().add(component.component.getComponent());
-                componentPane.getChildren().add(labeled);
-
-                root.getChildren().add(componentPane);
+            for (NodeUIWidget widget : components) {
+                root.getChildren().add(widget.getNodeComponent());
             }
 
             okButton = new Button("OK");
@@ -132,7 +106,7 @@ public class JavaFXUIWindow implements UIWindow<Node> {
             stage.show();
         }
 
-        public static void setValid(boolean valid) {
+        static void setValid(boolean valid) {
             if (okButton == null) {
                 JavaFXApplication.valid = valid;
             } else {
@@ -141,15 +115,65 @@ public class JavaFXUIWindow implements UIWindow<Node> {
         }
     }
 
-    private static class LabeledComponent {
-        final String title;
-        final UIComponent<?, Node> component;
+    private static class NodeUIWidget<T> implements UIWidget<T, Node> {
+        private final String title;
+        private final UIComponent<T, Node> component;
+        private VBox nodeComponent;
+        private boolean visible = true;
+        private Label messagesLabel;
+        private String messages;
 
-        private LabeledComponent(String title, UIComponent<?, Node> component) {
+        NodeUIWidget(String title, UIComponent<T, Node> component) {
             this.title = title;
             this.component = component;
         }
-    }
 
+        @Override
+        public void setVisible(boolean visible) {
+            if (nodeComponent == null) {
+                this.visible = visible;
+            } else {
+                nodeComponent.setVisible(visible);
+            }
+        }
+
+        @Override
+        public UIComponent<T, Node> getComponent() {
+            return component;
+        }
+
+        @Override
+        public void setValidationMessages(List<String> messages) {
+            String text = messages.stream().collect(Collectors.joining(","));
+            if (messagesLabel == null) {
+                this.messages = text;
+            } else {
+                messagesLabel.setText(text);
+            }
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        Node getNodeComponent() {
+            if (nodeComponent == null) {
+                nodeComponent = new VBox();
+                VBox labeled = new VBox();
+                Label label = new Label(title);
+                labeled.getChildren().add(label);
+                labeled.getChildren().add(component.getComponent());
+                nodeComponent.getChildren().add(labeled);
+                messagesLabel = new Label();
+//                messagesLabel.setStyle("color:RED");
+                if (messages != null) {
+                    messagesLabel.setText(messages);
+                }
+                nodeComponent.getChildren().add(messagesLabel);
+                nodeComponent.setVisible(visible);
+            }
+            return nodeComponent;
+        }
+    }
 }
 
