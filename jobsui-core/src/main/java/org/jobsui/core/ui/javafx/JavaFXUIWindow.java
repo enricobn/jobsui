@@ -121,23 +121,25 @@ class JavaFXUIWindow implements UIWindow<Node> {
     private static class NodeUIWidget<T> implements UIWidget<T, Node> {
         private final String title;
         private final UIComponent<T, Node> component;
-        private VBox nodeComponent;
-        private boolean visible = true;
-        private Label messagesLabel;
-        private String messages;
+        private final VBox nodeComponent;
+        private final Label messagesLabel;
 
         NodeUIWidget(String title, UIComponent<T, Node> component) {
             this.title = title;
             this.component = component;
+            nodeComponent = new VBox();
+            VBox labeled = new VBox();
+            Label label = new Label(title);
+            labeled.getChildren().add(label);
+            labeled.getChildren().add(component.getComponent());
+            nodeComponent.getChildren().add(labeled);
+            messagesLabel = new Label();
+            nodeComponent.getChildren().add(messagesLabel);
         }
 
         @Override
         public void setVisible(boolean visible) {
-            if (nodeComponent == null) {
-                this.visible = visible;
-            } else {
-                nodeComponent.setVisible(visible);
-            }
+            nodeComponent.setVisible(visible);
         }
 
         @Override
@@ -148,11 +150,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
         @Override
         public void setValidationMessages(List<String> messages) {
             String text = messages.stream().collect(Collectors.joining(","));
-            if (messagesLabel == null) {
-                this.messages = text;
-            } else {
-                messagesLabel.setText(text);
-            }
+            messagesLabel.setText(text);
         }
 
         public String getTitle() {
@@ -160,21 +158,6 @@ class JavaFXUIWindow implements UIWindow<Node> {
         }
 
         Node getNodeComponent() {
-            if (nodeComponent == null) {
-                nodeComponent = new VBox();
-                VBox labeled = new VBox();
-                Label label = new Label(title);
-                labeled.getChildren().add(label);
-                labeled.getChildren().add(component.getComponent());
-                nodeComponent.getChildren().add(labeled);
-                messagesLabel = new Label();
-//                messagesLabel.setStyle("color:RED");
-                if (messages != null) {
-                    messagesLabel.setText(messages);
-                }
-                nodeComponent.getChildren().add(messagesLabel);
-                nodeComponent.setVisible(visible);
-            }
             return nodeComponent;
         }
     }
