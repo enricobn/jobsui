@@ -41,22 +41,42 @@ public class EditProject extends Application {
         load.setOnAction(event -> {
             DirectoryChooser chooser = new DirectoryChooser();
             chooser.setTitle("Load project");
-            File file = chooser.showDialog(stage);
-            if (file != null) {
-//                status.setText("Loading ...");
-                root.setDisable(true);
-                try {
-                    JobParser parser = new JobParser();
-                    Project project = parser.loadProject(file);
-                    loadProject(project);
-                } catch (Exception e) {
-                    Alert alert = new Alert(Alert.AlertType.ERROR, "Error loading project: " + e.getMessage());
-                    alert.showAndWait();
 
-                } finally {
-                    root.setDisable(false);
-//                    status.setText("");
-                }
+            File file = chooser.showDialog(stage);
+
+            if (file != null) {
+                Task runnable = new Task() {
+                    @Override
+                    protected Void call() throws Exception {
+                        Platform.runLater(() -> {
+                            root.setDisable(true);
+                            item.getChildren().clear();
+                            items.setRoot(null);
+                            status.setText("Loading project ...");
+                        });
+                        try {
+                            TreeItem<Item> root = loadProject(file);
+
+                            Platform.runLater(() -> {
+                                items.setRoot(root);
+                                root.setExpanded(true);
+                            });
+                        } catch (Exception e) {
+                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error loading project: " + e.getMessage());
+                            alert.showAndWait();
+                        } finally {
+                            Platform.runLater(() -> {
+                                status.setText("");
+                                root.setDisable(false);
+                            });
+                        }
+                        return null;
+                    }
+                };
+
+                Thread thread = new Thread(runnable);
+                thread.setDaemon(true);
+                thread.start();
             }
         });
         buttons.getChildren().add(load);
@@ -73,26 +93,27 @@ public class EditProject extends Application {
 
         SplitPane splitPane = new SplitPane(items, item);
         root.getChildren().add(splitPane);
+
         status = new Label();
         root.getChildren().add(status);
 
         Scene scene = new Scene(root, 800, 600);
 
-        stage.setTitle("Edit jobsui");
+        stage.setTitle("Edit JobsUI");
         stage.setScene(scene);
         stage.show();
     }
 
-    private void loadProject(Project project) {
-        item.getChildren().clear();
+    private TreeItem<Item> loadProject(File file) throws Exception {
+        JobParser parser = new JobParser();
+        Project project = parser.loadProject(file);
         TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, "Project", project));
         project.getKeys().stream()
                 .map(project::getJob)
                 .sorted(Comparator.comparing(Job::getName))
                 .map(this::createJobTreeItem)
                 .forEach(root.getChildren()::add);
-        items.setRoot(root);
-        root.setExpanded(true);
+        return root;
     }
 
     private TreeItem<Item> createJobTreeItem(Job<?> job) {
