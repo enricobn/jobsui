@@ -82,6 +82,7 @@ public class EditProject extends Application {
         root.getChildren().add(buttons);
 
         items = new TreeView<>();
+        items.setCellFactory(param -> new TextFieldTreeCellImpl());
         items.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 try {
@@ -225,6 +226,42 @@ public class EditProject extends Application {
         @Override
         public String toString() {
             return title;
+        }
+    }
+
+    private final class TextFieldTreeCellImpl extends TreeCell<Item> {
+        private ContextMenu addDependencyMenu = new ContextMenu();
+        private ContextMenu deleteMenu = new ContextMenu();
+
+        TextFieldTreeCellImpl() {
+            MenuItem addDependency = new MenuItem("Add dependency");
+            this.addDependencyMenu.getItems().add(addDependency);
+            addDependency.setOnAction(t -> {
+                // TODO)
+                TreeItem<Item> newEmployee = new TreeItem<>(new Item(ItemType.Dependency, "New dep", null));
+                getTreeItem().getChildren().add(newEmployee);
+            });
+
+            MenuItem delete = new MenuItem("Delete");
+            this.deleteMenu.getItems().add(delete);
+            delete.setOnAction(t -> {
+                // TODO)
+                getTreeItem().getParent().getChildren().remove(getTreeItem());
+            });
+        }
+
+        @Override
+        protected void updateItem(Item item, boolean empty) {
+            super.updateItem(item, empty);
+            if (item != null) {
+                setText(item.title);
+                setGraphic(getTreeItem().getGraphic());
+                if (item.itemType == ItemType.Dependencies) {
+                    setContextMenu(addDependencyMenu);
+                } else if (item.itemType == ItemType.Dependency) {
+                    setContextMenu(deleteMenu);
+                }
+            }
         }
     }
 
