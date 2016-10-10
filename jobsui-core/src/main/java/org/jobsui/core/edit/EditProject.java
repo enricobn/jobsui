@@ -12,15 +12,12 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.jobsui.core.Job;
 import org.jobsui.core.JobParameterDef;
-import org.jobsui.core.Project;
-import org.jobsui.core.groovy.JobParameterDefGroovy;
-import org.jobsui.core.groovy.JobParser;
-import org.jobsui.core.groovy.ProjectGroovy;
+import org.jobsui.core.groovy.*;
 
+import javax.swing.event.TreeModelEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Comparator;
 
 /**
@@ -121,7 +118,7 @@ public class EditProject extends Application {
         ProjectGroovy project = (ProjectGroovy) parser.loadProject(file);
         TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, project.getName(), project));
 
-        TreeItem<Item> groovy = new TreeItem<>(new Item(ItemType.Groovy, "groovy", null));
+        TreeItem<Item> groovy = new TreeItem<>(new Item(ItemType.Container, "groovy", null));
         root.getChildren().add(groovy);
         project.getGroovyFiles().stream()
                 .map(f -> new Item(ItemType.GroovyFile, f.getName(), f))
@@ -138,20 +135,31 @@ public class EditProject extends Application {
 
     private TreeItem<Item> createJobTreeItem(Job<?> job) {
         TreeItem<Item> result = new TreeItem<>(new Item(ItemType.Job, job.getName(), job));
-        TreeItem<Item> parameters = new TreeItem<>(new Item(ItemType.ParametersDef, "parameters", null));
-        parameters.setExpanded(true);
-        result.getChildren().add(parameters);
-        job.getParameterDefs().stream()
-                .sorted(Comparator.comparing(JobParameterDef::getName))
-                .map(parameterDef -> new Item(ItemType.ParameterDef, parameterDef.getName(), parameterDef))
-                .map(TreeItem::new)
-                .forEach(parameters.getChildren()::add);
+
+        addParameters(result, job, "parameters", ItemType.ParameterDef, JobParameterDefGroovySimple.class);
+        addParameters(result, job, "expressions", ItemType.Expression, JobExpressionDefGroovy.class);
+        addParameters(result, job, "calls", ItemType.Call, JobCallDefGroovy.class);
+
         result.setExpanded(true);
         return result;
     }
 
+    private void addParameters(TreeItem<Item> result, Job<?> job, String containerText, ItemType itemType,
+                               Class<? extends JobParameterDef> clazz) {
+        TreeItem<Item> parameters = new TreeItem<>(new Item(ItemType.Container, containerText, null));
+        parameters.setExpanded(true);
+        result.getChildren().add(parameters);
+
+        job.getParameterDefs().stream()
+                .filter(parameter -> clazz.isAssignableFrom(parameter.getClass()))
+                .sorted(Comparator.comparing(JobParameterDef::getName))
+                .map(parameterDef -> new Item(itemType, parameterDef.getName(), parameterDef))
+                .map(TreeItem::new)
+                .forEach(parameters.getChildren()::add);
+    }
+
     private enum ItemType {
-        Project, Groovy, GroovyFile, Job, ParametersDef, ParameterDef
+        Project, GroovyFile, Job, Container, ParameterDef, Expression, Call
     }
 
     private class Item {
@@ -171,8 +179,6 @@ public class EditProject extends Application {
                 case Project:
                     ProjectGroovy project = (ProjectGroovy) payload;
                     break;
-                case Groovy:
-                    break;
                 case GroovyFile:
                     File file = (File) payload;
                     if (file.getName().endsWith(".groovy") ||
@@ -187,6 +193,8 @@ public class EditProject extends Application {
                 case Job:
                     break;
                 case ParameterDef:
+                case Expression:
+                case Call:
                     JobParameterDefGroovy<?> parameterDef = (JobParameterDefGroovy) payload;
                     if (!parameterDef.getDependencies().isEmpty()) {
                         item.getChildren().add(new Label("Dependencies:"));
