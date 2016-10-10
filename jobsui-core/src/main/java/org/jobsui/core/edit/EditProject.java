@@ -201,6 +201,13 @@ public class EditProject extends Application {
                 case Job:
                     break;
                 case Parameter:
+                    JobParameterDefGroovySimple simple = (JobParameterDefGroovySimple) payload;
+                    item.getChildren().add(new Label("Create component:"));
+                    item.getChildren().add(new TextArea(simple.getCreateComponentScript()));
+                    item.getChildren().add(new Label("On dependecies change:"));
+                    item.getChildren().add(new TextArea(simple.getOnDependenciesChangeScript()));
+                    item.getChildren().add(new Label("Validate:"));
+                    item.getChildren().add(new TextArea(simple.getValidateScript()));
                     break;
                 case Expression:
                     break;

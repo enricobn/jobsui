@@ -22,6 +22,9 @@ public class JobParameterDefGroovySimple<T> extends JobParameterDefAbstract<T> i
             "import org.jobsui.core.*;\n" +
             "import org.jobsui.core.ui.*;\n";
     private final File projectFolder;
+    private final String createComponentScript;
+    private final String onDependenciesChangeScript;
+    private final String validateScript;
     private final Script createComponent;
     private final Script onDependenciesChange;
     private final Script validate;
@@ -31,6 +34,9 @@ public class JobParameterDefGroovySimple<T> extends JobParameterDefAbstract<T> i
                                        String validateScript, boolean optional, boolean visible) {
         super(key, name, null, optional, visible);
         this.projectFolder = projectFolder;
+        this.createComponentScript = createComponentScript;
+        this.onDependenciesChangeScript = onDependenciesChangeScript;
+        this.validateScript = validateScript;
         try {
             this.createComponent = shell.parse(IMPORTS + createComponentScript);
         } catch (CompilationFailedException e) {
@@ -100,5 +106,17 @@ public class JobParameterDefGroovySimple<T> extends JobParameterDefAbstract<T> i
     @Override
     public void init(ProjectGroovy projectGroovy) {
 
+    }
+
+    public String getCreateComponentScript() {
+        return createComponentScript;
+    }
+
+    public String getOnDependenciesChangeScript() {
+        return onDependenciesChangeScript;
+    }
+
+    public String getValidateScript() {
+        return validateScript;
     }
 }
