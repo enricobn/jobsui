@@ -40,4 +40,8 @@ public class ProjectGroovy implements Project {
     public ProjectXML getProjectXML() {
         return projectXML;
     }
+
+    public Collection<File> getGroovyFiles() {
+        return groovyFiles;
+    }
 }

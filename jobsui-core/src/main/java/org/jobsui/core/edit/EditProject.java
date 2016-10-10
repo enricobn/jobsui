@@ -15,8 +15,12 @@ import org.jobsui.core.JobParameterDef;
 import org.jobsui.core.Project;
 import org.jobsui.core.groovy.JobParameterDefGroovy;
 import org.jobsui.core.groovy.JobParser;
+import org.jobsui.core.groovy.ProjectGroovy;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Comparator;
 
 /**
@@ -62,8 +66,7 @@ public class EditProject extends Application {
                                 root.setExpanded(true);
                             });
                         } catch (Exception e) {
-                            Alert alert = new Alert(Alert.AlertType.ERROR, "Error loading project: " + e.getMessage());
-                            alert.showAndWait();
+                            showError("Error loading project.", e);
                         } finally {
                             Platform.runLater(() -> {
                                 status.setText("");
@@ -85,7 +88,11 @@ public class EditProject extends Application {
         items = new TreeView<>();
         items.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                newValue.getValue().onSelect();
+                try {
+                    newValue.getValue().onSelect();
+                } catch (Throwable e) {
+                    showError("Error :", e);
+                }
             }
         });
 
@@ -104,10 +111,23 @@ public class EditProject extends Application {
         stage.show();
     }
 
+    private void showError(String message, Throwable e) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, message + " " + e.getMessage());
+        alert.showAndWait();
+    }
+
     private TreeItem<Item> loadProject(File file) throws Exception {
         JobParser parser = new JobParser();
-        Project project = parser.loadProject(file);
+        ProjectGroovy project = (ProjectGroovy) parser.loadProject(file);
         TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, project.getName(), project));
+
+        TreeItem<Item> groovy = new TreeItem<>(new Item(ItemType.Groovy, "groovy", null));
+        root.getChildren().add(groovy);
+        project.getGroovyFiles().stream()
+                .map(f -> new Item(ItemType.GroovyFile, f.getName(), f))
+                .map(TreeItem::new)
+                .forEach(treeItem -> groovy.getChildren().add(treeItem));
+
         project.getKeys().stream()
                 .map(project::getJob)
                 .sorted(Comparator.comparing(Job::getName))
@@ -118,17 +138,20 @@ public class EditProject extends Application {
 
     private TreeItem<Item> createJobTreeItem(Job<?> job) {
         TreeItem<Item> result = new TreeItem<>(new Item(ItemType.Job, job.getName(), job));
+        TreeItem<Item> parameters = new TreeItem<>(new Item(ItemType.ParametersDef, "parameters", null));
+        parameters.setExpanded(true);
+        result.getChildren().add(parameters);
         job.getParameterDefs().stream()
                 .sorted(Comparator.comparing(JobParameterDef::getName))
                 .map(parameterDef -> new Item(ItemType.ParameterDef, parameterDef.getName(), parameterDef))
                 .map(TreeItem::new)
-                .forEach(result.getChildren()::add);
+                .forEach(parameters.getChildren()::add);
         result.setExpanded(true);
         return result;
     }
 
     private enum ItemType {
-        Project, Job, ParameterDef
+        Project, Groovy, GroovyFile, Job, ParametersDef, ParameterDef
     }
 
     private class Item {
@@ -142,10 +165,24 @@ public class EditProject extends Application {
             this.payload = payload;
         }
 
-        void onSelect() {
+        void onSelect() throws IOException {
             item.getChildren().clear();
             switch (itemType) {
                 case Project:
+                    ProjectGroovy project = (ProjectGroovy) payload;
+                    break;
+                case Groovy:
+                    break;
+                case GroovyFile:
+                    File file = (File) payload;
+                    if (file.getName().endsWith(".groovy") ||
+                            file.getName().endsWith(".txt") ||
+                            file.getName().endsWith(".properties") ||
+                            file.getName().endsWith(".xml")) {
+                        String content = new String(Files.readAllBytes(file.toPath()));
+                        item.getChildren().add(new Label("Content:"));
+                        item.getChildren().add(new TextArea(content));
+                    }
                     break;
                 case Job:
                     break;
