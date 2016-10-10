@@ -93,6 +93,7 @@ public class EditProject extends Application {
         });
 
         item = new VBox(5);
+        item.setPadding(new Insets(5, 5, 5, 5));
 
         SplitPane splitPane = new SplitPane(items, item);
         root.getChildren().add(splitPane);
@@ -107,7 +108,7 @@ public class EditProject extends Application {
         stage.show();
     }
 
-    private void showError(String message, Throwable e) {
+    private static void showError(String message, Throwable e) {
         Alert alert = new Alert(Alert.AlertType.ERROR, message + " " + e.getMessage());
         alert.showAndWait();
     }
