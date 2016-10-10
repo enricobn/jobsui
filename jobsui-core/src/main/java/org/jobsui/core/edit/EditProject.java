@@ -117,7 +117,7 @@ public class EditProject extends Application {
         ProjectGroovy project = (ProjectGroovy) parser.loadProject(file);
         TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, project.getName(), project));
 
-        TreeItem<Item> groovy = new TreeItem<>(new Item(ItemType.None, "groovy", null));
+        TreeItem<Item> groovy = new TreeItem<>(new Item(ItemType.Groovy, "groovy", project));
         root.getChildren().add(groovy);
         project.getGroovyFiles().stream()
                 .map(f -> new Item(ItemType.GroovyFile, f.getName(), f))
@@ -145,7 +145,7 @@ public class EditProject extends Application {
 
     private void addParameters(TreeItem<Item> result, Job<?> job, String containerText, ItemType itemType,
                                Class<? extends JobParameterDef> clazz) {
-        TreeItem<Item> parameters = new TreeItem<>(new Item(ItemType.None, containerText, null));
+        TreeItem<Item> parameters = new TreeItem<>(new Item(ItemType.Parameters, containerText, job));
         parameters.setExpanded(true);
         result.getChildren().add(parameters);
 
@@ -158,16 +158,16 @@ public class EditProject extends Application {
     private void addParameter(TreeItem<Item> parameters, ItemType itemType, JobParameterDef<?> parameterDef) {
         TreeItem<Item> parameterTI = new TreeItem<>(new Item(itemType, parameterDef.getName(), parameterDef));
         parameters.getChildren().add(parameterTI);
-        TreeItem<Item> dependencies = new TreeItem<>(new Item(ItemType.None, "dependencies", null));
+        TreeItem<Item> dependencies = new TreeItem<>(new Item(ItemType.Dependencies, "dependencies", parameterDef));
         parameterTI.getChildren().add(dependencies);
         parameterDef.getDependencies().stream()
-                .map(dep -> new Item(ItemType.None, dep.getName(), null))
+                .map(dep -> new Item(ItemType.Dependency, dep.getName(), dep))
                 .map(TreeItem::new)
                 .forEach(dependencies.getChildren()::add);
     }
 
     private enum ItemType {
-        Project, GroovyFile, Job, None, Parameter, Expression, Call
+        Project, GroovyFile, Job, Parameter, Expression, Dependency, Dependencies, Parameters, Groovy, Call
     }
 
     private class Item {
