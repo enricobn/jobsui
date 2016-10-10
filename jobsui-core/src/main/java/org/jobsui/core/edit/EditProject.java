@@ -14,7 +14,6 @@ import org.jobsui.core.Job;
 import org.jobsui.core.JobParameterDef;
 import org.jobsui.core.groovy.*;
 
-import javax.swing.event.TreeModelEvent;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -118,7 +117,7 @@ public class EditProject extends Application {
         ProjectGroovy project = (ProjectGroovy) parser.loadProject(file);
         TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, project.getName(), project));
 
-        TreeItem<Item> groovy = new TreeItem<>(new Item(ItemType.Container, "groovy", null));
+        TreeItem<Item> groovy = new TreeItem<>(new Item(ItemType.None, "groovy", null));
         root.getChildren().add(groovy);
         project.getGroovyFiles().stream()
                 .map(f -> new Item(ItemType.GroovyFile, f.getName(), f))
@@ -136,7 +135,7 @@ public class EditProject extends Application {
     private TreeItem<Item> createJobTreeItem(Job<?> job) {
         TreeItem<Item> result = new TreeItem<>(new Item(ItemType.Job, job.getName(), job));
 
-        addParameters(result, job, "parameters", ItemType.ParameterDef, JobParameterDefGroovySimple.class);
+        addParameters(result, job, "parameters", ItemType.Parameter, JobParameterDefGroovySimple.class);
         addParameters(result, job, "expressions", ItemType.Expression, JobExpressionDefGroovy.class);
         addParameters(result, job, "calls", ItemType.Call, JobCallDefGroovy.class);
 
@@ -146,20 +145,29 @@ public class EditProject extends Application {
 
     private void addParameters(TreeItem<Item> result, Job<?> job, String containerText, ItemType itemType,
                                Class<? extends JobParameterDef> clazz) {
-        TreeItem<Item> parameters = new TreeItem<>(new Item(ItemType.Container, containerText, null));
+        TreeItem<Item> parameters = new TreeItem<>(new Item(ItemType.None, containerText, null));
         parameters.setExpanded(true);
         result.getChildren().add(parameters);
 
         job.getParameterDefs().stream()
                 .filter(parameter -> clazz.isAssignableFrom(parameter.getClass()))
                 .sorted(Comparator.comparing(JobParameterDef::getName))
-                .map(parameterDef -> new Item(itemType, parameterDef.getName(), parameterDef))
+                .forEach(parameterDef -> addParameter(parameters, itemType, parameterDef));
+    }
+
+    private void addParameter(TreeItem<Item> parameters, ItemType itemType, JobParameterDef<?> parameterDef) {
+        TreeItem<Item> parameterTI = new TreeItem<>(new Item(itemType, parameterDef.getName(), parameterDef));
+        parameters.getChildren().add(parameterTI);
+        TreeItem<Item> dependencies = new TreeItem<>(new Item(ItemType.None, "dependencies", null));
+        parameterTI.getChildren().add(dependencies);
+        parameterDef.getDependencies().stream()
+                .map(dep -> new Item(ItemType.None, dep.getName(), null))
                 .map(TreeItem::new)
-                .forEach(parameters.getChildren()::add);
+                .forEach(dependencies.getChildren()::add);
     }
 
     private enum ItemType {
-        Project, GroovyFile, Job, Container, ParameterDef, Expression, Call
+        Project, GroovyFile, Job, None, Parameter, Expression, Call
     }
 
     private class Item {
@@ -192,15 +200,11 @@ public class EditProject extends Application {
                     break;
                 case Job:
                     break;
-                case ParameterDef:
+                case Parameter:
+                    break;
                 case Expression:
+                    break;
                 case Call:
-                    JobParameterDefGroovy<?> parameterDef = (JobParameterDefGroovy) payload;
-                    if (!parameterDef.getDependencies().isEmpty()) {
-                        item.getChildren().add(new Label("Dependencies:"));
-                        parameterDef.getDependencies().stream()
-                                .forEach(dep -> item.getChildren().add(new Label(dep.getName())));
-                    }
                     break;
             }
         }
