@@ -210,8 +210,13 @@ public class EditProject extends Application {
                     item.getChildren().add(new TextArea(simple.getValidateScript()));
                     break;
                 case Expression:
+                    JobExpressionDefGroovy exp= (JobExpressionDefGroovy) payload;
+                    item.getChildren().add(new Label("Evaluate:"));
+                    item.getChildren().add(new TextArea(exp.getEvaluateScript()));
                     break;
                 case Call:
+                    JobCallDefGroovy call = (JobCallDefGroovy) payload;
+                    // TODO
                     break;
             }
         }

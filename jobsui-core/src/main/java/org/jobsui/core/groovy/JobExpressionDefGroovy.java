@@ -18,12 +18,14 @@ public class JobExpressionDefGroovy<T> extends JobParameterDefAbstract<T> implem
             "import org.jobsui.core.*;\n" +
             "import org.jobsui.core.ui.*;\n";
     private final File projectFolder;
+    private final String evaluateScript;
     private final Script evaluate;
 
     public JobExpressionDefGroovy(File projectFolder, GroovyShell shell, String key, String name,
                                   String evaluateScript) {
         super(key, name, null, false, false);
         this.projectFolder = projectFolder;
+        this.evaluateScript = evaluateScript;
         try {
             this.evaluate = shell.parse(IMPORTS + evaluateScript);
         } catch (CompilationFailedException e) {
@@ -69,5 +71,9 @@ public class JobExpressionDefGroovy<T> extends JobParameterDefAbstract<T> implem
     @Override
     public void init(ProjectGroovy projectGroovy) {
 
+    }
+
+    public String getEvaluateScript() {
+        return evaluateScript;
     }
 }
