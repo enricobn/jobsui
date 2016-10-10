@@ -10,4 +10,6 @@ public interface Project {
     <T> Job<T> getJob(String key);
 
     Set<String> getKeys();
+
+    String getName();
 }

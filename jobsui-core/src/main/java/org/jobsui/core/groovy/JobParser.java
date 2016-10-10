@@ -30,51 +30,52 @@ public class JobParser {
     public JobParser() throws SAXException {
         String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
         SchemaFactory factory = SchemaFactory.newInstance(language);
-        Schema jobSchema = factory.newSchema(getClass().getResource("/org/jobsui/jobsui.xsd"));
+        Schema jobSchema = factory.newSchema(getClass().getResource("/org/jobsui/job.xsd"));
         jobValidator = jobSchema.newValidator();
         Schema projectSchema = factory.newSchema(getClass().getResource("/org/jobsui/project.xsd"));
         projectValidator = projectSchema.newValidator();
     }
 
     public Project loadProject(File folder) throws Exception {
+        File projectFile = new File(folder, "project.xml");
+
+        if (!projectFile.exists()) {
+            throw new Exception("Cannot find project file (project.xml) in " + folder);
+        }
 
         final File[] files = folder.listFiles();
 
-        if (files == null) {
-            throw new Exception("Cannot find files in " + folder);
-        }
-
         GroovyClassLoader cl;
+
+        Collection<File> groovyFiles;
 
         final File groovy = new File(folder, "groovy");
         if (groovy.exists()) {
             GroovyScriptEngine engine = new GroovyScriptEngine(new URL[]{groovy.toURI().toURL()});
             cl = engine.getGroovyClassLoader();
+            groovyFiles = Arrays.asList(groovy.listFiles(File::isFile));
         } else {
             cl = new GroovyClassLoader();
+            groovyFiles = Collections.emptyList();
         }
 
-        File projectFile = new File(folder, "project.xml");
-
-        ProjectXML projectXML = null;
-
-        if (projectFile.exists()) {
-            try (FileInputStream is = new FileInputStream(projectFile)) {
-                final StreamSource source = new StreamSource(is);
-                try {
-                    projectValidator.validate(source);
-                } catch (Exception e) {
-                    throw new Exception("Cannot parse file " + projectFile, e);
-                }
+        try (FileInputStream is = new FileInputStream(projectFile)) {
+            final StreamSource source = new StreamSource(is);
+            try {
+                projectValidator.validate(source);
+            } catch (Exception e) {
+                throw new Exception("Cannot parse file " + projectFile, e);
             }
+        }
 
-            try (FileInputStream is = new FileInputStream(projectFile)) {
-                projectXML = parseProject(folder, is);
-                for (String library : projectXML.getLibraries()) {
-                    String[] split = library.split(":");
-                    File file = IvyUtils.resolveArtifact(split[0], split[1], split[2]);
-                    cl.addURL(file.toURI().toURL());
-                }
+        ProjectXML projectXML;
+
+        try (FileInputStream is = new FileInputStream(projectFile)) {
+            projectXML = parseProject(folder, is);
+            for (String library : projectXML.getLibraries()) {
+                String[] split = library.split(":");
+                File file = IvyUtils.resolveArtifact(split[0], split[1], split[2]);
+                cl.addURL(file.toURI().toURL());
             }
         }
 
@@ -116,23 +117,27 @@ public class JobParser {
             }
         }
 
-        ProjectGroovy project = new ProjectGroovy(projectXML, jobs);
+        ProjectGroovy project = new ProjectGroovy(projectXML, jobs, groovyFiles);
 
         for (JobGroovy<?> job : jobs.values()) {
             job.init(project);
         }
 
-        return new ProjectGroovy(projectXML, jobs);
+        return project;
     }
 
     private ProjectXML parseProject(File projectFolder, InputStream is) throws Exception {
-        ProjectXML projectXML = new ProjectXML(projectFolder);
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setValidating(false);
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 
         Document doc = dBuilder.parse(is);
+
+        NodeList projects = doc.getElementsByTagName("Project");
+        String projectName = getMandatoryAttribute((Element) projects.item(0), "name");
+
+        ProjectXML projectXML = new ProjectXML(projectFolder, projectName);
 
         NodeList libraries = doc.getElementsByTagName("Library");
 

@@ -107,7 +107,7 @@ public class EditProject extends Application {
     private TreeItem<Item> loadProject(File file) throws Exception {
         JobParser parser = new JobParser();
         Project project = parser.loadProject(file);
-        TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, "Project", project));
+        TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, project.getName(), project));
         project.getKeys().stream()
                 .map(project::getJob)
                 .sorted(Comparator.comparing(Job::getName))

@@ -13,11 +13,13 @@ import java.util.Map;
  */
 public class ProjectXML {
     private final File projectFolder;
+    private final String name;
     private final List<String> libraries = new ArrayList<>();
     private final Map<String, Project> imports = new HashMap<>();
 
-    ProjectXML(File projectFolder) {
+    ProjectXML(File projectFolder, String name) {
         this.projectFolder = projectFolder;
+        this.name = name;
     }
 
     public void addLibrary(String library) {
@@ -35,5 +37,9 @@ public class ProjectXML {
 
     public Map<String, Project> getImports() {
         return imports;
+    }
+
+    public String getName() {
+        return name;
     }
 }
