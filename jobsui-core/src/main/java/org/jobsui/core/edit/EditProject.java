@@ -119,6 +119,13 @@ public class EditProject extends Application {
         ProjectGroovy project = (ProjectGroovy) parser.loadProject(file);
         TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, project.getName(), project));
 
+        TreeItem<Item> libraries = new TreeItem<>(new Item(ItemType.Libraries, "libraries", project));
+        root.getChildren().add(libraries);
+        project.getProjectXML().getLibraries().stream()
+                .map(l -> new Item(ItemType.Library, l, l))
+                .map(TreeItem::new)
+                .forEach(treeItem -> libraries.getChildren().add(treeItem));
+
         TreeItem<Item> groovy = new TreeItem<>(new Item(ItemType.Groovy, "groovy", project));
         root.getChildren().add(groovy);
         project.getGroovyFiles().stream()
@@ -169,7 +176,7 @@ public class EditProject extends Application {
     }
 
     private enum ItemType {
-        Project, GroovyFile, Job, Parameter, Expression, Dependency, Dependencies, Parameters, Groovy, Call
+        Project, GroovyFile, Job, Parameter, Expression, Dependency, Dependencies, Parameters, Groovy, Libraries, Library, Call
     }
 
     private class Item {
@@ -238,8 +245,8 @@ public class EditProject extends Application {
             this.addDependencyMenu.getItems().add(addDependency);
             addDependency.setOnAction(t -> {
                 // TODO)
-                TreeItem<Item> newEmployee = new TreeItem<>(new Item(ItemType.Dependency, "New dep", null));
-                getTreeItem().getChildren().add(newEmployee);
+                TreeItem<Item> newDep = new TreeItem<>(new Item(ItemType.Dependency, "New dep", null));
+                getTreeItem().getChildren().add(newDep);
             });
 
             MenuItem delete = new MenuItem("Delete");
