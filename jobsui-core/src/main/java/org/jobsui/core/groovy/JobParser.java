@@ -4,8 +4,7 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
 import org.jobsui.core.Project;
-import org.jobsui.core.xml.JobXML;
-import org.jobsui.core.xml.ProjectXML;
+import org.jobsui.core.xml.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -199,11 +198,11 @@ public class JobParser {
 
         jobXML.setValidateScript(validateScript);
 
-        NodeList parametersList = parseParameters(shell, projectFolder, doc, parameterDefs);
+        NodeList parametersList = parseParameters(shell, projectFolder, doc, parameterDefs, jobXML);
 
-        NodeList expressionsList = parseExpressions(shell, projectFolder, doc, parameterDefs);
+        NodeList expressionsList = parseExpressions(shell, projectFolder, doc, parameterDefs, jobXML);
 
-        List<JobCallDefGroovy<?>> callDefs = parseCalls(doc, parameterDefs);
+        List<JobCallDefGroovy<?>> callDefs = parseCalls(doc, parameterDefs, jobXML);
 
         addDependencies(parameterDefs, parametersList);
         addDependencies(parameterDefs, expressionsList);
@@ -214,8 +213,9 @@ public class JobParser {
     }
 
     private NodeList parseExpressions(GroovyShell shell, File projectFolder, Document doc, Map<String,
-            JobParameterDefGroovy<?>> parameterDefs)
+            JobParameterDefGroovy<?>> parameterDefs, JobXML jobXML)
     throws JobsUIParseException {
+
         NodeList expressionsList = doc.getElementsByTagName("Expression");
         for (int i = 0; i < expressionsList.getLength(); i++) {
             Element element = (Element) expressionsList.item(i);
@@ -225,7 +225,11 @@ public class JobParser {
             }
             String parameterName = getMandatoryAttribute(element, "name");
 
+            ExpressionXML expressionXML = new ExpressionXML(parameterKey, parameterName);
+
             String evaluateScript = getElementContent(element, "Evaluate", false);
+            expressionXML.setEvaluateScript(evaluateScript);
+            jobXML.add(expressionXML);
 
             JobParameterDefGroovy<?> parameterDef = new JobExpressionDefGroovy<>(projectFolder, shell, parameterKey,
                     parameterName,
@@ -235,7 +239,8 @@ public class JobParser {
         return expressionsList;
     }
 
-    private List<JobCallDefGroovy<?>> parseCalls(Document doc, Map<String, JobParameterDefGroovy<?>> parameterDefs)
+    private List<JobCallDefGroovy<?>> parseCalls(Document doc, Map<String, JobParameterDefGroovy<?>> parameterDefs,
+                                                 JobXML jobXML)
     throws JobsUIParseException {
         List<JobCallDefGroovy<?>> calls = new ArrayList<>();
 
@@ -252,6 +257,10 @@ public class JobParser {
             String project = getMandatoryAttribute(element, "project");
             String job = getMandatoryAttribute(element, "job");
 
+            CallXML callXML = new CallXML(key, name);
+            callXML.setProject(project);
+            callXML.setJob(job);
+
             Map<String, String> mapArguments = new HashMap<>();
 
             NodeList maps = element.getElementsByTagName("Map");
@@ -259,8 +268,11 @@ public class JobParser {
                 Element mapElement = (Element) maps.item(j);
                 String in = getMandatoryAttribute(mapElement, "in");
                 String out = getMandatoryAttribute(mapElement, "out");
+                callXML.addMap(in, out);
                 mapArguments.put(in, out);
             }
+
+            jobXML.add(callXML);
 
             JobCallDefGroovy<?> call = new JobCallDefGroovy<>(key, name, project, job, mapArguments);
             parameterDefs.put(key, call);
@@ -290,7 +302,7 @@ public class JobParser {
     }
 
     private NodeList parseParameters(GroovyShell shell, File projectFolder, Document doc,
-                                     Map<String, JobParameterDefGroovy<?>> parameterDefs)
+                                     Map<String, JobParameterDefGroovy<?>> parameterDefs, JobXML jobXML)
     throws JobsUIParseException {
         NodeList parametersList = doc.getElementsByTagName("Parameter");
 
@@ -315,8 +327,18 @@ public class JobParser {
             boolean visible = visibleString == null || visibleString.isEmpty() || Boolean.parseBoolean(visibleString);
             boolean optional = optionalString != null && !optionalString.isEmpty() && Boolean.parseBoolean(optionalString);
 
-            JobParameterDefGroovy<?> parameterDef = new JobParameterDefGroovySimple<>(projectFolder, shell, parameterKey, parameterName,
-                    createComponentScript, onDependenciesChangeScript, parameterValidateScript, optional, visible);
+            SimplePararameterXML simplePararameterXML = new SimplePararameterXML(parameterKey, parameterName);
+            simplePararameterXML.setValidateScript(parameterValidateScript);
+            simplePararameterXML.setCreateComponentScript(createComponentScript);
+            simplePararameterXML.setOnDependenciesChangeScript(onDependenciesChangeScript);
+            simplePararameterXML.setVisible(visible);
+            simplePararameterXML.setOptional(optional);
+
+            jobXML.add(simplePararameterXML);
+
+            JobParameterDefGroovy<?> parameterDef = new JobParameterDefGroovySimple<>(projectFolder, shell, parameterKey,
+                    parameterName, createComponentScript, onDependenciesChangeScript, parameterValidateScript, optional,
+                    visible);
             parameterDefs.put(parameterDef.getKey(), parameterDef);
         }
         return parametersList;
