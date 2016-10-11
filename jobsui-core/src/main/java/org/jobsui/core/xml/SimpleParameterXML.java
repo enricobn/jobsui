@@ -4,15 +4,14 @@ package org.jobsui.core.xml;
  * Created by enrico on 10/11/16.
  */
 public class SimpleParameterXML extends ParameterXML {
-
     private String parameterValidateScript;
     private String createComponentScript;
     private String onDependenciesChangeScript;
     private boolean visible;
     private boolean optional;
 
-    public SimpleParameterXML(String key, String name) {
-        super(key, name);
+    public SimpleParameterXML(String key, String name, int order) {
+        super(key, name, order);
     }
 
     public void setValidateScript(String parameterValidateScript) {

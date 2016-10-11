@@ -10,11 +10,12 @@ public class ParameterXML {
     private final String key;
     private final String name;
     private final List<String> dependencies = new ArrayList<>();
-    private int order;
+    private final int order;
 
-    public ParameterXML(String key, String name) {
+    ParameterXML(String key, String name, int order) {
         this.key = key;
         this.name = name;
+        this.order = order;
     }
 
     public void addDependency(String depKey) {
@@ -33,11 +34,7 @@ public class ParameterXML {
         return dependencies;
     }
 
-    public void setOrder(int order) {
-        this.order = order;
-    }
-
-    public int getOrder() {
+    int getOrder() {
         return order;
     }
 }

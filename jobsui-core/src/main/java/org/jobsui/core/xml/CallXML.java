@@ -7,13 +7,12 @@ import java.util.Map;
  * Created by enrico on 10/11/16.
  */
 public class CallXML extends ParameterXML {
-
     private String project;
     private String job;
     private Map<String, String> map = new HashMap<>();
 
-    public CallXML(String key, String name) {
-        super(key, name);
+    public CallXML(String key, String name, int order) {
+        super(key, name, order);
     }
 
     public void setProject(String project) {

@@ -6,8 +6,8 @@ package org.jobsui.core.xml;
 public class ExpressionXML extends ParameterXML {
     private String evaluateScript;
 
-    public ExpressionXML(String key, String name) {
-        super(key, name);
+    public ExpressionXML(String key, String name, int order) {
+        super(key, name, order);
     }
 
     public void setEvaluateScript(String evaluateScript) {

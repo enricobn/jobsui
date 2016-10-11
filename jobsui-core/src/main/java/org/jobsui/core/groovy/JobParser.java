@@ -17,12 +17,13 @@ import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
 
 /**
  * Created by enrico on 5/4/16.
  */
 public class JobParser {
+    private static final int ORDER_INCREMENT = 1_000;
     private final Validator jobValidator;
     private final Validator projectValidator;
 
@@ -148,8 +149,6 @@ public class JobParser {
 
         JobXML jobXML = new JobXML(key, name);
 
-        Map<String, JobParameterDefGroovy<?>> parameterDefs = new LinkedHashMap<>();
-
         String runScript = getElementContent(doc.getDocumentElement(), "Run", true);
 
         jobXML.setRunScript(runScript);
@@ -158,34 +157,38 @@ public class JobParser {
 
         jobXML.setValidateScript(validateScript);
 
-        parseParameters(doc, jobXML);
+        int order = 0;
 
-        parseExpressions(doc, jobXML);
+        order = parseParameters(doc, jobXML, order);
 
-        parseCalls(doc, jobXML);
+        order = parseExpressions(doc, jobXML, order);
+
+        parseCalls(doc, jobXML, order);
 
         projectXML.addJob(jobXML);
     }
 
-    private void parseExpressions(Document doc, JobXML jobXML)
+    private int parseExpressions(Document doc, JobXML jobXML, int order)
     throws Exception {
         NodeList expressionsList = doc.getElementsByTagName("Expression");
         for (int i = 0; i < expressionsList.getLength(); i++) {
             Element element = (Element) expressionsList.item(i);
             String parameterKey = getMandatoryAttribute(element, "key");
             String parameterName = getMandatoryAttribute(element, "name");
-
-            ExpressionXML expressionXML = new ExpressionXML(parameterKey, parameterName);
-
             String evaluateScript = getElementContent(element, "Evaluate", false);
+
+            ExpressionXML expressionXML = new ExpressionXML(parameterKey, parameterName, order);
+            order += ORDER_INCREMENT;
             expressionXML.setEvaluateScript(evaluateScript);
+
             jobXML.add(expressionXML);
 
             addDependencies(element, expressionXML);
         }
+        return order;
     }
 
-    private void parseCalls(Document doc, JobXML jobXML)
+    private int parseCalls(Document doc, JobXML jobXML, int order)
     throws Exception {
         NodeList callsList = doc.getElementsByTagName("Call");
         for (int i = 0; i < callsList.getLength(); i++) {
@@ -196,7 +199,8 @@ public class JobParser {
             String project = getMandatoryAttribute(element, "project");
             String job = getMandatoryAttribute(element, "job");
 
-            CallXML callXML = new CallXML(key, name);
+            CallXML callXML = new CallXML(key, name, order);
+            order += ORDER_INCREMENT;
             callXML.setProject(project);
             callXML.setJob(job);
 
@@ -211,9 +215,10 @@ public class JobParser {
 
             jobXML.add(callXML);
         }
+        return order;
     }
 
-    private void parseParameters(Document doc, JobXML jobXML)
+    private int parseParameters(Document doc, JobXML jobXML, int order)
     throws Exception {
         NodeList parametersList = doc.getElementsByTagName("Parameter");
 
@@ -225,14 +230,14 @@ public class JobParser {
             String parameterValidateScript = getElementContent(element, "Validate", false);
             String createComponentScript = getElementContent(element, "CreateComponent", true);
             String onDependenciesChangeScript = getElementContent(element, "OnDependenciesChange", false);
-
             String visibleString = element.getAttribute("visible");
-            boolean visible = visibleString == null || visibleString.isEmpty() || Boolean.parseBoolean(visibleString);
-
             String optionalString = element.getAttribute("optional");
+
+            boolean visible = visibleString == null || visibleString.isEmpty() || Boolean.parseBoolean(visibleString);
             boolean optional = optionalString != null && !optionalString.isEmpty() && Boolean.parseBoolean(optionalString);
 
-            SimpleParameterXML simpleParameterXML = new SimpleParameterXML(parameterKey, parameterName);
+            SimpleParameterXML simpleParameterXML = new SimpleParameterXML(parameterKey, parameterName, order);
+            order += ORDER_INCREMENT;
             simpleParameterXML.setValidateScript(parameterValidateScript);
             simpleParameterXML.setCreateComponentScript(createComponentScript);
             simpleParameterXML.setOnDependenciesChangeScript(onDependenciesChangeScript);
@@ -243,6 +248,7 @@ public class JobParser {
 
             jobXML.add(simpleParameterXML);
         }
+        return order;
     }
 
     private static void addDependencies(Element element, ParameterXML parameterXML) throws JobsUIParseException {
