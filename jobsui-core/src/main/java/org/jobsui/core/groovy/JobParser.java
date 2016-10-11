@@ -80,7 +80,7 @@ public class JobParser {
                 try (InputStream is = new FileInputStream(file)) {
                     JobGroovy<?> job;
                     try {
-                        job = parse(shell, is, folder);
+                        job = parse(shell, is, folder, projectXML);
                     } catch (Exception e) {
                         throw new Exception("Cannot parse file " + file, e);
                     }
@@ -171,7 +171,7 @@ public class JobParser {
         return projectXML;
     }
 
-    private <T> JobGroovy<T> parse(GroovyShell shell, InputStream is, File projectFolder) throws Exception {
+    private <T> JobGroovy<T> parse(GroovyShell shell, InputStream is, File projectFolder, ProjectXML projectXML) throws Exception {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setValidating(false);
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -208,6 +208,8 @@ public class JobParser {
         addDependencies(parameterDefs, expressionsList);
         addDependenciesForCalls(parameterDefs, callDefs);
 
+        projectXML.addJob(jobXML);
+
         return new JobGroovy<>(shell, key, name, new ArrayList<>(parameterDefs.values()), runScript, validateScript,
             projectFolder);
     }
@@ -230,6 +232,8 @@ public class JobParser {
             String evaluateScript = getElementContent(element, "Evaluate", false);
             expressionXML.setEvaluateScript(evaluateScript);
             jobXML.add(expressionXML);
+
+            addDependencies(element, expressionXML);
 
             JobParameterDefGroovy<?> parameterDef = new JobExpressionDefGroovy<>(projectFolder, shell, parameterKey,
                     parameterName,
@@ -271,6 +275,8 @@ public class JobParser {
                 callXML.addMap(in, out);
                 mapArguments.put(in, out);
             }
+
+            addDependencies(element, callXML);
 
             jobXML.add(callXML);
 
@@ -334,6 +340,8 @@ public class JobParser {
             simplePararameterXML.setVisible(visible);
             simplePararameterXML.setOptional(optional);
 
+            addDependencies(element, simplePararameterXML);
+
             jobXML.add(simplePararameterXML);
 
             JobParameterDefGroovy<?> parameterDef = new JobParameterDefGroovySimple<>(projectFolder, shell, parameterKey,
@@ -363,6 +371,15 @@ public class JobParser {
                 }
                 parameterDef.addDependency(jobParameterDefDep);
             }
+        }
+    }
+
+    private static void addDependencies(Element element, ParameterXML parameterXML) throws JobsUIParseException {
+        final NodeList dependenciesList = element.getElementsByTagName("Dependency");
+        for (int iDep = 0; iDep < dependenciesList.getLength(); iDep++) {
+            final Element dependency = (Element) dependenciesList.item(iDep);
+            final String depKey = getMandatoryAttribute(dependency, "key");
+            parameterXML.addDependency(depKey);
         }
     }
 

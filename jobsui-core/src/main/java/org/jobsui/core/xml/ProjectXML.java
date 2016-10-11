@@ -1,6 +1,5 @@
 package org.jobsui.core.xml;
 
-import java.awt.peer.ChoicePeer;
 import java.io.File;
 import java.util.*;
 
