@@ -94,7 +94,7 @@ public class JobParser {
             }
         }
 
-        ProjectGroovy project = new ProjectGroovy(folder, projectXML, jobs);
+        ProjectGroovy project = new ProjectGroovy(projectXML, jobs);
 
         for (JobGroovy<?> job : jobs.values()) {
             job.init(project);
@@ -103,7 +103,7 @@ public class JobParser {
         return project;
     }
 
-    private GroovyShell getGroovyShell(File folder, ProjectXML projectXML) throws IOException, ParseException {
+    private static GroovyShell getGroovyShell(File folder, ProjectXML projectXML) throws IOException, ParseException {
         GroovyClassLoader cl;
 
         if (projectXML.getGroovyFiles().isEmpty()) {
@@ -138,7 +138,7 @@ public class JobParser {
         NodeList projects = doc.getElementsByTagName("Project");
         String projectName = getMandatoryAttribute((Element) projects.item(0), "name");
 
-        ProjectXML projectXML = new ProjectXML(projectName);
+        ProjectXML projectXML = new ProjectXML(projectFolder, projectName);
 
         NodeList libraries = doc.getElementsByTagName("Library");
 

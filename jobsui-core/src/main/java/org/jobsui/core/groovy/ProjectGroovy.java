@@ -19,14 +19,14 @@ public class ProjectGroovy implements Project {
     private final Map<String, JobGroovy<?>> jobs;
     private final Map<String, Project> projects = new HashMap<>();
 
-    public ProjectGroovy(File projectFolder, ProjectXML projectXML, Map<String, JobGroovy<?>> jobs) {
+    public ProjectGroovy(ProjectXML projectXML, Map<String, JobGroovy<?>> jobs) {
         this.projectXML = projectXML;
         this.jobs = jobs;
         getProjectXML().getImports().entrySet().stream().forEach(entry -> {
             JobParser jobParser;
             try {
                 jobParser = new JobParser();
-                projects.put(entry.getKey(), jobParser.loadProject(new File(projectFolder, entry.getValue())));
+                projects.put(entry.getKey(), jobParser.loadProject(new File(projectXML.getProjectFolder(), entry.getValue())));
             } catch (Exception e) {
                 // TODO
                 throw new RuntimeException(e);

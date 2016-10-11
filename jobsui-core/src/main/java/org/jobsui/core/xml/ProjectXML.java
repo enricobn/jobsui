@@ -7,6 +7,7 @@ import java.util.*;
  * Created by enrico on 10/6/16.
  */
 public class ProjectXML {
+    private final File projectFolder;
     private final String name;
     private final List<String> libraries = new ArrayList<>();
     private final Map<String, String> imports = new HashMap<>();
@@ -14,7 +15,8 @@ public class ProjectXML {
     private final Collection<File> fileLibraries = new ArrayList<>();
     private final Collection<File> groovyFiles = new ArrayList<>();
 
-    public ProjectXML(String name) {
+    public ProjectXML(File projectFolder, String name) {
+        this.projectFolder = projectFolder;
         this.name = name;
     }
 
@@ -56,5 +58,13 @@ public class ProjectXML {
 
     public Collection<File> getGroovyFiles() {
         return groovyFiles;
+    }
+
+    public File getProjectFolder() {
+        return projectFolder;
+    }
+
+    public Map<String, JobXML> getJobs() {
+        return jobs;
     }
 }
