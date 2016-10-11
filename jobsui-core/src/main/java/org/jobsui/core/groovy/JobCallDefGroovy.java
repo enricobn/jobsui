@@ -30,7 +30,7 @@ public class JobCallDefGroovy<T> extends JobParameterDefAbstract<T> implements J
     public <C> UIComponent<T, C> createComponent(UI<C> ui) throws UnsupportedComponentException {
         final UIChoice<T, C> component = ui.create(UIChoice.class);
         if (getDependencies().isEmpty()) {
-            evaluate(component, Collections.<String, Object>emptyMap());
+            evaluate(component, Collections.emptyMap());
         }
         return component;
     }

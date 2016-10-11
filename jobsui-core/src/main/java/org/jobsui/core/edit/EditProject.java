@@ -160,7 +160,7 @@ public class EditProject extends Application {
 
         job.getParameterDefs().stream()
                 .filter(parameter -> clazz.isAssignableFrom(parameter.getClass()))
-                .sorted(Comparator.comparing(JobParameterDef::getName))
+//                .sorted(Comparator.comparing(JobParameterDef::getName))
                 .forEach(parameterDef -> addParameter(parameters, itemType, parameterDef));
     }
 
