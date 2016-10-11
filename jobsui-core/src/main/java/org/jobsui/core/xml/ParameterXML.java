@@ -19,4 +19,16 @@ public class ParameterXML {
     public void addDependency(String depKey) {
         dependencies.add(depKey);
     }
+
+    public String getKey() {
+        return key;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public List<String> getDependencies() {
+        return dependencies;
+    }
 }

@@ -17,7 +17,10 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.*;
@@ -61,30 +64,32 @@ public class JobParser {
 
         GroovyShell shell = getGroovyShell(folder, projectXML);
 
-        final Map<String,JobGroovy<?>> jobs = new HashMap<>();
+        final Map<String, JobGroovy<?>> jobs = new HashMap<>();
 
         final File[] files = folder.listFiles();
 
-        for (File file : files) {
-            if (file.getName().endsWith(".job")) {
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().endsWith(".job")) {
 
-                try (InputStream is = new FileInputStream(file)) {
-                    final StreamSource source = new StreamSource(is);
-                    try {
-                        jobValidator.validate(source);
-                    } catch (Exception e) {
-                        throw new Exception("Cannot parse file " + file, e);
+                    try (InputStream is = new FileInputStream(file)) {
+                        final StreamSource source = new StreamSource(is);
+                        try {
+                            jobValidator.validate(source);
+                        } catch (Exception e) {
+                            throw new Exception("Cannot parse file " + file, e);
+                        }
                     }
-                }
 
-                try (InputStream is = new FileInputStream(file)) {
-                    JobGroovy<?> job;
-                    try {
-                        job = parse(shell, is, folder, projectXML);
-                    } catch (Exception e) {
-                        throw new Exception("Cannot parse file " + file, e);
+                    try (InputStream is = new FileInputStream(file)) {
+                        JobGroovy<?> job;
+                        try {
+                            job = parse(shell, is, folder, projectXML);
+                        } catch (Exception e) {
+                            throw new Exception("Cannot parse file " + file, e);
+                        }
+                        jobs.put(job.getKey(), job);
                     }
-                    jobs.put(job.getKey(), job);
                 }
             }
         }
@@ -124,7 +129,6 @@ public class JobParser {
     }
 
     private ProjectXML parseProject(File projectFolder, InputStream is) throws Exception {
-
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setValidating(false);
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -187,7 +191,6 @@ public class JobParser {
 
         JobXML jobXML = new JobXML(key, name);
 
-
         Map<String, JobParameterDefGroovy<?>> parameterDefs = new LinkedHashMap<>();
 
         String runScript = getElementContent(doc.getDocumentElement(), "Run", true);
@@ -216,7 +219,7 @@ public class JobParser {
 
     private NodeList parseExpressions(GroovyShell shell, File projectFolder, Document doc, Map<String,
             JobParameterDefGroovy<?>> parameterDefs, JobXML jobXML)
-    throws JobsUIParseException {
+    throws Exception {
 
         NodeList expressionsList = doc.getElementsByTagName("Expression");
         for (int i = 0; i < expressionsList.getLength(); i++) {
@@ -245,7 +248,7 @@ public class JobParser {
 
     private List<JobCallDefGroovy<?>> parseCalls(Document doc, Map<String, JobParameterDefGroovy<?>> parameterDefs,
                                                  JobXML jobXML)
-    throws JobsUIParseException {
+    throws Exception {
         List<JobCallDefGroovy<?>> calls = new ArrayList<>();
 
         NodeList callsList = doc.getElementsByTagName("Call");
@@ -309,7 +312,7 @@ public class JobParser {
 
     private NodeList parseParameters(GroovyShell shell, File projectFolder, Document doc,
                                      Map<String, JobParameterDefGroovy<?>> parameterDefs, JobXML jobXML)
-    throws JobsUIParseException {
+    throws Exception {
         NodeList parametersList = doc.getElementsByTagName("Parameter");
 
         for (int i = 0; i < parametersList.getLength(); i++) {
@@ -333,16 +336,16 @@ public class JobParser {
             boolean visible = visibleString == null || visibleString.isEmpty() || Boolean.parseBoolean(visibleString);
             boolean optional = optionalString != null && !optionalString.isEmpty() && Boolean.parseBoolean(optionalString);
 
-            SimplePararameterXML simplePararameterXML = new SimplePararameterXML(parameterKey, parameterName);
-            simplePararameterXML.setValidateScript(parameterValidateScript);
-            simplePararameterXML.setCreateComponentScript(createComponentScript);
-            simplePararameterXML.setOnDependenciesChangeScript(onDependenciesChangeScript);
-            simplePararameterXML.setVisible(visible);
-            simplePararameterXML.setOptional(optional);
+            SimpleParameterXML simpleParameterXML = new SimpleParameterXML(parameterKey, parameterName);
+            simpleParameterXML.setValidateScript(parameterValidateScript);
+            simpleParameterXML.setCreateComponentScript(createComponentScript);
+            simpleParameterXML.setOnDependenciesChangeScript(onDependenciesChangeScript);
+            simpleParameterXML.setVisible(visible);
+            simpleParameterXML.setOptional(optional);
 
-            addDependencies(element, simplePararameterXML);
+            addDependencies(element, simpleParameterXML);
 
-            jobXML.add(simplePararameterXML);
+            jobXML.add(simpleParameterXML);
 
             JobParameterDefGroovy<?> parameterDef = new JobParameterDefGroovySimple<>(projectFolder, shell, parameterKey,
                     parameterName, createComponentScript, onDependenciesChangeScript, parameterValidateScript, optional,

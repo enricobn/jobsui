@@ -3,7 +3,7 @@ package org.jobsui.core.xml;
 /**
  * Created by enrico on 10/11/16.
  */
-public class SimplePararameterXML extends ParameterXML {
+public class SimpleParameterXML extends ParameterXML {
 
     private String parameterValidateScript;
     private String createComponentScript;
@@ -11,7 +11,7 @@ public class SimplePararameterXML extends ParameterXML {
     private boolean visible;
     private boolean optional;
 
-    public SimplePararameterXML(String key, String name) {
+    public SimpleParameterXML(String key, String name) {
         super(key, name);
     }
 
