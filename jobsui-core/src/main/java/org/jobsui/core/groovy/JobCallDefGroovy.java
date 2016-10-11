@@ -74,7 +74,7 @@ public class JobCallDefGroovy<T> extends JobParameterDefAbstract<T> implements J
         if ("this".equals(projectRef)) {
             projectToCall = project;
         } else {
-            projectToCall = project.getProjectXML().getImports().get(projectRef);
+            projectToCall = project.getProject(projectRef);
         }
         if (projectToCall == null) {
             throw new IllegalStateException("Cannot find project \"" + projectRef + "\" for Call \"" + getName() + "\".");

@@ -4,6 +4,7 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
 import org.jobsui.core.Project;
+import org.jobsui.core.xml.ProjectXML;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -45,18 +46,22 @@ public class JobParser {
 
         final File[] files = folder.listFiles();
 
+
+        ProjectXML projectXML;
+
+        try (FileInputStream is = new FileInputStream(projectFile)) {
+            projectXML = parseProject(folder, is);
+        }
+
         GroovyClassLoader cl;
 
-        Collection<File> groovyFiles;
-
-        final File groovy = new File(folder, "groovy");
-        if (groovy.exists()) {
-            GroovyScriptEngine engine = new GroovyScriptEngine(new URL[]{groovy.toURI().toURL()});
-            cl = engine.getGroovyClassLoader();
-            groovyFiles = Arrays.asList(groovy.listFiles(File::isFile));
-        } else {
+        if (projectXML.getGroovyFiles().isEmpty()) {
             cl = new GroovyClassLoader();
-            groovyFiles = Collections.emptyList();
+        } else {
+            // TODO
+            final File groovy = new File(folder, "groovy");
+            GroovyScriptEngine engine = new GroovyScriptEngine(new URL[]{ groovy.toURI().toURL() });
+            cl = engine.getGroovyClassLoader();
         }
 
         try (FileInputStream is = new FileInputStream(projectFile)) {
@@ -68,25 +73,14 @@ public class JobParser {
             }
         }
 
-        ProjectXML projectXML;
-
-        try (FileInputStream is = new FileInputStream(projectFile)) {
-            projectXML = parseProject(folder, is);
-            for (String library : projectXML.getLibraries()) {
-                String[] split = library.split(":");
-                File file = IvyUtils.resolveArtifact(split[0], split[1], split[2]);
-                cl.addURL(file.toURI().toURL());
-            }
+        for (String library : projectXML.getLibraries()) {
+            String[] split = library.split(":");
+            File file = IvyUtils.resolveArtifact(split[0], split[1], split[2]);
+            cl.addURL(file.toURI().toURL());
         }
 
-        final File lib = new File(folder, "lib");
-        if (lib.exists()) {
-            final File[] libFiles = lib.listFiles();
-            if (libFiles != null) {
-                for (File file : libFiles) {
-                    cl.addURL(file.toURI().toURL());
-                }
-            }
+        for (File fileLibrary : projectXML.getFileLibraries()) {
+            cl.addURL(fileLibrary.toURI().toURL());
         }
 
         GroovyShell shell = new GroovyShell(cl);
@@ -117,7 +111,7 @@ public class JobParser {
             }
         }
 
-        ProjectGroovy project = new ProjectGroovy(projectXML, jobs, groovyFiles);
+        ProjectGroovy project = new ProjectGroovy(folder, projectXML, jobs);
 
         for (JobGroovy<?> job : jobs.values()) {
             job.init(project);
@@ -137,7 +131,7 @@ public class JobParser {
         NodeList projects = doc.getElementsByTagName("Project");
         String projectName = getMandatoryAttribute((Element) projects.item(0), "name");
 
-        ProjectXML projectXML = new ProjectXML(projectFolder, projectName);
+        ProjectXML projectXML = new ProjectXML(projectName);
 
         NodeList libraries = doc.getElementsByTagName("Library");
 
@@ -154,6 +148,21 @@ public class JobParser {
             String imp = getElementContent(element, "#text", false);
             String name = getMandatoryAttribute(element, "name");
             projectXML.addImport(name, imp);
+        }
+
+        final File lib = new File(projectFolder, "lib");
+        if (lib.exists()) {
+            final File[] libFiles = lib.listFiles();
+            if (libFiles != null) {
+                for (File file : libFiles) {
+                    projectXML.addFileLibrary(file);
+                }
+            }
+        }
+
+        final File groovy = new File(projectFolder, "groovy");
+        if (groovy.exists()) {
+            Arrays.stream(groovy.listFiles(File::isFile)).forEach(projectXML::addGroovyFile);
         }
 
         return projectXML;
