@@ -6,6 +6,8 @@ package org.jobsui.core.xml;
 public class JobXML {
     private final String key;
     private final String name;
+    private String runScript;
+    private String validateScript;
 
     public JobXML(String key, String name) {
         this.key = key;
@@ -18,5 +20,13 @@ public class JobXML {
 
     public String getName() {
         return name;
+    }
+
+    public void setRunScript(String runScript) {
+        this.runScript = runScript;
+    }
+
+    public void setValidateScript(String validateScript) {
+        this.validateScript = validateScript;
     }
 }

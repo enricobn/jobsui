@@ -4,6 +4,7 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
 import org.jobsui.core.Project;
+import org.jobsui.core.xml.JobXML;
 import org.jobsui.core.xml.ProjectXML;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -19,6 +20,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.*;
 import java.net.URL;
+import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -44,26 +46,6 @@ public class JobParser {
             throw new Exception("Cannot find project file (project.xml) in " + folder);
         }
 
-        final File[] files = folder.listFiles();
-
-
-        ProjectXML projectXML;
-
-        try (FileInputStream is = new FileInputStream(projectFile)) {
-            projectXML = parseProject(folder, is);
-        }
-
-        GroovyClassLoader cl;
-
-        if (projectXML.getGroovyFiles().isEmpty()) {
-            cl = new GroovyClassLoader();
-        } else {
-            // TODO
-            final File groovy = new File(folder, "groovy");
-            GroovyScriptEngine engine = new GroovyScriptEngine(new URL[]{ groovy.toURI().toURL() });
-            cl = engine.getGroovyClassLoader();
-        }
-
         try (FileInputStream is = new FileInputStream(projectFile)) {
             final StreamSource source = new StreamSource(is);
             try {
@@ -73,19 +55,16 @@ public class JobParser {
             }
         }
 
-        for (String library : projectXML.getLibraries()) {
-            String[] split = library.split(":");
-            File file = IvyUtils.resolveArtifact(split[0], split[1], split[2]);
-            cl.addURL(file.toURI().toURL());
+        ProjectXML projectXML;
+        try (FileInputStream is = new FileInputStream(projectFile)) {
+            projectXML = parseProject(folder, is);
         }
 
-        for (File fileLibrary : projectXML.getFileLibraries()) {
-            cl.addURL(fileLibrary.toURI().toURL());
-        }
-
-        GroovyShell shell = new GroovyShell(cl);
+        GroovyShell shell = getGroovyShell(folder, projectXML);
 
         final Map<String,JobGroovy<?>> jobs = new HashMap<>();
+
+        final File[] files = folder.listFiles();
 
         for (File file : files) {
             if (file.getName().endsWith(".job")) {
@@ -118,6 +97,31 @@ public class JobParser {
         }
 
         return project;
+    }
+
+    private GroovyShell getGroovyShell(File folder, ProjectXML projectXML) throws IOException, ParseException {
+        GroovyClassLoader cl;
+
+        if (projectXML.getGroovyFiles().isEmpty()) {
+            cl = new GroovyClassLoader();
+        } else {
+            // TODO
+            final File groovy = new File(folder, "groovy");
+            GroovyScriptEngine engine = new GroovyScriptEngine(new URL[]{ groovy.toURI().toURL() });
+            cl = engine.getGroovyClassLoader();
+        }
+
+        for (String library : projectXML.getLibraries()) {
+            String[] split = library.split(":");
+            File file = IvyUtils.resolveArtifact(split[0], split[1], split[2]);
+            cl.addURL(file.toURI().toURL());
+        }
+
+        for (File fileLibrary : projectXML.getFileLibraries()) {
+            cl.addURL(fileLibrary.toURI().toURL());
+        }
+
+        return new GroovyShell(cl);
     }
 
     private ProjectXML parseProject(File projectFolder, InputStream is) throws Exception {
@@ -181,11 +185,19 @@ public class JobParser {
 
         String name = getMandatoryAttribute(doc.getDocumentElement(), "name");
         String key = getMandatoryAttribute(doc.getDocumentElement(), "key");
+
+        JobXML jobXML = new JobXML(key, name);
+
+
         Map<String, JobParameterDefGroovy<?>> parameterDefs = new LinkedHashMap<>();
 
         String runScript = getElementContent(doc.getDocumentElement(), "Run", true);
 
+        jobXML.setRunScript(runScript);
+
         String validateScript = getElementContent(doc.getDocumentElement(), "Validate", false);
+
+        jobXML.setValidateScript(validateScript);
 
         NodeList parametersList = parseParameters(shell, projectFolder, doc, parameterDefs);
 
