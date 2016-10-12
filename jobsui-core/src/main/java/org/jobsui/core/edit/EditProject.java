@@ -3,6 +3,8 @@ package org.jobsui.core.edit;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -27,6 +29,7 @@ public class EditProject extends Application {
     private VBox item;
     private VBox root;
     private Label status;
+    private ProjectXML projectXML = null;
 
     public static void main(String... args) {
         launch(args);
@@ -79,6 +82,17 @@ public class EditProject extends Application {
             }
         });
         buttons.getChildren().add(load);
+
+        Button export = new Button("Export");
+        export.setOnAction(event -> {
+            try {
+                projectXML.export();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        buttons.getChildren().add(export);
+
         root.getChildren().add(buttons);
 
         items = new TreeView<>();
@@ -116,24 +130,24 @@ public class EditProject extends Application {
 
     private TreeItem<Item> loadProject(File file) throws Exception {
         JobParser parser = new JobParser();
-        ProjectXML project = parser.loadProject(file);
-        TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, project.getName(), project));
+        projectXML = parser.loadProject(file);
+        TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, projectXML.getName(), projectXML));
 
-        TreeItem<Item> libraries = new TreeItem<>(new Item(ItemType.Libraries, "libraries", project));
+        TreeItem<Item> libraries = new TreeItem<>(new Item(ItemType.Libraries, "libraries", projectXML));
         root.getChildren().add(libraries);
-        project.getLibraries().stream()
+        projectXML.getLibraries().stream()
                 .map(l -> new Item(ItemType.Library, l, l))
                 .map(TreeItem::new)
                 .forEach(treeItem -> libraries.getChildren().add(treeItem));
 
-        TreeItem<Item> groovy = new TreeItem<>(new Item(ItemType.Groovy, "groovy", project));
+        TreeItem<Item> groovy = new TreeItem<>(new Item(ItemType.Groovy, "groovy", projectXML));
         root.getChildren().add(groovy);
-        project.getGroovyFiles().stream()
+        projectXML.getGroovyFiles().stream()
                 .map(f -> new Item(ItemType.GroovyFile, f.getName(), f))
                 .map(TreeItem::new)
                 .forEach(treeItem -> groovy.getChildren().add(treeItem));
 
-        project.getJobs().values().stream()
+        projectXML.getJobs().values().stream()
                 .sorted(Comparator.comparing(JobXML::getName))
                 .map(this::createJobTreeItem)
                 .forEach(root.getChildren()::add);

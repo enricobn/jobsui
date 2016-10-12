@@ -23,6 +23,7 @@ import java.util.Arrays;
  */
 public class JobParser {
     private static final int ORDER_INCREMENT = 1_000;
+    public static final String PROJECT_FILE_NAME = "project.xml";
     private final Validator jobValidator;
     private final Validator projectValidator;
 
@@ -36,10 +37,10 @@ public class JobParser {
     }
 
     public ProjectXML loadProject(File folder) throws Exception {
-        File projectFile = new File(folder, "project.xml");
+        File projectFile = new File(folder, PROJECT_FILE_NAME);
 
         if (!projectFile.exists()) {
-            throw new Exception("Cannot find project file (project.xml) in " + folder);
+            throw new Exception("Cannot find project file (" + PROJECT_FILE_NAME + ") in " + folder);
         }
 
         try (FileInputStream is = new FileInputStream(projectFile)) {
@@ -71,13 +72,7 @@ public class JobParser {
                         }
                     }
 
-                    try (InputStream is = new FileInputStream(file)) {
-                        try {
-                            parseJob(is, projectXML);
-                        } catch (Exception e) {
-                            throw new Exception("Cannot parse file " + file, e);
-                        }
-                    }
+                    parseJob(file, projectXML);
                 }
             }
         }
@@ -132,39 +127,44 @@ public class JobParser {
         return projectXML;
     }
 
-    private void parseJob(InputStream is, ProjectXML projectXML) throws Exception {
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        dbFactory.setValidating(false);
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+    private void parseJob(File file, ProjectXML projectXML) throws Exception {
+        try (InputStream is = new FileInputStream(file)) {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            dbFactory.setValidating(false);
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 
-        Document doc = dBuilder.parse(is);
+            Document doc = dBuilder.parse(is);
 
-        //optional, but recommended
-        //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
-        doc.getDocumentElement().normalize();
+            //optional, but recommended
+            //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
+            doc.getDocumentElement().normalize();
 
-        String name = getMandatoryAttribute(doc.getDocumentElement(), "name");
-        String key = getMandatoryAttribute(doc.getDocumentElement(), "key");
+            String name = getMandatoryAttribute(doc.getDocumentElement(), "name");
+            String key = getMandatoryAttribute(doc.getDocumentElement(), "key");
 
-        JobXML jobXML = new JobXML(key, name);
+            JobXML jobXML = new JobXML(file, key, name);
 
-        String runScript = getElementContent(doc.getDocumentElement(), "Run", true);
+            String runScript = getElementContent(doc.getDocumentElement(), "Run", true);
 
-        jobXML.setRunScript(runScript);
+            jobXML.setRunScript(runScript);
 
-        String validateScript = getElementContent(doc.getDocumentElement(), "Validate", false);
+            String validateScript = getElementContent(doc.getDocumentElement(), "Validate", false);
 
-        jobXML.setValidateScript(validateScript);
+            jobXML.setValidateScript(validateScript);
 
-        int order = 0;
+            int order = 0;
 
-        order = parseParameters(doc, jobXML, order);
+            order = parseParameters(doc, jobXML, order);
 
-        order = parseExpressions(doc, jobXML, order);
+            order = parseExpressions(doc, jobXML, order);
 
-        parseCalls(doc, jobXML, order);
+            parseCalls(doc, jobXML, order);
 
-        projectXML.addJob(jobXML);
+            projectXML.addJob(jobXML);
+
+        } catch (Throwable th) {
+            throw new Exception("Cannot parse file " + file, th);
+        }
     }
 
     private int parseExpressions(Document doc, JobXML jobXML, int order)

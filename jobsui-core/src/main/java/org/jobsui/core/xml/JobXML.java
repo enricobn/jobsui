@@ -1,5 +1,14 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.groovy.JobParser;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
 import java.util.*;
 
 /**
@@ -11,14 +20,70 @@ public class JobXML {
     private final List<CallXML> callXMLs = new ArrayList<>();
     private final Map<String, ParameterXML> parameters = new HashMap<>();
 
+    private final File file;
     private final String key;
     private final String name;
     private String runScript;
     private String validateScript;
 
-    public JobXML(String key, String name) {
+    public JobXML(File file, String key, String name) {
+        this.file = file;
         this.key = key;
         this.name = name;
+    }
+
+    public void export() throws Exception {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+        // root elements
+        Document doc = docBuilder.newDocument();
+        Element rootElement = doc.createElement("Job");
+        doc.appendChild(rootElement);
+
+        Attr attr = doc.createAttribute("key");
+        attr.setValue(key);
+        rootElement.setAttributeNode(attr);
+
+        attr = doc.createAttribute("name");
+        attr.setValue(name);
+        rootElement.setAttributeNode(attr);
+
+        for (SimpleParameterXML parameter : simpleParameterXMLs) {
+            Element element = createParameterElement(doc, rootElement, parameter);
+
+            Element createComponent = doc.createElement("CreateComponent");
+            element.appendChild(createComponent);
+            createComponent.appendChild(doc.createTextNode(parameter.getCreateComponentScript()));
+
+            if (validateScript != null && !validateScript.isEmpty()) {
+                Element validateComponent = doc.createElement("Validate");
+                element.appendChild(validateComponent);
+                validateComponent.appendChild(doc.createTextNode(parameter.getValidateScript()));
+            }
+
+            for (String dependency : parameter.getDependencies()) {
+                Element dependencyComponent = doc.createElement("Dependency");
+                element.appendChild(dependencyComponent);
+                XMLUtils.addAttr(doc, dependencyComponent, "key", dependency);
+            }
+
+            if (parameter.getOnDependenciesChangeScript() != null && !parameter.getOnDependenciesChangeScript().isEmpty()) {
+                Element onDependenciesChange = doc.createElement("OnDependenciesChange");
+                element.appendChild(onDependenciesChange);
+                onDependenciesChange.appendChild(doc.createTextNode(parameter.getOnDependenciesChangeScript()));
+            }
+        }
+
+        XMLUtils.write(doc, file);
+    }
+
+    private Element createParameterElement(Document doc, Element rootElement, ParameterXML parameter) {
+        Element element = doc.createElement("Parameter");
+        rootElement.appendChild(element);
+        XMLUtils.addAttr(doc, element, "key", parameter.getKey());
+        XMLUtils.addAttr(doc, element, "name", parameter.getName());
+        return element;
     }
 
     public void setRunScript(String runScript) {

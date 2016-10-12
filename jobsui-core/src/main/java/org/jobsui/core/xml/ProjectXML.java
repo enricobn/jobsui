@@ -1,5 +1,19 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.groovy.JobParser;
+import org.w3c.dom.Attr;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.util.*;
 
@@ -18,6 +32,39 @@ public class ProjectXML {
     public ProjectXML(File projectFolder, String name) {
         this.projectFolder = projectFolder;
         this.name = name;
+    }
+
+    public void export() throws Exception {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+
+        // root elements
+        Document doc = docBuilder.newDocument();
+        Element rootElement = doc.createElement("Project");
+        doc.appendChild(rootElement);
+
+        for (String library : libraries) {
+            Element element = doc.createElement("Library");
+            rootElement.appendChild(element);
+            element.appendChild(doc.createTextNode(library));
+        }
+
+        for (Map.Entry<String, String> entry : imports.entrySet()) {
+            Element element = doc.createElement("Import");
+            rootElement.appendChild(element);
+            element.appendChild(doc.createTextNode(entry.getValue()));
+
+            Attr attr = doc.createAttribute("name");
+            attr.setValue(entry.getKey());
+            element.setAttributeNode(attr);
+        }
+
+        XMLUtils.write(doc, new File(projectFolder, JobParser.PROJECT_FILE_NAME));
+
+        for (JobXML jobXML : jobs.values()) {
+            jobXML.export();
+        }
+
     }
 
     public void addLibrary(String library) {
