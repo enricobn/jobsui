@@ -1,9 +1,11 @@
 package org.jobsui.core;
 
 import org.jobsui.core.groovy.JobParser;
+import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.ui.UI;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.ui.swing.SwingUI;
+import org.jobsui.core.xml.ProjectXML;
 
 import java.io.File;
 
@@ -25,8 +27,8 @@ public class Main {
             return;
         }
 
-        JobParser parser = new JobParser();
-        final Project project = parser.loadProject(projectFolder);
+        ProjectXML projectXML = new JobParser().loadProject(projectFolder);
+        final Project project = new ProjectGroovyBuilder().build(projectXML);
 
         String key = args[1];
 

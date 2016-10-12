@@ -22,11 +22,13 @@ public class ProjectGroovy implements Project {
     public ProjectGroovy(ProjectXML projectXML, Map<String, JobGroovy<?>> jobs) {
         this.projectXML = projectXML;
         this.jobs = jobs;
+        ProjectGroovyBuilder projectGroovyBuilder = new ProjectGroovyBuilder();
         getProjectXML().getImports().entrySet().stream().forEach(entry -> {
             JobParser jobParser;
             try {
                 jobParser = new JobParser();
-                projects.put(entry.getKey(), jobParser.loadProject(new File(projectXML.getProjectFolder(), entry.getValue())));
+                ProjectXML refProjectXML = jobParser.loadProject(new File(projectXML.getProjectFolder(), entry.getValue()));
+                projects.put(entry.getKey(), projectGroovyBuilder.build(refProjectXML));
             } catch (Exception e) {
                 // TODO
                 throw new RuntimeException(e);

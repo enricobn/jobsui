@@ -37,4 +37,12 @@ public class ParameterXML {
     int getOrder() {
         return order;
     }
+
+    public boolean isOptional() {
+        return false;
+    }
+
+    public boolean isVisible() {
+        return true;
+    }
 }

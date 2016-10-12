@@ -3,7 +3,9 @@ package org.jobsui.core;
 import groovy.lang.GroovyShell;
 import org.jobsui.core.groovy.JobParameterDefGroovySimple;
 import org.jobsui.core.groovy.JobParser;
+import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.ui.*;
+import org.jobsui.core.xml.ProjectXML;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -126,13 +128,17 @@ public class JobRunnerTest {
             }
         };
 
-        JobParser parser = new JobParser();
-        Project project = parser.loadProject(new File("src/test/resources/simplejob"));
-        final Job<String> job = project.getJob("simple");
+        final Job<String> job = getJob("src/test/resources/simplejob", "simple");
 
         final JobFuture<String> jobFuture = jobRunnerWrapper.start(job);
 
         assertThat(jobFuture.get(), equalTo("(John,Doe)"));
+    }
+
+    private <T> Job<T> getJob(String file, String job) throws Exception {
+        ProjectXML projectXML = new JobParser().loadProject(new File(file));
+        Project project = new ProjectGroovyBuilder().build(projectXML);
+        return project.getJob(job);
     }
 
     @Test public void assert_that_complexjob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
@@ -190,9 +196,7 @@ public class JobRunnerTest {
             }
         };
 
-        JobParser parser = new JobParser();
-        Project project = parser.loadProject(new File("src/test/resources/simplejob"));
-        final Job<String> job = project.getJob("simple");
+        final Job<String> job = getJob("src/test/resources/simplejob", "simple");
 
         jobRunnerWrapper.start(job);
 
@@ -299,9 +303,7 @@ public class JobRunnerTest {
             }
         };
 
-        JobParser parser = new JobParser();
-        Project project = parser.loadProject(new File("src/test/resources/external"));
-        final Job<String> job = project.getJob("concat");
+        final Job<String> job = getJob("src/test/resources/external", "concat");
 
         final JobFuture<String> jobFuture = jobRunnerWrapper.start(job);
 
@@ -324,9 +326,7 @@ public class JobRunnerTest {
             }
         };
 
-        JobParser parser = new JobParser();
-        Project project = parser.loadProject(new File("src/test/resources/simplejob"));
-        final Job<String> job = project.getJob("simpleWithExternalCall");
+        final Job<String> job = getJob("src/test/resources/simplejob", "simpleWithExternalCall");
 
         final JobFuture<String> jobFuture = jobRunnerWrapper.start(job);
 
@@ -349,9 +349,7 @@ public class JobRunnerTest {
             }
         };
 
-        JobParser parser = new JobParser();
-        Project project = parser.loadProject(new File("src/test/resources/simplejob"));
-        final Job<String> job = project.getJob("simpleWithInternalCall");
+        final Job<String> job = getJob("src/test/resources/simplejob", "simpleWithInternalCall");
 
         final JobFuture<String> jobFuture = jobRunnerWrapper.start(job);
 

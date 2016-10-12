@@ -10,14 +10,14 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.jobsui.core.Job;
-import org.jobsui.core.JobParameterDef;
 import org.jobsui.core.groovy.*;
+import org.jobsui.core.xml.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Created by enrico on 10/9/16.
@@ -116,12 +116,12 @@ public class EditProject extends Application {
 
     private TreeItem<Item> loadProject(File file) throws Exception {
         JobParser parser = new JobParser();
-        ProjectGroovy project = (ProjectGroovy) parser.loadProject(file);
+        ProjectXML project = parser.loadProject(file);
         TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, project.getName(), project));
 
         TreeItem<Item> libraries = new TreeItem<>(new Item(ItemType.Libraries, "libraries", project));
         root.getChildren().add(libraries);
-        project.getProjectXML().getLibraries().stream()
+        project.getLibraries().stream()
                 .map(l -> new Item(ItemType.Library, l, l))
                 .map(TreeItem::new)
                 .forEach(treeItem -> libraries.getChildren().add(treeItem));
@@ -133,43 +133,41 @@ public class EditProject extends Application {
                 .map(TreeItem::new)
                 .forEach(treeItem -> groovy.getChildren().add(treeItem));
 
-        project.getKeys().stream()
-                .map(project::getJob)
-                .sorted(Comparator.comparing(Job::getName))
+        project.getJobs().values().stream()
+                .sorted(Comparator.comparing(JobXML::getName))
                 .map(this::createJobTreeItem)
                 .forEach(root.getChildren()::add);
         return root;
     }
 
-    private TreeItem<Item> createJobTreeItem(Job<?> job) {
+    private TreeItem<Item> createJobTreeItem(JobXML job) {
         TreeItem<Item> result = new TreeItem<>(new Item(ItemType.Job, job.getName(), job));
 
-        addParameters(result, job, "parameters", ItemType.Parameter, JobParameterDefGroovySimple.class);
-        addParameters(result, job, "expressions", ItemType.Expression, JobExpressionDefGroovy.class);
-        addParameters(result, job, "calls", ItemType.Call, JobCallDefGroovy.class);
+        addParameters(result, job, "parameters", ItemType.Parameter, job.getSimpleParameterXMLs());
+        addParameters(result, job, "expressions", ItemType.Expression, job.getExpressionXMLs());
+        addParameters(result, job, "calls", ItemType.Call, job.getCallXMLs());
 
         result.setExpanded(true);
         return result;
     }
 
-    private void addParameters(TreeItem<Item> result, Job<?> job, String containerText, ItemType itemType,
-                               Class<? extends JobParameterDef> clazz) {
-        TreeItem<Item> parameters = new TreeItem<>(new Item(ItemType.Parameters, containerText, job));
+    private void addParameters(TreeItem<Item> result, JobXML jobXML, String containerText, ItemType itemType,
+                               List<? extends ParameterXML> parametersList) {
+        TreeItem<Item> parameters = new TreeItem<>(new Item(ItemType.Parameters, containerText, jobXML));
         parameters.setExpanded(true);
         result.getChildren().add(parameters);
 
-        job.getParameterDefs().stream()
-                .filter(parameter -> clazz.isAssignableFrom(parameter.getClass()))
-//                .sorted(Comparator.comparing(JobParameterDef::getName))
-                .forEach(parameterDef -> addParameter(parameters, itemType, parameterDef));
+        parametersList.stream()
+                .forEach(parameter -> addParameter(parameters, itemType, parameter, jobXML));
     }
 
-    private void addParameter(TreeItem<Item> parameters, ItemType itemType, JobParameterDef<?> parameterDef) {
+    private void addParameter(TreeItem<Item> parameters, ItemType itemType, ParameterXML parameterDef, JobXML jobXML) {
         TreeItem<Item> parameterTI = new TreeItem<>(new Item(itemType, parameterDef.getName(), parameterDef));
         parameters.getChildren().add(parameterTI);
         TreeItem<Item> dependencies = new TreeItem<>(new Item(ItemType.Dependencies, "dependencies", parameterDef));
         parameterTI.getChildren().add(dependencies);
         parameterDef.getDependencies().stream()
+                .map(jobXML::getParameter)
                 .map(dep -> new Item(ItemType.Dependency, dep.getName(), dep))
                 .map(TreeItem::new)
                 .forEach(dependencies.getChildren()::add);
@@ -194,7 +192,7 @@ public class EditProject extends Application {
             item.getChildren().clear();
             switch (itemType) {
                 case Project:
-                    ProjectGroovy project = (ProjectGroovy) payload;
+                    ProjectXML project = (ProjectXML) payload;
                     break;
                 case GroovyFile:
                     File file = (File) payload;
@@ -210,7 +208,7 @@ public class EditProject extends Application {
                 case Job:
                     break;
                 case Parameter:
-                    JobParameterDefGroovySimple simple = (JobParameterDefGroovySimple) payload;
+                    SimpleParameterXML simple = (SimpleParameterXML) payload;
                     item.getChildren().add(new Label("Create component:"));
                     item.getChildren().add(new TextArea(simple.getCreateComponentScript()));
                     item.getChildren().add(new Label("On dependecies change:"));
@@ -219,12 +217,12 @@ public class EditProject extends Application {
                     item.getChildren().add(new TextArea(simple.getValidateScript()));
                     break;
                 case Expression:
-                    JobExpressionDefGroovy exp= (JobExpressionDefGroovy) payload;
+                    ExpressionXML exp= (ExpressionXML) payload;
                     item.getChildren().add(new Label("Evaluate:"));
                     item.getChildren().add(new TextArea(exp.getEvaluateScript()));
                     break;
                 case Call:
-                    JobCallDefGroovy call = (JobCallDefGroovy) payload;
+                    CallXML call = (CallXML) payload;
                     // TODO
                     break;
             }

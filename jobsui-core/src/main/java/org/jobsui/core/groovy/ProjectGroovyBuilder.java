@@ -46,7 +46,7 @@ public class ProjectGroovyBuilder {
                     simpleParameterXML.getName(),
                     simpleParameterXML.getCreateComponentScript(),
                     simpleParameterXML.getOnDependenciesChangeScript(),
-                    simpleParameterXML.getParameterValidateScript(),
+                    simpleParameterXML.getValidateScript(),
                     simpleParameterXML.isOptional(),
                     simpleParameterXML.isVisible());
             parameterDefsMap.put(parameterDef.getKey(), parameterDef);

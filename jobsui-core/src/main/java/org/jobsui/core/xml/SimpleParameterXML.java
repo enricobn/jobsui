@@ -34,7 +34,7 @@ public class SimpleParameterXML extends ParameterXML {
         this.optional = optional;
     }
 
-    public String getParameterValidateScript() {
+    public String getValidateScript() {
         return parameterValidateScript;
     }
 

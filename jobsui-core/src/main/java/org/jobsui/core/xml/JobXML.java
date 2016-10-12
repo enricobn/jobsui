@@ -110,4 +110,8 @@ public class JobXML {
         }
         return sorted;
     }
+
+    public ParameterXML getParameter(String key) {
+        return parameters.get(key);
+    }
 }

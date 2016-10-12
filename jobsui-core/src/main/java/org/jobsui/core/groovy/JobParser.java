@@ -1,6 +1,5 @@
 package org.jobsui.core.groovy;
 
-import org.jobsui.core.Project;
 import org.jobsui.core.xml.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -36,7 +35,7 @@ public class JobParser {
         projectValidator = projectSchema.newValidator();
     }
 
-    public Project loadProject(File folder) throws Exception {
+    public ProjectXML loadProject(File folder) throws Exception {
         File projectFile = new File(folder, "project.xml");
 
         if (!projectFile.exists()) {
@@ -83,7 +82,7 @@ public class JobParser {
             }
         }
 
-        return new ProjectGroovyBuilder().build(projectXML);
+        return projectXML;
     }
 
     private ProjectXML parseProject(File projectFolder, InputStream is) throws Exception {
