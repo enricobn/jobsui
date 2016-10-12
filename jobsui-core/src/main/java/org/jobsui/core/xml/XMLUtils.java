@@ -30,11 +30,19 @@ public interface XMLUtils {
         transformer.transform(source, result);
     }
 
-    static void addAttr(Document doc, Element element, String key, String value) {
+    static void addAttr(Element element, String key, String value) {
+        Document doc = element.getOwnerDocument();
         Attr attr = doc.createAttribute(key);
         attr.setValue(value);
         element.setAttributeNode(attr);
+    }
 
+    static Element addTextElement(Element parent, String name, String text) {
+        Document doc = parent.getOwnerDocument();
+        Element child = doc.createElement(name);
+        parent.appendChild(child);
+        child.appendChild(doc.createTextNode(text));
+        return child;
     }
 
 }

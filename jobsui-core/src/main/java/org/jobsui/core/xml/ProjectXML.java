@@ -44,19 +44,12 @@ public class ProjectXML {
         doc.appendChild(rootElement);
 
         for (String library : libraries) {
-            Element element = doc.createElement("Library");
-            rootElement.appendChild(element);
-            element.appendChild(doc.createTextNode(library));
+            XMLUtils.addTextElement(rootElement, "Library", library);
         }
 
         for (Map.Entry<String, String> entry : imports.entrySet()) {
-            Element element = doc.createElement("Import");
-            rootElement.appendChild(element);
-            element.appendChild(doc.createTextNode(entry.getValue()));
-
-            Attr attr = doc.createAttribute("name");
-            attr.setValue(entry.getKey());
-            element.setAttributeNode(attr);
+            Element element = XMLUtils.addTextElement(rootElement, "Import", entry.getValue());
+            XMLUtils.addAttr(element, "name", entry.getKey());
         }
 
         XMLUtils.write(doc, new File(projectFolder, JobParser.PROJECT_FILE_NAME));
