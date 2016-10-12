@@ -194,6 +194,7 @@ public class EditProject extends Application {
                 case Project:
                     ProjectXML project = (ProjectXML) payload;
                     break;
+
                 case GroovyFile:
                     File file = (File) payload;
                     if (file.getName().endsWith(".groovy") ||
@@ -205,8 +206,10 @@ public class EditProject extends Application {
                         item.getChildren().add(new TextArea(content));
                     }
                     break;
+
                 case Job:
                     break;
+
                 case Parameter:
                     SimpleParameterXML simple = (SimpleParameterXML) payload;
                     item.getChildren().add(new Label("Create component:"));
@@ -216,11 +219,13 @@ public class EditProject extends Application {
                     item.getChildren().add(new Label("Validate:"));
                     item.getChildren().add(new TextArea(simple.getValidateScript()));
                     break;
+
                 case Expression:
                     ExpressionXML exp= (ExpressionXML) payload;
                     item.getChildren().add(new Label("Evaluate:"));
                     item.getChildren().add(new TextArea(exp.getEvaluateScript()));
                     break;
+
                 case Call:
                     CallXML call = (CallXML) payload;
                     // TODO
