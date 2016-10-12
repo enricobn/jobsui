@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Job key="simpleWithInternalCall" name="Simple with ext">
+<Job name="Simple">
 
     <Parameter key="name" name="Name">
 
@@ -36,11 +36,24 @@
         </Validate>
 
     </Parameter>
+    <Parameter key="inv" name="Inv" visible="false">
 
-    <Call key="inv" name="Inv" project="this" job="concat">
-        <Map in="name" out="first"/>
-        <Map in="surname" out="second"/>
-    </Call>
+        <CreateComponent>
+            <![CDATA[
+                return ui.create(UIChoice.class);
+            ]]>
+        </CreateComponent>
+
+        <Dependency key="name"/>
+        <Dependency key="surname"/>
+
+        <OnDependenciesChange>
+            <![CDATA[
+                widget.getComponent().setItems([Foo.concat(name, surname)])
+            ]]>
+        </OnDependenciesChange>
+
+    </Parameter>
 
     <Run>
         <![CDATA[

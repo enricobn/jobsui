@@ -23,10 +23,16 @@ public class JobXML {
     private String runScript;
     private String validateScript;
 
-    public JobXML(File file, String key, String name) {
+    public JobXML(File file, String name) {
         this.file = file;
-        this.key = key;
         this.name = name;
+
+        String fileName = file.getName();
+        int pos = fileName.lastIndexOf(".");
+        if (pos > 0) {
+            fileName = fileName.substring(0, pos);
+        }
+        this.key = fileName;
     }
 
     public void export() throws Exception {
@@ -38,7 +44,6 @@ public class JobXML {
         Element rootElement = doc.createElement("Job");
         doc.appendChild(rootElement);
 
-        XMLUtils.addAttr(rootElement, "key", key);
         XMLUtils.addAttr(rootElement, "name", name);
 
         for (SimpleParameterXML parameter : simpleParameterXMLs) {

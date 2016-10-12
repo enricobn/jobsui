@@ -140,9 +140,8 @@ public class JobParser {
             doc.getDocumentElement().normalize();
 
             String name = getMandatoryAttribute(doc.getDocumentElement(), "name");
-            String key = getMandatoryAttribute(doc.getDocumentElement(), "key");
 
-            JobXML jobXML = new JobXML(file, key, name);
+            JobXML jobXML = new JobXML(file, name);
 
             String runScript = getElementContent(doc.getDocumentElement(), "Run", true);
 
