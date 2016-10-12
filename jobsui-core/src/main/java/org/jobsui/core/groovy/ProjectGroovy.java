@@ -2,12 +2,7 @@ package org.jobsui.core.groovy;
 
 import org.jobsui.core.Job;
 import org.jobsui.core.Project;
-import org.jobsui.core.xml.ProjectXML;
-import org.xml.sax.SAXException;
 
-import java.io.File;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,25 +10,14 @@ import java.util.Set;
  * Created by enrico on 10/6/16.
  */
 public class ProjectGroovy implements Project {
-    private final ProjectXML projectXML;
+    private final String name;
     private final Map<String, JobGroovy<?>> jobs;
-    private final Map<String, Project> projects = new HashMap<>();
+    private final Map<String, Project> referencedProjects;
 
-    public ProjectGroovy(ProjectXML projectXML, Map<String, JobGroovy<?>> jobs) {
-        this.projectXML = projectXML;
+    public ProjectGroovy(String name, Map<String, JobGroovy<?>> jobs, Map<String, Project> referencedProjects) {
+        this.name = name;
         this.jobs = jobs;
-        ProjectGroovyBuilder projectGroovyBuilder = new ProjectGroovyBuilder();
-        getProjectXML().getImports().entrySet().stream().forEach(entry -> {
-            JobParser jobParser;
-            try {
-                jobParser = new JobParser();
-                ProjectXML refProjectXML = jobParser.loadProject(new File(projectXML.getProjectFolder(), entry.getValue()));
-                projects.put(entry.getKey(), projectGroovyBuilder.build(refProjectXML));
-            } catch (Exception e) {
-                // TODO
-                throw new RuntimeException(e);
-            }
-        });
+        this.referencedProjects = referencedProjects;
     }
 
     @Override
@@ -48,18 +32,10 @@ public class ProjectGroovy implements Project {
 
     @Override
     public String getName() {
-        return projectXML.getName();
-    }
-
-    public ProjectXML getProjectXML() {
-        return projectXML;
-    }
-
-    public Collection<File> getGroovyFiles() {
-        return projectXML.getGroovyFiles();
+        return name;
     }
 
     public Project getProject(String key) {
-        return projects.get(key);
+        return referencedProjects.get(key);
     }
 }

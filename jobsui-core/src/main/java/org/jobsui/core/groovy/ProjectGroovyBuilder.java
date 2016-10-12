@@ -3,6 +3,7 @@ package org.jobsui.core.groovy;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
+import org.jobsui.core.Project;
 import org.jobsui.core.xml.*;
 
 import java.io.File;
@@ -26,7 +27,22 @@ public class ProjectGroovyBuilder {
             jobs.put(jobXML.getKey(), build(projectXML, jobXML));
         }
 
-        ProjectGroovy projectGroovy = new ProjectGroovy(projectXML, jobs);
+        Map<String, Project> projects = new HashMap<>();
+
+        JobParser jobParser = new JobParser();
+
+        ProjectGroovyBuilder projectGroovyBuilder = new ProjectGroovyBuilder();
+        projectXML.getImports().entrySet().stream().forEach(entry -> {
+            try {
+                ProjectXML refProjectXML = jobParser.loadProject(new File(projectXML.getProjectFolder(), entry.getValue()));
+                projects.put(entry.getKey(), projectGroovyBuilder.build(refProjectXML));
+            } catch (Exception e) {
+                // TODO
+                throw new RuntimeException(e);
+            }
+        });
+
+        ProjectGroovy projectGroovy = new ProjectGroovy(projectXML.getName(), jobs, projects);
 
         for (JobGroovy<?> job : jobs.values()) {
             job.init(projectGroovy);
@@ -34,7 +50,7 @@ public class ProjectGroovyBuilder {
         return projectGroovy;
     }
 
-    private <T> JobGroovy<T> build(ProjectXML projectXML, JobXML jobXML) throws Exception {
+    private static <T> JobGroovy<T> build(ProjectXML projectXML, JobXML jobXML) throws Exception {
         GroovyShell groovyShell = createGroovyShell(projectXML);
         Map<String, JobParameterDefGroovy<?>> parameterDefsMap = new HashMap<>();
 
@@ -83,7 +99,7 @@ public class ProjectGroovyBuilder {
                 jobXML.getRunScript(), jobXML.getValidateScript(), projectXML.getProjectFolder());
     }
 
-    private void addDependencies(List<? extends ParameterXML> parameterXMLs, Map<String, JobParameterDefGroovy<?>> parameterDefs) {
+    private static void addDependencies(List<? extends ParameterXML> parameterXMLs, Map<String, JobParameterDefGroovy<?>> parameterDefs) {
         for (ParameterXML parameterXML : parameterXMLs) {
             JobParameterDefGroovy<?> jobParameterDefGroovy = parameterDefs.get(parameterXML.getKey());
             for (String depKey : parameterXML.getDependencies()) {
@@ -117,4 +133,5 @@ public class ProjectGroovyBuilder {
 
         return new GroovyShell(cl);
     }
+
 }
