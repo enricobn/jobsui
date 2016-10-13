@@ -2,13 +2,7 @@ package org.jobsui.core.edit;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -21,14 +15,10 @@ import org.jobsui.core.xml.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -234,38 +224,46 @@ public class EditProject extends Application {
                 case Job:
                     break;
 
-                case Parameter:
-                    SimpleParameterXML simple = (SimpleParameterXML) payload;
+                case Parameter: {
+                    SimpleParameterXML parameter = (SimpleParameterXML) payload;
 
-                    addTextProperty("Key:", simple::setKey, simple::getKey);
-                    addTextProperty("Name:", simple::setName, simple::getName);
+                    addTextProperty("Key:", parameter::getKey, parameter::setKey);
+                    addTextProperty("Name:", parameter::getName, parameter::setName);
 
-                    addTextAreaProperty("Create component:", simple::setCreateComponentScript,
-                            simple::getCreateComponentScript);
+                    addTextAreaProperty("Create component:", parameter::getCreateComponentScript,
+                            parameter::setCreateComponentScript);
 
-                    addTextAreaProperty("On dependencies change:", simple::setOnDependenciesChangeScript,
-                            simple::getOnDependenciesChangeScript);
+                    addTextAreaProperty("On dependencies change:", parameter::getOnDependenciesChangeScript,
+                            parameter::setOnDependenciesChangeScript);
 
-                    addTextAreaProperty("Validate:", simple::setValidateScript,
-                            simple::getValidateScript);
+                    addTextAreaProperty("Validate:", parameter::getValidateScript, parameter::setValidateScript);
                     break;
+                }
 
-                case Expression:
-                    ExpressionXML exp= (ExpressionXML) payload;
-                    item.getChildren().add(new Label("Evaluate:"));
-                    item.getChildren().add(new TextArea(exp.getEvaluateScript()));
+                case Expression: {
+                    ExpressionXML parameter = (ExpressionXML) payload;
+
+                    addTextProperty("Key:", parameter::getKey, parameter::setKey);
+                    addTextProperty("Name:", parameter::getName, parameter::setName);
+
+                    addTextAreaProperty("Evaluate:", parameter::getEvaluateScript, parameter::setEvaluateScript);
                     break;
+                }
 
-                case Call:
-                    CallXML call = (CallXML) payload;
+                case Call: {
+                    CallXML parameter = (CallXML) payload;
+
+                    addTextProperty("Key:", parameter::getKey, parameter::setKey);
+                    addTextProperty("Name:", parameter::getName, parameter::setName);
+
                     // TODO
                     break;
+                }
             }
         }
 
         private void addTextAreaProperty(String title,
-                                         Consumer<String> set,
-                                         Supplier<String> get) {
+                                         Supplier<String> get, Consumer<String> set) {
             item.getChildren().add(new Label(title));
             TextArea control = new TextArea(get.get());
 
@@ -276,8 +274,7 @@ public class EditProject extends Application {
         }
 
         private void addTextProperty(String title,
-                                         Consumer<String> set,
-                                         Supplier<String> get) {
+                                     Supplier<String> get, Consumer<String> set) {
             item.getChildren().add(new Label(title));
             TextField control = new TextField(get.get());
 
@@ -326,7 +323,7 @@ public class EditProject extends Application {
                 setText(null);
                 setGraphic(null);
             } else if (item != null) {
-                setText((String) item.title.get());
+                setText(item.title.get());
                 setGraphic(getTreeItem().getGraphic());
                 if (item.itemType == ItemType.Dependencies) {
                     setContextMenu(addDependencyMenu);
