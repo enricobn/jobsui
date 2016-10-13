@@ -201,7 +201,7 @@ public class EditProject extends Application {
         Project, GroovyFile, Job, Parameter, Expression, Dependency, Dependencies, Parameters, Groovy, Libraries, Library, Call
     }
 
-    private class Item<T> {
+    private class Item {
         private final ItemType itemType;
         private final Supplier<String> title;
         private final Object payload;
