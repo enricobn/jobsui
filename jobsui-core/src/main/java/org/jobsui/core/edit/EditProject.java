@@ -8,6 +8,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.event.EventType;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -140,19 +141,19 @@ public class EditProject extends Application {
     private TreeItem<Item> loadProject(File file) throws Exception {
         JobParser parser = new JobParser();
         projectXML = parser.loadProject(file);
-        TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, projectXML.getName(), projectXML));
+        TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, projectXML::getName, projectXML));
 
-        TreeItem<Item> libraries = new TreeItem<>(new Item(ItemType.Libraries, "libraries", projectXML));
+        TreeItem<Item> libraries = new TreeItem<>(new Item(ItemType.Libraries, () -> "libraries", projectXML));
         root.getChildren().add(libraries);
         projectXML.getLibraries().stream()
-                .map(l -> new Item(ItemType.Library, l, l))
+                .map(l -> new Item(ItemType.Library, () -> l, l))
                 .map(TreeItem::new)
                 .forEach(treeItem -> libraries.getChildren().add(treeItem));
 
-        TreeItem<Item> groovy = new TreeItem<>(new Item(ItemType.Groovy, "groovy", projectXML));
+        TreeItem<Item> groovy = new TreeItem<>(new Item(ItemType.Groovy, () -> "groovy", projectXML));
         root.getChildren().add(groovy);
         projectXML.getGroovyFiles().stream()
-                .map(f -> new Item(ItemType.GroovyFile, f.getName(), f))
+                .map(f -> new Item(ItemType.GroovyFile, f::getName, f))
                 .map(TreeItem::new)
                 .forEach(treeItem -> groovy.getChildren().add(treeItem));
 
@@ -164,7 +165,7 @@ public class EditProject extends Application {
     }
 
     private TreeItem<Item> createJobTreeItem(JobXML job) {
-        TreeItem<Item> result = new TreeItem<>(new Item(ItemType.Job, job.getName(), job));
+        TreeItem<Item> result = new TreeItem<>(new Item(ItemType.Job, job::getName, job));
 
         addParameters(result, job, "parameters", ItemType.Parameter, job.getSimpleParameterXMLs());
         addParameters(result, job, "expressions", ItemType.Expression, job.getExpressionXMLs());
@@ -176,7 +177,7 @@ public class EditProject extends Application {
 
     private void addParameters(TreeItem<Item> result, JobXML jobXML, String containerText, ItemType itemType,
                                List<? extends ParameterXML> parametersList) {
-        TreeItem<Item> parameters = new TreeItem<>(new Item(ItemType.Parameters, containerText, jobXML));
+        TreeItem<Item> parameters = new TreeItem<>(new Item(ItemType.Parameters, () -> containerText, jobXML));
         parameters.setExpanded(true);
         result.getChildren().add(parameters);
 
@@ -185,13 +186,13 @@ public class EditProject extends Application {
     }
 
     private void addParameter(TreeItem<Item> parameters, ItemType itemType, ParameterXML parameterDef, JobXML jobXML) {
-        TreeItem<Item> parameterTI = new TreeItem<>(new Item(itemType, parameterDef.getName(), parameterDef));
+        TreeItem<Item> parameterTI = new TreeItem<>(new Item(itemType, parameterDef::getName, parameterDef));
         parameters.getChildren().add(parameterTI);
-        TreeItem<Item> dependencies = new TreeItem<>(new Item(ItemType.Dependencies, "dependencies", parameterDef));
+        TreeItem<Item> dependencies = new TreeItem<>(new Item(ItemType.Dependencies, () -> "dependencies", parameterDef));
         parameterTI.getChildren().add(dependencies);
         parameterDef.getDependencies().stream()
                 .map(jobXML::getParameter)
-                .map(dep -> new Item(ItemType.Dependency, dep.getName(), dep))
+                .map(dep -> new Item(ItemType.Dependency, dep::getName, dep))
                 .map(TreeItem::new)
                 .forEach(dependencies.getChildren()::add);
     }
@@ -200,12 +201,12 @@ public class EditProject extends Application {
         Project, GroovyFile, Job, Parameter, Expression, Dependency, Dependencies, Parameters, Groovy, Libraries, Library, Call
     }
 
-    private class Item {
+    private class Item<T> {
         private final ItemType itemType;
-        private final String title;
+        private final Supplier<String> title;
         private final Object payload;
 
-        Item(ItemType itemType, String title, Object payload) {
+        Item(ItemType itemType, Supplier<String> title, Object payload) {
             this.itemType = itemType;
             this.title = title;
             this.payload = payload;
@@ -282,13 +283,18 @@ public class EditProject extends Application {
 
             control.textProperty().addListener((observable, oldValue, newValue) -> {
                 set.accept(newValue);
+
+                // to update the tree item's label
+                TreeItem<Item> selectedItem = items.getSelectionModel().getSelectedItem();
+                int index = selectedItem.getParent().getChildren().indexOf(selectedItem);
+                selectedItem.getParent().getChildren().set(index, selectedItem);
             });
             item.getChildren().add(control);
         }
 
         @Override
         public String toString() {
-            return title;
+            return title.get();
         }
     }
 
@@ -301,7 +307,7 @@ public class EditProject extends Application {
             this.addDependencyMenu.getItems().add(addDependency);
             addDependency.setOnAction(t -> {
                 // TODO)
-                TreeItem<Item> newDep = new TreeItem<>(new Item(ItemType.Dependency, "New dep", null));
+                TreeItem<Item> newDep = new TreeItem<>(new Item(ItemType.Dependency, () -> "New dep", null));
                 getTreeItem().getChildren().add(newDep);
             });
 
@@ -320,7 +326,7 @@ public class EditProject extends Application {
                 setText(null);
                 setGraphic(null);
             } else if (item != null) {
-                setText(item.title);
+                setText((String) item.title.get());
                 setGraphic(getTreeItem().getGraphic());
                 if (item.itemType == ItemType.Dependencies) {
                     setContextMenu(addDependencyMenu);
