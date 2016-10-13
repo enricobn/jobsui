@@ -2,6 +2,9 @@ package org.jobsui.core.edit;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableObjectValue;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -17,9 +20,15 @@ import org.jobsui.core.xml.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.Files;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Created by enrico on 10/9/16.
@@ -226,12 +235,18 @@ public class EditProject extends Application {
 
                 case Parameter:
                     SimpleParameterXML simple = (SimpleParameterXML) payload;
-                    item.getChildren().add(new Label("Create component:"));
-                    item.getChildren().add(new TextArea(simple.getCreateComponentScript()));
-                    item.getChildren().add(new Label("On dependecies change:"));
-                    item.getChildren().add(new TextArea(simple.getOnDependenciesChangeScript()));
-                    item.getChildren().add(new Label("Validate:"));
-                    item.getChildren().add(new TextArea(simple.getValidateScript()));
+
+                    addTextProperty("Key:", simple::setKey, simple::getKey);
+                    addTextProperty("Name:", simple::setName, simple::getName);
+
+                    addTextAreaProperty("Create component:", simple::setCreateComponentScript,
+                            simple::getCreateComponentScript);
+
+                    addTextAreaProperty("On dependencies change:", simple::setOnDependenciesChangeScript,
+                            simple::getOnDependenciesChangeScript);
+
+                    addTextAreaProperty("Validate:", simple::setValidateScript,
+                            simple::getValidateScript);
                     break;
 
                 case Expression:
@@ -245,6 +260,30 @@ public class EditProject extends Application {
                     // TODO
                     break;
             }
+        }
+
+        private void addTextAreaProperty(String title,
+                                         Consumer<String> set,
+                                         Supplier<String> get) {
+            item.getChildren().add(new Label(title));
+            TextArea control = new TextArea(get.get());
+
+            control.textProperty().addListener((observable, oldValue, newValue) -> {
+                set.accept(newValue);
+            });
+            item.getChildren().add(control);
+        }
+
+        private void addTextProperty(String title,
+                                         Consumer<String> set,
+                                         Supplier<String> get) {
+            item.getChildren().add(new Label(title));
+            TextField control = new TextField(get.get());
+
+            control.textProperty().addListener((observable, oldValue, newValue) -> {
+                set.accept(newValue);
+            });
+            item.getChildren().add(control);
         }
 
         @Override

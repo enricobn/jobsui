@@ -7,10 +7,10 @@ import java.util.List;
  * Created by enrico on 10/11/16.
  */
 public class ParameterXML {
-    private final String key;
-    private final String name;
     private final List<String> dependencies = new ArrayList<>();
     private final int order;
+    private String key;
+    private String name;
 
     ParameterXML(String key, String name, int order) {
         this.key = key;
@@ -44,5 +44,13 @@ public class ParameterXML {
 
     public boolean isVisible() {
         return true;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
