@@ -277,7 +277,10 @@ public class EditProject extends Application {
         @Override
         protected void updateItem(Item item, boolean empty) {
             super.updateItem(item, empty);
-            if (item != null) {
+            if (empty) {
+                setText(null);
+                setGraphic(null);
+            } else if (item != null) {
                 setText(item.title);
                 setGraphic(getTreeItem().getGraphic());
                 if (item.itemType == ItemType.Dependencies) {
