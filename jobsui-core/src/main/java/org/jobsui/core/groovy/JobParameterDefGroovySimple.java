@@ -2,12 +2,12 @@ package org.jobsui.core.groovy;
 
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
+import org.codehaus.groovy.control.CompilationFailedException;
 import org.jobsui.core.JobParameterDefAbstract;
 import org.jobsui.core.ui.UI;
 import org.jobsui.core.ui.UIComponent;
 import org.jobsui.core.ui.UIWidget;
 import org.jobsui.core.ui.UnsupportedComponentException;
-import org.codehaus.groovy.control.CompilationFailedException;
 
 import java.io.File;
 import java.util.Collections;

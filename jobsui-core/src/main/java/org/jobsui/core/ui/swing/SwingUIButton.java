@@ -5,8 +5,6 @@ import rx.Observable;
 import rx.Subscriber;
 
 import javax.swing.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * Created by enrico on 2/24/16.

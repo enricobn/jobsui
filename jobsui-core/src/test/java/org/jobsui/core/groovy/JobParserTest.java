@@ -1,8 +1,5 @@
 package org.jobsui.core.groovy;
 
-import org.jobsui.core.Job;
-import org.jobsui.core.JobParameterDef;
-import org.jobsui.core.Project;
 import org.jobsui.core.xml.JobXML;
 import org.jobsui.core.xml.ParameterXML;
 import org.jobsui.core.xml.ProjectXML;

@@ -1,7 +1,7 @@
 package org.jobsui.core.ui.swing;
 
-import org.jobsui.core.utils.Tuple2;
 import org.jobsui.core.ui.*;
+import org.jobsui.core.utils.Tuple2;
 import rx.Observable;
 import rx.functions.Action1;
 import rx.functions.Func2;

@@ -2,8 +2,8 @@ package org.jobsui.core.groovy;
 
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
-import org.jobsui.core.JobParameterDefAbstract;
 import org.codehaus.groovy.control.CompilationFailedException;
+import org.jobsui.core.JobParameterDefAbstract;
 import org.jobsui.core.ui.*;
 
 import java.io.File;

@@ -1,19 +1,11 @@
 package org.jobsui.core.xml;
 
 import org.jobsui.core.groovy.JobParser;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.util.*;
 
@@ -22,12 +14,12 @@ import java.util.*;
  */
 public class ProjectXML {
     private final File projectFolder;
-    private final String name;
     private final List<String> libraries = new ArrayList<>();
     private final Map<String, String> imports = new HashMap<>();
     private final Map<String, JobXML> jobs = new HashMap<>();
     private final Collection<File> fileLibraries = new ArrayList<>();
     private final Collection<File> groovyFiles = new ArrayList<>();
+    private String name;
 
     public ProjectXML(File projectFolder, String name) {
         this.projectFolder = projectFolder;
@@ -106,5 +98,9 @@ public class ProjectXML {
 
     public Map<String, JobXML> getJobs() {
         return jobs;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

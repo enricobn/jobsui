@@ -12,7 +12,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.jobsui.core.groovy.*;
+import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.xml.*;
 
 import java.io.File;
@@ -235,6 +235,7 @@ public class EditProject extends Application {
             switch (itemType) {
                 case Project:
                     ProjectXML project = (ProjectXML) payload;
+                    addTextProperty("Name:", project::getName, project::setName);
                     break;
 
                 case GroovyFile:
@@ -321,21 +322,20 @@ public class EditProject extends Application {
     }
 
     private static void updateTreeItem(TreeItem<Item> treeItem) {
-        int index = treeItem.getParent().getChildren().indexOf(treeItem);
-        treeItem.getParent().getChildren().set(index, treeItem);
+//        if (treeItem.getParent() != null) {
+//            int index = treeItem.getParent().getChildren().indexOf(treeItem);
+//            treeItem.getParent().getChildren().set(index, treeItem);
+//        } else {
+            Item value = treeItem.getValue();
+            treeItem.setValue(null);
+            treeItem.setValue(value);
+//        }
     }
 
-    /*private final class TextFieldTreeCellImpl extends TreeCell<Item> {
-        private ContextMenu deleteMenu = new ContextMenu();
+    /*
+    private final class TextFieldTreeCellImpl extends TreeCell<Item> {
 
         TextFieldTreeCellImpl() {
-            MenuItem delete = new MenuItem("Delete");
-            this.deleteMenu.getItems().add(delete);
-            delete.setOnAction(t -> {
-                // TODO)
-                getTreeItem().getParent().getChildren().remove(getTreeItem());
-                updateTreeItem(itemsTree.getSelectionModel().getSelectedItem().getParent());
-            });
         }
 
         @Override
@@ -347,46 +347,7 @@ public class EditProject extends Application {
             } else if (item != null) {
                 setText(item.title.get());
                 setGraphic(getTreeItem().getGraphic());
-                if (item.itemType == ItemType.Dependencies) {
-                    ParameterXML parameterXML = (ParameterXML) item.payload;
-                    List<String> dependencies = parameterXML.getDependencies();
-                    JobXML jobXML = (JobXML) getTreeItem().getParent().getParent().getValue().payload;
-                    List<String> parameters = getAllParameters(jobXML);
-                    parameters.removeAll(dependencies);
-
-                    if (!parameters.isEmpty()) {
-                        ContextMenu addDependencyMenu = new ContextMenu();
-                        Menu addDependency = new Menu("Add dependency");
-                        addDependencyMenu.getItems().add(addDependency);
-                        setContextMenu(addDependencyMenu);
-
-                        for (String dependency : parameters) {
-                            ParameterXML parameter = jobXML.getParameter(dependency);
-                            String name = parameter.getName();
-                            MenuItem dependencyMenuItem = new MenuItem(name);
-                            dependencyMenuItem.setOnAction(t -> {
-                                parameterXML.addDependency(dependency);
-                                TreeItem<Item> newDep = new TreeItem<>(new Item(ItemType.Dependency, () -> name, dependency));
-                                getTreeItem().getChildren().add(newDep);
-                            });
-                            addDependency.getItems().add(dependencyMenuItem);
-                        }
-                    } else {
-                        setContextMenu(null);
-                    }
-                } else if (item.itemType == ItemType.Dependency) {
-                    setContextMenu(deleteMenu);
-                } else {
-                    setContextMenu(null);
-                }
             }
-        }
-
-        private List<String> getAllParameters(JobXML jobXML) {
-            return Stream.concat(Stream.concat(jobXML.getCallXMLs().stream(),
-                    jobXML.getExpressionXMLs().stream()),
-                    jobXML.getSimpleParameterXMLs().stream())
-                    .map(ParameterXML::getKey).collect(Collectors.toList());
         }
     }
     */
