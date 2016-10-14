@@ -53,4 +53,8 @@ public class ParameterXML {
     public void setName(String name) {
         this.name = name;
     }
+
+    public void removeDependency(String key) {
+        dependencies.remove(key);
+    }
 }

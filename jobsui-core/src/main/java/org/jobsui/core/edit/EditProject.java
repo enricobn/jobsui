@@ -6,6 +6,8 @@ import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -20,13 +22,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by enrico on 10/9/16.
  */
 public class EditProject extends Application {
-    private TreeView<Item> items;
-    private VBox item;
+    private TreeView<Item> itemsTree;
+    private VBox itemDetail;
     private VBox root;
     private Label status;
     private ProjectXML projectXML = null;
@@ -53,15 +57,15 @@ public class EditProject extends Application {
                     protected Void call() throws Exception {
                         Platform.runLater(() -> {
                             root.setDisable(true);
-                            item.getChildren().clear();
-                            items.setRoot(null);
+                            itemDetail.getChildren().clear();
+                            itemsTree.setRoot(null);
                             status.setText("Loading project ...");
                         });
                         try {
                             TreeItem<Item> root = loadProject(file);
 
                             Platform.runLater(() -> {
-                                items.setRoot(root);
+                                itemsTree.setRoot(root);
                                 root.setExpanded(true);
                             });
                         } catch (Exception e) {
@@ -95,9 +99,9 @@ public class EditProject extends Application {
 
         root.getChildren().add(buttons);
 
-        items = new TreeView<>();
-        items.setCellFactory(param -> new TextFieldTreeCellImpl());
-        items.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+        itemsTree = new TreeView<>();
+//        itemsTree.setCellFactory(param -> new TextFieldTreeCellImpl());
+        itemsTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 try {
                     newValue.getValue().onSelect();
@@ -107,10 +111,32 @@ public class EditProject extends Application {
             }
         });
 
-        item = new VBox(5);
-        item.setPadding(new Insets(5, 5, 5, 5));
+        ContextMenu contextMenu = new ContextMenu();
 
-        SplitPane splitPane = new SplitPane(items, item);
+        itemsTree.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
+            if (e.getButton() == MouseButton.SECONDARY) {
+                TreeItem<Item> selected = itemsTree.getSelectionModel().getSelectedItem();
+
+                //item is selected - this prevents fail when clicking on empty space
+                if (selected != null) {
+                    populateContextMenu(contextMenu, selected);
+                    if (contextMenu.getItems().isEmpty()) {
+                        contextMenu.hide();
+                    } else {
+                        //show menu
+                        contextMenu.show(itemsTree, e.getScreenX(), e.getScreenY());
+                    }
+                }
+            } else {
+                //any other click cause hiding menu
+                contextMenu.hide();
+            }
+        });
+
+        itemDetail = new VBox(5);
+        itemDetail.setPadding(new Insets(5, 5, 5, 5));
+
+        SplitPane splitPane = new SplitPane(itemsTree, itemDetail);
         root.getChildren().add(splitPane);
 
         status = new Label();
@@ -124,6 +150,8 @@ public class EditProject extends Application {
     }
 
     private static void showError(String message, Throwable e) {
+        // TODO
+        e.printStackTrace();
         Alert alert = new Alert(Alert.AlertType.ERROR, message + " " + e.getMessage());
         alert.showAndWait();
     }
@@ -182,7 +210,7 @@ public class EditProject extends Application {
         parameterTI.getChildren().add(dependencies);
         parameterDef.getDependencies().stream()
                 .map(jobXML::getParameter)
-                .map(dep -> new Item(ItemType.Dependency, dep::getName, dep))
+                .map(dep -> new Item(ItemType.Dependency, dep::getName, dep.getKey()))
                 .map(TreeItem::new)
                 .forEach(dependencies.getChildren()::add);
     }
@@ -203,7 +231,7 @@ public class EditProject extends Application {
         }
 
         void onSelect() throws IOException {
-            item.getChildren().clear();
+            itemDetail.getChildren().clear();
             switch (itemType) {
                 case Project:
                     ProjectXML project = (ProjectXML) payload;
@@ -216,8 +244,8 @@ public class EditProject extends Application {
                             file.getName().endsWith(".properties") ||
                             file.getName().endsWith(".xml")) {
                         String content = new String(Files.readAllBytes(file.toPath()));
-                        item.getChildren().add(new Label("Content:"));
-                        item.getChildren().add(new TextArea(content));
+                        itemDetail.getChildren().add(new Label("Content:"));
+                        itemDetail.getChildren().add(new TextArea(content));
                     }
                     break;
 
@@ -264,29 +292,26 @@ public class EditProject extends Application {
 
         private void addTextAreaProperty(String title,
                                          Supplier<String> get, Consumer<String> set) {
-            item.getChildren().add(new Label(title));
+            itemDetail.getChildren().add(new Label(title));
             TextArea control = new TextArea(get.get());
 
             control.textProperty().addListener((observable, oldValue, newValue) -> {
                 set.accept(newValue);
             });
-            item.getChildren().add(control);
+            itemDetail.getChildren().add(control);
         }
 
         private void addTextProperty(String title,
                                      Supplier<String> get, Consumer<String> set) {
-            item.getChildren().add(new Label(title));
+            itemDetail.getChildren().add(new Label(title));
             TextField control = new TextField(get.get());
 
             control.textProperty().addListener((observable, oldValue, newValue) -> {
                 set.accept(newValue);
 
-                // to update the tree item's label
-                TreeItem<Item> selectedItem = items.getSelectionModel().getSelectedItem();
-                int index = selectedItem.getParent().getChildren().indexOf(selectedItem);
-                selectedItem.getParent().getChildren().set(index, selectedItem);
+                updateTreeItem(itemsTree.getSelectionModel().getSelectedItem());
             });
-            item.getChildren().add(control);
+            itemDetail.getChildren().add(control);
         }
 
         @Override
@@ -295,24 +320,21 @@ public class EditProject extends Application {
         }
     }
 
-    private final class TextFieldTreeCellImpl extends TreeCell<Item> {
-        private ContextMenu addDependencyMenu = new ContextMenu();
+    private static void updateTreeItem(TreeItem<Item> treeItem) {
+        int index = treeItem.getParent().getChildren().indexOf(treeItem);
+        treeItem.getParent().getChildren().set(index, treeItem);
+    }
+
+    /*private final class TextFieldTreeCellImpl extends TreeCell<Item> {
         private ContextMenu deleteMenu = new ContextMenu();
 
         TextFieldTreeCellImpl() {
-            MenuItem addDependency = new MenuItem("Add dependency");
-            this.addDependencyMenu.getItems().add(addDependency);
-            addDependency.setOnAction(t -> {
-                // TODO)
-                TreeItem<Item> newDep = new TreeItem<>(new Item(ItemType.Dependency, () -> "New dep", null));
-                getTreeItem().getChildren().add(newDep);
-            });
-
             MenuItem delete = new MenuItem("Delete");
             this.deleteMenu.getItems().add(delete);
             delete.setOnAction(t -> {
                 // TODO)
                 getTreeItem().getParent().getChildren().remove(getTreeItem());
+                updateTreeItem(itemsTree.getSelectionModel().getSelectedItem().getParent());
             });
         }
 
@@ -326,12 +348,93 @@ public class EditProject extends Application {
                 setText(item.title.get());
                 setGraphic(getTreeItem().getGraphic());
                 if (item.itemType == ItemType.Dependencies) {
-                    setContextMenu(addDependencyMenu);
+                    ParameterXML parameterXML = (ParameterXML) item.payload;
+                    List<String> dependencies = parameterXML.getDependencies();
+                    JobXML jobXML = (JobXML) getTreeItem().getParent().getParent().getValue().payload;
+                    List<String> parameters = getAllParameters(jobXML);
+                    parameters.removeAll(dependencies);
+
+                    if (!parameters.isEmpty()) {
+                        ContextMenu addDependencyMenu = new ContextMenu();
+                        Menu addDependency = new Menu("Add dependency");
+                        addDependencyMenu.getItems().add(addDependency);
+                        setContextMenu(addDependencyMenu);
+
+                        for (String dependency : parameters) {
+                            ParameterXML parameter = jobXML.getParameter(dependency);
+                            String name = parameter.getName();
+                            MenuItem dependencyMenuItem = new MenuItem(name);
+                            dependencyMenuItem.setOnAction(t -> {
+                                parameterXML.addDependency(dependency);
+                                TreeItem<Item> newDep = new TreeItem<>(new Item(ItemType.Dependency, () -> name, dependency));
+                                getTreeItem().getChildren().add(newDep);
+                            });
+                            addDependency.getItems().add(dependencyMenuItem);
+                        }
+                    } else {
+                        setContextMenu(null);
+                    }
                 } else if (item.itemType == ItemType.Dependency) {
                     setContextMenu(deleteMenu);
+                } else {
+                    setContextMenu(null);
                 }
             }
         }
+
+        private List<String> getAllParameters(JobXML jobXML) {
+            return Stream.concat(Stream.concat(jobXML.getCallXMLs().stream(),
+                    jobXML.getExpressionXMLs().stream()),
+                    jobXML.getSimpleParameterXMLs().stream())
+                    .map(ParameterXML::getKey).collect(Collectors.toList());
+        }
+    }
+    */
+
+    private void populateContextMenu(ContextMenu contextMenu, TreeItem<Item> treeItem) {
+        contextMenu.getItems().clear();
+        Item item = treeItem.getValue();
+
+        if (item.itemType == ItemType.Dependencies) {
+            ParameterXML parameterXML = (ParameterXML) item.payload;
+            List<String> dependencies = parameterXML.getDependencies();
+            JobXML jobXML = (JobXML) treeItem.getParent().getParent().getValue().payload;
+            List<String> parameters = getAllParameters(jobXML);
+            parameters.removeAll(dependencies);
+
+            if (!parameters.isEmpty()) {
+                Menu addDependency = new Menu("Add dependency");
+                contextMenu.getItems().add(addDependency);
+
+                for (String dependency : parameters) {
+                    ParameterXML parameter = jobXML.getParameter(dependency);
+                    String name = parameter.getName();
+                    MenuItem dependencyMenuItem = new MenuItem(name);
+                    dependencyMenuItem.setOnAction(t -> {
+                        parameterXML.addDependency(dependency);
+                        TreeItem<Item> newDep = new TreeItem<>(EditProject.this.new Item(ItemType.Dependency,
+                                () -> name, dependency));
+                        treeItem.getChildren().add(newDep);
+                    });
+                    addDependency.getItems().add(dependencyMenuItem);
+                }
+            }
+        } else if (item.itemType == ItemType.Dependency) {
+            MenuItem delete = new MenuItem("Delete");
+            contextMenu.getItems().add(delete);
+            delete.setOnAction(t -> {
+                ParameterXML parameterXML = (ParameterXML) treeItem.getParent().getValue().payload;
+                treeItem.getParent().getChildren().remove(treeItem);
+                parameterXML.removeDependency((String)item.payload);
+            });
+        }
+    }
+
+    private static List<String> getAllParameters(JobXML jobXML) {
+        return Stream.concat(Stream.concat(jobXML.getCallXMLs().stream(),
+                jobXML.getExpressionXMLs().stream()),
+                jobXML.getSimpleParameterXMLs().stream())
+                .map(ParameterXML::getKey).collect(Collectors.toList());
     }
 
 }
