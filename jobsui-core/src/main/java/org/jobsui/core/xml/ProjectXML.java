@@ -33,6 +33,7 @@ public class ProjectXML {
         // root elements
         Document doc = docBuilder.newDocument();
         Element rootElement = doc.createElement("Project");
+        XMLUtils.addAttr(rootElement, "name", getName());
         doc.appendChild(rootElement);
 
         for (String library : libraries) {
