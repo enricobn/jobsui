@@ -52,33 +52,7 @@ public class EditProject extends Application {
             File file = chooser.showDialog(stage);
 
             if (file != null) {
-                Task runnable = new Task() {
-                    @Override
-                    protected Void call() throws Exception {
-                        Platform.runLater(() -> {
-                            root.setDisable(true);
-                            itemDetail.getChildren().clear();
-                            itemsTree.setRoot(null);
-                            status.setText("Loading project ...");
-                        });
-                        try {
-                            TreeItem<Item> root = loadProject(file);
-
-                            Platform.runLater(() -> {
-                                itemsTree.setRoot(root);
-                                root.setExpanded(true);
-                            });
-                        } catch (Exception e) {
-                            showError("Error loading project.", e);
-                        } finally {
-                            Platform.runLater(() -> {
-                                status.setText("");
-                                root.setDisable(false);
-                            });
-                        }
-                        return null;
-                    }
-                };
+                Task runnable = new OpenProjectTask(file);
 
                 Thread thread = new Thread(runnable);
                 thread.setDaemon(true);
@@ -232,63 +206,83 @@ public class EditProject extends Application {
 
         void onSelect() throws IOException {
             itemDetail.getChildren().clear();
+
             switch (itemType) {
                 case Project:
-                    ProjectXML project = (ProjectXML) payload;
-                    addTextProperty("Name:", project::getName, project::setName);
+                    setProjectDetail();
                     break;
 
                 case GroovyFile:
-                    File file = (File) payload;
-                    if (file.getName().endsWith(".groovy") ||
-                            file.getName().endsWith(".txt") ||
-                            file.getName().endsWith(".properties") ||
-                            file.getName().endsWith(".xml")) {
-                        String content = new String(Files.readAllBytes(file.toPath()));
-                        itemDetail.getChildren().add(new Label("Content:"));
-                        itemDetail.getChildren().add(new TextArea(content));
-                    }
+                    setGroovyFileDetail();
                     break;
 
                 case Job:
                     break;
 
-                case Parameter: {
-                    SimpleParameterXML parameter = (SimpleParameterXML) payload;
-
-                    addTextProperty("Key:", parameter::getKey, parameter::setKey);
-                    addTextProperty("Name:", parameter::getName, parameter::setName);
-
-                    addTextAreaProperty("Create component:", parameter::getCreateComponentScript,
-                            parameter::setCreateComponentScript);
-
-                    addTextAreaProperty("On dependencies change:", parameter::getOnDependenciesChangeScript,
-                            parameter::setOnDependenciesChangeScript);
-
-                    addTextAreaProperty("Validate:", parameter::getValidateScript, parameter::setValidateScript);
+                case Parameter:
+                    setParameterDetail();
                     break;
-                }
 
                 case Expression: {
-                    ExpressionXML parameter = (ExpressionXML) payload;
-
-                    addTextProperty("Key:", parameter::getKey, parameter::setKey);
-                    addTextProperty("Name:", parameter::getName, parameter::setName);
-
-                    addTextAreaProperty("Evaluate:", parameter::getEvaluateScript, parameter::setEvaluateScript);
+                    setExpressionDetail();
                     break;
                 }
 
                 case Call: {
-                    CallXML parameter = (CallXML) payload;
-
-                    addTextProperty("Key:", parameter::getKey, parameter::setKey);
-                    addTextProperty("Name:", parameter::getName, parameter::setName);
-
-                    // TODO
+                    setCallDetail();
                     break;
                 }
             }
+        }
+
+        private void setProjectDetail() {
+            ProjectXML project = (ProjectXML) payload;
+            addTextProperty("Name:", project::getName, project::setName);
+        }
+
+        private void setGroovyFileDetail() throws IOException {
+            File file = (File) payload;
+            if (file.getName().endsWith(".groovy") ||
+                    file.getName().endsWith(".txt") ||
+                    file.getName().endsWith(".properties") ||
+                    file.getName().endsWith(".xml")) {
+                String content = new String(Files.readAllBytes(file.toPath()));
+                itemDetail.getChildren().add(new Label("Content:"));
+                itemDetail.getChildren().add(new TextArea(content));
+            }
+        }
+
+        private void setCallDetail() {
+            CallXML parameter = (CallXML) payload;
+
+            addTextProperty("Key:", parameter::getKey, parameter::setKey);
+            addTextProperty("Name:", parameter::getName, parameter::setName);
+
+            // TODO
+        }
+
+        private void setExpressionDetail() {
+            ExpressionXML parameter = (ExpressionXML) payload;
+
+            addTextProperty("Key:", parameter::getKey, parameter::setKey);
+            addTextProperty("Name:", parameter::getName, parameter::setName);
+
+            addTextAreaProperty("Evaluate:", parameter::getEvaluateScript, parameter::setEvaluateScript);
+        }
+
+        private void setParameterDetail() {
+            SimpleParameterXML parameter = (SimpleParameterXML) payload;
+
+            addTextProperty("Key:", parameter::getKey, parameter::setKey);
+            addTextProperty("Name:", parameter::getName, parameter::setName);
+
+            addTextAreaProperty("Create component:", parameter::getCreateComponentScript,
+                    parameter::setCreateComponentScript);
+
+            addTextAreaProperty("On dependencies change:", parameter::getOnDependenciesChangeScript,
+                    parameter::setOnDependenciesChangeScript);
+
+            addTextAreaProperty("Validate:", parameter::getValidateScript, parameter::setValidateScript);
         }
 
         private void addTextAreaProperty(String title,
@@ -398,4 +392,37 @@ public class EditProject extends Application {
                 .map(ParameterXML::getKey).collect(Collectors.toList());
     }
 
+    private class OpenProjectTask extends Task {
+        private final File file;
+
+        OpenProjectTask(File file) {
+            this.file = file;
+        }
+
+        @Override
+        protected Void call() throws Exception {
+            Platform.runLater(() -> {
+                root.setDisable(true);
+                itemDetail.getChildren().clear();
+                itemsTree.setRoot(null);
+                status.setText("Loading project ...");
+            });
+            try {
+                TreeItem<Item> root = loadProject(file);
+
+                Platform.runLater(() -> {
+                    itemsTree.setRoot(root);
+                    root.setExpanded(true);
+                });
+            } catch (Exception e) {
+                showError("Error loading project.", e);
+            } finally {
+                Platform.runLater(() -> {
+                    status.setText("");
+                    root.setDisable(false);
+                });
+            }
+            return null;
+        }
+    }
 }
