@@ -29,6 +29,7 @@ import java.util.stream.Stream;
  * Created by enrico on 10/9/16.
  */
 public class EditProject extends Application {
+    private EditProjectConfiguration configuration;
     private TreeView<Item> itemsTree;
     private VBox itemDetail;
     private VBox root;
@@ -41,13 +42,19 @@ public class EditProject extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
+        configuration = EditProjectConfiguration.load();
         root = new VBox(5);
         HBox buttons = new HBox(5);
         buttons.setPadding(new Insets(5, 5, 5, 5));
-        Button load = new Button("Load");
-        load.setOnAction(event -> {
+        Button openButton = new Button("Open");
+        openButton.setOnAction(event -> {
             DirectoryChooser chooser = new DirectoryChooser();
-            chooser.setTitle("Load project");
+            chooser.setTitle("Open project");
+
+            File firstProject = configuration.getFirstRecentValidProject();
+            if (firstProject != null) {
+                chooser.setInitialDirectory(firstProject);
+            }
 
             File file = chooser.showDialog(stage);
 
@@ -59,7 +66,7 @@ public class EditProject extends Application {
                 thread.start();
             }
         });
-        buttons.getChildren().add(load);
+        buttons.getChildren().add(openButton);
 
         Button export = new Button("Export");
         export.setOnAction(event -> {
@@ -409,6 +416,9 @@ public class EditProject extends Application {
             });
             try {
                 TreeItem<Item> root = loadProject(file);
+
+                configuration.addRecentProject(file);
+                EditProjectConfiguration.save(configuration);
 
                 Platform.runLater(() -> {
                     itemsTree.setRoot(root);
