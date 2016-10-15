@@ -23,13 +23,7 @@ public class SwingUICheckBox implements UICheckBox<JComponent> {
             @Override
             public void call(final Subscriber<? super Boolean> subscriber) {
                 subscriber.onStart();
-                component.addActionListener(new ActionListener() {
-
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        subscriber.onNext(getValue());
-                    }
-                });
+                component.addActionListener(e -> subscriber.onNext(getValue()));
                 subscribers.add(subscriber);
             }
         });

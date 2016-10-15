@@ -19,6 +19,7 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     private final SwingUIContainer container;
     private final OKCancelHandler okCancelHandler;
 
+    // TODO remove or put in another class
     private static <T> UIWindow<T> createWindow(UI<T> ui) throws UnsupportedComponentException {
         UIWindow<T> window = ui.createWindow("Test");
 
@@ -37,47 +38,30 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         name.setDefaultValue("hello");
         window.add("Name", name);
 
-        version.getObservable().subscribe(new Action1<String>() {
-            @Override
-            public void call(String s) {
-                System.out.println("Version " + s);
-                if (s == null) {
-                    db.setItems(Collections.<String>emptyList());
-                } else if (s.equals("1.0")) {
-                    db.setItems(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev"));
-                } else {
-                    db.setItems(Arrays.asList("Dev-2.0", "Cons-2.0", "Dev"));
-                }
+        version.getObservable().subscribe(s -> {
+            System.out.println("Version " + s);
+            if (s == null) {
+                db.setItems(Collections.<String>emptyList());
+            } else if (s.equals("1.0")) {
+                db.setItems(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev"));
+            } else {
+                db.setItems(Arrays.asList("Dev-2.0", "Cons-2.0", "Dev"));
             }
         });
 
-        db.getObservable().subscribe(new Action1<String>() {
-            @Override
-            public void call(String s) {
-                System.out.println("DB " + s);
-            }
+        db.getObservable().subscribe(s -> {
+            System.out.println("DB " + s);
         });
 
-        user.getObservable().subscribe(new Action1<String>() {
-            @Override
-            public void call(String s) {
-                System.out.println("User " + s);
-            }
+        user.getObservable().subscribe(s -> {
+            System.out.println("User " + s);
         });
 
-        Observable.combineLatest(version.getObservable(), db.getObservable(), new Func2<String, String, Tuple2<String, String>>() {
-            @Override
-            public Tuple2<String,String> call(String version, String db) {
-                return new Tuple2<>(version, db);
-            }
-        }).subscribe(new Action1<Tuple2<String, String>>() {
-            @Override
-            public void call(Tuple2<String, String> versionDB) {
-                if (versionDB.first == null || versionDB.second == null) {
-                    user.setItems(Collections.<String>emptyList());
-                } else {
-                    user.setItems(Collections.singletonList(versionDB.toString()));
-                }
+        Observable.combineLatest(version.getObservable(), db.getObservable(), (version1, db1) -> new Tuple2<>(version1, db1)).subscribe(versionDB -> {
+            if (versionDB.first == null || versionDB.second == null) {
+                user.setItems(Collections.<String>emptyList());
+            } else {
+                user.setItems(Collections.singletonList(versionDB.toString()));
             }
         });
 
@@ -90,11 +74,8 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         button.setTitle("Add");
         window.add(button);
 
-        button.getObservable().subscribe(new Action1<Void>() {
-            @Override
-            public void call(Void o) {
-                list.addItem("Other");
-            }
+        button.getObservable().subscribe(o -> {
+            list.addItem("Other");
         });
         return window;
     }

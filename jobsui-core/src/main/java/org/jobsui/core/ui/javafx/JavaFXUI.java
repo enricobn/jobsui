@@ -28,6 +28,7 @@ public class JavaFXUI implements UI<Node> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <COMP extends UIComponent> COMP create(Class<COMP> componentType) throws UnsupportedComponentException {
         if (componentType == UIChoice.class) {
             return (COMP) new JavaFXUIChoice<>();

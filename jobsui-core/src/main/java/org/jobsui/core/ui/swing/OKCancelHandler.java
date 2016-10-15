@@ -61,13 +61,10 @@ public class OKCancelHandler {
             buttonsPanel.add(okButton, constraints);
         }
 
-        okButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                window.setVisible(false);
-                window.dispose();
-                ok = true;
-            }
+        okButton.addActionListener(e -> {
+            window.setVisible(false);
+            window.dispose();
+            ok = true;
         });
 
         // Cancel

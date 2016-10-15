@@ -204,11 +204,9 @@ public class JobXML implements ValidatingXML {
         parameterXML.setKey(newKey);
         parameters.remove(oldKey);
         parameters.put(newKey, parameterXML);
-        for (ParameterXML parameter : parameters.values()) {
-            if (parameter.removeDependency(oldKey)) {
-                parameter.addDependency(newKey);
-            }
-        }
+        parameters.values().stream()
+                .filter(parameter -> parameter.removeDependency(oldKey))
+                .forEach(parameter -> parameter.addDependency(newKey));
     }
 
     @Override

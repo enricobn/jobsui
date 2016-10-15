@@ -34,10 +34,10 @@ public class JobExpressionDefGroovy<T> extends JobParameterDefAbstract<T> implem
     }
 
     @Override
-    public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-        final UIChoice component = (UIChoice) ui.create(UIChoice.class);
+    public <C> UIComponent<T, C> createComponent(UI<C> ui) throws UnsupportedComponentException {
+        final UIChoice component = ui.create(UIChoice.class);
         if (getDependencies().isEmpty()) {
-            evaluate(component, Collections.<String, Object>emptyMap());
+            evaluate(component, Collections.emptyMap());
         }
         return component;
     }

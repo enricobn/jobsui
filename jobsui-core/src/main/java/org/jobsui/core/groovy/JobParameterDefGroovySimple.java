@@ -96,7 +96,9 @@ public class JobParameterDefGroovySimple<T> extends JobParameterDefAbstract<T> i
         validate.setProperty("value", value);
         validate.setProperty("projectFolder", projectFolder);
         try {
-            return (List<String>) validate.run();
+            @SuppressWarnings("unchecked")
+            List<String> result = (List<String>) validate.run();
+            return result;
         } catch (Throwable e) {
             throw new RuntimeException("Error in validate script for parameter whit key \"" +
                     getKey() + "\"", e);

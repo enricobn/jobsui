@@ -7,6 +7,7 @@ import rx.Subscriber;
 import rx.functions.FuncN;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 4/29/16.
@@ -124,9 +125,7 @@ class JobRunner {
     }
 
     private <C> void notifyInitialValue(WidgetsMap<C> widgets) {
-        for (ParameterAndWidget<?, C> entry : widgets.getWidgets()) {
-            notifyInitialValue(entry);
-        }
+        widgets.getWidgets().forEach(this::notifyInitialValue);
     }
 
     private <T, C> void notifyInitialValue(ParameterAndWidget<T, C> entry) {
@@ -143,11 +142,9 @@ class JobRunner {
 
         final Map<String,Object> parameters = new HashMap<>();
 
-        List<Observable<?>> observables = new ArrayList<>();
-
-        for (ParameterAndWidget<?, C> widget : widgetsMap.getWidgets()) {
-            observables.add(widget.getWidget().getComponent().getObservable());
-        }
+        List<Observable<?>> observables = widgetsMap.getWidgets().stream()
+                .map(widget -> widget.getWidget().getComponent().getObservable())
+                .collect(Collectors.toList());
 
         Observable<Boolean> combined = Observable.combineLatest(observables, new FuncN<Boolean>() {
             @Override
@@ -200,7 +197,7 @@ class JobRunner {
             if (!dependencies.isEmpty()) {
                 List<Observable<?>> observables = getDependenciesObservables(widgets, dependencies);
 
-                final Observable<Map<String, Object>> observable = combineDependeciesObservables(dependencies, observables);
+                final Observable<Map<String, Object>> observable = combineDependenciesObservables(dependencies, observables);
 
                 observable.subscribe(objects -> {
                     // all dependencies are valid
@@ -213,8 +210,8 @@ class JobRunner {
         }
     }
 
-    private Observable<Map<String, Object>> combineDependeciesObservables(final List<JobParameterDef<?>> dependencies,
-                                                                          List<Observable<?>> observables) {
+    private Observable<Map<String, Object>> combineDependenciesObservables(final List<JobParameterDef<?>> dependencies,
+                                                                           List<Observable<?>> observables) {
         return Observable.combineLatest(observables, new FuncN<Map<String,Object>>() {
             @Override
             public Map<String,Object> call(Object... args) {

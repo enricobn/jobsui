@@ -66,7 +66,7 @@ public class ProjectXML implements ValidatingXML {
         libraries.add(library);
     }
 
-    public void addImport(String name, String uri) throws Exception {
+    public void addImport(String name, String uri) {
         imports.put(name, uri);
     }
 

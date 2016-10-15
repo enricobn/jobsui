@@ -31,7 +31,7 @@ public class FakeUiValue<T, C> extends FakeUIComponent<T, C> implements UIValue<
     @Override
     public void setValue(T value) {
         this.value = value;
-        for (Action1 action1 : actions) {
+        for (Action1<T> action1 : actions) {
             action1.call(value);
         }
     }

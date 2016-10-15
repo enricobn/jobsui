@@ -29,9 +29,7 @@ public class JobGroovy<T> extends JobAbstract<T> {
         this.name = name;
         this.parameterDefs = new ArrayList<>();
         // TODO can I remove this loop?
-        for (JobParameterDefGroovy parameterDef : parameterDefs) {
-            this.parameterDefs.add(parameterDef);
-        }
+        this.parameterDefs.addAll(parameterDefs);
 
         this.projectFolder = projectFolder;
         this.run = shell.parse(runScript);
@@ -58,7 +56,9 @@ public class JobGroovy<T> extends JobAbstract<T> {
 
             run.setProperty("projectFolder", projectFolder);
             try {
-                return (T) run.run();
+                @SuppressWarnings("unchecked")
+                T result = (T) this.run.run();
+                return result;
             } catch (Exception e) {
                 throw new RuntimeException("Cannot execute run for job with key \"" + getKey() + "\".", e);
             }

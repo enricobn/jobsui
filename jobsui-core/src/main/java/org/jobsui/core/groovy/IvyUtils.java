@@ -68,13 +68,10 @@ public class IvyUtils {
         ResolveOptions resolveOptions = new ResolveOptions().setConfs(confs);
 
         // TODO it does not work
-        ivy.getEventManager().addIvyListener(new IvyListener() {
-            @Override
-            public void progress(IvyEvent event) {
-                if (event instanceof StartArtifactDownloadEvent) {
-                    StartArtifactDownloadEvent artifactEvent = (StartArtifactDownloadEvent) event;
-                    System.out.println("Downloading " + artifactEvent.getArtifact());
-                }
+        ivy.getEventManager().addIvyListener(event -> {
+            if (event instanceof StartArtifactDownloadEvent) {
+                StartArtifactDownloadEvent artifactEvent = (StartArtifactDownloadEvent) event;
+                System.out.println("Downloading " + artifactEvent.getArtifact());
             }
         });
 

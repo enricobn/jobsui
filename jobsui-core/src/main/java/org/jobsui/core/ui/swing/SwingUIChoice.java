@@ -18,7 +18,6 @@ import java.util.Objects;
 public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
     private final JPanel component = new JPanel();
     private final JComboBox<T> combo = new JComboBox<>();
-    private final JButton button = new JButton("...");
     private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
     private final Observable<T> observable;
     private List<T> items = new ArrayList<>();
@@ -26,6 +25,7 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
     private boolean disableListener = false;
 
     public SwingUIChoice() {
+        JButton button = new JButton("...");
         button.setMargin(new Insets(2, 2, 2, 2));
         observable = Observable.create(new Observable.OnSubscribe<T>() {
             @Override
@@ -62,14 +62,11 @@ public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
             component.add(button, gc);
         }
 
-        button.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                final SwingFilteredList<T> filteredList = new SwingFilteredList<>(title, items, (T) combo.getSelectedItem());
-                filteredList.show();
-                if (filteredList.isOk()) {
-                    setValue(filteredList.getSelectedItem());
-                }
+        button.addActionListener(e -> {
+            final SwingFilteredList<T> filteredList = new SwingFilteredList<>(title, items, (T) combo.getSelectedItem());
+            filteredList.show();
+            if (filteredList.isOk()) {
+                setValue(filteredList.getSelectedItem());
             }
         });
 

@@ -15,7 +15,7 @@ public class SwingUI implements UI<JComponent> {
     }
 
     @Override
-    public UIWindow createWindow(String title) {
+    public UIWindow<JComponent> createWindow(String title) {
         return new SwingUIWindow(title);
     }
 
@@ -30,6 +30,7 @@ public class SwingUI implements UI<JComponent> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <COMP extends UIComponent> COMP create(Class<COMP> componentType) throws UnsupportedComponentException {
         if (componentType == UIButton.class) {
             return (COMP) new SwingUIButton();

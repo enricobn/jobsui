@@ -52,7 +52,7 @@ public class FakeUIChoice<T, C> extends FakeUIComponent<T, C> implements UIChoic
         assertTrue(Objects.toString(item), found);
 
         this.selectedItem = item;
-        for (Action1 action1 : actions) {
+        for (Action1<T> action1 : actions) {
             action1.call(item);
         }
     }

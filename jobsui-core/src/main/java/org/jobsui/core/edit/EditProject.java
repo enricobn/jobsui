@@ -404,6 +404,12 @@ public class EditProject extends Application {
             ParameterXML parameterXML = (ParameterXML) item.payload;
             List<String> dependencies = parameterXML.getDependencies();
             JobXML jobXML = findAncestorPayload(ItemType.Job, treeItem);
+
+            if (jobXML == null) {
+                showError("Cannot find job for " + item);
+                return;
+            }
+
             List<String> parameters = getAllParameters(jobXML);
             parameters.removeAll(dependencies);
 

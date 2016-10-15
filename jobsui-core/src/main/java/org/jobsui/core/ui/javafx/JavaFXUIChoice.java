@@ -23,8 +23,8 @@ class JavaFXUIChoice<T> implements UIChoice<T, Node> {
     private final ComboBox<T> combo = new ComboBox<>();
     private final Button button = new Button("...");
     private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
-    private Observable<T> observable;
-    private List<T> items = new ArrayList<>();
+    private final Observable<T> observable;
+    private final List<T> items = new ArrayList<>();
     private String title;
     private boolean disableListener = false;
 

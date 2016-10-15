@@ -15,14 +15,12 @@ import java.util.List;
  * Created by enrico on 5/16/16.
  */
 public class SwingFilteredList<T> {
-    private final List<T> items;
     private final JDialog dialog;
     private final OKCancelHandler okCancelHandler;
 //    private T selectedItem;
     private final JList<T> list;
 
     public SwingFilteredList(final String title, final List<T> items, final T selectedItem) {
-        this.items = items;
         dialog = new JDialog((Frame) null, true);
         if (title != null) {
             dialog.setTitle(title);
@@ -117,22 +115,19 @@ public class SwingFilteredList<T> {
         search.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (search.getText().isEmpty()) {
-                            list.setListData((T[]) items.toArray());
-                        } else {
-                            List<T> found = new ArrayList<>();
-                            for (T item : items) {
-                                if (item != null && item.toString().toLowerCase().contains(search.getText().toLowerCase())) {
-                                    found.add(item);
-                                }
+                SwingUtilities.invokeLater(() -> {
+                    if (search.getText().isEmpty()) {
+                        list.setListData((T[]) items.toArray());
+                    } else {
+                        List<T> found = new ArrayList<>();
+                        for (T item : items) {
+                            if (item != null && item.toString().toLowerCase().contains(search.getText().toLowerCase())) {
+                                found.add(item);
                             }
-                            list.setListData((T[]) found.toArray());
-                            if (found.size() == 1) {
-                                list.setSelectedIndex(0);
-                            }
+                        }
+                        list.setListData((T[]) found.toArray());
+                        if (found.size() == 1) {
+                            list.setSelectedIndex(0);
                         }
                     }
                 });

@@ -53,25 +53,22 @@ public class SwingUIList<T> implements UIList<T,JComponent> {
     }
 
     private void updateItems() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                component.removeAll();
-                int i = 0;
-                for (final T item : items) {
-                    GridBagConstraints constraints = new GridBagConstraints();
-                    constraints.fill = GridBagConstraints.HORIZONTAL;
-                    constraints.weightx = 1.0;
-                    constraints.weighty = 0;
-                    constraints.gridy = i;
-                    constraints.gridx = 0;
+        SwingUtilities.invokeLater(() -> {
+            component.removeAll();
+            int i = 0;
+            for (final T item : items) {
+                GridBagConstraints constraints = new GridBagConstraints();
+                constraints.fill = GridBagConstraints.HORIZONTAL;
+                constraints.weightx = 1.0;
+                constraints.weighty = 0;
+                constraints.gridy = i;
+                constraints.gridx = 0;
 
-                    component.add(new Item(item), constraints);
-                    i++;
-                }
-                component.revalidate();
-                notifySubscribers();
+                component.add(new Item(item), constraints);
+                i++;
             }
+            component.revalidate();
+            notifySubscribers();
         });
     }
 
@@ -115,12 +112,9 @@ public class SwingUIList<T> implements UIList<T,JComponent> {
                 constraints.weighty = 0;
                 constraints.gridx = 0;
                 final JButton button = new JButton("-");
-                button.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        items.remove(item);
-                        updateItems();
-                    }
+                button.addActionListener(e -> {
+                    items.remove(item);
+                    updateItems();
                 });
                 button.setPreferredSize(new Dimension(25, 20));
                 button.setMargin(new Insets(2, 2, 2, 2));
