@@ -2,7 +2,9 @@ package org.jobsui.core.xml;
 
 import org.jobsui.core.utils.JobsUIUtils;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by enrico on 10/11/16.

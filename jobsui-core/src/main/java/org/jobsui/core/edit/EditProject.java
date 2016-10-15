@@ -16,7 +16,6 @@ import javafx.stage.Stage;
 import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.jobsui.core.xml.*;
-import sun.reflect.generics.tree.Tree;
 
 import java.io.File;
 import java.io.IOException;

@@ -3,7 +3,6 @@ package org.jobsui.core.xml;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
