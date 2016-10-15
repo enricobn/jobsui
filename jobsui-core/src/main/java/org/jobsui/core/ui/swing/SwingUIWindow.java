@@ -41,7 +41,7 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         version.getObservable().subscribe(s -> {
             System.out.println("Version " + s);
             if (s == null) {
-                db.setItems(Collections.<String>emptyList());
+                db.setItems(Collections.emptyList());
             } else if (s.equals("1.0")) {
                 db.setItems(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev"));
             } else {
@@ -59,7 +59,7 @@ public class SwingUIWindow implements UIWindow<JComponent> {
 
         Observable.combineLatest(version.getObservable(), db.getObservable(), (version1, db1) -> new Tuple2<>(version1, db1)).subscribe(versionDB -> {
             if (versionDB.first == null || versionDB.second == null) {
-                user.setItems(Collections.<String>emptyList());
+                user.setItems(Collections.emptyList());
             } else {
                 user.setItems(Collections.singletonList(versionDB.toString()));
             }
