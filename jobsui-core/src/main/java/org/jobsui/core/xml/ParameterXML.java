@@ -53,8 +53,8 @@ public class ParameterXML {
         this.name = name;
     }
 
-    public void removeDependency(String key) {
-        dependencies.remove(key);
+    public boolean removeDependency(String key) {
+        return dependencies.remove(key);
     }
 
     public void setOrder(int order) {

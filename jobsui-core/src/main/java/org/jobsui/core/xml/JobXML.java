@@ -50,7 +50,9 @@ public class JobXML {
         for (SimpleParameterXML parameter : simpleParameterXMLs) {
             Element element = createParameterElement(doc, rootElement, parameter);
 
-            XMLUtils.addTextElement(element, "CreateComponent", parameter.getCreateComponentScript());
+            if (parameter.getCreateComponentScript() != null && !parameter.getCreateComponentScript().isEmpty()) {
+                XMLUtils.addTextElement(element, "CreateComponent", parameter.getCreateComponentScript());
+            }
 
             if (validateScript != null && !validateScript.isEmpty()) {
                 XMLUtils.addTextElement(element, "Validate", parameter.getValidateScript());
@@ -67,7 +69,13 @@ public class JobXML {
             }
         }
 
-        XMLUtils.write(doc, file);
+        XMLUtils.addTextElement(rootElement, "Run", getRunScript());
+
+        try {
+            XMLUtils.write(doc, file, getClass().getResource("/org/jobsui/job.xsd"));
+        } catch (Exception e) {
+            throw new Exception("Error exporting job \"" + getName() + "\".", e);
+        }
     }
 
     private Element createParameterElement(Document doc, Element rootElement, ParameterXML parameter) {
@@ -87,18 +95,18 @@ public class JobXML {
     }
 
     public void add(SimpleParameterXML simpleParameterXML) throws Exception {
-        simpleParameterXMLs.add(simpleParameterXML);
         addCheckedParameter(simpleParameterXML);
+        simpleParameterXMLs.add(simpleParameterXML);
     }
 
     public void add(ExpressionXML expressionXML) throws Exception {
-        expressionXMLs.add(expressionXML);
         addCheckedParameter(expressionXML);
+        expressionXMLs.add(expressionXML);
     }
 
     public void add(CallXML callXML) throws Exception {
-        callXMLs.add(callXML);
         addCheckedParameter(callXML);
+        callXMLs.add(callXML);
     }
 
     public String getRunScript() {
@@ -172,5 +180,17 @@ public class JobXML {
 
     public ParameterXML getParameter(String key) {
         return parameters.get(key);
+    }
+
+    public void changeParameterKey(ParameterXML parameterXML, String newKey) {
+        String oldKey = parameterXML.getKey();
+        parameterXML.setKey(newKey);
+        parameters.remove(oldKey);
+        parameters.put(newKey, parameterXML);
+        for (ParameterXML parameter : parameters.values()) {
+            if (parameter.removeDependency(oldKey)) {
+                parameter.addDependency(newKey);
+            }
+        }
     }
 }

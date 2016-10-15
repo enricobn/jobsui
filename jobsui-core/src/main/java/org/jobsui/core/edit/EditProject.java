@@ -14,6 +14,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.xml.*;
+import sun.reflect.generics.tree.Tree;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,7 +74,7 @@ public class EditProject extends Application {
             try {
                 projectXML.export();
             } catch (Exception e) {
-                e.printStackTrace();
+                showError("Error exporting project.", e);
             }
         });
         buttons.getChildren().add(export);
@@ -134,6 +135,11 @@ public class EditProject extends Application {
         // TODO
         e.printStackTrace();
         Alert alert = new Alert(Alert.AlertType.ERROR, message + " " + e.getMessage());
+        alert.showAndWait();
+    }
+
+    private static void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, message);
         alert.showAndWait();
     }
 
@@ -278,9 +284,22 @@ public class EditProject extends Application {
         }
 
         private void setParameterDetail() {
+            TreeItem<Item> treeItem = findItem(itemsTree.getRoot(), this);
+
+            if (treeItem == null) {
+                showError("Cannot find item \"" + payload + "\".");
+            }
+
+            JobXML jobXML = findAncestorPayload(ItemType.Job, treeItem);
+
+            if (jobXML == null) {
+                showError("Cannot find job for item \"" + payload + "\".");
+                return;
+            }
+
             SimpleParameterXML parameter = (SimpleParameterXML) payload;
 
-            addTextProperty("Key:", parameter::getKey, parameter::setKey);
+            addTextProperty("Key:", parameter::getKey, key -> jobXML.changeParameterKey(parameter, key));
 
             addTextProperty("Name:", parameter::getName, parameter::setName);
 
@@ -359,21 +378,7 @@ public class EditProject extends Application {
         Item item = treeItem.getValue();
 
         if (item.itemType == ItemType.Parameters) {
-            JobXML jobXML = findAncestorPayload(ItemType.Job, treeItem);
-            if (jobXML == null) {
-                return;
-            }
-            MenuItem addParameter = new MenuItem("Add parameter");
-            contextMenu.getItems().add(addParameter);
-            addParameter.setOnAction(e -> {
-                SimpleParameterXML parameter = new SimpleParameterXML("newKey", "newName");
-                try {
-                    jobXML.add(parameter);
-                    addParameter(treeItem, ItemType.Parameter, parameter, jobXML);
-                } catch (Exception e1) {
-                    showError("Error adding new parameter.", e1);
-                }
-            });
+            addParameterMenu(contextMenu, treeItem);
 
         } else if (item.itemType == ItemType.Dependencies) {
             ParameterXML parameterXML = (ParameterXML) item.payload;
@@ -408,6 +413,24 @@ public class EditProject extends Application {
                 parameterXML.removeDependency((String)item.payload);
             });
         }
+    }
+
+    private void addParameterMenu(ContextMenu contextMenu, TreeItem<Item> treeItem) {
+        JobXML jobXML = findAncestorPayload(ItemType.Job, treeItem);
+        if (jobXML == null) {
+            return;
+        }
+        MenuItem addParameter = new MenuItem("Add parameter");
+        contextMenu.getItems().add(addParameter);
+        addParameter.setOnAction(e -> {
+            SimpleParameterXML parameter = new SimpleParameterXML("newKey", "newName");
+            try {
+                jobXML.add(parameter);
+                addParameter(treeItem, ItemType.Parameter, parameter, jobXML);
+            } catch (Exception e1) {
+                showError("Error adding new parameter.", e1);
+            }
+        });
     }
 
     private <T> T findAncestorPayload(ItemType itemType, TreeItem<Item> treeItem) {
@@ -464,5 +487,18 @@ public class EditProject extends Application {
             }
             return null;
         }
+    }
+
+    private TreeItem<Item> findItem(TreeItem<Item> root, Item item) {
+        if (root.getValue() == item) {
+            return root;
+        }
+        for (TreeItem<Item> child : root.getChildren()) {
+            TreeItem<Item> found = findItem(child, item);
+            if (found != null) {
+                return found;
+            }
+        }
+        return null;
     }
 }

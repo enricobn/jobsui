@@ -50,20 +50,17 @@ public class JobGroovy<T> extends JobAbstract<T> {
 
     @Override
     public JobFuture<T> run(final Map<String, Object> values) {
-        return new JobFuture<T>() {
-            @Override
-            public T get() {
-                run.setProperty("values", values);
-                for (Map.Entry<String, Object> entry : values.entrySet()) {
-                    run.setProperty(entry.getKey(), entry.getValue());
-                }
+        return () -> {
+            run.setProperty("values", values);
+            for (Map.Entry<String, Object> entry : values.entrySet()) {
+                run.setProperty(entry.getKey(), entry.getValue());
+            }
 
-                run.setProperty("projectFolder", projectFolder);
-                try {
-                    return (T) run.run();
-                } catch (Exception e) {
-                    throw new RuntimeException("Cannot execute run for job with key \"" + getKey() + "\".", e);
-                }
+            run.setProperty("projectFolder", projectFolder);
+            try {
+                return (T) run.run();
+            } catch (Exception e) {
+                throw new RuntimeException("Cannot execute run for job with key \"" + getKey() + "\".", e);
             }
         };
     }

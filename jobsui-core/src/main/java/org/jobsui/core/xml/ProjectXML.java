@@ -45,7 +45,8 @@ public class ProjectXML {
             XMLUtils.addAttr(element, "name", entry.getKey());
         }
 
-        XMLUtils.write(doc, new File(projectFolder, JobParser.PROJECT_FILE_NAME));
+        XMLUtils.write(doc, new File(projectFolder, JobParser.PROJECT_FILE_NAME),
+                getClass().getResource("/org/jobsui/project.xsd"));
 
         for (JobXML jobXML : jobs.values()) {
             jobXML.export();

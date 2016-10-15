@@ -3,20 +3,41 @@ package org.jobsui.core.xml;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import java.io.File;
+import java.net.URL;
 
 /**
  * Created by enrico on 10/12/16.
  */
 public interface XMLUtils {
 
-    static void write(Document doc, File file) throws Exception {
+    static void write(Document doc, File file, URL schemaURL) throws Exception {
+        // create a SchemaFactory capable of understanding WXS schemas
+        SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+
+        // load a WXS schema, represented by a Schema instance
+        Source schemaSource = new StreamSource(schemaURL.openStream());
+        Schema schema = factory.newSchema(schemaSource);
+
+        // create a Validator instance, which can be used to validate an instance document
+        Validator validator = schema.newValidator();
+
+        // validate the DOM tree
+        validator.validate(new DOMSource(doc));
+
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
