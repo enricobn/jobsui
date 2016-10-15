@@ -10,9 +10,11 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.jobsui.core.groovy.JobParser;
+import org.jobsui.core.utils.JobsUIUtils;
 import org.jobsui.core.xml.*;
 import sun.reflect.generics.tree.Tree;
 
@@ -284,10 +286,11 @@ public class EditProject extends Application {
         }
 
         private void setParameterDetail() {
-            TreeItem<Item> treeItem = findItem(itemsTree.getRoot(), this);
+            TreeItem<Item> treeItem = itemsTree.getSelectionModel().getSelectedItem();
 
             if (treeItem == null) {
                 showError("Cannot find item \"" + payload + "\".");
+                return;
             }
 
             JobXML jobXML = findAncestorPayload(ItemType.Job, treeItem);
@@ -312,26 +315,24 @@ public class EditProject extends Application {
             addTextAreaProperty("Validate:", parameter::getValidateScript, parameter::setValidateScript);
         }
 
-        private void addTextAreaProperty(String title,
-                                         Supplier<String> get, Consumer<String> set) {
+        private void addTextAreaProperty(String title, Supplier<String> get, Consumer<String> set) {
             itemDetail.getChildren().add(new Label(title));
             TextArea control = new TextArea(get.get());
 
             control.textProperty().addListener((observable, oldValue, newValue) -> {
                 set.accept(newValue);
+                updateSelectedItem();
             });
             itemDetail.getChildren().add(control);
         }
 
-        private void addTextProperty(String title,
-                                     Supplier<String> get, Consumer<String> set) {
+        private void addTextProperty(String title, Supplier<String> get, Consumer<String> set) {
             itemDetail.getChildren().add(new Label(title));
             TextField control = new TextField(get.get());
 
             control.textProperty().addListener((observable, oldValue, newValue) -> {
                 set.accept(newValue);
-
-                updateTreeItem(itemsTree.getSelectionModel().getSelectedItem());
+                updateSelectedItem();
             });
             itemDetail.getChildren().add(control);
         }
@@ -342,15 +343,30 @@ public class EditProject extends Application {
         }
     }
 
-    private static void updateTreeItem(TreeItem<Item> treeItem) {
-//        if (treeItem.getParent() != null) {
-//            int index = treeItem.getParent().getChildren().indexOf(treeItem);
-//            treeItem.getParent().getChildren().set(index, treeItem);
-//        } else {
-            Item value = treeItem.getValue();
-            treeItem.setValue(null);
-            treeItem.setValue(value);
-//        }
+    private void updateSelectedItem() {
+        TreeItem<Item> selectedItem = itemsTree.getSelectionModel().getSelectedItem();
+
+        Object payload = selectedItem.getValue().payload;
+        if (payload instanceof  ValidatingXML) {
+            validate(selectedItem, (ValidatingXML) payload);
+        }
+
+        Item value = selectedItem.getValue();
+        selectedItem.setValue(null);
+        selectedItem.setValue(value);
+    }
+
+
+    private void validate(TreeItem<Item> treeItem, ValidatingXML validatingXML) {
+        List<String> validate = validatingXML.validate();
+        if (!validate.isEmpty()) {
+            Label label = new Label("?");
+            label.setTextFill(Color.RED);
+            label.setTooltip(new Tooltip(JobsUIUtils.join(validate, " ")));
+            treeItem.setGraphic(label);
+        } else {
+            treeItem.setGraphic(null);
+        }
     }
 
     /*

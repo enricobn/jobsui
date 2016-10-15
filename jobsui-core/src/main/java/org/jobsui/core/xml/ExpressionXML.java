@@ -1,5 +1,7 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.utils.JobsUIUtils;
+
 import java.util.List;
 
 /**
@@ -23,7 +25,7 @@ public class ExpressionXML extends ParameterXML {
     @Override
     public List<String> validate() {
         List<String> messages = super.validate();
-        if (evaluateScript == null || evaluateScript.isEmpty()) {
+        if (JobsUIUtils.isNullOrEmptyOrSpaces(evaluateScript)) {
             messages.add("Evaluate script is mandatory.");
         }
         return messages;

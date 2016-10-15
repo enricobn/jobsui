@@ -1,5 +1,7 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.utils.JobsUIUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -64,11 +66,11 @@ public abstract class ParameterXML implements ValidatingXML {
     @Override
     public List<String> validate() {
         List<String> messages = new ArrayList<>(0);
-        if (key == null || key.isEmpty()) {
+        if (JobsUIUtils.isNullOrEmptyOrSpaces(key)) {
             messages.add("Key is mandatory.");
         }
 
-        if (name == null || name.isEmpty()) {
+        if (JobsUIUtils.isNullOrEmptyOrSpaces(name)) {
             messages.add("Name is mandatory.");
         }
         return messages;

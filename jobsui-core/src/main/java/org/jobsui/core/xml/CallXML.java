@@ -1,5 +1,7 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.utils.JobsUIUtils;
+
 import java.util.*;
 
 /**
@@ -41,11 +43,11 @@ public class CallXML extends ParameterXML {
     @Override
     public List<String> validate() {
         List<String> messages = super.validate();
-        if (project == null || project.isEmpty()) {
+        if (JobsUIUtils.isNullOrEmptyOrSpaces(project)) {
             messages.add("Project is mandatory.");
         }
 
-        if (job == null || job.isEmpty()) {
+        if (JobsUIUtils.isNullOrEmptyOrSpaces(job)) {
             messages.add("Job is mandatory.");
         }
 

@@ -1,5 +1,7 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.utils.JobsUIUtils;
+
 import java.util.List;
 
 /**
@@ -59,7 +61,7 @@ public class SimpleParameterXML extends ParameterXML {
     @Override
     public List<String> validate() {
         List<String> messages = super.validate();
-        if (createComponentScript == null || createComponentScript.isEmpty()) {
+        if (JobsUIUtils.isNullOrEmptyOrSpaces(createComponentScript)) {
             messages.add("Create component script is mandatory.");
         }
         return messages;

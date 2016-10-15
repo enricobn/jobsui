@@ -1,5 +1,6 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.utils.JobsUIUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -203,20 +204,22 @@ public class JobXML implements ValidatingXML {
     @Override
     public List<String> validate() {
         List<String> messages = new ArrayList<>(0);
-        if (key == null || key.isEmpty()) {
+        if (JobsUIUtils.isNullOrEmptyOrSpaces(key)) {
             messages.add("Key is mandatory.");
         }
 
-        if (name == null || name.isEmpty()) {
+        if (JobsUIUtils.isNullOrEmptyOrSpaces(name)) {
             messages.add("Name is mandatory.");
         }
 
         for (ParameterXML parameterXML : parameters.values()) {
             List<String> parameterMessages = parameterXML.validate();
             if (!parameterMessages.isEmpty()) {
-                messages.add(parameterXML.getName() + ":" + parameterMessages.stream().collect(Collectors.joining(",")));
+                messages.add(parameterXML.getName() + ": " + parameterMessages.stream().collect(Collectors.joining(" ")));
             }
         }
+
+        // TODO dependencies
 
         return messages;
     }

@@ -1,6 +1,7 @@
 package org.jobsui.core.xml;
 
 import org.jobsui.core.groovy.JobParser;
+import org.jobsui.core.utils.JobsUIUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -12,7 +13,7 @@ import java.util.*;
 /**
  * Created by enrico on 10/6/16.
  */
-public class ProjectXML {
+public class ProjectXML implements ValidatingXML {
     private final File projectFolder;
     private final List<String> libraries = new ArrayList<>();
     private final Map<String, String> imports = new HashMap<>();
@@ -104,5 +105,14 @@ public class ProjectXML {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    @Override
+    public List<String> validate() {
+        List<String> messages = new ArrayList<>(0);
+        if (JobsUIUtils.isNullOrEmptyOrSpaces(name)) {
+            messages.add("Name is mandatory.");
+        }
+        return messages;
     }
 }
