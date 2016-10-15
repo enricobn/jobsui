@@ -8,14 +8,13 @@ import java.util.List;
  */
 public class ParameterXML {
     private final List<String> dependencies = new ArrayList<>();
-    private final int order;
+    private int order;
     private String key;
     private String name;
 
-    ParameterXML(String key, String name, int order) {
+    ParameterXML(String key, String name) {
         this.key = key;
         this.name = name;
-        this.order = order;
     }
 
     public void addDependency(String depKey) {
@@ -56,5 +55,9 @@ public class ParameterXML {
 
     public void removeDependency(String key) {
         dependencies.remove(key);
+    }
+
+    public void setOrder(int order) {
+        this.order = order;
     }
 }

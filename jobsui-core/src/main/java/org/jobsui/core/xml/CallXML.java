@@ -11,8 +11,8 @@ public class CallXML extends ParameterXML {
     private String job;
     private Map<String, String> map = new HashMap<>();
 
-    public CallXML(String key, String name, int order) {
-        super(key, name, order);
+    public CallXML(String key, String name) {
+        super(key, name);
     }
 
     public void setProject(String project) {

@@ -10,8 +10,8 @@ public class SimpleParameterXML extends ParameterXML {
     private boolean visible;
     private boolean optional;
 
-    public SimpleParameterXML(String key, String name, int order) {
-        super(key, name, order);
+    public SimpleParameterXML(String key, String name) {
+        super(key, name);
     }
 
     public void setValidateScript(String parameterValidateScript) {

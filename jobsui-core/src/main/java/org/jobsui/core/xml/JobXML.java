@@ -22,6 +22,7 @@ public class JobXML {
     private final String name;
     private String runScript;
     private String validateScript;
+    private int order;
 
     public JobXML(File file, String name) {
         this.file = file;
@@ -133,6 +134,8 @@ public class JobXML {
             throw new Exception("Duplicate parameter key '" + parameterXML.getKey() + "' for parameter " +
                     "with name '" + parameterXML.getName() + "'.");
         }
+        parameterXML.setOrder(order);
+        order += 1_000;
     }
 
     public List<String> getSortedParameters() throws Exception {

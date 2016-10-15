@@ -22,7 +22,6 @@ import java.util.Arrays;
  * Created by enrico on 5/4/16.
  */
 public class JobParser {
-    private static final int ORDER_INCREMENT = 1_000;
     public static final String PROJECT_FILE_NAME = "project.xml";
     private final Validator jobValidator;
     private final Validator projectValidator;
@@ -151,13 +150,11 @@ public class JobParser {
 
             jobXML.setValidateScript(validateScript);
 
-            int order = 0;
+            parseParameters(doc, jobXML);
 
-            order = parseParameters(doc, jobXML, order);
+            parseExpressions(doc, jobXML);
 
-            order = parseExpressions(doc, jobXML, order);
-
-            parseCalls(doc, jobXML, order);
+            parseCalls(doc, jobXML);
 
             projectXML.addJob(jobXML);
 
@@ -166,7 +163,7 @@ public class JobParser {
         }
     }
 
-    private int parseExpressions(Document doc, JobXML jobXML, int order)
+    private void parseExpressions(Document doc, JobXML jobXML)
     throws Exception {
         NodeList expressionsList = doc.getElementsByTagName("Expression");
         for (int i = 0; i < expressionsList.getLength(); i++) {
@@ -175,18 +172,16 @@ public class JobParser {
             String parameterName = getMandatoryAttribute(element, "name");
             String evaluateScript = getElementContent(element, "Evaluate", false);
 
-            ExpressionXML expressionXML = new ExpressionXML(parameterKey, parameterName, order);
-            order += ORDER_INCREMENT;
+            ExpressionXML expressionXML = new ExpressionXML(parameterKey, parameterName);
             expressionXML.setEvaluateScript(evaluateScript);
 
             jobXML.add(expressionXML);
 
             addDependencies(element, expressionXML);
         }
-        return order;
     }
 
-    private int parseCalls(Document doc, JobXML jobXML, int order)
+    private void parseCalls(Document doc, JobXML jobXML)
     throws Exception {
         NodeList callsList = doc.getElementsByTagName("Call");
         for (int i = 0; i < callsList.getLength(); i++) {
@@ -197,8 +192,7 @@ public class JobParser {
             String project = getMandatoryAttribute(element, "project");
             String job = getMandatoryAttribute(element, "job");
 
-            CallXML callXML = new CallXML(key, name, order);
-            order += ORDER_INCREMENT;
+            CallXML callXML = new CallXML(key, name);
             callXML.setProject(project);
             callXML.setJob(job);
 
@@ -213,10 +207,9 @@ public class JobParser {
 
             jobXML.add(callXML);
         }
-        return order;
     }
 
-    private int parseParameters(Document doc, JobXML jobXML, int order)
+    private void parseParameters(Document doc, JobXML jobXML)
     throws Exception {
         NodeList parametersList = doc.getElementsByTagName("Parameter");
 
@@ -234,8 +227,7 @@ public class JobParser {
             boolean visible = visibleString == null || visibleString.isEmpty() || Boolean.parseBoolean(visibleString);
             boolean optional = optionalString != null && !optionalString.isEmpty() && Boolean.parseBoolean(optionalString);
 
-            SimpleParameterXML simpleParameterXML = new SimpleParameterXML(parameterKey, parameterName, order);
-            order += ORDER_INCREMENT;
+            SimpleParameterXML simpleParameterXML = new SimpleParameterXML(parameterKey, parameterName);
             simpleParameterXML.setValidateScript(parameterValidateScript);
             simpleParameterXML.setCreateComponentScript(createComponentScript);
             simpleParameterXML.setOnDependenciesChangeScript(onDependenciesChangeScript);
@@ -246,7 +238,6 @@ public class JobParser {
 
             jobXML.add(simpleParameterXML);
         }
-        return order;
     }
 
     private static void addDependencies(Element element, ParameterXML parameterXML) throws JobsUIParseException {

@@ -281,6 +281,7 @@ public class EditProject extends Application {
             SimpleParameterXML parameter = (SimpleParameterXML) payload;
 
             addTextProperty("Key:", parameter::getKey, parameter::setKey);
+
             addTextProperty("Name:", parameter::getName, parameter::setName);
 
             addTextAreaProperty("Create component:", parameter::getCreateComponentScript,
@@ -357,10 +358,27 @@ public class EditProject extends Application {
         contextMenu.getItems().clear();
         Item item = treeItem.getValue();
 
-        if (item.itemType == ItemType.Dependencies) {
+        if (item.itemType == ItemType.Parameters) {
+            JobXML jobXML = findAncestorPayload(ItemType.Job, treeItem);
+            if (jobXML == null) {
+                return;
+            }
+            MenuItem addParameter = new MenuItem("Add parameter");
+            contextMenu.getItems().add(addParameter);
+            addParameter.setOnAction(e -> {
+                SimpleParameterXML parameter = new SimpleParameterXML("newKey", "newName");
+                try {
+                    jobXML.add(parameter);
+                    addParameter(treeItem, ItemType.Parameter, parameter, jobXML);
+                } catch (Exception e1) {
+                    showError("Error adding new parameter.", e1);
+                }
+            });
+
+        } else if (item.itemType == ItemType.Dependencies) {
             ParameterXML parameterXML = (ParameterXML) item.payload;
             List<String> dependencies = parameterXML.getDependencies();
-            JobXML jobXML = (JobXML) treeItem.getParent().getParent().getValue().payload;
+            JobXML jobXML = findAncestorPayload(ItemType.Job, treeItem);
             List<String> parameters = getAllParameters(jobXML);
             parameters.removeAll(dependencies);
 
@@ -372,7 +390,7 @@ public class EditProject extends Application {
                     ParameterXML parameter = jobXML.getParameter(dependency);
                     String name = parameter.getName();
                     MenuItem dependencyMenuItem = new MenuItem(name);
-                    dependencyMenuItem.setOnAction(t -> {
+                    dependencyMenuItem.setOnAction(e -> {
                         parameterXML.addDependency(dependency);
                         TreeItem<Item> newDep = new TreeItem<>(EditProject.this.new Item(ItemType.Dependency,
                                 () -> name, dependency));
@@ -390,6 +408,18 @@ public class EditProject extends Application {
                 parameterXML.removeDependency((String)item.payload);
             });
         }
+    }
+
+    private <T> T findAncestorPayload(ItemType itemType, TreeItem<Item> treeItem) {
+        TreeItem<Item> ancestor = treeItem.getParent();
+        while (ancestor != null) {
+            Item value = ancestor.getValue();
+            if (value != null && value.itemType == itemType) {
+                return (T) value.payload;
+            }
+            ancestor = ancestor.getParent();
+        }
+        return null;
     }
 
     private static List<String> getAllParameters(JobXML jobXML) {
