@@ -40,8 +40,9 @@ public class JobXML implements ValidatingXML {
 
     public void export() throws Exception {
         List<String> validate = validate();
+
         if (!validate.isEmpty()) {
-            throw new Exception("Invalid job \"" + name + "\":" + validate.stream().collect(Collectors.joining(",")));
+            throw new Exception("Invalid job \"" + name + "\":\n" + validate.stream().collect(Collectors.joining("\n ")));
         }
 
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -61,7 +62,7 @@ public class JobXML implements ValidatingXML {
                 XMLUtils.addTextElement(element, "CreateComponent", parameter.getCreateComponentScript());
             }
 
-            if (validateScript != null && !validateScript.isEmpty()) {
+            if (!JobsUIUtils.isNullOrEmptyOrSpaces(parameter.getValidateScript())) {
                 XMLUtils.addTextElement(element, "Validate", parameter.getValidateScript());
             }
 
@@ -76,7 +77,16 @@ public class JobXML implements ValidatingXML {
             }
         }
 
-        XMLUtils.addTextElement(rootElement, "Run", getRunScript());
+        // TODO Expressions
+        // TODO Calls
+
+        if (!JobsUIUtils.isNullOrEmptyOrSpaces(validateScript)) {
+            XMLUtils.addTextElement(rootElement, "Validate", validateScript);
+        }
+
+        if (!JobsUIUtils.isNullOrEmptyOrSpaces(runScript)) {
+            XMLUtils.addTextElement(rootElement, "Run", getRunScript());
+        }
 
         try {
             XMLUtils.write(doc, file, getClass().getResource("/org/jobsui/job.xsd"));
@@ -220,6 +230,11 @@ public class JobXML implements ValidatingXML {
         }
 
         // TODO dependencies
+
+        if (JobsUIUtils.isNullOrEmptyOrSpaces(runScript)) {
+            messages.add("Run script is mandatory.");
+        }
+
 
         return messages;
     }

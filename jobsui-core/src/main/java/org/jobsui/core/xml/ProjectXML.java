@@ -9,6 +9,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 10/6/16.
@@ -28,6 +29,12 @@ public class ProjectXML implements ValidatingXML {
     }
 
     public void export() throws Exception {
+        List<String> validate = validate();
+
+        if (!validate.isEmpty()) {
+            throw new Exception("Invalid project \"" + name + "\":\n" + validate.stream().collect(Collectors.joining("\n ")));
+        }
+
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
@@ -112,6 +119,13 @@ public class ProjectXML implements ValidatingXML {
         List<String> messages = new ArrayList<>(0);
         if (JobsUIUtils.isNullOrEmptyOrSpaces(name)) {
             messages.add("Name is mandatory.");
+        }
+
+        for (JobXML jobXML : jobs.values()) {
+            List<String> validate = jobXML.validate();
+            if (!validate.isEmpty()) {
+                messages.add("Invalid job \"" + jobXML.getName() + "\":\n" + JobsUIUtils.join(validate, " "));
+            }
         }
         return messages;
     }

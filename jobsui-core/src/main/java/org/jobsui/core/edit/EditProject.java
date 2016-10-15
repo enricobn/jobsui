@@ -133,15 +133,20 @@ public class EditProject extends Application {
         stage.show();
     }
 
-    private static void showError(String message, Throwable e) {
+    private static void showError(String title, Throwable e) {
         // TODO
         e.printStackTrace();
-        Alert alert = new Alert(Alert.AlertType.ERROR, message + " " + e.getMessage());
+        Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage());
+        alert.setTitle(title);
+        alert.setWidth(400);
+        alert.setResizable(true);
         alert.showAndWait();
     }
 
     private static void showError(String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR, message);
+        alert.setWidth(400);
+        alert.setResizable(true);
         alert.showAndWait();
     }
 
