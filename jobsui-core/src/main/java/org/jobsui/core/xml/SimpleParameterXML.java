@@ -1,5 +1,7 @@
 package org.jobsui.core.xml;
 
+import java.util.List;
+
 /**
  * Created by enrico on 10/11/16.
  */
@@ -52,5 +54,14 @@ public class SimpleParameterXML extends ParameterXML {
 
     public boolean isOptional() {
         return optional;
+    }
+
+    @Override
+    public List<String> validate() {
+        List<String> messages = super.validate();
+        if (createComponentScript == null || createComponentScript.isEmpty()) {
+            messages.add("Create component script is mandatory.");
+        }
+        return messages;
     }
 }

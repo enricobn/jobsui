@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by enrico on 10/11/16.
  */
-public class ParameterXML {
+public abstract class ParameterXML implements ValidatingXML {
     private final List<String> dependencies = new ArrayList<>();
     private int order;
     private String key;
@@ -59,5 +59,18 @@ public class ParameterXML {
 
     public void setOrder(int order) {
         this.order = order;
+    }
+
+    @Override
+    public List<String> validate() {
+        List<String> messages = new ArrayList<>(0);
+        if (key == null || key.isEmpty()) {
+            messages.add("Key is mandatory.");
+        }
+
+        if (name == null || name.isEmpty()) {
+            messages.add("Name is mandatory.");
+        }
+        return messages;
     }
 }

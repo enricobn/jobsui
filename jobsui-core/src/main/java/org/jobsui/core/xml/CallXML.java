@@ -1,7 +1,6 @@
 package org.jobsui.core.xml;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by enrico on 10/11/16.
@@ -37,5 +36,21 @@ public class CallXML extends ParameterXML {
 
     public Map<String, String> getMap() {
         return map;
+    }
+
+    @Override
+    public List<String> validate() {
+        List<String> messages = super.validate();
+        if (project == null || project.isEmpty()) {
+            messages.add("Project is mandatory.");
+        }
+
+        if (job == null || job.isEmpty()) {
+            messages.add("Job is mandatory.");
+        }
+
+        // TODO map
+
+        return messages;
     }
 }

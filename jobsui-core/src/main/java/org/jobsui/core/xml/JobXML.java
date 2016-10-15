@@ -7,11 +7,12 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 10/11/16.
  */
-public class JobXML {
+public class JobXML implements ValidatingXML {
     private final List<SimpleParameterXML> simpleParameterXMLs = new ArrayList<>();
     private final List<ExpressionXML> expressionXMLs = new ArrayList<>();
     private final List<CallXML> callXMLs = new ArrayList<>();
@@ -37,6 +38,11 @@ public class JobXML {
     }
 
     public void export() throws Exception {
+        List<String> validate = validate();
+        if (!validate.isEmpty()) {
+            throw new Exception("Invalid job \"" + name + "\":" + validate.stream().collect(Collectors.joining(",")));
+        }
+
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
@@ -192,5 +198,26 @@ public class JobXML {
                 parameter.addDependency(newKey);
             }
         }
+    }
+
+    @Override
+    public List<String> validate() {
+        List<String> messages = new ArrayList<>(0);
+        if (key == null || key.isEmpty()) {
+            messages.add("Key is mandatory.");
+        }
+
+        if (name == null || name.isEmpty()) {
+            messages.add("Name is mandatory.");
+        }
+
+        for (ParameterXML parameterXML : parameters.values()) {
+            List<String> parameterMessages = parameterXML.validate();
+            if (!parameterMessages.isEmpty()) {
+                messages.add(parameterXML.getName() + ":" + parameterMessages.stream().collect(Collectors.joining(",")));
+            }
+        }
+
+        return messages;
     }
 }

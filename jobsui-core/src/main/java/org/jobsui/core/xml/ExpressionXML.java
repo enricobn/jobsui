@@ -1,5 +1,7 @@
 package org.jobsui.core.xml;
 
+import java.util.List;
+
 /**
  * Created by enrico on 10/11/16.
  */
@@ -18,4 +20,12 @@ public class ExpressionXML extends ParameterXML {
         return evaluateScript;
     }
 
+    @Override
+    public List<String> validate() {
+        List<String> messages = super.validate();
+        if (evaluateScript == null || evaluateScript.isEmpty()) {
+            messages.add("Evaluate script is mandatory.");
+        }
+        return messages;
+    }
 }
