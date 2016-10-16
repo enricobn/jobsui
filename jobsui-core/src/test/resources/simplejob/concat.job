@@ -4,17 +4,13 @@
     <Parameter key="first" name="First">
 
         <CreateComponent>
-            <![CDATA[
-                def uiValue = ui.create(UIValue.class);
-                uiValue.setConverter(new StringConverterString());
-                return uiValue;
-            ]]>
+            def uiValue = ui.create(UIValue.class);
+            uiValue.setConverter(new StringConverterString());
+            return uiValue;
         </CreateComponent>
 
         <Validate>
-            <![CDATA[
-                return new NotEmptyStringValidator().validate(value);
-            ]]>
+            return new NotEmptyStringValidator().validate(value);
         </Validate>
 
     </Parameter>
@@ -22,17 +18,13 @@
     <Parameter key="second" name="Second">
 
         <CreateComponent>
-            <![CDATA[
-                def uiValue = ui.create(UIValue.class);
-                uiValue.setConverter(new StringConverterString());
-                return uiValue;
-            ]]>
+            def uiValue = ui.create(UIValue.class);
+            uiValue.setConverter(new StringConverterString());
+            return uiValue;
         </CreateComponent>
 
         <Validate>
-            <![CDATA[
-                return new NotEmptyStringValidator().validate(value);
-            ]]>
+            return new NotEmptyStringValidator().validate(value);
         </Validate>
 
     </Parameter>

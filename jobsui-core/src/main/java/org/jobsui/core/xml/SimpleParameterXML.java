@@ -19,15 +19,15 @@ public class SimpleParameterXML extends ParameterXML {
     }
 
     public void setValidateScript(String parameterValidateScript) {
-        this.parameterValidateScript = parameterValidateScript;
+        this.parameterValidateScript = XMLUtils.scriptToEditForm(parameterValidateScript);
     }
 
     public void setCreateComponentScript(String createComponentScript) {
-        this.createComponentScript = createComponentScript;
+        this.createComponentScript = XMLUtils.scriptToEditForm(createComponentScript);
     }
 
     public void setOnDependenciesChangeScript(String onDependenciesChangeScript) {
-        this.onDependenciesChangeScript = onDependenciesChangeScript;
+        this.onDependenciesChangeScript = XMLUtils.scriptToEditForm(onDependenciesChangeScript);
     }
 
     public void setVisible(boolean visible) {

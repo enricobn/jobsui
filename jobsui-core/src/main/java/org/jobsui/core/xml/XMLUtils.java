@@ -1,5 +1,6 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.utils.JobsUIUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -15,8 +16,14 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 10/12/16.
@@ -63,6 +70,48 @@ public interface XMLUtils {
         parent.appendChild(child);
         child.appendChild(doc.createTextNode(text));
         return child;
+    }
+
+    static String scriptToEditForm(String script) {
+        if (script == null) {
+            return null;
+        }
+        String normalized = script.replaceAll("\\r\\n", "\n");
+        List<String> newLines;
+        try (StringReader reader = new StringReader(normalized); BufferedReader bufferedReader = new BufferedReader(reader)) {
+            List<String> lines = bufferedReader.lines().collect(Collectors.toList());
+            newLines = new ArrayList<>(lines.size());
+            boolean start = true;
+            int spaces = 0;
+            for (String line : lines) {
+                String trimmed = line.trim();
+                if (start) {
+                    if (trimmed.isEmpty()) {
+                        continue;
+                    }
+                    spaces = JobsUIUtils.leadingSpaces(line);
+                    newLines.add(trimmed);
+                    start = false;
+                } else {
+                    int leadingSpaces = JobsUIUtils.leadingSpaces(line);
+                    newLines.add(JobsUIUtils.spaces(leadingSpaces - spaces) + trimmed);
+                }
+            }
+        } catch (IOException e) {
+            return script;
+        }
+
+        int i = newLines.size() -1;
+
+        while (i >= 0 && newLines.get(i).isEmpty()) {
+            newLines.remove(i);
+            i--;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        newLines.stream()
+                .forEach(line -> sb.append(line).append('\n'));
+        return sb.toString();
     }
 
 }

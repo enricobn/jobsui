@@ -104,11 +104,11 @@ public class JobXML implements ValidatingXML {
     }
 
     public void setRunScript(String runScript) {
-        this.runScript = runScript;
+        this.runScript = XMLUtils.scriptToEditForm(runScript);
     }
 
     public void setValidateScript(String validateScript) {
-        this.validateScript = validateScript;
+        this.validateScript = XMLUtils.scriptToEditForm(validateScript);
     }
 
     public void add(SimpleParameterXML simpleParameterXML) throws Exception {

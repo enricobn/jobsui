@@ -15,7 +15,7 @@ public class ExpressionXML extends ParameterXML {
     }
 
     public void setEvaluateScript(String evaluateScript) {
-        this.evaluateScript = evaluateScript;
+        this.evaluateScript = XMLUtils.scriptToEditForm(evaluateScript);
     }
 
     public String getEvaluateScript() {
