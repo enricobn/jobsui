@@ -4,53 +4,41 @@
     <Parameter key="name" name="Name">
 
         <CreateComponent>
-            <![CDATA[
-                def uiValue = ui.create(UIValue.class);
-                uiValue.setConverter(new StringConverterString());
-                uiValue.setDefaultValue("Enrico");
-                return uiValue;
-            ]]>
+            def uiValue = ui.create(UIValue.class);
+            uiValue.setConverter(new StringConverterString());
+            uiValue.setDefaultValue("Enrico");
+            return uiValue;
         </CreateComponent>
 
         <Validate>
-            <![CDATA[
-                return new NotEmptyStringValidator().validate(value);
-            ]]>
+            return new NotEmptyStringValidator().validate(value);
         </Validate>
 
     </Parameter>
 
     <Parameter key="surname" name="Surname">
         <CreateComponent>
-            <![CDATA[
-                def uiValue = ui.create(UIValue.class);
-                uiValue.setConverter(new StringConverterString());
-                return uiValue;
-            ]]>
+            def uiValue = ui.create(UIValue.class);
+            uiValue.setConverter(new StringConverterString());
+            return uiValue;
         </CreateComponent>
 
         <Validate>
-            <![CDATA[
-                return new NotEmptyStringValidator().validate(value);
-            ]]>
+            return new NotEmptyStringValidator().validate(value);
         </Validate>
 
     </Parameter>
     <Parameter key="inv" name="Inv" visible="false">
 
         <CreateComponent>
-            <![CDATA[
-                return ui.create(UIChoice.class);
-            ]]>
+            return ui.create(UIChoice.class);
         </CreateComponent>
 
         <Dependency key="name"/>
         <Dependency key="surname"/>
 
         <OnDependenciesChange>
-            <![CDATA[
-                widget.getComponent().setItems([Foo.concat(name, surname)])
-            ]]>
+            widget.getComponent().setItems([Foo.concat(name, surname)])
         </OnDependenciesChange>
 
     </Parameter>
@@ -61,8 +49,6 @@
         ]]>
     </Run>
     <!--Validate>
-        <![CDATA[
-                return new NotEmptyStringValidator().validate(value);
-            ]]>
+        return new NotEmptyStringValidator().validate(value);
     </Validate-->
 </Job>
