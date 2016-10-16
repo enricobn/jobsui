@@ -236,6 +236,7 @@ public class EditProject extends Application {
                     break;
 
                 case Job:
+                    setJobDetail();
                     break;
 
                 case Parameter:
@@ -256,7 +257,18 @@ public class EditProject extends Application {
 
         private void setProjectDetail() {
             ProjectXML project = (ProjectXML) payload;
+
             addTextProperty("Name:", project::getName, project::setName);
+        }
+
+        private void setJobDetail() {
+            JobXML jobXML = (JobXML) payload;
+
+            // TODO key (file name)
+            addTextProperty("Name:", jobXML::getName, jobXML::setName);
+
+            addTextAreaProperty("Validate:", jobXML::getValidateScript, jobXML::setValidateScript);
+            addTextAreaProperty("Run:", jobXML::getRunScript, jobXML::setRunScript);
         }
 
         private void setGroovyFileDetail() throws IOException {

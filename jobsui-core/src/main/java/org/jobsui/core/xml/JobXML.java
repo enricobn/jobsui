@@ -21,7 +21,7 @@ public class JobXML implements ValidatingXML {
 
     private final File file;
     private final String key;
-    private final String name;
+    private String name;
     private String runScript;
     private String validateScript;
     private int order;
@@ -235,5 +235,9 @@ public class JobXML implements ValidatingXML {
 
 
         return messages;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }
