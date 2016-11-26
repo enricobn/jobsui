@@ -309,7 +309,7 @@ public class EditProject extends Application {
                 return;
             }
 
-            JobXML jobXML = findAncestorPayload(ItemType.Job, treeItem);
+            JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
 
             if (jobXML == null) {
                 showError("Cannot find job for item \"" + payload + "\".");
@@ -415,7 +415,7 @@ public class EditProject extends Application {
         } else if (item.itemType == ItemType.Dependencies) {
             ParameterXML parameterXML = (ParameterXML) item.payload;
             List<String> dependencies = parameterXML.getDependencies();
-            JobXML jobXML = findAncestorPayload(ItemType.Job, treeItem);
+            JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
 
             if (jobXML == null) {
                 showError("Cannot find job for " + item);
@@ -430,6 +430,9 @@ public class EditProject extends Application {
                 contextMenu.getItems().add(addDependency);
 
                 for (String dependency : parameters) {
+                    if (parameterXML.getKey().equals(dependency)) {
+                        continue;
+                    }
                     ParameterXML parameter = jobXML.getParameter(dependency);
                     String name = parameter.getName();
                     MenuItem dependencyMenuItem = new MenuItem(name);
@@ -454,7 +457,7 @@ public class EditProject extends Application {
     }
 
     private void addParameterMenu(ContextMenu contextMenu, TreeItem<Item> treeItem) {
-        JobXML jobXML = findAncestorPayload(ItemType.Job, treeItem);
+        JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
         if (jobXML == null) {
             return;
         }
@@ -471,12 +474,16 @@ public class EditProject extends Application {
         });
     }
 
-    private <T> T findAncestorPayload(ItemType itemType, TreeItem<Item> treeItem) {
+    private <T> T findAncestorPayload(TreeItem<Item> treeItem, ItemType... itemTypes) {
         TreeItem<Item> ancestor = treeItem.getParent();
         while (ancestor != null) {
             Item value = ancestor.getValue();
-            if (value != null && value.itemType == itemType) {
-                return (T) value.payload;
+            if (value != null) {
+                for (ItemType itemType : itemTypes) {
+                    if (value.itemType == itemType) {
+                        return (T) value.payload;
+                    }
+                }
             }
             ancestor = ancestor.getParent();
         }
