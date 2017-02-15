@@ -84,7 +84,9 @@ class JavaFXUIWindow implements UIWindow<Node> {
             callback.run();
 
             for (NodeUIWidget widget : components) {
-                root.getChildren().add(widget.getNodeComponent());
+                Node node = widget.getNodeComponent();
+                node.managedProperty().bind(node.visibleProperty());
+                root.getChildren().add(node);
             }
 
             HBox okCancel = new HBox(5);
