@@ -427,7 +427,6 @@ public class EditProject extends Application {
 
             if (!parameters.isEmpty()) {
                 Menu addDependency = new Menu("Add dependency");
-                contextMenu.getItems().add(addDependency);
 
                 for (String dependency : parameters) {
                     if (parameterXML.getKey().equals(dependency)) {
@@ -444,6 +443,8 @@ public class EditProject extends Application {
                     });
                     addDependency.getItems().add(dependencyMenuItem);
                 }
+
+                contextMenu.getItems().add(addDependency);
             }
         } else if (item.itemType == ItemType.Dependency) {
             MenuItem delete = new MenuItem("Delete");
