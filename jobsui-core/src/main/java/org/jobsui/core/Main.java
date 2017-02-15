@@ -15,8 +15,8 @@ import java.io.File;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        if (args.length < 2) {
-            System.out.println("Usage: jobsui projectFolder jobkey");
+        if (args.length < 2 || args.length > 3) {
+            System.out.println("Usage: jobsui projectFolder jobkey [ui]");
             return;
         }
 
