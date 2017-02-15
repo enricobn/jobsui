@@ -24,7 +24,6 @@ class JavaFXUIChoice<T> implements UIChoice<T, Node> {
     private final Button button = new Button("...");
     private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
     private final Observable<T> observable;
-    private final List<T> items = new ArrayList<>();
     private String title;
     private boolean disableListener = false;
 
@@ -77,9 +76,13 @@ class JavaFXUIChoice<T> implements UIChoice<T, Node> {
 
         if (found) {
             combo.getSelectionModel().select(selectedItem);
+            combo.setDisable(false);
+            button.setDisable(false);
         } else {
             if (items.size() == 1) {
                 combo.getSelectionModel().select(items.get(0));
+                combo.setDisable(true);
+                button.setDisable(true);
             } else {
                 // when no items are set, I want to be sure that subscribers are notified,
                 // even if the value was already null, but I want to do it only once
@@ -88,6 +91,8 @@ class JavaFXUIChoice<T> implements UIChoice<T, Node> {
                 combo.getSelectionModel().select(null);
                 disableListener = false;
                 notifySubscribers();
+                combo.setDisable(false);
+                button.setDisable(false);
             }
         }
     }
@@ -115,7 +120,7 @@ class JavaFXUIChoice<T> implements UIChoice<T, Node> {
         component.getChildren().add(combo);
 
         button.setOnAction(event -> {
-            final SwingFilteredList<T> filteredList = new SwingFilteredList<>(title, items,
+            final SwingFilteredList<T> filteredList = new SwingFilteredList<>(title, combo.getItems(),
                     combo.getSelectionModel().getSelectedItem());
             filteredList.show();
             if (filteredList.isOk()) {
@@ -154,7 +159,7 @@ class JavaFXUIChoice<T> implements UIChoice<T, Node> {
 //                }
 //            }
 
-            if (!items.contains(value)) {
+            if (!combo.getItems().contains(value)) {
                 throw new RuntimeException("Cannot find item " + value);
             }
         }
