@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.fxmisc.richtext.CodeArea;
 import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.utils.JobsUIUtils;
@@ -130,6 +131,7 @@ public class EditProject extends Application {
         root.getChildren().add(status);
 
         Scene scene = new Scene(root, 800, 600);
+        scene.getStylesheets().add(EditProject.class.getResource("groovy-keywords.css").toExternalForm());
 
         stage.setTitle("Edit JobsUI");
         stage.setScene(scene);
@@ -270,8 +272,8 @@ public class EditProject extends Application {
             // TODO key (file name)
             addTextProperty("Name:", jobXML::getName, jobXML::setName);
 
-            addTextAreaProperty("Validate:", jobXML::getValidateScript, jobXML::setValidateScript);
-            addTextAreaProperty("Run:", jobXML::getRunScript, jobXML::setRunScript);
+            addTextAreaProperty("Validate:", jobXML::getValidateScript, jobXML::setValidateScript, false);
+            addTextAreaProperty("Run:", jobXML::getRunScript, jobXML::setRunScript, false);
         }
 
         private void setGroovyFileDetail() throws IOException {
@@ -282,9 +284,12 @@ public class EditProject extends Application {
                     file.getName().endsWith(".xml")) {
                 String content = new String(Files.readAllBytes(file.toPath()));
                 itemDetail.getChildren().add(new Label("Content:"));
-                TextArea textArea = new TextArea(content);
-                VBox.setVgrow(textArea, Priority.ALWAYS);
-                itemDetail.getChildren().add(textArea);
+
+                CodeArea codeArea = GroovyCodeArea.getCodeArea(content, true);
+
+                VBox.setVgrow(codeArea, Priority.ALWAYS);
+
+                itemDetail.getChildren().add(codeArea);
             }
         }
 
@@ -303,8 +308,9 @@ public class EditProject extends Application {
             addTextProperty("Key:", parameter::getKey, parameter::setKey);
             addTextProperty("Name:", parameter::getName, parameter::setName);
 
-            TextArea textArea = addTextAreaProperty("Evaluate:", parameter::getEvaluateScript, parameter::setEvaluateScript);
-            VBox.setVgrow(textArea, Priority.ALWAYS);
+            CodeArea codeArea = addTextAreaProperty("Evaluate:",
+                    parameter::getEvaluateScript, parameter::setEvaluateScript, false);
+            VBox.setVgrow(codeArea, Priority.ALWAYS);
         }
 
         private void setParameterDetail() {
@@ -329,17 +335,17 @@ public class EditProject extends Application {
             addTextProperty("Name:", parameter::getName, parameter::setName);
 
             addTextAreaProperty("Create component:", parameter::getCreateComponentScript,
-                    parameter::setCreateComponentScript);
+                    parameter::setCreateComponentScript, false);
 
             addTextAreaProperty("On dependencies change:", parameter::getOnDependenciesChangeScript,
-                    parameter::setOnDependenciesChangeScript);
+                    parameter::setOnDependenciesChangeScript, false);
 
-            addTextAreaProperty("Validate:", parameter::getValidateScript, parameter::setValidateScript);
+            addTextAreaProperty("Validate:", parameter::getValidateScript, parameter::setValidateScript, false);
         }
 
-        private TextArea addTextAreaProperty(String title, Supplier<String> get, Consumer<String> set) {
+        private CodeArea addTextAreaProperty(String title, Supplier<String> get, Consumer<String> set, boolean showLineNumbers) {
             itemDetail.getChildren().add(new Label(title));
-            TextArea control = new TextArea(get.get());
+            CodeArea control = GroovyCodeArea.getCodeArea(get.get(), showLineNumbers);
 
             control.textProperty().addListener((observable, oldValue, newValue) -> {
                 set.accept(newValue);
