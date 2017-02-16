@@ -9,6 +9,8 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
@@ -47,6 +49,7 @@ public class EditProject extends Application {
         configuration = EditProjectConfiguration.load();
         root = new VBox(5);
         HBox buttons = new HBox(5);
+        VBox.setVgrow(buttons, Priority.NEVER);
         buttons.setPadding(new Insets(5, 5, 5, 5));
         Button openButton = new Button("Open");
         openButton.setOnAction(event -> {
@@ -120,6 +123,7 @@ public class EditProject extends Application {
         itemDetail.setPadding(new Insets(5, 5, 5, 5));
 
         SplitPane splitPane = new SplitPane(itemsTree, itemDetail);
+        VBox.setVgrow(splitPane, Priority.ALWAYS);
         root.getChildren().add(splitPane);
 
         status = new Label();
@@ -298,7 +302,8 @@ public class EditProject extends Application {
             addTextProperty("Key:", parameter::getKey, parameter::setKey);
             addTextProperty("Name:", parameter::getName, parameter::setName);
 
-            addTextAreaProperty("Evaluate:", parameter::getEvaluateScript, parameter::setEvaluateScript);
+            TextArea textArea = addTextAreaProperty("Evaluate:", parameter::getEvaluateScript, parameter::setEvaluateScript);
+            VBox.setVgrow(textArea, Priority.ALWAYS);
         }
 
         private void setParameterDetail() {
@@ -331,7 +336,7 @@ public class EditProject extends Application {
             addTextAreaProperty("Validate:", parameter::getValidateScript, parameter::setValidateScript);
         }
 
-        private void addTextAreaProperty(String title, Supplier<String> get, Consumer<String> set) {
+        private TextArea addTextAreaProperty(String title, Supplier<String> get, Consumer<String> set) {
             itemDetail.getChildren().add(new Label(title));
             TextArea control = new TextArea(get.get());
 
@@ -340,6 +345,7 @@ public class EditProject extends Application {
                 updateSelectedItem();
             });
             itemDetail.getChildren().add(control);
+            return control;
         }
 
         private void addTextProperty(String title, Supplier<String> get, Consumer<String> set) {
