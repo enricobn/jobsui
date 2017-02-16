@@ -21,10 +21,7 @@ public class JavaFXUI implements UI<Node> {
 
     @Override
     public void showMessage(String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("JobsUI");
-        alert.setContentText(message);
-        alert.showAndWait();
+        showMessageStatic(message);
     }
 
     @Override
@@ -54,33 +51,41 @@ public class JavaFXUI implements UI<Node> {
     }
 
     public static void uncaughtException(Thread t, Throwable e) {
-        showErrorStatic(e);
+        showErrorStatic("Error on thread " + t.getName(), e);
     }
 
-    public static void showErrorStatic(Throwable e) {
+    public static void showErrorStatic(String message, Throwable e) {
         StringWriter errorMsg = new StringWriter();
         e.printStackTrace(new PrintWriter(errorMsg));
 
         if (Platform.isFxApplicationThread()) {
-            showErrorStatic(errorMsg.toString());
+            showErrorStatic(message, errorMsg.toString());
         } else {
             e.printStackTrace();
         }
     }
 
-    private static void showErrorStatic(String message) {
+    private static void showErrorStatic(String message, String errorMessage) {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
         FXMLLoader loader = new FXMLLoader(JavaFXUI.class.getResource("Error.fxml"));
         try {
             Parent root = loader.load();
-            ((ErrorController)loader.getController()).setErrorText(message);
+            ((ErrorController)loader.getController()).setMessageText(message);
+            ((ErrorController)loader.getController()).setErrorText(errorMessage);
             dialog.setScene(new Scene(root, 600, 600));
             dialog.setTitle("JobsUI");
             dialog.show();
         } catch (IOException exc) {
             exc.printStackTrace();
         }
+    }
+
+    public static void showMessageStatic(String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("JobsUI");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
 }

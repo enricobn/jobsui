@@ -208,7 +208,7 @@ class JobRunner {
                         try {
                             jobParameterDef.onDependenciesChange(widget, objects);
                         } catch (Exception e) {
-                            JavaFXUI.showErrorStatic(e);
+                            JavaFXUI.showErrorStatic("Error on onDependenciesChange for parameter " + jobParameterDef.getName(), e);
                             widget.setValidationMessages(Collections.singletonList(e.getMessage()));
                             widget.getComponent().setValue(null);
                             widget.getComponent().setEnabled(false);

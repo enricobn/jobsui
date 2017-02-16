@@ -9,13 +9,13 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.jobsui.core.groovy.JobParser;
+import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.jobsui.core.xml.*;
 
@@ -78,7 +78,7 @@ public class EditProject extends Application {
             try {
                 projectXML.export();
             } catch (Exception e) {
-                showError("Error exporting project.", e);
+                JavaFXUI.showErrorStatic("Error exporting project.", e);
             }
         });
         buttons.getChildren().add(export);
@@ -92,7 +92,7 @@ public class EditProject extends Application {
                 try {
                     newValue.getValue().onSelect();
                 } catch (Throwable e) {
-                    showError("Error :", e);
+                    JavaFXUI.showErrorStatic("Error :", e);
                 }
             }
         });
@@ -136,22 +136,22 @@ public class EditProject extends Application {
         stage.show();
     }
 
-    private static void showError(String title, Throwable e) {
-        // TODO
-        e.printStackTrace();
-        Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage());
-        alert.setTitle(title);
-        alert.setWidth(400);
-        alert.setResizable(true);
-        alert.showAndWait();
-    }
-
-    private static void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, message);
-        alert.setWidth(400);
-        alert.setResizable(true);
-        alert.showAndWait();
-    }
+//    private static void showError(String title, Throwable e) {
+//        // TODO
+//        e.printStackTrace();
+//        Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage());
+//        alert.setTitle(title);
+//        alert.setWidth(400);
+//        alert.setResizable(true);
+//        alert.showAndWait();
+//    }
+//
+//    private static void showError(String message) {
+//        Alert alert = new Alert(Alert.AlertType.ERROR, message);
+//        alert.setWidth(400);
+//        alert.setResizable(true);
+//        alert.showAndWait();
+//    }
 
     private TreeItem<Item> loadProject(File file) throws Exception {
         JobParser parser = new JobParser();
@@ -196,8 +196,7 @@ public class EditProject extends Application {
         parameters.setExpanded(true);
         result.getChildren().add(parameters);
 
-        parametersList.stream()
-                .forEach(parameter -> addParameter(parameters, itemType, parameter, jobXML));
+        parametersList.forEach(parameter -> addParameter(parameters, itemType, parameter, jobXML));
     }
 
     private void addParameter(TreeItem<Item> parameters, ItemType itemType, ParameterXML parameterDef, JobXML jobXML) {
@@ -283,7 +282,9 @@ public class EditProject extends Application {
                     file.getName().endsWith(".xml")) {
                 String content = new String(Files.readAllBytes(file.toPath()));
                 itemDetail.getChildren().add(new Label("Content:"));
-                itemDetail.getChildren().add(new TextArea(content));
+                TextArea textArea = new TextArea(content);
+                VBox.setVgrow(textArea, Priority.ALWAYS);
+                itemDetail.getChildren().add(textArea);
             }
         }
 
@@ -310,14 +311,14 @@ public class EditProject extends Application {
             TreeItem<Item> treeItem = itemsTree.getSelectionModel().getSelectedItem();
 
             if (treeItem == null) {
-                showError("Cannot find item \"" + payload + "\".");
+                JavaFXUI.showMessageStatic("Cannot find item \"" + payload + "\".");
                 return;
             }
 
             JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
 
             if (jobXML == null) {
-                showError("Cannot find job for item \"" + payload + "\".");
+                JavaFXUI.showMessageStatic("Cannot find job for item \"" + payload + "\".");
                 return;
             }
 
@@ -424,7 +425,7 @@ public class EditProject extends Application {
             JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
 
             if (jobXML == null) {
-                showError("Cannot find job for " + item);
+                JavaFXUI.showMessageStatic("Cannot find job for " + item);
                 return;
             }
 
@@ -476,7 +477,7 @@ public class EditProject extends Application {
                 jobXML.add(parameter);
                 addParameter(treeItem, ItemType.Parameter, parameter, jobXML);
             } catch (Exception e1) {
-                showError("Error adding new parameter.", e1);
+                JavaFXUI.showErrorStatic("Error adding new parameter.", e1);
             }
         });
     }
@@ -530,7 +531,7 @@ public class EditProject extends Application {
                     root.setExpanded(true);
                 });
             } catch (Exception e) {
-                showError("Error loading project.", e);
+                JavaFXUI.showErrorStatic("Error loading project.", e);
             } finally {
                 Platform.runLater(() -> {
                     status.setText("");
