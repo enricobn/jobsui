@@ -77,7 +77,7 @@ public class JobParameterDefGroovySimple<T> extends JobParameterDefAbstract<T> i
             onDependenciesChange.setProperty("projectFolder", projectFolder);
             try {
                 onDependenciesChange.run();
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 throw new RuntimeException("Error in onDependenciesChange script for parameter whit key \"" +
                         getKey() + "\"", e);
             }
@@ -99,7 +99,7 @@ public class JobParameterDefGroovySimple<T> extends JobParameterDefAbstract<T> i
             @SuppressWarnings("unchecked")
             List<String> result = (List<String>) validate.run();
             return result;
-        } catch (Throwable e) {
+        } catch (Exception e) {
             throw new RuntimeException("Error in validate script for parameter whit key \"" +
                     getKey() + "\"", e);
         }

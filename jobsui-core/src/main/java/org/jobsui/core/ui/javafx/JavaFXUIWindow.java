@@ -78,6 +78,8 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
         @Override
         public void start(Stage stage) throws Exception {
+            Thread.setDefaultUncaughtExceptionHandler(JavaFXUI::uncaughtException);
+
             root = new VBox(5);
             root.setPadding(new Insets(5, 5, 5, 5));
 
@@ -166,5 +168,6 @@ class JavaFXUIWindow implements UIWindow<Node> {
             return nodeComponent;
         }
     }
+
 }
 

@@ -45,4 +45,5 @@ public class SwingUI implements UI<JComponent> {
         }
         throw new UnsupportedComponentException("SWING: cannot find component for " + componentType.getName());
     }
+
 }

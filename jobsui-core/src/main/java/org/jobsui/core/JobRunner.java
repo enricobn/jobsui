@@ -1,6 +1,7 @@
 package org.jobsui.core;
 
 import org.jobsui.core.ui.*;
+import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
 import rx.Subscriber;
@@ -203,7 +204,15 @@ class JobRunner {
                     // all dependencies are valid
                     if (objects.size() == dependencies.size()) {
                         final UIWidget widget = widgets.get(jobParameterDef);
-                        jobParameterDef.onDependenciesChange(widget, objects);
+                        widget.getComponent().setEnabled(true);
+                        try {
+                            jobParameterDef.onDependenciesChange(widget, objects);
+                        } catch (Exception e) {
+                            JavaFXUI.showErrorStatic(e);
+                            widget.setValidationMessages(Collections.singletonList(e.getMessage()));
+                            widget.getComponent().setValue(null);
+                            widget.getComponent().setEnabled(false);
+                        }
                     }
                 });
             }
@@ -211,7 +220,7 @@ class JobRunner {
     }
 
     private Observable<Map<String, Object>> combineDependenciesObservables(final List<JobParameterDef<?>> dependencies,
-                                                                           List<Observable<?>> observables) {
+                                                               List<Observable<?>> observables) {
         return Observable.combineLatest(observables, new FuncN<Map<String,Object>>() {
             @Override
             public Map<String,Object> call(Object... args) {
