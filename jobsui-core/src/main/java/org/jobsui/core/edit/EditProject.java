@@ -272,7 +272,8 @@ public class EditProject extends Application {
             // TODO key (file name)
             addTextProperty("Name:", jobXML::getName, jobXML::setName);
 
-            addTextAreaProperty("Validate:", jobXML::getValidateScript, jobXML::setValidateScript, false);
+            addTextAreaProperty("Validate:", jobXML::getValidateScript, jobXML::setValidateScript,
+                    false);
             addTextAreaProperty("Run:", jobXML::getRunScript, jobXML::setRunScript, false);
         }
 
@@ -285,7 +286,9 @@ public class EditProject extends Application {
                 String content = new String(Files.readAllBytes(file.toPath()));
                 itemDetail.getChildren().add(new Label("Content:"));
 
-                CodeArea codeArea = GroovyCodeArea.getCodeArea(content, true);
+                CodeArea codeArea = GroovyCodeArea.getCodeArea(true);
+                GroovyCodeArea.setText(codeArea, content);
+                GroovyCodeArea.resetCaret(codeArea);
 
                 VBox.setVgrow(codeArea, Priority.ALWAYS);
 
@@ -308,9 +311,8 @@ public class EditProject extends Application {
             addTextProperty("Key:", parameter::getKey, parameter::setKey);
             addTextProperty("Name:", parameter::getName, parameter::setName);
 
-            CodeArea codeArea = addTextAreaProperty("Evaluate:",
-                    parameter::getEvaluateScript, parameter::setEvaluateScript, false);
-            VBox.setVgrow(codeArea, Priority.ALWAYS);
+            addTextAreaProperty("Evaluate:", parameter::getEvaluateScript, parameter::setEvaluateScript,
+                    false);
         }
 
         private void setParameterDetail() {
@@ -340,19 +342,28 @@ public class EditProject extends Application {
             addTextAreaProperty("On dependencies change:", parameter::getOnDependenciesChangeScript,
                     parameter::setOnDependenciesChangeScript, false);
 
-            addTextAreaProperty("Validate:", parameter::getValidateScript, parameter::setValidateScript, false);
+            addTextAreaProperty("Validate:", parameter::getValidateScript, parameter::setValidateScript,
+                    false);
         }
 
-        private CodeArea addTextAreaProperty(String title, Supplier<String> get, Consumer<String> set, boolean showLineNumbers) {
+        private void addTextAreaProperty(String title, Supplier<String> get, Consumer<String> set, boolean showLineNumbers) {
             itemDetail.getChildren().add(new Label(title));
-            CodeArea control = GroovyCodeArea.getCodeArea(get.get(), showLineNumbers);
+            CodeArea codeArea = GroovyCodeArea.getCodeArea(showLineNumbers);
 
-            control.textProperty().addListener((observable, oldValue, newValue) -> {
+            String content = get.get();
+            if (content != null) {
+                GroovyCodeArea.setText(codeArea, content);
+                GroovyCodeArea.resetCaret(codeArea);
+            }
+
+            codeArea.textProperty().addListener((observable, oldValue, newValue) -> {
                 set.accept(newValue);
                 updateSelectedItem();
             });
-            itemDetail.getChildren().add(control);
-            return control;
+
+            itemDetail.getChildren().add(codeArea);
+
+            VBox.setVgrow(codeArea, Priority.ALWAYS);
         }
 
         private void addTextProperty(String title, Supplier<String> get, Consumer<String> set) {

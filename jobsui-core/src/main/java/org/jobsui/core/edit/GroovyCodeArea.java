@@ -28,9 +28,9 @@ public class GroovyCodeArea {
     };
     private static final String KEYWORD_PATTERN = "\\b(" + String.join("|", KEYWORDS) + ")\\b";
     private static final String PAREN_PATTERN = "\\(|\\)";
-    private static final String BRACE_PATTERN = "\\{|\\}";
-    private static final String BRACKET_PATTERN = "\\[|\\]";
-    private static final String SEMICOLON_PATTERN = "\\;";
+    private static final String BRACE_PATTERN = "\\{|}";
+    private static final String BRACKET_PATTERN = "\\[|]";
+    private static final String SEMICOLON_PATTERN = ";";
     private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
     private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
 
@@ -44,30 +44,33 @@ public class GroovyCodeArea {
                     + "|(?<COMMENT>" + COMMENT_PATTERN + ")"
     );
 
-    static CodeArea getCodeArea(String content, boolean showLineNumbers) {
+    static CodeArea getCodeArea(boolean showLineNumbers) {
         CodeArea codeArea = new CodeArea();
         if (showLineNumbers) {
             codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
         }
 
         codeArea.richChanges()
-                .filter(ch -> !ch.getInserted().equals(ch.getRemoved())) // XXX
-                .subscribe(change -> {
-                    codeArea.setStyleSpans(0, computeHighlighting(codeArea.getText()));
-                });
+                .filter(ch -> !ch.getInserted().equals(ch.getRemoved()))
+                .subscribe(change -> codeArea.setStyleSpans(0, computeHighlighting(codeArea.getText())));
 
-        if (content != null) {
-            codeArea.replaceText(0, 0, content);
-        }
         return codeArea;
+    }
+
+    static void setText(CodeArea codeArea, String content) {
+        codeArea.replaceText(0, 0, content);
+    }
+
+    static void resetCaret(CodeArea codeArea) {
+        codeArea.replaceText(0, 0, "");
+        codeArea.requestFollowCaret();
     }
 
     private static StyleSpans<? extends Collection<String>> computeHighlighting(String text) {
         Matcher matcher = PATTERN.matcher(text);
         int lastKwEnd = 0;
-        StyleSpansBuilder<Collection<String>> spansBuilder
-                = new StyleSpansBuilder<>();
-        while(matcher.find()) {
+        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+        while (matcher.find()) {
             String styleClass =
                 matcher.group("KEYWORD") != null ? "keyword" :
                 matcher.group("PAREN") != null ? "paren" :
