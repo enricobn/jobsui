@@ -10,6 +10,7 @@ import org.jobsui.core.ui.UIWidget;
 import org.jobsui.core.ui.UnsupportedComponentException;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,7 @@ import java.util.Map;
 /**
  * Created by enrico on 5/4/16.
  */
-public class JobParameterDefGroovySimple<T> extends JobParameterDefAbstract<T> implements JobParameterDefGroovy<T> {
+public class JobParameterDefGroovySimple<T extends Serializable> extends JobParameterDefAbstract<T> implements JobParameterDefGroovy<T> {
     private static final String IMPORTS =
             "import org.jobsui.core.*;\n" +
             "import org.jobsui.core.ui.*;\n";
@@ -67,11 +68,11 @@ public class JobParameterDefGroovySimple<T> extends JobParameterDefAbstract<T> i
     }
 
     @Override
-    public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
+    public void onDependenciesChange(UIWidget widget, Map<String, Serializable> values) {
         if (onDependenciesChange != null) {
             onDependenciesChange.setProperty("widget", widget);
             onDependenciesChange.setProperty("values", values);
-            for (Map.Entry<String, Object> entry : values.entrySet()) {
+            for (Map.Entry<String, Serializable> entry : values.entrySet()) {
                 onDependenciesChange.setProperty(entry.getKey(), entry.getValue());
             }
             onDependenciesChange.setProperty("projectFolder", projectFolder);

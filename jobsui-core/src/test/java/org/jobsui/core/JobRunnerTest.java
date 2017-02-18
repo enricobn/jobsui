@@ -17,6 +17,7 @@ import org.mockito.listeners.MethodInvocationReport;
 import org.mockito.stubbing.Answer;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.*;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -234,8 +235,8 @@ public class JobRunnerTest {
         jobRunnerWrapper.start(job);
 
         final JobParameterDef inv = job.getParameter("inv");
-        verify(inv, never()).validate(isNull());
-        verify(inv, never()).validate(isNotNull());
+        verify(inv, never()).validate(isNull(Serializable.class));
+        verify(inv, never()).validate(isNotNull(Serializable.class));
     }
 
     @Test public void verify_that_onDepependencyChange_occurs_if_dependencies_are_valid() throws Exception {
@@ -262,7 +263,7 @@ public class JobRunnerTest {
 
         final JobParameterDef inv = job.getParameter("inv");
         verify(inv).onDependenciesChange(any(UIWidget.class), anyMap());
-        verify(inv).validate(isNull());
+        verify(inv).validate(isNull(Serializable.class));
     }
 
     @Test public void assert_that_a_message_is_shown_when_job_is_not_valid() throws Exception {
@@ -375,16 +376,16 @@ public class JobRunnerTest {
         when(name.getName()).thenReturn("Name");
         when(name.isVisible()).thenReturn(true);
         when(name.isOptional()).thenReturn(false);
-        when(name.validate(isNull())).thenReturn(Collections.singletonList("Error"));
-        when(name.validate(isNotNull())).thenReturn(Collections.emptyList());
+        when(name.validate(isNull(Serializable.class))).thenReturn(Collections.singletonList("Error"));
+        when(name.validate(isNotNull(Serializable.class))).thenReturn(Collections.emptyList());
 
         when(surname.createComponent(any(UI.class))).thenReturn(uiValueSurname);
         when(surname.getKey()).thenReturn("surname");
         when(surname.getName()).thenReturn("Surname");
         when(surname.isVisible()).thenReturn(true);
         when(surname.isOptional()).thenReturn(false);
-        when(surname.validate(isNull())).thenReturn(Collections.singletonList("Error"));
-        when(surname.validate(isNotNull())).thenReturn(Collections.emptyList());
+        when(surname.validate(isNull(Serializable.class))).thenReturn(Collections.singletonList("Error"));
+        when(surname.validate(isNotNull(Serializable.class))).thenReturn(Collections.emptyList());
 
         when(inv.createComponent(any(UI.class))).thenReturn(uiChoiceInv);
         when(inv.getKey()).thenReturn("inv");
@@ -432,7 +433,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
+            public void onDependenciesChange(UIWidget widget, Map<String, Serializable> values) {
             }
         };
         parameterDefs.add(name);
@@ -449,7 +450,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
+            public void onDependenciesChange(UIWidget widget, Map<String, Serializable> values) {
             }
         };
         surname.addDependency(name);
@@ -486,7 +487,7 @@ public class JobRunnerTest {
 
     private Job<String> createGroovySimpleJob() {
         GroovyShell shell = new GroovyShell();
-        final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
+        final List<JobParameterDef<? extends Serializable>> parameterDefs = new ArrayList<>();
 
         final JobParameterDefAbstract<String> name = new JobParameterDefGroovySimple<String>(
                 null,
@@ -502,7 +503,7 @@ public class JobRunnerTest {
                 false,
                 true) {
             @Override
-            public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
+            public void onDependenciesChange(UIWidget widget, Map<String, Serializable> values) {
             }
         };
         parameterDefs.add(name);
@@ -552,7 +553,7 @@ public class JobRunnerTest {
     }
 
     private Job<String> createComplexJob() {
-        final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
+        final List<JobParameterDef<? extends Serializable>> parameterDefs = new ArrayList<>();
 
         final JobParameterDefAbstract<String> version = new JobParameterDefAbstract<String>(
                 "version",
@@ -566,7 +567,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
+            public void onDependenciesChange(UIWidget widget, Map<String, Serializable> values) {
             }
         };
         parameterDefs.add(version);
@@ -583,7 +584,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
+            public void onDependenciesChange(UIWidget widget, Map<String, Serializable> values) {
                 String version = (String) values.get("version");
                 if (version == null) {
                     ((UIChoice)widget.getComponent()).setItems(Collections.<String>emptyList());
@@ -609,7 +610,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
+            public void onDependenciesChange(UIWidget widget, Map<String, Serializable> values) {
                 String version = (String) values.get("version");
                 String db = (String) values.get("db");
                 if (version == null || db == null) {
@@ -630,7 +631,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public List<JobParameterDef<?>> getParameterDefs() {
+            public List<JobParameterDef<? extends Serializable>> getParameterDefs() {
                 return parameterDefs;
             }
 

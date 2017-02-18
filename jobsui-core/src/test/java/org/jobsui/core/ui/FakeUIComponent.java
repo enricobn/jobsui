@@ -4,13 +4,14 @@ import rx.Observable;
 import rx.Subscriber;
 import rx.functions.Action1;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by enrico on 5/5/16.
  */
-public abstract class FakeUIComponent<T, C> implements UIComponent<T, C> {
+public abstract class FakeUIComponent<T extends Serializable, C> implements UIComponent<T, C> {
     private final Observable<T> observable;
     protected final List<Action1<T>> actions = new ArrayList<>();
     private final List<Subscriber<? super T>> subscribers = new ArrayList<>();

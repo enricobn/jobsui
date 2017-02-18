@@ -5,12 +5,13 @@ import org.jobsui.core.ui.UIComponent;
 import org.jobsui.core.ui.UIWidget;
 import org.jobsui.core.ui.UnsupportedComponentException;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Created by enrico on 2/18/17.
  */
-public interface ParameterDefUI<T> {
+public interface ParameterDefUI<T extends Serializable> {
 
     <C> UIComponent<T, C> createComponent(UI<C> ui) throws UnsupportedComponentException;
 
@@ -18,7 +19,7 @@ public interface ParameterDefUI<T> {
      *
      * @param values key = parameterDef key
      */
-    void onDependenciesChange(UIWidget widget, Map<String, Object> values);
+    void onDependenciesChange(UIWidget widget, Map<String, Serializable> values);
 
     boolean isVisible();
 

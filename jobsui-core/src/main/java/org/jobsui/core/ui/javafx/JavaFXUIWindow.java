@@ -15,6 +15,7 @@ import org.jobsui.core.ui.UIContainer;
 import org.jobsui.core.ui.UIWidget;
 import org.jobsui.core.ui.UIWindow;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -48,14 +49,14 @@ class JavaFXUIWindow implements UIWindow<Node> {
     }
 
     @Override
-    public <T> UIWidget<T, Node> add(String title, final UIComponent<T, Node> component) {
+    public <T extends Serializable> UIWidget<T, Node> add(String title, final UIComponent<T, Node> component) {
         NodeUIWidget<T> widget = new NodeUIWidget<>(title, component);
         components.add(widget);
         return widget;
     }
 
     @Override
-    public <T> UIWidget<T, Node> add(UIComponent<T, Node> component) {
+    public <T extends Serializable> UIWidget<T, Node> add(UIComponent<T, Node> component) {
         return add(null, component);
     }
 
@@ -127,7 +128,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
         }
     }
 
-    private static class NodeUIWidget<T> implements UIWidget<T, Node> {
+    private static class NodeUIWidget<T extends Serializable> implements UIWidget<T, Node> {
         private final String title;
         private final UIComponent<T, Node> component;
         private final VBox nodeComponent;

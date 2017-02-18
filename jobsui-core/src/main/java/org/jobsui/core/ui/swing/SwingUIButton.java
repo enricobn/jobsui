@@ -1,5 +1,6 @@
 package org.jobsui.core.ui.swing;
 
+import org.jobsui.core.SerializableVoid;
 import org.jobsui.core.ui.UIButton;
 import rx.Observable;
 import rx.Subscriber;
@@ -11,20 +12,17 @@ import javax.swing.*;
  */
 public class SwingUIButton implements UIButton<JComponent> {
     private final JButton component = new JButton();
-    private final Observable<Void> observable;
+    private final Observable<SerializableVoid> observable;
 
     public SwingUIButton() {
-        observable = Observable.create(new Observable.OnSubscribe<Void>() {
-            @Override
-            public void call(final Subscriber<? super Void> subscriber) {
-                subscriber.onStart();
-                component.addActionListener(e -> subscriber.onNext(null));
-            }
+        observable = Observable.create(subscriber -> {
+            subscriber.onStart();
+            component.addActionListener(e -> subscriber.onNext(null));
         });
     }
 
     @Override
-    public Observable<Void> getObservable() {
+    public Observable<SerializableVoid> getObservable() {
         return observable;
     }
 
@@ -42,7 +40,7 @@ public class SwingUIButton implements UIButton<JComponent> {
     }
 
     @Override
-    public Void getValue() {
+    public SerializableVoid getValue() {
         return null;
     }
 
@@ -56,7 +54,7 @@ public class SwingUIButton implements UIButton<JComponent> {
     }
 
     @Override
-    public void setValue(Void value) {
+    public void setValue(SerializableVoid value) {
     }
 
     @Override

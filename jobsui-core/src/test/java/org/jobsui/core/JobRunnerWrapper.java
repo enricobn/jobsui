@@ -3,6 +3,7 @@ package org.jobsui.core;
 import org.jobsui.core.ui.FakeUIWindow;
 import org.jobsui.core.ui.UI;
 
+import java.io.Serializable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -10,7 +11,7 @@ import java.util.concurrent.Future;
 /**
  * Created by enrico on 5/10/16.
  */
-abstract class JobRunnerWrapper<T> {
+abstract class JobRunnerWrapper<T extends Serializable> {
     private final ExecutorService pool = Executors.newFixedThreadPool(1);
     private final FakeUIWindow window;
     private final JobRunner runner;
@@ -35,7 +36,7 @@ abstract class JobRunnerWrapper<T> {
         return future.get();
     }
 
-    private <T1> Future<JobFuture<T1>> runJob(final Job<T1> job) {
+    private <T1 extends Serializable> Future<JobFuture<T1>> runJob(final Job<T1> job) {
         return pool.submit(() -> {
             try {
                 return runner.run(ui, job);

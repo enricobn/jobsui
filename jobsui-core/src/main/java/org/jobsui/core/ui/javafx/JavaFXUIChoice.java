@@ -11,6 +11,7 @@ import org.jobsui.core.ui.swing.SwingFilteredList;
 import rx.Observable;
 import rx.Subscriber;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -18,7 +19,7 @@ import java.util.Objects;
 /**
  * Created by enrico on 10/7/16.
  */
-class JavaFXUIChoice<T> implements UIChoice<T, Node> {
+class JavaFXUIChoice<T extends Serializable> implements UIChoice<T, Node> {
     private final FlowPane component = new FlowPane();
     private final ComboBox<T> combo = new ComboBox<>();
     private final Button button = new Button("...");

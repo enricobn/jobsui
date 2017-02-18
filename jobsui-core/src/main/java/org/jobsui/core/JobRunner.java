@@ -6,7 +6,9 @@ import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.FuncN;
+import rx.functions.Function;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -15,7 +17,7 @@ import java.util.stream.Collectors;
  */
 class JobRunner {
 
-    private static class ParameterAndWidget<T, C> {
+    private static class ParameterAndWidget<T extends Serializable, C> {
         private final JobParameterDef<T> jobParameterDef;
         private final UIWidget<T, C> widget;
 
@@ -34,9 +36,9 @@ class JobRunner {
     }
 
     private static class WidgetsMap<C> {
-        private final Collection<ParameterAndWidget<?, C>> widgets;
+        private final Collection<ParameterAndWidget<Serializable, C>> widgets;
 
-        private WidgetsMap(Collection<ParameterAndWidget<?, C>> widgets) {
+        private WidgetsMap(Collection<ParameterAndWidget<Serializable, C>> widgets) {
             this.widgets = widgets;
         }
 
@@ -49,12 +51,12 @@ class JobRunner {
             return null;
         }
 
-        Collection<ParameterAndWidget<?, C>> getWidgets() {
+        Collection<ParameterAndWidget<Serializable, C>> getWidgets() {
             return widgets;
         }
     }
 
-    public <T, C> JobFuture<T> run(final UI<C> ui, final Job<T> job) throws UnsupportedComponentException {
+    public <T extends Serializable, C> JobFuture<T> run(final UI<C> ui, final Job<T> job) throws UnsupportedComponentException {
         final UIWindow<C> window = ui.createWindow(job.getName());
 
         final Map<String, Object> values = new HashMap<>();
@@ -90,18 +92,20 @@ class JobRunner {
         return null;
     }
 
-    private <T, C> WidgetsMap<C> createWidgets(final UI<C> ui, Job<T> job, UIWindow<C> window)
+    private <T extends Serializable, C> WidgetsMap<C> createWidgets(final UI<C> ui, Job<T> job, UIWindow<C> window)
     throws UnsupportedComponentException {
-        Collection<ParameterAndWidget<?, C>> result = new ArrayList<>();
+        Collection<ParameterAndWidget<Serializable, C>> result = new ArrayList<>();
 
-        for (final JobParameterDef<?> jobParameterDef : job.getParameterDefs()) {
+        for (final JobParameterDef<? extends Serializable> jobParameterDef : job.getParameterDefs()) {
             crateWidget(ui, window, result, jobParameterDef);
         }
         return new WidgetsMap<>(result);
     }
 
-    private <T, C> void crateWidget(final UI<C> ui, UIWindow<C> window, Collection<ParameterAndWidget<?, C>> result,
-                                    final JobParameterDef<T> jobParameterDef) throws UnsupportedComponentException {
+    private <T extends Serializable, C> void crateWidget(final UI<C> ui, UIWindow<C> window,
+                                                         Collection<ParameterAndWidget<Serializable, C>> result,
+                                                         final JobParameterDef<T> jobParameterDef)
+    throws UnsupportedComponentException {
         final UIComponent<T, C> component = jobParameterDef.createComponent(ui);
         if (component == null) {
             throw new IllegalStateException("Cannot create component for parameter with key \""
@@ -116,7 +120,7 @@ class JobRunner {
 
         widget.setVisible(jobParameterDef.isVisible());
 
-        result.add(new ParameterAndWidget<>(jobParameterDef, widget));
+        result.add(new ParameterAndWidget(jobParameterDef, widget));
 
         final Observable<T> observable = widget.getComponent().getObservable();
 
@@ -129,7 +133,7 @@ class JobRunner {
         widgets.getWidgets().forEach(this::notifyInitialValue);
     }
 
-    private <T, C> void notifyInitialValue(ParameterAndWidget<T, C> entry) {
+    private <T extends Serializable, C> void notifyInitialValue(ParameterAndWidget<T, C> entry) {
         final T value = entry.getWidget().getComponent().getValue();
         if (entry.getJobParameterDef().validate(value).isEmpty()) {
             entry.getWidget().getComponent().notifySubscribers();
@@ -155,11 +159,8 @@ class JobRunner {
 
                 int i = 0;
 
-                for (final ParameterAndWidget<?, C> entry : widgetsMap.getWidgets()) {
-                    @SuppressWarnings("unchecked")
-                    ParameterAndWidget<Object, C> entry1 = (ParameterAndWidget<Object, C>) entry;
-
-                    if (addParameter(entry1, args[i++])) break;
+                for (final ParameterAndWidget<Serializable, C> entry : widgetsMap.getWidgets()) {
+                    if (addParameter(entry, (Serializable) args[i++])) break;
                 }
 
                 if (parameters.size() != args.length) {
@@ -173,8 +174,8 @@ class JobRunner {
                 return validate.isEmpty();
             }
 
-            private boolean addParameter(ParameterAndWidget<Object, C> entry, Object value) {
-                final JobParameterDef<Object> parameterDef = entry.getJobParameterDef();
+            private boolean addParameter(ParameterAndWidget<Serializable, C> entry, Serializable value) {
+                final JobParameterDef<Serializable> parameterDef = entry.getJobParameterDef();
                 final List<String> validate = parameterDef.validate(value);
 
                 setValidationMessage(validate, parameterDef, entry.getWidget(), ui);
@@ -192,13 +193,13 @@ class JobRunner {
         return result;
     }
 
-    private <T, C> void observeDependencies(Job<T> job, final WidgetsMap<C> widgets) {
-        for (final JobParameterDef<?> jobParameterDef : job.getParameterDefs()) {
-            final List<JobParameterDef<?>> dependencies = jobParameterDef.getDependencies();
+    private <T extends Serializable, C> void observeDependencies(Job<T> job, final WidgetsMap<C> widgets) {
+        for (final JobParameterDef<? extends Serializable> jobParameterDef : job.getParameterDefs()) {
+            final List<JobParameterDef<? extends Serializable>> dependencies = jobParameterDef.getDependencies();
             if (!dependencies.isEmpty()) {
-                List<Observable<?>> observables = getDependenciesObservables(widgets, dependencies);
+                List<Observable<Serializable>> observables = getDependenciesObservables(widgets, dependencies);
 
-                final Observable<Map<String, Object>> observable = combineDependenciesObservables(dependencies, observables);
+                final Observable<Map<String, Serializable>> observable = combineDependenciesObservables(dependencies, observables);
 
                 observable.subscribe(objects -> {
                     // all dependencies are valid
@@ -219,22 +220,22 @@ class JobRunner {
         }
     }
 
-    private Observable<Map<String, Object>> combineDependenciesObservables(final List<JobParameterDef<?>> dependencies,
-                                                               List<Observable<?>> observables) {
-        return Observable.combineLatest(observables, new FuncN<Map<String,Object>>() {
+    private Observable<Map<String, Serializable>> combineDependenciesObservables(final List<JobParameterDef<? extends Serializable>> dependencies,
+                                                               List<Observable<Serializable>> observables) {
+        return Observable.combineLatest(observables, new FuncN<Map<String,Serializable>>() {
             @Override
-            public Map<String,Object> call(Object... args) {
-                Map<String, Object> result = new HashMap<>();
+            public Map<String,Serializable> call(Object... args) {
+                Map<String, Serializable> result = new HashMap<>();
 
                 int i = 0;
                 for (JobParameterDef dependency : dependencies) {
-                    final Object arg = args[i++];
+                    final Serializable arg = (Serializable) args[i++];
                     if (addValidatedValue(result, dependency, arg)) break;
                 }
                 return result;
             }
 
-            private <T> boolean addValidatedValue(Map<String, Object> result, JobParameterDef<T> dependency, T arg) {
+            private <T extends Serializable> boolean addValidatedValue(Map<String, Serializable> result, JobParameterDef<T> dependency, T arg) {
                 final List<String> validate = dependency.validate(arg);
                 if (!validate.isEmpty()) {
                     return true;
@@ -245,9 +246,9 @@ class JobRunner {
         });
     }
 
-    private <C> List<Observable<?>> getDependenciesObservables(WidgetsMap<C> widgetsMap,
-                                                           List<JobParameterDef<?>> dependencies) {
-        List<Observable<?>> observables = new ArrayList<>();
+    private <C> List<Observable<Serializable>> getDependenciesObservables(WidgetsMap<C> widgetsMap,
+                                                           List<JobParameterDef<? extends Serializable>> dependencies) {
+        List<Observable<Serializable>> observables = new ArrayList<>();
         for (JobParameterDef dependency : dependencies) {
             final UIWidget widget = widgetsMap.get(dependency);
             if (widget == null) {
@@ -259,7 +260,7 @@ class JobRunner {
         return observables;
     }
 
-    private <T> void setValidationMessage(List<String> validate, JobParameterDef<T> jobParameterDef,
+    private <T extends Serializable> void setValidationMessage(List<String> validate, JobParameterDef<T> jobParameterDef,
                                       UIWidget<T, ?> widget, UI<?> ui) {
         if (!jobParameterDef.isVisible()) {
             if (!validate.isEmpty()) {
@@ -269,4 +270,5 @@ class JobRunner {
             widget.setValidationMessages(validate);
         }
     }
+
 }

@@ -1,5 +1,6 @@
 package org.jobsui.core.ui;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +13,7 @@ import static org.mockito.Mockito.when;
 /**
  * Created by enrico on 5/8/16.
  */
-public class FakeUIWindow<T> implements UIWindow<T> {
+public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
     private static final int TIMEOUT = 5_000_000;
     private static final int SLEEP = 50;
     private volatile boolean exit = false;
@@ -52,7 +53,7 @@ public class FakeUIWindow<T> implements UIWindow<T> {
     }
 
     @Override
-    public <T1> UIWidget<T1, T> add(String title, final UIComponent<T1, T> component) {
+    public <T1 extends Serializable> UIWidget<T1, T> add(String title, final UIComponent<T1, T> component) {
         final UIWidget widget = mock(UIWidget.class);
         when(widget.getComponent()).thenReturn(component);
         widgets.put(title, widget);
@@ -60,7 +61,7 @@ public class FakeUIWindow<T> implements UIWindow<T> {
     }
 
     @Override
-    public <T1> UIWidget<T1, T> add(UIComponent<T1, T> component) {
+    public <T1 extends Serializable> UIWidget<T1, T> add(UIComponent<T1, T> component) {
         return add(Integer.toString(unnamed.addAndGet(1)), component);
     }
 

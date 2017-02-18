@@ -7,13 +7,14 @@ import org.jobsui.core.JobParameterDefAbstract;
 import org.jobsui.core.ui.*;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 
 /**
  * Created by enrico on 5/4/16.
  */
-public class JobExpressionDefGroovy<T> extends JobParameterDefAbstract<T> implements JobParameterDefGroovy<T> {
+public class JobExpressionDefGroovy<T extends Serializable> extends JobParameterDefAbstract<T> implements JobParameterDefGroovy<T> {
     private static final String IMPORTS =
             "import org.jobsui.core.*;\n" +
             "import org.jobsui.core.ui.*;\n";
@@ -43,13 +44,13 @@ public class JobExpressionDefGroovy<T> extends JobParameterDefAbstract<T> implem
     }
 
     @Override
-    public void onDependenciesChange(UIWidget widget, Map<String, Object> values) {
+    public void onDependenciesChange(UIWidget widget, Map<String, Serializable> values) {
         evaluate(((UIChoice)widget.getComponent()), values);
     }
 
-    private void evaluate(UIChoice component, Map<String, Object> values) {
+    private void evaluate(UIChoice component, Map<String, Serializable> values) {
         evaluate.setProperty("values", values);
-        for (Map.Entry<String, Object> entry : values.entrySet()) {
+        for (Map.Entry<String, Serializable> entry : values.entrySet()) {
             evaluate.setProperty(entry.getKey(), entry.getValue());
         }
 

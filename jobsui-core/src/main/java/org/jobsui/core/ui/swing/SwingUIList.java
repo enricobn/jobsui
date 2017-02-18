@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,19 +17,19 @@ import java.util.List;
 /**
  * Created by enrico on 2/24/16.
  */
-public class SwingUIList<T> implements UIList<T,JComponent> {
+public class SwingUIList<T extends Serializable> implements UIList<T,JComponent> {
     private final JPanel component = new JPanel();
-    private final Observable<List<T>> observable;
-    private final List<Subscriber<? super List<T>>> subscribers = new ArrayList<>();
-    private List<T> items;
+    private final Observable<ArrayList<T>> observable;
+    private final List<Subscriber<? super ArrayList<T>>> subscribers = new ArrayList<>();
+    private ArrayList<T> items;
     private boolean allowRemove = true;
 
     public SwingUIList() {
         component.setLayout(new GridBagLayout());
-        observable = Observable.create(new Observable.OnSubscribe<List<T>>() {
+        observable = Observable.create(new Observable.OnSubscribe<ArrayList<T>>() {
 
             @Override
-            public void call(Subscriber<? super List<T>> subscriber) {
+            public void call(Subscriber<? super ArrayList<T>> subscriber) {
                 subscriber.onStart();
                 subscribers.add(subscriber);
             }
@@ -42,7 +43,7 @@ public class SwingUIList<T> implements UIList<T,JComponent> {
     }
 
     @Override
-    public void setValue(final List<T> items) {
+    public void setValue(final ArrayList<T> items) {
         this.items = new ArrayList<>(items);
         updateItems();
     }
@@ -74,14 +75,14 @@ public class SwingUIList<T> implements UIList<T,JComponent> {
 
     @Override
     public void notifySubscribers() {
-        for (Subscriber<? super List<T>> subscriber : subscribers) {
+        for (Subscriber<? super ArrayList<T>> subscriber : subscribers) {
             subscriber.onNext(getValue());
         }
     }
 
     @Override
-    public List<T> getValue() {
-        return Collections.unmodifiableList(items);
+    public ArrayList<T> getValue() {
+        return new ArrayList<>(items);
     }
 
     @Override
@@ -95,7 +96,7 @@ public class SwingUIList<T> implements UIList<T,JComponent> {
     }
 
     @Override
-    public Observable<List<T>> getObservable() {
+    public Observable<ArrayList<T>> getObservable() {
         return observable;
     }
 

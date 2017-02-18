@@ -8,13 +8,14 @@ import rx.Subscriber;
 import javax.swing.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by enrico on 5/1/16.
  */
-public class SwingUIValue<T> implements UIValue<T,JComponent> {
+public class SwingUIValue<T extends Serializable> implements UIValue<T,JComponent> {
     private final JTextField component = new JTextField();
     private final Observable<T> observable;
     private final List<Subscriber<? super T>> subscribers = new ArrayList<>();

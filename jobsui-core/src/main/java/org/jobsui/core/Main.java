@@ -8,6 +8,7 @@ import org.jobsui.core.ui.swing.SwingUI;
 import org.jobsui.core.xml.ProjectXML;
 
 import java.io.File;
+import java.io.Serializable;
 
 /**
  * Created by enrico on 5/5/16.
@@ -32,7 +33,7 @@ public class Main {
 
         String key = args[1];
 
-        final Job<?> job = project.getJob(key);
+        final Job<Serializable> job = project.getJob(key);
 
         if (job == null) {
             System.out.println("Cannot find project with key \"" + key + "\" in folder " + projectFolder + " .");

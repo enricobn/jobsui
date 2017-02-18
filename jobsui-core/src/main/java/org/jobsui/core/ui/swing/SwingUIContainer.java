@@ -7,6 +7,7 @@ import org.jobsui.core.utils.JobsUIUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -21,12 +22,12 @@ public class SwingUIContainer implements UIContainer<JComponent> {
     }
 
     @Override
-    public <T> UIWidget<T, JComponent> add(String title, UIComponent<T, JComponent> component) {
+    public <T extends Serializable> UIWidget<T, JComponent> add(String title, UIComponent<T, JComponent> component) {
         return addRow(title, component);
     }
 
     @Override
-    public <T> UIWidget<T, JComponent> add(final UIComponent<T, JComponent> component) {
+    public <T extends Serializable> UIWidget<T, JComponent> add(final UIComponent<T, JComponent> component) {
         {
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
@@ -112,7 +113,7 @@ public class SwingUIContainer implements UIContainer<JComponent> {
         component.add(new JLabel(), constraints);
     }
 
-    private <T> UIWidget<T, JComponent> addRow(String label, final UIComponent<T, JComponent> component) {
+    private <T extends Serializable> UIWidget<T, JComponent> addRow(String label, final UIComponent<T, JComponent> component) {
         component.setTitle(label);
 
         final JLabel jlabel;

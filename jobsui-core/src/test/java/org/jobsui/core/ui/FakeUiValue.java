@@ -2,10 +2,12 @@ package org.jobsui.core.ui;
 
 import rx.functions.Action1;
 
+import java.io.Serializable;
+
 /**
  * Created by enrico on 5/5/16.
  */
-public class FakeUiValue<T, C> extends FakeUIComponent<T, C> implements UIValue<T, C> {
+public class FakeUiValue<T extends Serializable, C> extends FakeUIComponent<T, C> implements UIValue<T, C> {
     private T value;
 
     @Override

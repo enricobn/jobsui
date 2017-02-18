@@ -1,5 +1,6 @@
 package org.jobsui.core;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +11,7 @@ public interface Job<T> {
 
     String getName();
 
-    List<JobParameterDef<?>> getParameterDefs();
+    List<JobParameterDef<? extends Serializable>> getParameterDefs();
 
     JobFuture<T> run(Map<String,Object> values);
 

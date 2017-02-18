@@ -1,5 +1,6 @@
 package org.jobsui.core;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -7,12 +8,12 @@ import java.util.List;
 /**
  * Created by enrico on 4/30/16.
  */
-public abstract class JobParameterDefAbstract<T> implements JobParameterDef<T> {
+public abstract class JobParameterDefAbstract<T extends Serializable> implements JobParameterDef<T> {
     private final String key;
     private final String name;
 //    private final StringConverter<T> converter;
     private final ParameterValidator<T> validator;
-    private final List<JobParameterDef<?>> dependencies = new ArrayList<>();
+    private final List<JobParameterDef<? extends Serializable>> dependencies = new ArrayList<>();
     private final boolean optional;
     private final boolean visible;
 
@@ -46,7 +47,7 @@ public abstract class JobParameterDefAbstract<T> implements JobParameterDef<T> {
     }
 
     @Override
-    public List<JobParameterDef<?>> getDependencies() {
+    public List<JobParameterDef<? extends Serializable>> getDependencies() {
         return Collections.unmodifiableList(dependencies);
     }
 
@@ -69,7 +70,7 @@ public abstract class JobParameterDefAbstract<T> implements JobParameterDef<T> {
         return visible;
     }
 
-    public void addDependency(JobParameterDef<?> parameterDef) {
+    public void addDependency(JobParameterDef<? extends Serializable> parameterDef) {
         dependencies.add(parameterDef);
     }
 

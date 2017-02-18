@@ -8,6 +8,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -15,7 +16,7 @@ import java.util.Objects;
 /**
  * Created by enrico on 5/1/16.
  */
-public class SwingUIChoice<T> implements UIChoice<T,JComponent> {
+public class SwingUIChoice<T extends Serializable> implements UIChoice<T,JComponent> {
     private final JPanel component = new JPanel();
     private final JComboBox<T> combo = new JComboBox<>();
     private final List<Subscriber<? super T>> subscribers = new ArrayList<>();

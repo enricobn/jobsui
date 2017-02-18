@@ -2,6 +2,7 @@ package org.jobsui.core.ui;
 
 import rx.functions.Action1;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
@@ -10,7 +11,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by enrico on 5/5/16.
  */
-public class FakeUIChoice<T, C> extends FakeUIComponent<T, C> implements UIChoice<T, C> {
+public class FakeUIChoice<T extends Serializable, C> extends FakeUIComponent<T, C> implements UIChoice<T, C> {
     private List<T> items;
     private T selectedItem;
 

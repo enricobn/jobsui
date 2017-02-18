@@ -8,6 +8,7 @@ import org.jobsui.core.xml.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 public class ProjectGroovyBuilder {
 
     public ProjectGroovy build(ProjectXML projectXML) throws Exception {
-        Map<String, JobGroovy<?>> jobs = new HashMap<>();
+        Map<String, JobGroovy<Serializable>> jobs = new HashMap<>();
 
         for (JobXML jobXML : projectXML.getJobs().values()) {
             jobs.put(jobXML.getKey(), build(projectXML, jobXML));
@@ -52,10 +53,10 @@ public class ProjectGroovyBuilder {
 
     private static <T> JobGroovy<T> build(ProjectXML projectXML, JobXML jobXML) throws Exception {
         GroovyShell groovyShell = createGroovyShell(projectXML);
-        Map<String, JobParameterDefGroovy<?>> parameterDefsMap = new HashMap<>();
+        Map<String, JobParameterDefGroovy<Serializable>> parameterDefsMap = new HashMap<>();
 
         for (SimpleParameterXML simpleParameterXML : jobXML.getSimpleParameterXMLs()) {
-            JobParameterDefGroovy<?> parameterDef = new JobParameterDefGroovySimple<>(
+            JobParameterDefGroovy<Serializable> parameterDef = new JobParameterDefGroovySimple<>(
                     projectXML.getProjectFolder(),
                     groovyShell,
                     simpleParameterXML.getKey(),
@@ -69,7 +70,7 @@ public class ProjectGroovyBuilder {
         }
 
         for (ExpressionXML expressionXML : jobXML.getExpressionXMLs()) {
-            JobParameterDefGroovy<?> parameterDef = new JobExpressionDefGroovy<>(
+            JobParameterDefGroovy<Serializable> parameterDef = new JobExpressionDefGroovy<>(
                     projectXML.getProjectFolder(),
                     groovyShell,
                     expressionXML.getKey(),
@@ -79,7 +80,7 @@ public class ProjectGroovyBuilder {
         }
 
         for (CallXML callXML : jobXML.getCallXMLs()) {
-            JobCallDefGroovy<?> call = new JobCallDefGroovy<>(
+            JobCallDefGroovy<Serializable> call = new JobCallDefGroovy<>(
                     callXML.getKey(),
                     callXML.getName(),
                     callXML.getProject(),
@@ -95,15 +96,15 @@ public class ProjectGroovyBuilder {
         List<JobParameterDefGroovy<?>> sorted = jobXML.getSortedParameters().stream()
                 .map(parameterDefsMap::get).collect(Collectors.toList());
 
-        return new JobGroovy<>(groovyShell, jobXML.getKey(), jobXML.getName(), sorted,
+        return new JobGroovy(groovyShell, jobXML.getKey(), jobXML.getName(), sorted,
                 jobXML.getRunScript(), jobXML.getValidateScript(), projectXML.getProjectFolder());
     }
 
-    private static void addDependencies(List<? extends ParameterXML> parameterXMLs, Map<String, JobParameterDefGroovy<?>> parameterDefs) {
+    private static void addDependencies(List<? extends ParameterXML> parameterXMLs, Map<String, JobParameterDefGroovy<Serializable>> parameterDefs) {
         for (ParameterXML parameterXML : parameterXMLs) {
-            JobParameterDefGroovy<?> jobParameterDefGroovy = parameterDefs.get(parameterXML.getKey());
+            JobParameterDefGroovy<Serializable> jobParameterDefGroovy = parameterDefs.get(parameterXML.getKey());
             for (String depKey : parameterXML.getDependencies()) {
-                JobParameterDefGroovy<?> dep = parameterDefs.get(depKey);
+                JobParameterDefGroovy<Serializable> dep = parameterDefs.get(depKey);
                 jobParameterDefGroovy.addDependency(dep);
             }
         }
