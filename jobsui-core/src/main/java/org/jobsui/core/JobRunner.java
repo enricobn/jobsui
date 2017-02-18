@@ -6,7 +6,6 @@ import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
 import rx.Subscriber;
 import rx.functions.FuncN;
-import rx.functions.Function;
 
 import java.io.Serializable;
 import java.util.*;

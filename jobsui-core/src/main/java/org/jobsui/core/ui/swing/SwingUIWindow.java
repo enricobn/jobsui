@@ -1,16 +1,13 @@
 package org.jobsui.core.ui.swing;
 
-import org.jobsui.core.ui.*;
-import org.jobsui.core.utils.Tuple2;
-import rx.Observable;
-import rx.functions.Action1;
-import rx.functions.Func2;
+import org.jobsui.core.ui.UIComponent;
+import org.jobsui.core.ui.UIContainer;
+import org.jobsui.core.ui.UIWidget;
+import org.jobsui.core.ui.UIWindow;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
 
 /**
  * Created by enrico on 2/14/16.

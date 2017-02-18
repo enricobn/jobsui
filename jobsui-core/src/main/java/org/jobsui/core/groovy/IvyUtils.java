@@ -1,8 +1,6 @@
 package org.jobsui.core.groovy;
 
 import org.apache.ivy.Ivy;
-import org.apache.ivy.core.event.IvyEvent;
-import org.apache.ivy.core.event.IvyListener;
 import org.apache.ivy.core.event.download.StartArtifactDownloadEvent;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;

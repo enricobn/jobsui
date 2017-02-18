@@ -3,7 +3,6 @@ package org.jobsui.core.ui.swing;
 import org.jobsui.core.SerializableVoid;
 import org.jobsui.core.ui.UIButton;
 import rx.Observable;
-import rx.Subscriber;
 
 import javax.swing.*;
 

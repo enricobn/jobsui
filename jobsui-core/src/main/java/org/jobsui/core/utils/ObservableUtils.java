@@ -1,10 +1,6 @@
 package org.jobsui.core.utils;
 
 import rx.Observable;
-import rx.functions.Func2;
-import rx.functions.Func3;
-import rx.functions.Func4;
-import rx.functions.Func5;
 
 /**
  * Created by enrico on 2/20/16.

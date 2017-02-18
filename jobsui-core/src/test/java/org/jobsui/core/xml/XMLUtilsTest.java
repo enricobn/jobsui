@@ -2,7 +2,8 @@ package org.jobsui.core.xml;
 
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Created by enrico on 10/16/16.
