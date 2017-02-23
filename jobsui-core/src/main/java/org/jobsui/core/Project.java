@@ -9,7 +9,7 @@ public interface Project {
 
     <T> Job<T> getJob(String key);
 
-    Set<String> getKeys();
+    Set<String> getIds();
 
     String getName();
 }

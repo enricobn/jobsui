@@ -22,12 +22,12 @@ public class ProjectGroovy implements Project {
     }
 
     @Override
-    public <T> Job<T> getJob(String key) {
-        return (Job<T>) jobs.get(key);
+    public <T> Job<T> getJob(String id) {
+        return (Job<T>) jobs.get(id);
     }
 
     @Override
-    public Set<String> getKeys() {
+    public Set<String> getIds() {
         return jobs.keySet();
     }
 
@@ -36,7 +36,7 @@ public class ProjectGroovy implements Project {
         return name;
     }
 
-    public Project getProject(String key) {
-        return referencedProjects.get(key);
+    public Project getProject(String id) {
+        return referencedProjects.get(id);
     }
 }

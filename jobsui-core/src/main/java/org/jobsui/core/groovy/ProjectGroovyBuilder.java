@@ -25,7 +25,7 @@ public class ProjectGroovyBuilder {
         Map<String, JobGroovy<Serializable>> jobs = new HashMap<>();
 
         for (JobXML jobXML : projectXML.getJobs().values()) {
-            jobs.put(jobXML.getKey(), build(projectXML, jobXML));
+            jobs.put(jobXML.getId(), build(projectXML, jobXML));
         }
 
         Map<String, Project> projects = new HashMap<>();
@@ -96,7 +96,7 @@ public class ProjectGroovyBuilder {
         List<JobParameterDefGroovy<?>> sorted = jobXML.getSortedParameters().stream()
                 .map(parameterDefsMap::get).collect(Collectors.toList());
 
-        return new JobGroovy(groovyShell, jobXML.getKey(), jobXML.getName(), sorted,
+        return new JobGroovy(groovyShell, jobXML.getId(), jobXML.getName(), sorted,
                 jobXML.getRunScript(), jobXML.getValidateScript(), projectXML.getProjectFolder());
     }
 

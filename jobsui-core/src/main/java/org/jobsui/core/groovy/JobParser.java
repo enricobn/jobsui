@@ -138,9 +138,11 @@ public class JobParser {
             //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
             doc.getDocumentElement().normalize();
 
+            String id = getMandatoryAttribute(doc.getDocumentElement(), "id");
             String name = getMandatoryAttribute(doc.getDocumentElement(), "name");
+            String version = getMandatoryAttribute(doc.getDocumentElement(), "version");
 
-            JobXML jobXML = new JobXML(file, name);
+            JobXML jobXML = new JobXML(file, id, name, version);
 
             String runScript = getElementContent(doc.getDocumentElement(), "Run", true);
 

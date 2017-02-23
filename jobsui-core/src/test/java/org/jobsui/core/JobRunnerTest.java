@@ -139,7 +139,11 @@ public class JobRunnerTest {
     private <T> Job<T> getJob(String file, String job) throws Exception {
         ProjectXML projectXML = new JobParser().loadProject(new File(file));
         Project project = new ProjectGroovyBuilder().build(projectXML);
-        return project.getJob(job);
+        Job<T> result = project.getJob(job);
+        if (result == null) {
+            throw new Exception("Cannot find job with id \"" + job + "\". Ids:" + project.getIds());
+        }
+        return result;
     }
 
     @Test public void assert_that_complexjob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {

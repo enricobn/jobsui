@@ -20,13 +20,14 @@ public class JobXML implements ValidatingXML {
     private final Map<String, ParameterXML> parameters = new HashMap<>();
 
     private final File file;
-    private final String key;
+    private final String id;
+    private final String version;
     private String name;
     private String runScript;
     private String validateScript;
     private int order;
 
-    public JobXML(File file, String name) {
+    public JobXML(File file, String id, String name, String version) {
         this.file = file;
         this.name = name;
 
@@ -35,7 +36,8 @@ public class JobXML implements ValidatingXML {
         if (pos > 0) {
             fileName = fileName.substring(0, pos);
         }
-        this.key = fileName;
+        this.id = id;
+        this.version = version;
     }
 
     public void export() throws Exception {
@@ -134,8 +136,8 @@ public class JobXML implements ValidatingXML {
         return validateScript;
     }
 
-    public String getKey() {
-        return key;
+    public String getId() {
+        return id;
     }
 
     public String getName() {
@@ -212,13 +214,18 @@ public class JobXML implements ValidatingXML {
     @Override
     public List<String> validate() {
         List<String> messages = new ArrayList<>(0);
-        if (JobsUIUtils.isNullOrEmptyOrSpaces(key)) {
-            messages.add("Key is mandatory.");
+        if (JobsUIUtils.isNullOrEmptyOrSpaces(id)) {
+            messages.add("Id is mandatory.");
         }
 
         if (JobsUIUtils.isNullOrEmptyOrSpaces(name)) {
             messages.add("Name is mandatory.");
         }
+
+        if (JobsUIUtils.isNullOrEmptyOrSpaces(version)) {
+            messages.add("Version is mandatory.");
+        }
+
 
         for (ParameterXML parameterXML : parameters.values()) {
             List<String> parameterMessages = parameterXML.validate();

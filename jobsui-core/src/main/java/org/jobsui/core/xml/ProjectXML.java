@@ -71,7 +71,7 @@ public class ProjectXML implements ValidatingXML {
     }
 
     public void addJob(JobXML job) {
-        jobs.put(job.getKey(), job);
+        jobs.put(job.getId(), job);
     }
 
     public List<String> getLibraries() {

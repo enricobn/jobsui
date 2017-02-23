@@ -40,9 +40,9 @@ abstract class JobRunnerWrapper<T extends Serializable> {
         return pool.submit(() -> {
             try {
                 return runner.run(ui, job);
-            } catch (Throwable th) {
-                th.printStackTrace();
-                return null;
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw e;
             }
         });
     }

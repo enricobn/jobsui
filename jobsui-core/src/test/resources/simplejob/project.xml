@@ -1,4 +1,4 @@
-<Project name="Simple">
+<Project id="simple" name="Simple" version="1.0.0">
     <Library>org.apache.commons:commons-lang3:3.4</Library>
     <Import name="ext">../external</Import>
 </Project>

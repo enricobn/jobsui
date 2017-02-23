@@ -1,2 +1,2 @@
 <?xml version="1.0"?>
-<Project name="External"/>
+<Project id="external" name="External" version="external"/>

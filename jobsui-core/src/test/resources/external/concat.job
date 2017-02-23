@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<Job name="Concat">
+<Job id="concat" name="Concat" version="1.0.0">
 
     <Parameter key="first" name="First">
 
