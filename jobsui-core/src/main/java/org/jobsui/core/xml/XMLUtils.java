@@ -109,8 +109,7 @@ public interface XMLUtils {
         }
 
         StringBuilder sb = new StringBuilder();
-        newLines.stream()
-                .forEach(line -> sb.append(line).append('\n'));
+        newLines.forEach(line -> sb.append(line).append('\n'));
         return sb.toString();
     }
 

@@ -33,7 +33,7 @@ public class ProjectGroovyBuilder {
         JobParser jobParser = new JobParser();
 
         ProjectGroovyBuilder projectGroovyBuilder = new ProjectGroovyBuilder();
-        projectXML.getImports().entrySet().stream().forEach(entry -> {
+        projectXML.getImports().entrySet().forEach(entry -> {
             try {
                 ProjectXML refProjectXML = jobParser.loadProject(new File(projectXML.getProjectFolder(), entry.getValue()));
                 projects.put(entry.getKey(), projectGroovyBuilder.build(refProjectXML));

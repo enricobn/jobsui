@@ -189,7 +189,7 @@ public class JobXML implements ValidatingXML {
             }
             if (!found) {
                 StringBuilder sb = new StringBuilder("Unresolved dependencies:\n");
-                toSort.entrySet().stream()
+                toSort.entrySet()
                         .forEach(entry -> sb.append(entry.getKey()).append(":").append(entry.getValue()).append('\n'));
                 throw new Exception(sb.toString());
             }
