@@ -55,6 +55,55 @@ class JobRunner {
         }
     }
 
+    public void setValues(JobValues values) {
+
+    }
+
+    public <T extends Serializable, C> JobValues getValues(final UI<C> ui, final Job<T> job) throws UnsupportedComponentException {
+        final UIWindow<C> window = ui.createWindow(job.getName());
+
+        final JobValues values = new JobValuesImpl();
+
+        List<UnsupportedComponentException> exceptions = new ArrayList<>();
+
+        if (window.show(() -> {
+            final WidgetsMap<C> widgets;
+            try {
+                widgets = createWidgets(ui, job, window);
+            } catch (UnsupportedComponentException e) {
+                exceptions.add(e);
+                return;
+            }
+
+            observeDependencies(job, widgets);
+
+            Observable<Map<String, Object>> mapObservable = observeValues(ui, job, window, widgets);
+
+            mapObservable.subscribe(map -> {
+                values.clear();
+                for (JobParameterDef<? extends Serializable> jobParameterDef : job.getParameterDefs()) {
+                    setValue(values, map, jobParameterDef);
+                }
+            });
+
+            window.setValid(false);
+
+            notifyInitialValue(widgets);
+        })) {
+            if (!exceptions.isEmpty()) {
+                throw exceptions.get(0);
+            }
+            return values;
+        } else {
+            return null;
+        }
+
+    }
+
+    private static <T extends Serializable> void setValue(JobValues values, Map<String, Object> map, JobParameterDef<T> jobParameterDef) {
+        values.setValue(jobParameterDef, (T)map.get(jobParameterDef.getKey()));
+    }
+
     public <T extends Serializable, C> JobFuture<T> run(final UI<C> ui, final Job<T> job) throws UnsupportedComponentException {
         final UIWindow<C> window = ui.createWindow(job.getName());
 

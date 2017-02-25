@@ -17,4 +17,6 @@ public interface UI<T> {
 
     <COMP extends UIComponent> COMP create(Class<COMP> componentType) throws UnsupportedComponentException;
 
+    void showError(String message, Throwable t);
+
 }

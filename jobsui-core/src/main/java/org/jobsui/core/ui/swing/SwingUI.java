@@ -3,6 +3,9 @@ package org.jobsui.core.ui.swing;
 import org.jobsui.core.ui.*;
 
 import javax.swing.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * Created by enrico on 11/2/15.
@@ -44,6 +47,18 @@ public class SwingUI implements UI<JComponent> {
             return (COMP) new SwingUICheckBox();
         }
         throw new UnsupportedComponentException("SWING: cannot find component for " + componentType.getName());
+    }
+
+    @Override
+    public void showError(String message, Throwable t) {
+        // TODO
+        try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
+            t.printStackTrace(pw);
+            showMessage(message + sw.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+            showMessage(message);
+        }
     }
 
 }

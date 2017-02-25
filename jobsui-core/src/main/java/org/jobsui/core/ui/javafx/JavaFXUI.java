@@ -50,6 +50,11 @@ public class JavaFXUI implements UI<Node> {
         throw new UnsupportedComponentException("JavaFX: cannot find component for " + componentType.getName());
     }
 
+    @Override
+    public void showError(String message, Throwable t) {
+        showErrorStatic(message, t);
+    }
+
     public static void uncaughtException(Thread t, Throwable e) {
         showErrorStatic("Error on thread " + t.getName(), e);
     }

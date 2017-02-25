@@ -51,11 +51,14 @@ public class Main {
             ui = new JavaFXUI();
         }
 
-        final JobFuture<?> future = runner.run(ui, job);
+        JobValues values = runner.getValues(ui, job);
+        System.out.println(values);
 
-        if (future != null) {
-            future.get();
-        }
+//        final JobFuture<? extends Serializable> future = runner.run(ui, job);
+//
+//        if (future != null) {
+//            future.get();
+//        }
     }
 
 }
