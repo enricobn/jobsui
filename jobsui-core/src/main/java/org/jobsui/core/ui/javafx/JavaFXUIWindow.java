@@ -1,13 +1,10 @@
 package org.jobsui.core.ui.javafx;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.jobsui.core.ui.UIComponent;
@@ -26,26 +23,24 @@ import java.util.stream.Collectors;
 class JavaFXUIWindow implements UIWindow<Node> {
     private static final List<NodeUIWidget> components = new ArrayList<>();
 
-    private static boolean ok = false;
+//    private static boolean ok = false;
     private static Runnable callback;
 
     @Override
-    public boolean show(Runnable callback) {
+    public void show(Runnable callback) {
         JavaFXUIWindow.callback = callback;
 
-        Application.launch(JavaFXApplication.class);
-
-        return ok;
+        Application.launch(JavaFXUIWindow.JavaFXApplication.class);
     }
 
-    @Override
-    public void setValid(boolean valid) {
-        JavaFXApplication.setValid(valid);
-    }
+//    @Override
+//    public void setValid(boolean valid) {
+//        JavaFXApplication.setValid(valid);
+//    }
 
     @Override
     public void showValidationMessage(String message) {
-
+        // TODO
     }
 
     @Override
@@ -74,8 +69,8 @@ class JavaFXUIWindow implements UIWindow<Node> {
     public static class JavaFXApplication extends Application {
         private Scene scene;
         private static VBox root;
-        private static Button okButton;
-        private static boolean valid = false;
+//        private static Button okButton;
+//        private static boolean valid = false;
 
         @Override
         public void start(Stage stage) throws Exception {
@@ -92,24 +87,22 @@ class JavaFXUIWindow implements UIWindow<Node> {
                 root.getChildren().add(node);
             }
 
-            HBox okCancel = new HBox(5);
-
-            okButton = new Button("OK");
-            okButton.setDisable(!valid);
-            okButton.setOnAction(event -> {
-                ok = true;
-                Platform.exit();
-            });
-            okCancel.getChildren().add(okButton);
-
-            Button cancelButton = new Button("Cancel");
-            cancelButton.setOnAction(event -> {
-                ok = false;
-                Platform.exit();
-            });
-            okCancel.getChildren().add(cancelButton);
-
-            root.getChildren().add(okCancel);
+//            HBox okCancel = new HBox(5);
+//
+//            okButton = new Button("OK");
+//            okButton.setDisable(!valid);
+//            okButton.setOnAction(event -> {
+//                ok = true;
+//            });
+//            okCancel.getChildren().add(okButton);
+//
+//            Button cancelButton = new Button("Cancel");
+//            cancelButton.setOnAction(event -> {
+//                ok = false;
+//            });
+//            okCancel.getChildren().add(cancelButton);
+//
+//            root.getChildren().add(okCancel);
 
             scene = new Scene(root, 600, 800);
 
@@ -119,13 +112,13 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
         }
 
-        static void setValid(boolean valid) {
-            if (okButton == null) {
-                JavaFXApplication.valid = valid;
-            } else {
-                okButton.setDisable(!valid);
-            }
-        }
+//        static void setValid(boolean valid) {
+//            if (okButton == null) {
+//                JavaFXApplication.valid = valid;
+//            } else {
+//                okButton.setDisable(!valid);
+//            }
+//        }
     }
 
     private static class NodeUIWidget<T extends Serializable> implements UIWidget<T, Node> {

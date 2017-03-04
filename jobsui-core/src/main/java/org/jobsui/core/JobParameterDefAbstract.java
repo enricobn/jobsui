@@ -78,4 +78,19 @@ public abstract class JobParameterDefAbstract<T extends Serializable> implements
     public String toString() {
         return getName();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+
+        JobParameterDefAbstract<?> that = (JobParameterDefAbstract<?>) o;
+
+        return key.equals(that.key);
+    }
+
+    @Override
+    public int hashCode() {
+        return key.hashCode();
+    }
 }

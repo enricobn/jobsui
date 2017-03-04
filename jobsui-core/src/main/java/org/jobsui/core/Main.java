@@ -51,8 +51,8 @@ public class Main {
             ui = new JavaFXUI();
         }
 
-        JobValues values = runner.getValues(ui, job);
-        System.out.println(values);
+        Serializable result = runner.run(ui, job);
+
 
 //        final JobFuture<? extends Serializable> future = runner.run(ui, job);
 //

@@ -1,7 +1,9 @@
 package org.jobsui.core;
 
+import org.jobsui.core.ui.FakeUIButton;
 import org.jobsui.core.ui.FakeUIWindow;
 import org.jobsui.core.ui.UI;
+import org.jobsui.core.ui.UIButton;
 
 import java.io.Serializable;
 import java.util.concurrent.ExecutorService;
@@ -16,30 +18,36 @@ abstract class JobRunnerWrapper<T extends Serializable> {
     private final FakeUIWindow window;
     private final JobRunner runner;
     private final UI<T> ui;
+    private final FakeUIButton<?> runButton;
 
-    JobRunnerWrapper(JobRunner runner, UI<T> ui, FakeUIWindow window) {
+    JobRunnerWrapper(JobRunner runner, UI<T> ui, FakeUIWindow window, FakeUIButton<?> runButton) {
         this.runner = runner;
         this.ui = ui;
         this.window = window;
+        this.runButton = runButton;
     }
 
-    JobFuture<T> start(Job<T> job) throws Exception {
+    T start(Job<T> job) throws Exception {
 
-        final Future<JobFuture<T>> future = runJob(job);
+        final Future<T> future = runJob(job);
 
         window.waitUntilStarted();
 
         interact();
+
+        runButton.click();
 
         window.exit();
 
         return future.get();
     }
 
-    private <T1 extends Serializable> Future<JobFuture<T1>> runJob(final Job<T1> job) {
+    private <T1 extends Serializable> Future<T1> runJob(final Job<T1> job) {
         return pool.submit(() -> {
             try {
                 return runner.run(ui, job);
+//                return job.run(values);
+//                return runner.run(ui, job);
             } catch (Exception e) {
                 e.printStackTrace();
                 throw e;
@@ -48,4 +56,8 @@ abstract class JobRunnerWrapper<T extends Serializable> {
     }
 
     protected abstract void interact();
+
+    public boolean isValid() {
+        return runner.isValid();
+    }
 }

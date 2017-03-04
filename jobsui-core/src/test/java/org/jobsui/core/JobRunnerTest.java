@@ -34,13 +34,16 @@ public class JobRunnerTest {
     private JobRunner runner;
     private UI ui;
     private FakeUIWindow window;
+    private FakeUIButton<?> runButton;
 
     @Before
-    public void init() {
+    public void init() throws UnsupportedComponentException {
         runner = new JobRunner();
         ui = mock(UI.class);
         window = new FakeUIWindow();
         when(ui.createWindow(anyString())).thenReturn(window);
+        runButton = new FakeUIButton<>();
+        when(ui.create(UIButton.class)).thenReturn(runButton);
     }
 
     @Test public void assert_that_simplejob_is_valid_when_run_with_valid_parameters() throws Exception {
@@ -48,7 +51,7 @@ public class JobRunnerTest {
         final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
                 uiValueName.setValue("John");
@@ -58,7 +61,7 @@ public class JobRunnerTest {
 
         jobRunnerWrapper.start(createSimpleJob());
 
-        assertThat(window.isValid(), is(true));
+        assertThat(jobRunnerWrapper.isValid(), is(true));
     }
 
     @Test public void assert_that_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
@@ -66,7 +69,7 @@ public class JobRunnerTest {
         final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
                 uiValueName.setValue("John");
@@ -74,9 +77,9 @@ public class JobRunnerTest {
             }
         };
 
-        final JobFuture<String> jobFuture = jobRunnerWrapper.start(createSimpleJob());
+        String result = jobRunnerWrapper.start(createSimpleJob());
 
-        assertThat(jobFuture.get(), equalTo("John Doe"));
+        assertThat(result, equalTo("John Doe"));
     }
 
     @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters() throws Exception {
@@ -84,7 +87,7 @@ public class JobRunnerTest {
         FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
             }
@@ -92,7 +95,7 @@ public class JobRunnerTest {
 
         jobRunnerWrapper.start(createSimpleJob());
 
-        assertThat(window.isValid(), is(false));
+        assertThat(jobRunnerWrapper.isValid(), is(false));
     }
 
     @Test public void assert_that_groovy_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
@@ -100,7 +103,7 @@ public class JobRunnerTest {
         final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
                 uiValueName.setValue("John");
@@ -109,9 +112,9 @@ public class JobRunnerTest {
             }
         };
 
-        final JobFuture<String> jobFuture = jobRunnerWrapper.start(createGroovySimpleJob());
+        String result = jobRunnerWrapper.start(createGroovySimpleJob());
 
-        assertThat(jobFuture.get(), equalTo("John Doe"));
+        assertThat(result, equalTo("John Doe"));
     }
 
     @Test public void assert_that_groovy_loaded_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
@@ -120,7 +123,7 @@ public class JobRunnerTest {
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
         when(ui.create(UIChoice.class)).thenReturn(new FakeUIChoice());
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
                 uiValueName.setValue("John");
@@ -131,9 +134,9 @@ public class JobRunnerTest {
 
         final Job<String> job = getJob("src/test/resources/simplejob", "simple");
 
-        final JobFuture<String> jobFuture = jobRunnerWrapper.start(job);
+        String result = jobRunnerWrapper.start(job);
 
-        assertThat(jobFuture.get(), equalTo("(John,Doe)"));
+        assertThat(result, equalTo("(John,Doe)"));
     }
 
     private <T> Job<T> getJob(String file, String job) throws Exception {
@@ -152,7 +155,7 @@ public class JobRunnerTest {
         final FakeUIChoice<String,?> uiChoiceUser = new FakeUIChoice<>();
         when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
                 uiChoiceVersion.setItems(Arrays.asList("1.0", "2.0"));
@@ -161,9 +164,9 @@ public class JobRunnerTest {
             }
         };
 
-        final JobFuture<String> jobFuture = jobRunnerWrapper.start(createComplexJob());
+        String result = jobRunnerWrapper.start(createComplexJob());
 
-        assertThat(jobFuture.get(), equalTo("1.0 Dev-1.0"));
+        assertThat(result, equalTo("1.0 Dev-1.0"));
         assertThat(uiChoiceDb.getItems(), equalTo(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev")));
         assertThat(uiChoiceUser.getItems(), equalTo(Collections.singletonList("1.0 Dev-1.0")));
     }
@@ -174,7 +177,7 @@ public class JobRunnerTest {
         final FakeUIChoice<String,?> uiChoiceUser = new FakeUIChoice<>();
         when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
                 uiChoiceVersion.setItems(Collections.singletonList("1.0"));
@@ -185,7 +188,7 @@ public class JobRunnerTest {
 
         jobRunnerWrapper.start(createComplexJob());
 
-        assertThat(window.isValid(), is(true));
+        assertThat(jobRunnerWrapper.isValid(), is(true));
     }
 
     @Test public void assert_that_not_valid_parameter_invokes_set_validation_on_widget() throws Exception {
@@ -194,7 +197,7 @@ public class JobRunnerTest {
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
         when(ui.create(UIChoice.class)).thenReturn(new FakeUIChoice());
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
                 uiValueName.setValue(null);
@@ -227,7 +230,7 @@ public class JobRunnerTest {
 
         final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, JobRunnerTest.this.ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
                 // I want to ignore all validations at startup
@@ -253,7 +256,7 @@ public class JobRunnerTest {
 
         final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, JobRunnerTest.this.ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
                 // I want to ignore all validations at startup
@@ -266,7 +269,7 @@ public class JobRunnerTest {
         jobRunnerWrapper.start(job);
 
         final JobParameterDef inv = job.getParameter("inv");
-        verify(inv).onDependenciesChange(any(UIWidget.class), anyMap());
+        verify(inv).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
         verify(inv).validate(isNull(Serializable.class));
     }
 
@@ -279,9 +282,9 @@ public class JobRunnerTest {
         when(this.ui.create(UIChoice.class)).thenReturn(uiChoiceInv);
 
         final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
-        when(job.validate(anyMap())).thenReturn(Collections.singletonList("Error"));
+        when(job.validate(anyMapOf(String.class, Object.class))).thenReturn(Collections.singletonList("Error"));
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, JobRunnerTest.this.ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
                 uiValueName.setValue("John");
@@ -299,20 +302,19 @@ public class JobRunnerTest {
         final FakeUiValue<String, ?> uiValueSecond = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
                 uiValueFirst.setValue("John");
                 uiValueSecond.setValue(" Doe");
-
             }
         };
 
         final Job<String> job = getJob("src/test/resources/external", "concat");
 
-        final JobFuture<String> jobFuture = jobRunnerWrapper.start(job);
+        String result = jobRunnerWrapper.start(job);
 
-        assertThat(jobFuture.get(), equalTo("John Doe"));
+        assertThat(result, equalTo("John Doe"));
     }
 
     @Test public void assert_that_groovy_simple_with_ext_job_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
@@ -323,7 +325,7 @@ public class JobRunnerTest {
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
         when(ui.create(UIChoice.class)).thenReturn(uiValueInv);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
                 uiValueFirst.setValue("John");
@@ -333,9 +335,9 @@ public class JobRunnerTest {
 
         final Job<String> job = getJob("src/test/resources/simplejob", "simpleWithExternalCall");
 
-        final JobFuture<String> jobFuture = jobRunnerWrapper.start(job);
+        String result = jobRunnerWrapper.start(job);
 
-        assertThat(jobFuture.get(), equalTo("John Doe"));
+        assertThat(result, equalTo("John Doe"));
     }
 
     @Test public void assert_that_groovy_simple_with_int_call_job_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
@@ -346,7 +348,7 @@ public class JobRunnerTest {
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
         when(ui.create(UIChoice.class)).thenReturn(uiValueInv);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window) {
+        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
             protected void interact() {
                 uiValueFirst.setValue("John");
@@ -356,12 +358,13 @@ public class JobRunnerTest {
 
         final Job<String> job = getJob("src/test/resources/simplejob", "simpleWithInternalCall");
 
-        final JobFuture<String> jobFuture = jobRunnerWrapper.start(job);
+        String result = jobRunnerWrapper.start(job);
 
-        assertThat(jobFuture.get(), equalTo("John Doe"));
+        assertThat(result, equalTo("John Doe"));
     }
 
-    private Job<String> getMockedSimpleJob(FakeUiValue<String, ?> uiValueName, FakeUiValue<String, ?> uiValueSurname, FakeUIChoice uiChoiceInv) throws UnsupportedComponentException {
+    private Job<String> getMockedSimpleJob(FakeUiValue<String, ?> uiValueName, FakeUiValue<String, ?> uiValueSurname,
+                                           FakeUIChoice uiChoiceInv) throws UnsupportedComponentException {
         final Job<String> job = mock(Job.class);
 
         final Map<String, JobParameterDef<?>> parameters = new LinkedHashMap<>();
@@ -402,7 +405,7 @@ public class JobRunnerTest {
         when(job.getParameter(anyString())).thenAnswer(new Answer<JobParameterDef>() {
             @Override
             public JobParameterDef answer(InvocationOnMock invocation) throws Throwable {
-                final JobParameterDef jobParameterDef = parameters.get(invocation.getArguments()[0]);
+                final JobParameterDef jobParameterDef = parameters.get(invocation.getArguments()[0].toString());
                 return jobParameterDef;
             }
         });
@@ -472,14 +475,14 @@ public class JobRunnerTest {
             }
 
             @Override
-            public JobFuture<String> run(final Map<String, Object> values) {
-                return new JobFuture<String>() {
-                    @Override
-                    public String get() {
-                        return values.get("name") + " " + values.get("surname");
-                    }
-                };
+            public JobFuture<String> run(final Map<String, Serializable> values) {
+                return () -> values.get("name") + " " + values.get("surname");
             }
+
+//            @Override
+//            public JobFuture<String> run(JobValues values) {
+//                return () -> values.getValue(name) + " " + values.getValue(surname);
+//            }
 
             @Override
             public List<String> validate(Map<String, Object> values) {
@@ -494,7 +497,6 @@ public class JobRunnerTest {
         final List<JobParameterDef<? extends Serializable>> parameterDefs = new ArrayList<>();
 
         final JobParameterDefAbstract<String> name = new JobParameterDefGroovySimple<String>(
-                null,
                 shell,
                 "name",
                 "Name",
@@ -513,7 +515,6 @@ public class JobRunnerTest {
         parameterDefs.add(name);
 
         final JobParameterDefAbstract<String> surname = new JobParameterDefGroovySimple<String>(
-                null,
                 shell,
                 "surname",
                 "Surname",
@@ -540,7 +541,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public JobFuture<String> run(final Map<String, Object> values) {
+            public JobFuture<String> run(final Map<String, Serializable> values) {
                 return new JobFuture<String>() {
                     @Override
                     public String get() {
@@ -548,6 +549,11 @@ public class JobRunnerTest {
                     }
                 };
             }
+
+//            @Override
+//            public JobFuture<String> run(JobValues values) {
+//                return () -> values.getValue(name) + " " + values.getValue(surname);
+//            }
 
             @Override
             public List<String> validate(Map<String, Object> values) {
@@ -640,7 +646,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public JobFuture<String> run(final Map<String, Object> values) {
+            public JobFuture<String> run(final Map<String, Serializable> values) {
                 return new JobFuture<String>() {
                     @Override
                     public String get() {
@@ -648,6 +654,11 @@ public class JobRunnerTest {
                     }
                 };
             }
+
+//            @Override
+//            public JobFuture<String> run(JobValues values) {
+//                return () -> values.getValue(user);
+//            }
 
             @Override
             public List<String> validate(Map<String, Object> values) {

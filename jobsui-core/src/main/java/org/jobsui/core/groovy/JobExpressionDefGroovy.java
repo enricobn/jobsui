@@ -1,5 +1,6 @@
 package org.jobsui.core.groovy;
 
+import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.codehaus.groovy.control.CompilationFailedException;
@@ -18,20 +19,22 @@ public class JobExpressionDefGroovy<T extends Serializable> extends JobParameter
     private static final String IMPORTS =
             "import org.jobsui.core.*;\n" +
             "import org.jobsui.core.ui.*;\n";
-    private final File projectFolder;
+//    private final File projectFolder;
     private final String evaluateScript;
     private final Script evaluate;
+    private final Binding shellBinding;
 
-    public JobExpressionDefGroovy(File projectFolder, GroovyShell shell, String key, String name,
+    public JobExpressionDefGroovy(GroovyShell shell, String key, String name,
                                   String evaluateScript) {
         super(key, name, null, false, false);
-        this.projectFolder = projectFolder;
+//        this.projectFolder = projectFolder;
         this.evaluateScript = evaluateScript;
         try {
             this.evaluate = shell.parse(IMPORTS + evaluateScript);
         } catch (CompilationFailedException e) {
             throw new RuntimeException("Error parsing evaluate for expression with key \"" + key + "\".", e);
         }
+        shellBinding = shell.getContext();
     }
 
     @Override
@@ -49,12 +52,14 @@ public class JobExpressionDefGroovy<T extends Serializable> extends JobParameter
     }
 
     private void evaluate(UIChoice component, Map<String, Serializable> values) {
+        // I reset the bindings otherwise I get "global" or previous bindings
+        evaluate.setBinding(new Binding(shellBinding.getVariables()));
         evaluate.setProperty("values", values);
         for (Map.Entry<String, Serializable> entry : values.entrySet()) {
             evaluate.setProperty(entry.getKey(), entry.getValue());
         }
 
-        evaluate.setProperty("projectFolder", projectFolder);
+//        evaluate.setProperty("projectFolder", projectFolder);
         try {
             Object value = evaluate.run();
             if (value == null) {

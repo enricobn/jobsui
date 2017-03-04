@@ -46,6 +46,8 @@ public class JavaFXUI implements UI<Node> {
             return (COMP) new JavaFXUIChoice<>();
         } else if (componentType == UICheckBox.class) {
             return (COMP) new JavaFXUICheckBox();
+        } else if (componentType == UIButton.class) {
+            return (COMP) new JavaFXUIButton();
         }
         throw new UnsupportedComponentException("JavaFX: cannot find component for " + componentType.getName());
     }

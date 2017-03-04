@@ -18,13 +18,13 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
     private static final int SLEEP = 50;
     private volatile boolean exit = false;
     private volatile boolean started = false;
-    private volatile boolean valid = false;
+//    private volatile boolean valid = false;
     private volatile AtomicInteger unnamed = new AtomicInteger(0);
     private Map<String, UIWidget> widgets = new HashMap<>();
     private List<String> validationMessages = new ArrayList<>();
 
     @Override
-    public boolean show(Runnable callback) {
+    public void show(Runnable callback) {
         callback.run();
 
         long start = System.currentTimeMillis();
@@ -39,15 +39,16 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
                 throw new IllegalStateException("Timeout on show.");
             }
         }
-        return valid;
+//        return valid;
     }
 
-    @Override
-    public void setValid(boolean valid) {
-        this.valid = valid;
-    }
+//    @Override
+//    public void setValid(boolean valid) {
+//        this.valid = valid;
+//    }
 
     @Override
+    // TODO I don't like it here, it must know nothing about validation
     public void showValidationMessage(String message) {
         validationMessages.add(message);
     }
@@ -75,12 +76,12 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
         return null;
     }
 
-    public boolean isValid() {
-        if (!started) {
-            throw new IllegalStateException();
-        }
-        return valid;
-    }
+//    public boolean isValid() {
+//        if (!started) {
+//            throw new IllegalStateException();
+//        }
+//        return valid;
+//    }
 
     public void exit() {
         this.exit = true;
@@ -104,6 +105,7 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
         return widgets.get(title);
     }
 
+    // TODO I don't like it here, it must know nothing about validation
     public List<String> getValidationMessages() {
         return validationMessages;
     }

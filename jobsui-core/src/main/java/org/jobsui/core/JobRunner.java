@@ -9,12 +9,14 @@ import rx.functions.FuncN;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 4/29/16.
  */
 class JobRunner {
+    private boolean valid = false;
 
     private static class ParameterAndWidget<T extends Serializable, C> {
         private final JobParameterDef<T> jobParameterDef;
@@ -59,14 +61,18 @@ class JobRunner {
 
     }
 
-    public <T extends Serializable, C> JobValues getValues(final UI<C> ui, final Job<T> job) throws UnsupportedComponentException {
+    public <T extends Serializable, C> T run(final UI<C> ui, final Job<T> job) throws UnsupportedComponentException {
+        valid = false;
+
         final UIWindow<C> window = ui.createWindow(job.getName());
 
         final JobValues values = new JobValuesImpl();
 
         List<UnsupportedComponentException> exceptions = new ArrayList<>();
 
-        if (window.show(() -> {
+        AtomicReference<T> result = new AtomicReference<T>(null);
+
+        window.show(() -> {
             final WidgetsMap<C> widgets;
             try {
                 widgets = createWidgets(ui, job, window);
@@ -77,7 +83,28 @@ class JobRunner {
 
             observeDependencies(job, widgets);
 
-            Observable<Map<String, Object>> mapObservable = observeValues(ui, job, window, widgets);
+            UIButton<C> runButton = null;
+            try {
+                runButton = ui.create(UIButton.class);
+            } catch (UnsupportedComponentException e) {
+                // TODO
+                throw new RuntimeException(e);
+            }
+
+            runButton.setEnabled(false);
+
+            runButton.setTitle("Run");
+
+            runButton.getObservable().subscribe(serializableVoid -> {
+                try {
+                    JobFuture<T> resultFuture = job.run(values);
+                    result.set(resultFuture.get());
+                } catch (Exception e) {
+                    ui.showError("Error running job.", e);
+                }
+            });
+
+            Observable<Map<String, Object>> mapObservable = observeValues(ui, job, window, runButton, widgets);
 
             mapObservable.subscribe(map -> {
                 values.clear();
@@ -86,73 +113,73 @@ class JobRunner {
                 }
             });
 
-            window.setValid(false);
+//            window.setValid(false);
 
             notifyInitialValue(widgets);
-        })) {
-            if (!exceptions.isEmpty()) {
-                throw exceptions.get(0);
-            }
-            return values;
-        } else {
-            return null;
-        }
 
+            window.add(runButton);
+
+        });
+
+        if (!exceptions.isEmpty()) {
+            throw exceptions.get(0);
+        }
+        return result.get();
     }
 
     private static <T extends Serializable> void setValue(JobValues values, Map<String, Object> map, JobParameterDef<T> jobParameterDef) {
         values.setValue(jobParameterDef, (T)map.get(jobParameterDef.getKey()));
     }
 
-    public <T extends Serializable, C> JobFuture<T> run(final UI<C> ui, final Job<T> job) throws UnsupportedComponentException {
-        final UIWindow<C> window = ui.createWindow(job.getName());
-
-        final Map<String, Object> values = new HashMap<>();
-
-        List<UnsupportedComponentException> exceptions = new ArrayList<>();
-
-        if (window.show(() -> {
-            final WidgetsMap<C> widgets;
-            try {
-                widgets = createWidgets(ui, job, window);
-            } catch (UnsupportedComponentException e) {
-                exceptions.add(e);
-                return;
-            }
-
-            observeDependencies(job, widgets);
-
-            Observable<Map<String, Object>> mapObservable = observeValues(ui, job, window, widgets);
-            mapObservable.subscribe(map -> {
-                values.clear();
-                values.putAll(map);
-            });
-
-            window.setValid(false);
-
-            notifyInitialValue(widgets);
-        })) {
-            if (!exceptions.isEmpty()) {
-                throw exceptions.get(0);
-            }
-            return job.run(values);
-        }
-        return null;
-    }
+//    public <T extends Serializable, C> JobFuture<T> run(final UI<C> ui, final Job<T> job) throws UnsupportedComponentException {
+//        final UIWindow<C> window = ui.createWindow(job.getName());
+//
+//        final Map<String, Object> values = new HashMap<>();
+//
+//        List<UnsupportedComponentException> exceptions = new ArrayList<>();
+//
+//        if (window.show(() -> {
+//            final WidgetsMap<C> widgets;
+//            try {
+//                widgets = createWidgets(ui, job, window);
+//            } catch (UnsupportedComponentException e) {
+//                exceptions.add(e);
+//                return;
+//            }
+//
+//            observeDependencies(job, widgets);
+//
+//            Observable<Map<String, Object>> mapObservable = observeValues(ui, job, window, widgets);
+//            mapObservable.subscribe(map -> {
+//                values.clear();
+//                values.putAll(map);
+//            });
+//
+//            window.setValid(false);
+//
+//            notifyInitialValue(widgets);
+//        })) {
+//            if (!exceptions.isEmpty()) {
+//                throw exceptions.get(0);
+//            }
+//            return job.run(values);
+//        }
+//        return null;
+//    }
 
     private <T extends Serializable, C> WidgetsMap<C> createWidgets(final UI<C> ui, Job<T> job, UIWindow<C> window)
     throws UnsupportedComponentException {
         Collection<ParameterAndWidget<Serializable, C>> result = new ArrayList<>();
 
         for (final JobParameterDef<? extends Serializable> jobParameterDef : job.getParameterDefs()) {
-            crateWidget(ui, window, result, jobParameterDef);
+            createWidget(ui, window, result, jobParameterDef);
         }
         return new WidgetsMap<>(result);
     }
 
-    private <T extends Serializable, C> void crateWidget(final UI<C> ui, UIWindow<C> window,
-                                                         Collection<ParameterAndWidget<Serializable, C>> result,
-                                                         final JobParameterDef<T> jobParameterDef)
+    private <T extends Serializable, C> void createWidget(final UI<C> ui, UIWindow<C> window,
+                                                          Collection<ParameterAndWidget<Serializable, C>> result,
+                                                          final JobParameterDef<T> jobParameterDef)
     throws UnsupportedComponentException {
         final UIComponent<T, C> component = jobParameterDef.createComponent(ui);
         if (component == null) {
@@ -189,11 +216,12 @@ class JobRunner {
     }
 
     private <T, C> Observable<Map<String, Object>> observeValues(final UI<?> ui, final Job<T> job, final UIWindow<?> window,
+                                                                 final UIButton<C> runButton,
                                                                  final WidgetsMap<C> widgetsMap) {
         final List<Subscriber<? super Map<String, Object>>> subscribers = new ArrayList<>();
         Observable<Map<String, Object>> result = Observable.create(subscribers::add);
 
-        final Map<String,Object> parameters = new HashMap<>();
+        final Map<String,Object> values = new HashMap<>();
 
         List<Observable<?>> observables = widgetsMap.getWidgets().stream()
                 .map(widget -> widget.getWidget().getComponent().getObservable())
@@ -202,27 +230,29 @@ class JobRunner {
         Observable<Boolean> combined = Observable.combineLatest(observables, new FuncN<Boolean>() {
             @Override
             public Boolean call(Object... args) {
-                parameters.clear();
-                subscribers.forEach(subscriber -> subscriber.onNext(parameters));
+                values.clear();
+                subscribers.forEach(subscriber -> subscriber.onNext(values));
 
                 int i = 0;
 
                 for (final ParameterAndWidget<Serializable, C> entry : widgetsMap.getWidgets()) {
-                    if (addParameter(entry, (Serializable) args[i++])) break;
+                    if (addValidValue(entry, (Serializable) args[i++])) break;
                 }
 
-                if (parameters.size() != args.length) {
+                if (values.size() != args.length) {
                     return false;
                 }
 
-                final List<String> validate = job.validate(parameters);
+                final List<String> validate = job.validate(values);
                 if (!validate.isEmpty()) {
                     window.showValidationMessage(JobsUIUtils.getMessagesAsString(validate));
+                } else {
+                    window.showValidationMessage(null);
                 }
                 return validate.isEmpty();
             }
 
-            private boolean addParameter(ParameterAndWidget<Serializable, C> entry, Serializable value) {
+            private boolean addValidValue(ParameterAndWidget<Serializable, C> entry, Serializable value) {
                 final JobParameterDef<Serializable> parameterDef = entry.getJobParameterDef();
                 final List<String> validate = parameterDef.validate(value);
 
@@ -231,14 +261,23 @@ class JobRunner {
                 if (!validate.isEmpty()) {
                     return true;
                 }
-                parameters.put(parameterDef.getKey(), value);
-                subscribers.forEach(subscriber -> subscriber.onNext(parameters));
+                values.put(parameterDef.getKey(), value);
+                subscribers.forEach(subscriber -> subscriber.onNext(values));
                 return false;
             }
         });
 
-        combined.subscribe(window::setValid);
+//        combined.subscribe(window::setValid);
+//        combined.subscribe(runButton::setEnabled);
+        combined.subscribe(v -> {
+            valid = v;
+            runButton.setEnabled(v);
+        });
         return result;
+    }
+
+    public boolean isValid() {
+        return valid;
     }
 
     private <T extends Serializable, C> void observeDependencies(Job<T> job, final WidgetsMap<C> widgets) {

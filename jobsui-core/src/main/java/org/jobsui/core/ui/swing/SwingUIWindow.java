@@ -15,7 +15,7 @@ import java.io.Serializable;
 public class SwingUIWindow implements UIWindow<JComponent> {
     private final JFrame frame;
     private final SwingUIContainer container;
-    private final OKCancelHandler okCancelHandler;
+//    private final OKCancelHandler okCancelHandler;
 
 //    // TODO remove or put in another class
 //    private static <T extends Serializable> UIWindow<T> createWindow(UI<T> ui) throws UnsupportedComponentException {
@@ -99,12 +99,12 @@ public class SwingUIWindow implements UIWindow<JComponent> {
         // container
         container = new SwingUIContainer();
 
-        okCancelHandler = new OKCancelHandler(frame, (JComponent) frame.getContentPane(), container.getComponent());
+//        okCancelHandler = new OKCancelHandler(frame, (JComponent) frame.getContentPane(), container.getComponent());
     }
 
 
     @Override
-    public boolean show(Runnable callback) {
+    public void show(Runnable callback) {
         container.addFiller();
 
         callback.run();
@@ -117,13 +117,13 @@ public class SwingUIWindow implements UIWindow<JComponent> {
                 e.printStackTrace();
             }
         }
-        return okCancelHandler.isOk();
+//        return okCancelHandler.isOk();
     }
 
-    @Override
-    public void setValid(boolean valid) {
-        okCancelHandler.setOKButtonEnabled(valid);
-    }
+//    @Override
+//    public void setValid(boolean valid) {
+//        okCancelHandler.setOKButtonEnabled(valid);
+//    }
 
     @Override
     public void showValidationMessage(String message) {

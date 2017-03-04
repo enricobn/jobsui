@@ -1,5 +1,6 @@
 package org.jobsui.core.groovy;
 
+import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.codehaus.groovy.control.CompilationFailedException;
@@ -22,19 +23,20 @@ public class JobParameterDefGroovySimple<T extends Serializable> extends JobPara
     private static final String IMPORTS =
             "import org.jobsui.core.*;\n" +
             "import org.jobsui.core.ui.*;\n";
-    private final File projectFolder;
+//    private final File projectFolder;
     private final String createComponentScript;
     private final String onDependenciesChangeScript;
     private final String validateScript;
     private final Script createComponent;
     private final Script onDependenciesChange;
     private final Script validate;
+    private final Binding shellBinding;
 
-    public JobParameterDefGroovySimple(File projectFolder, GroovyShell shell, String key, String name,
+    public JobParameterDefGroovySimple(GroovyShell shell, String key, String name,
                                        String createComponentScript, String onDependenciesChangeScript,
                                        String validateScript, boolean optional, boolean visible) {
         super(key, name, null, optional, visible);
-        this.projectFolder = projectFolder;
+//        this.projectFolder = projectFolder;
         this.createComponentScript = createComponentScript;
         this.onDependenciesChangeScript = onDependenciesChangeScript;
         this.validateScript = validateScript;
@@ -53,12 +55,15 @@ public class JobParameterDefGroovySimple<T extends Serializable> extends JobPara
         } catch (CompilationFailedException e) {
             throw new RuntimeException("Error parsing validate for parameter with key \"" + key + "\".", e);
         }
+        shellBinding = shell.getContext();
     }
 
     @Override
     public <C> UIComponent<T, C> createComponent(UI<C> ui) throws UnsupportedComponentException {
+        // I reset the bindings otherwise I get "global" or previous bindings
+        createComponent.setBinding(new Binding(shellBinding.getVariables()));
         createComponent.setProperty("ui", ui);
-        createComponent.setProperty("projectFolder", projectFolder);
+//        createComponent.setProperty("projectFolder", projectFolder);
         try {
             return (UIComponent) createComponent.run();
         } catch (Throwable e) {
@@ -70,12 +75,14 @@ public class JobParameterDefGroovySimple<T extends Serializable> extends JobPara
     @Override
     public void onDependenciesChange(UIWidget widget, Map<String, Serializable> values) {
         if (onDependenciesChange != null) {
+            // I reset the bindings otherwise I get "global" or previous bindings
+            onDependenciesChange.setBinding(new Binding());
             onDependenciesChange.setProperty("widget", widget);
             onDependenciesChange.setProperty("values", values);
             for (Map.Entry<String, Serializable> entry : values.entrySet()) {
                 onDependenciesChange.setProperty(entry.getKey(), entry.getValue());
             }
-            onDependenciesChange.setProperty("projectFolder", projectFolder);
+//            onDependenciesChange.setProperty("projectFolder", projectFolder);
             try {
                 onDependenciesChange.run();
             } catch (Exception e) {
@@ -94,8 +101,10 @@ public class JobParameterDefGroovySimple<T extends Serializable> extends JobPara
             }
             return Collections.emptyList();
         }
+        // I reset the bindings otherwise I get "global" or previous bindings
+        validate.setBinding(new Binding());
         validate.setProperty("value", value);
-        validate.setProperty("projectFolder", projectFolder);
+//        validate.setProperty("projectFolder", projectFolder);
         try {
             @SuppressWarnings("unchecked")
             List<String> result = (List<String>) validate.run();

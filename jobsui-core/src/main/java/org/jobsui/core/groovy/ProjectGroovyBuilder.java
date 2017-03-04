@@ -53,11 +53,11 @@ public class ProjectGroovyBuilder {
 
     private static <T> JobGroovy<T> build(ProjectXML projectXML, JobXML jobXML) throws Exception {
         GroovyShell groovyShell = createGroovyShell(projectXML);
+        groovyShell.setProperty("projectFolder", projectXML.getProjectFolder());
         Map<String, JobParameterDefGroovy<Serializable>> parameterDefsMap = new HashMap<>();
 
         for (SimpleParameterXML simpleParameterXML : jobXML.getSimpleParameterXMLs()) {
             JobParameterDefGroovy<Serializable> parameterDef = new JobParameterDefGroovySimple<>(
-                    projectXML.getProjectFolder(),
                     groovyShell,
                     simpleParameterXML.getKey(),
                     simpleParameterXML.getName(),
@@ -71,7 +71,6 @@ public class ProjectGroovyBuilder {
 
         for (ExpressionXML expressionXML : jobXML.getExpressionXMLs()) {
             JobParameterDefGroovy<Serializable> parameterDef = new JobExpressionDefGroovy<>(
-                    projectXML.getProjectFolder(),
                     groovyShell,
                     expressionXML.getKey(),
                     expressionXML.getName(),
@@ -97,7 +96,7 @@ public class ProjectGroovyBuilder {
                 .map(parameterDefsMap::get).collect(Collectors.toList());
 
         return new JobGroovy(groovyShell, jobXML.getId(), jobXML.getName(), sorted,
-                jobXML.getRunScript(), jobXML.getValidateScript(), projectXML.getProjectFolder());
+                jobXML.getRunScript(), jobXML.getValidateScript());
     }
 
     private static void addDependencies(List<? extends ParameterXML> parameterXMLs, Map<String, JobParameterDefGroovy<Serializable>> parameterDefs) {
