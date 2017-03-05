@@ -270,7 +270,7 @@ public class JobRunnerTest {
 
         final JobParameterDef inv = job.getParameter("inv");
         verify(inv).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
-        verify(inv).validate(isNull(Serializable.class));
+        verify(inv, atLeast(1)).validate(isNull(Serializable.class));
     }
 
     @Test public void assert_that_a_message_is_shown_when_job_is_not_valid() throws Exception {
@@ -282,7 +282,7 @@ public class JobRunnerTest {
         when(this.ui.create(UIChoice.class)).thenReturn(uiChoiceInv);
 
         final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
-        when(job.validate(anyMapOf(String.class, Object.class))).thenReturn(Collections.singletonList("Error"));
+        when(job.validate(anyMapOf(String.class, Serializable.class))).thenReturn(Collections.singletonList("Error"));
 
         JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
             @Override
@@ -401,14 +401,15 @@ public class JobRunnerTest {
         when(inv.isOptional()).thenReturn(false);
         when(inv.getDependencies()).thenReturn(
                 Collections.<JobParameterDef<?>>singletonList(name));
+//        doAnswer(invocation -> {
+//            Map<String,Serializable> values = (Map<String, Serializable>) invocation.getArguments()[1];
+//            uiChoiceInv.setValue(values.get("name"));
+//            return null;
+//        }).when(inv).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
 
-        when(job.getParameter(anyString())).thenAnswer(new Answer<JobParameterDef>() {
-            @Override
-            public JobParameterDef answer(InvocationOnMock invocation) throws Throwable {
-                final JobParameterDef jobParameterDef = parameters.get(invocation.getArguments()[0].toString());
-                return jobParameterDef;
-            }
-        });
+        when(job.getParameter(anyString())).thenAnswer((Answer<JobParameterDef>) invocation ->
+                parameters.get(invocation.getArguments()[0].toString())
+        );
         return job;
     }
 
@@ -485,7 +486,7 @@ public class JobRunnerTest {
 //            }
 
             @Override
-            public List<String> validate(Map<String, Object> values) {
+            public List<String> validate(Map<String, Serializable> values) {
                 return Collections.emptyList();
             }
         };
@@ -556,7 +557,7 @@ public class JobRunnerTest {
 //            }
 
             @Override
-            public List<String> validate(Map<String, Object> values) {
+            public List<String> validate(Map<String, Serializable> values) {
                 return Collections.emptyList();
             }
         };
@@ -661,7 +662,7 @@ public class JobRunnerTest {
 //            }
 
             @Override
-            public List<String> validate(Map<String, Object> values) {
+            public List<String> validate(Map<String, Serializable> values) {
                 return Collections.emptyList();
             }
         };

@@ -4,7 +4,6 @@ import org.jobsui.core.ui.*;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
-import rx.Subscriber;
 import rx.functions.FuncN;
 
 import java.io.Serializable;
@@ -58,7 +57,7 @@ class JobRunner {
     }
 
     public void setValues(JobValues values) {
-
+        // TODO
     }
 
     public <T extends Serializable, C> T run(final UI<C> ui, final Job<T> job) throws UnsupportedComponentException {
@@ -83,7 +82,7 @@ class JobRunner {
 
             observeDependencies(job, widgets);
 
-            UIButton<C> runButton = null;
+            UIButton<C> runButton;
             try {
                 runButton = ui.create(UIButton.class);
             } catch (UnsupportedComponentException e) {
@@ -104,16 +103,33 @@ class JobRunner {
                 }
             });
 
-            Observable<Map<String, Object>> mapObservable = observeValues(ui, job, window, runButton, widgets);
+//            Observable<Map<String, Object>> mapObservable = observeValues(ui, job, window, runButton, widgets);
+//
+//            mapObservable.subscribe(map -> {
+//                values.clear();
+//                for (JobParameterDef<? extends Serializable> jobParameterDef : job.getParameterDefs()) {
+//                    setValue(values, map, jobParameterDef);
+//                }
+//            });
 
-            mapObservable.subscribe(map -> {
+//            window.setValid(false);
+
+            Observable<JobValidation> validationObserver = validationObserver(job, widgets);
+
+            validationObserver.subscribe(v -> {
+                valid = v.isValid();
+                runButton.setEnabled(v.isValid());
+                window.showValidationMessage(String.join(", ", v.getMessages()));
+            });
+
+            Observable<Map<String, Serializable>> valuesChangeObserver = valuesChangeObserver(widgets);
+
+            valuesChangeObserver.subscribe(map -> {
                 values.clear();
                 for (JobParameterDef<? extends Serializable> jobParameterDef : job.getParameterDefs()) {
                     setValue(values, map, jobParameterDef);
                 }
             });
-
-//            window.setValid(false);
 
             notifyInitialValue(widgets);
 
@@ -127,7 +143,7 @@ class JobRunner {
         return result.get();
     }
 
-    private static <T extends Serializable> void setValue(JobValues values, Map<String, Object> map, JobParameterDef<T> jobParameterDef) {
+    private static <T extends Serializable> void setValue(JobValues values, Map<String, Serializable> map, JobParameterDef<T> jobParameterDef) {
         values.setValue(jobParameterDef, (T)map.get(jobParameterDef.getKey()));
     }
 
@@ -215,66 +231,169 @@ class JobRunner {
         }
     }
 
-    private <T, C> Observable<Map<String, Object>> observeValues(final UI<?> ui, final Job<T> job, final UIWindow<?> window,
-                                                                 final UIButton<C> runButton,
-                                                                 final WidgetsMap<C> widgetsMap) {
-        final List<Subscriber<? super Map<String, Object>>> subscribers = new ArrayList<>();
-        Observable<Map<String, Object>> result = Observable.create(subscribers::add);
+    private static class JobValidation {
+        private boolean valid = true;
+        private List<String> messages = new ArrayList<>();
 
-        final Map<String,Object> values = new HashMap<>();
+        void invalidate() {
+            valid = false;
+        }
 
+        void setMessages(List<String> messages) {
+            this.messages = messages;
+        }
+
+        boolean isValid() {
+            return valid && messages.isEmpty();
+        }
+
+        List<String> getMessages() {
+            return Collections.unmodifiableList(messages);
+        }
+    }
+
+    /**
+     * Creates an Observable that emits a JobValidation, with the validation status of the job, when all values are set or
+     * a value is changed.
+     */
+    private <T, C> Observable<JobValidation> validationObserver(final Job<T> job,
+                                                          final WidgetsMap<C> widgetsMap) {
         List<Observable<?>> observables = widgetsMap.getWidgets().stream()
                 .map(widget -> widget.getWidget().getComponent().getObservable())
                 .collect(Collectors.toList());
 
-        Observable<Boolean> combined = Observable.combineLatest(observables, new FuncN<Boolean>() {
+        return Observable.combineLatest(observables, new FuncN<JobValidation>() {
             @Override
-            public Boolean call(Object... args) {
-                values.clear();
-                subscribers.forEach(subscriber -> subscriber.onNext(values));
-
+            public JobValidation call(Object... args) {
                 int i = 0;
 
+                JobValidation jobValidation = new JobValidation();
+
+                Map<String, Serializable> values = new HashMap<>();
+
                 for (final ParameterAndWidget<Serializable, C> entry : widgetsMap.getWidgets()) {
-                    if (addValidValue(entry, (Serializable) args[i++])) break;
+                    Serializable value = (Serializable) args[i++];
+                    if (!isValid(entry, value)) {
+                        jobValidation.invalidate();
+                        break;
+                    }
+                    values.put(entry.jobParameterDef.getKey(), value);
                 }
 
-                if (values.size() != args.length) {
-                    return false;
+                if (!jobValidation.isValid()) {
+                    return jobValidation;
                 }
 
-                final List<String> validate = job.validate(values);
-                if (!validate.isEmpty()) {
-                    window.showValidationMessage(JobsUIUtils.getMessagesAsString(validate));
-                } else {
-                    window.showValidationMessage(null);
-                }
-                return validate.isEmpty();
+                jobValidation.setMessages(job.validate(values));
+
+                return jobValidation;
             }
 
-            private boolean addValidValue(ParameterAndWidget<Serializable, C> entry, Serializable value) {
+            private boolean isValid(ParameterAndWidget<Serializable, C> entry, Serializable value) {
                 final JobParameterDef<Serializable> parameterDef = entry.getJobParameterDef();
                 final List<String> validate = parameterDef.validate(value);
 
-                setValidationMessage(validate, parameterDef, entry.getWidget(), ui);
-
-                if (!validate.isEmpty()) {
-                    return true;
-                }
-                values.put(parameterDef.getKey(), value);
-                subscribers.forEach(subscriber -> subscriber.onNext(values));
-                return false;
+                return validate.isEmpty();
             }
         });
-
-//        combined.subscribe(window::setValid);
-//        combined.subscribe(runButton::setEnabled);
-        combined.subscribe(v -> {
-            valid = v;
-            runButton.setEnabled(v);
-        });
-        return result;
     }
+
+    /**
+     * Creates an Observable that emits a map with all valid values, when all values are set or
+     * a value is changed.
+     */
+    private <C> Observable<Map<String,Serializable>> valuesChangeObserver(final WidgetsMap<C> widgetsMap) {
+        List<Observable<?>> observables = widgetsMap.getWidgets().stream()
+                .map(widget -> widget.getWidget().getComponent().getObservable())
+                .collect(Collectors.toList());
+
+        return Observable.combineLatest(observables, new FuncN<Map<String,Serializable>>() {
+            @Override
+            public Map<String,Serializable> call(Object... args) {
+                int i = 0;
+
+                Map<String, Serializable> values = new HashMap<>();
+
+                for (final ParameterAndWidget<Serializable, C> entry : widgetsMap.getWidgets()) {
+                    Serializable value = (Serializable) args[i++];
+                    if (isValid(entry, value)) {
+                        values.put(entry.jobParameterDef.getKey(), value);
+                    }
+                }
+
+                return values;
+            }
+
+            private boolean isValid(ParameterAndWidget<Serializable, C> entry, Serializable value) {
+                final JobParameterDef<Serializable> parameterDef = entry.getJobParameterDef();
+                final List<String> validate = parameterDef.validate(value);
+
+                return validate.isEmpty();
+            }
+        });
+    }
+
+
+//    private <T, C> Observable<Map<String, Object>> observeValues(final UI<?> ui, final Job<T> job, final UIWindow<?> window,
+//                                                                 final UIButton<C> runButton,
+//                                                                 final WidgetsMap<C> widgetsMap) {
+//        final List<Subscriber<? super Map<String, Object>>> subscribers = new ArrayList<>();
+//        Observable<Map<String, Object>> result = Observable.create(subscribers::add);
+//
+//        final Map<String,Object> values = new HashMap<>();
+//
+//        List<Observable<?>> observables = widgetsMap.getWidgets().stream()
+//                .map(widget -> widget.getWidget().getComponent().getObservable())
+//                .collect(Collectors.toList());
+//
+//        Observable<Boolean> combined = Observable.combineLatest(observables, new FuncN<Boolean>() {
+//            @Override
+//            public Boolean call(Object... args) {
+//                values.clear();
+//                subscribers.forEach(subscriber -> subscriber.onNext(values));
+//
+//                int i = 0;
+//
+//                for (final ParameterAndWidget<Serializable, C> entry : widgetsMap.getWidgets()) {
+//                    if (addValidValue(entry, (Serializable) args[i++])) break;
+//                }
+//
+//                if (values.size() != args.length) {
+//                    return false;
+//                }
+//
+//                final List<String> validate = job.validate(values);
+//                if (!validate.isEmpty()) {
+//                    window.showValidationMessage(JobsUIUtils.getMessagesAsString(validate));
+//                } else {
+//                    window.showValidationMessage(null);
+//                }
+//                return validate.isEmpty();
+//            }
+//
+//            private boolean addValidValue(ParameterAndWidget<Serializable, C> entry, Serializable value) {
+//                final JobParameterDef<Serializable> parameterDef = entry.getJobParameterDef();
+//                final List<String> validate = parameterDef.validate(value);
+//
+//                setValidationMessage(validate, parameterDef, entry.getWidget(), ui);
+//
+//                if (!validate.isEmpty()) {
+//                    return true;
+//                }
+//                values.put(parameterDef.getKey(), value);
+//                subscribers.forEach(subscriber -> subscriber.onNext(values));
+//                return false;
+//            }
+//        });
+//
+////        combined.subscribe(window::setValid);
+////        combined.subscribe(runButton::setEnabled);
+//        combined.subscribe(v -> {
+//            valid = v;
+//            runButton.setEnabled(v);
+//        });
+//        return result;
+//    }
 
     public boolean isValid() {
         return valid;

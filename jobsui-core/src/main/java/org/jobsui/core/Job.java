@@ -45,7 +45,7 @@ public interface Job<T> {
 //        };
     }
 
-    List<String> validate(Map<String,Object> values);
+    List<String> validate(Map<String, Serializable> values);
 
     JobParameterDef<?> getParameter(String key);
 }

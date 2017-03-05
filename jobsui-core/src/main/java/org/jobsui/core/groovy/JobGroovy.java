@@ -6,9 +6,7 @@ import groovy.lang.Script;
 import org.jobsui.core.JobAbstract;
 import org.jobsui.core.JobFuture;
 import org.jobsui.core.JobParameterDef;
-import org.jobsui.core.JobValues;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 
@@ -71,7 +69,7 @@ public class JobGroovy<T> extends JobAbstract<T> {
     }
 
     @Override
-    public List<String> validate(Map<String, Object> values) {
+    public List<String> validate(Map<String, Serializable> values) {
         if (validate == null) {
             return Collections.emptyList();
         }
