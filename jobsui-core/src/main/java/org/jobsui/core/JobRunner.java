@@ -36,9 +36,9 @@ class JobRunner {
     }
 
     private static class WidgetsMap<C> {
-        private final Collection<ParameterAndWidget<Serializable, C>> widgets;
+        private final List<ParameterAndWidget<Serializable, C>> widgets;
 
-        private WidgetsMap(Collection<ParameterAndWidget<Serializable, C>> widgets) {
+        private WidgetsMap(List<ParameterAndWidget<Serializable, C>> widgets) {
             this.widgets = widgets;
         }
 
@@ -51,7 +51,7 @@ class JobRunner {
             return null;
         }
 
-        Collection<ParameterAndWidget<Serializable, C>> getWidgets() {
+        List<ParameterAndWidget<Serializable, C>> getWidgets() {
             return widgets;
         }
     }
@@ -185,7 +185,7 @@ class JobRunner {
 
     private <T extends Serializable, C> WidgetsMap<C> createWidgets(final UI<C> ui, Job<T> job, UIWindow<C> window)
     throws UnsupportedComponentException {
-        Collection<ParameterAndWidget<Serializable, C>> result = new ArrayList<>();
+        List<ParameterAndWidget<Serializable, C>> result = new ArrayList<>();
 
         for (final JobParameterDef<? extends Serializable> jobParameterDef : job.getParameterDefs()) {
             createWidget(ui, window, result, jobParameterDef);
