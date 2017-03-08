@@ -48,6 +48,8 @@ public class JavaFXUI implements UI<Node> {
             return (COMP) new JavaFXUICheckBox();
         } else if (componentType == UIButton.class) {
             return (COMP) new JavaFXUIButton();
+        } else if (componentType == UIExpression.class) {
+            return (COMP) new JavaFXUIExpression<>();
         }
         throw new UnsupportedComponentException("JavaFX: cannot find component for " + componentType.getName());
     }

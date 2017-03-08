@@ -7,9 +7,11 @@ import java.util.Set;
  */
 public interface Project {
 
+    String getId();
+
     <T> Job<T> getJob(String key);
 
-    Set<String> getIds();
+    Set<String> getJobsIds();
 
     String getName();
 }

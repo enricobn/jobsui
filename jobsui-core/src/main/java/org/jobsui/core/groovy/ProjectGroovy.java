@@ -11,14 +11,21 @@ import java.util.Set;
  * Created by enrico on 10/6/16.
  */
 public class ProjectGroovy implements Project {
+    private final String id;
     private final String name;
     private final Map<String, JobGroovy<Serializable>> jobs;
     private final Map<String, Project> referencedProjects;
 
-    public ProjectGroovy(String name, Map<String, JobGroovy<Serializable>> jobs, Map<String, Project> referencedProjects) {
+    public ProjectGroovy(String id, String name, Map<String, JobGroovy<Serializable>> jobs, Map<String, Project> referencedProjects) {
+        this.id = id;
         this.name = name;
         this.jobs = jobs;
         this.referencedProjects = referencedProjects;
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override
@@ -27,7 +34,7 @@ public class ProjectGroovy implements Project {
     }
 
     @Override
-    public Set<String> getIds() {
+    public Set<String> getJobsIds() {
         return jobs.keySet();
     }
 

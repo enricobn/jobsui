@@ -21,9 +21,11 @@ public class JobGroovy<T> extends JobAbstract<T> {
     private final Script validate;
 //    private final File projectFolder;
     private final Binding shellBinding;
+    private final GroovyShell shell;
 
     public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDefGroovy<Serializable>> parameterDefs,
                      String runScript, String validateScript) {
+        this.shell = shell;
         this.key = key;
         this.name = name;
         this.parameterDefs = new ArrayList<>();
@@ -63,7 +65,7 @@ public class JobGroovy<T> extends JobAbstract<T> {
                 T result = (T) this.run.run();
                 return result;
             } catch (Exception e) {
-                throw new RuntimeException("Cannot execute run for job with key \"" + getKey() + "\".", e);
+                throw new RuntimeException("Cannot execute run for job with id \"" + getId() + "\".", e);
             }
         };
     }
@@ -79,7 +81,7 @@ public class JobGroovy<T> extends JobAbstract<T> {
         return (List<String>) validate.run();
     }
 
-    public String getKey() {
+    public String getId() {
         return key;
     }
 
@@ -88,6 +90,10 @@ public class JobGroovy<T> extends JobAbstract<T> {
             // TODO can I remove cast?
             ((JobParameterDefGroovy)jobParameterDef).init(project);
         }
+    }
 
+    @Override
+    public ClassLoader getClassLoader() {
+        return shell.getClassLoader();
     }
 }

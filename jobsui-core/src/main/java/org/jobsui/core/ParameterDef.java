@@ -18,4 +18,8 @@ public interface ParameterDef<T extends Serializable> extends ParameterValidator
 
     List<JobParameterDef<? extends Serializable>> getDependencies();
 
+    default boolean isCalculated() {
+        return false;
+    }
+
 }

@@ -6,12 +6,12 @@ import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.xml.ProjectXML;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockSettings;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.listeners.InvocationListener;
 import org.mockito.listeners.MethodInvocationReport;
 import org.mockito.stubbing.Answer;
@@ -35,6 +35,7 @@ public class JobRunnerTest {
     private UI ui;
     private FakeUIWindow window;
     private FakeUIButton<?> runButton;
+    private FakeUIButton<?> bookmarkButton;
 
     @Before
     public void init() throws UnsupportedComponentException {
@@ -42,8 +43,15 @@ public class JobRunnerTest {
         ui = mock(UI.class);
         window = new FakeUIWindow();
         when(ui.createWindow(anyString())).thenReturn(window);
-        runButton = new FakeUIButton<>();
-        when(ui.create(UIButton.class)).thenReturn(runButton);
+        runButton = spy(new FakeUIButton<>());
+        bookmarkButton = spy(new FakeUIButton<>());
+        when(ui.create(UIButton.class)).thenReturn(runButton, bookmarkButton);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        verify(runButton).setTitle("Run");
+        verify(bookmarkButton).setTitle("Bookmark");
     }
 
     @Test public void assert_that_simplejob_is_valid_when_run_with_valid_parameters() throws Exception {
@@ -144,7 +152,7 @@ public class JobRunnerTest {
         Project project = new ProjectGroovyBuilder().build(projectXML);
         Job<T> result = project.getJob(job);
         if (result == null) {
-            throw new Exception("Cannot find job with id \"" + job + "\". Ids:" + project.getIds());
+            throw new Exception("Cannot find job with id \"" + job + "\". Ids:" + project.getJobsIds());
         }
         return result;
     }
@@ -465,6 +473,12 @@ public class JobRunnerTest {
         parameterDefs.add(surname);
 
         return new JobAbstract<String>() {
+
+            @Override
+            public String getId() {
+                return "JobRunnerTest.simpleJob";
+            }
+
             @Override
             public String getName() {
                 return "Test";
@@ -531,6 +545,11 @@ public class JobRunnerTest {
         parameterDefs.add(surname);
 
         return new JobAbstract<String>() {
+            @Override
+            public String getId() {
+                return "JobRunnerTest.groovySimpleJob";
+            }
+
             @Override
             public String getName() {
                 return "Test";
@@ -636,6 +655,11 @@ public class JobRunnerTest {
         user.addDependency(version);
 
         return new JobAbstract<String>() {
+            @Override
+            public String getId() {
+                return "JobRunnerTest.complexJob";
+            }
+
             @Override
             public String getName() {
                 return "Test";

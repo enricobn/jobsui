@@ -14,4 +14,5 @@ public abstract class JobAbstract<T> implements Job<T> {
         }
         return null;
     }
+
 }

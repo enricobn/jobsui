@@ -89,4 +89,9 @@ public class JobCallDefGroovy<T extends Serializable> extends JobParameterDefAbs
         }
         job = jobToCall;
     }
+
+    @Override
+    public boolean isCalculated() {
+        return true;
+    }
 }

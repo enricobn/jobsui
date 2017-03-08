@@ -22,6 +22,7 @@ public class ProjectXML implements ValidatingXML {
     private final Collection<File> fileLibraries = new ArrayList<>();
     private final Collection<File> groovyFiles = new ArrayList<>();
     private String name;
+    private String id;
 
     public ProjectXML(File projectFolder, String name) {
         this.projectFolder = projectFolder;
@@ -128,5 +129,9 @@ public class ProjectXML implements ValidatingXML {
             }
         }
         return messages;
+    }
+
+    public String getId() {
+        return id;
     }
 }

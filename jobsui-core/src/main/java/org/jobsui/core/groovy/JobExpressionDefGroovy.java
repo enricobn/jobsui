@@ -9,6 +9,7 @@ import org.jobsui.core.ui.*;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 
@@ -39,7 +40,7 @@ public class JobExpressionDefGroovy<T extends Serializable> extends JobParameter
 
     @Override
     public <C> UIComponent<T, C> createComponent(UI<C> ui) throws UnsupportedComponentException {
-        final UIChoice component = ui.create(UIChoice.class);
+        final UIExpression component = ui.create(UIExpression.class);
         if (getDependencies().isEmpty()) {
             evaluate(component, Collections.emptyMap());
         }
@@ -48,10 +49,10 @@ public class JobExpressionDefGroovy<T extends Serializable> extends JobParameter
 
     @Override
     public void onDependenciesChange(UIWidget widget, Map<String, Serializable> values) {
-        evaluate(((UIChoice)widget.getComponent()), values);
+        evaluate(((UIExpression) widget.getComponent()), values);
     }
 
-    private void evaluate(UIChoice component, Map<String, Serializable> values) {
+    private void evaluate(UIExpression component, Map<String, Serializable> values) {
         // I reset the bindings otherwise I get "global" or previous bindings
         evaluate.setBinding(new Binding(shellBinding.getVariables()));
         evaluate.setProperty("values", values);
@@ -61,12 +62,8 @@ public class JobExpressionDefGroovy<T extends Serializable> extends JobParameter
 
 //        evaluate.setProperty("projectFolder", projectFolder);
         try {
-            Object value = evaluate.run();
-            if (value == null) {
-                component.setItems(Collections.emptyList());
-            } else {
-                component.setItems(Collections.singletonList(value));
-            }
+            Serializable value = (Serializable) evaluate.run();
+            component.setValue(value);
         } catch (Throwable e) {
             throw new RuntimeException("Error in evaluate script for expression whit key \"" +
                     getKey() + "\"", e);
@@ -81,5 +78,10 @@ public class JobExpressionDefGroovy<T extends Serializable> extends JobParameter
 
     public String getEvaluateScript() {
         return evaluateScript;
+    }
+
+    @Override
+    public boolean isCalculated() {
+        return true;
     }
 }

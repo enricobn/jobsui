@@ -1,11 +1,15 @@
 package org.jobsui.core;
 
+import com.thoughtworks.xstream.XStream;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
 import rx.functions.FuncN;
 
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -56,10 +60,6 @@ class JobRunner {
         }
     }
 
-    public void setValues(JobValues values) {
-        // TODO
-    }
-
     public <T extends Serializable, C> T run(final UI<C> ui, final Job<T> job) throws UnsupportedComponentException {
         valid = false;
 
@@ -69,7 +69,7 @@ class JobRunner {
 
         List<UnsupportedComponentException> exceptions = new ArrayList<>();
 
-        AtomicReference<T> result = new AtomicReference<T>(null);
+        AtomicReference<T> result = new AtomicReference<>(null);
 
         window.show(() -> {
             final WidgetsMap<C> widgets;
@@ -83,15 +83,16 @@ class JobRunner {
             observeDependencies(job, widgets);
 
             UIButton<C> runButton;
+            UIButton<C> saveBookmarkButton;
             try {
                 runButton = ui.create(UIButton.class);
+                saveBookmarkButton = ui.create(UIButton.class);
             } catch (UnsupportedComponentException e) {
                 // TODO
                 throw new RuntimeException(e);
             }
 
             runButton.setEnabled(false);
-
             runButton.setTitle("Run");
 
             runButton.getObservable().subscribe(serializableVoid -> {
@@ -103,22 +104,30 @@ class JobRunner {
                 }
             });
 
-//            Observable<Map<String, Object>> mapObservable = observeValues(ui, job, window, runButton, widgets);
-//
-//            mapObservable.subscribe(map -> {
-//                values.clear();
-//                for (JobParameterDef<? extends Serializable> jobParameterDef : job.getParameterDefs()) {
-//                    setValue(values, map, jobParameterDef);
-//                }
-//            });
+            saveBookmarkButton.setEnabled(false);
+            saveBookmarkButton.setTitle("Bookmark");
 
-//            window.setValid(false);
+            XStream xstream = new XStream();
+            if (job.getClassLoader() != null) {
+                xstream.setClassLoader(job.getClassLoader());
+            }
+
+            saveBookmarkButton.getObservable().subscribe(serializableVoid -> {
+                try {
+                    Bookmark bookmark = new Bookmark(job, "Test", values);
+                    FileWriter fileWriter = new FileWriter("bookmark.xml");
+                    xstream.toXML(bookmark, fileWriter);
+                } catch (Exception e) {
+                    ui.showError("Error saving bookmark.", e);
+                }
+            });
 
             Observable<JobValidation> validationObserver = validationObserver(job, widgets);
 
             validationObserver.subscribe(v -> {
                 valid = v.isValid();
                 runButton.setEnabled(v.isValid());
+                saveBookmarkButton.setEnabled(v.isValid());
                 window.showValidationMessage(String.join(", ", v.getMessages()));
             });
 
@@ -134,7 +143,7 @@ class JobRunner {
             notifyInitialValue(widgets);
 
             window.add(runButton);
-
+            window.add(saveBookmarkButton);
         });
 
         if (!exceptions.isEmpty()) {
@@ -143,45 +152,13 @@ class JobRunner {
         return result.get();
     }
 
+    private Bookmark loadBookmark(XStream xstream, String fileName) throws FileNotFoundException {
+        return (Bookmark) xstream.fromXML(new FileReader(fileName));
+    }
+
     private static <T extends Serializable> void setValue(JobValues values, Map<String, Serializable> map, JobParameterDef<T> jobParameterDef) {
         values.setValue(jobParameterDef, (T)map.get(jobParameterDef.getKey()));
     }
-
-//    public <T extends Serializable, C> JobFuture<T> run(final UI<C> ui, final Job<T> job) throws UnsupportedComponentException {
-//        final UIWindow<C> window = ui.createWindow(job.getName());
-//
-//        final Map<String, Object> values = new HashMap<>();
-//
-//        List<UnsupportedComponentException> exceptions = new ArrayList<>();
-//
-//        if (window.show(() -> {
-//            final WidgetsMap<C> widgets;
-//            try {
-//                widgets = createWidgets(ui, job, window);
-//            } catch (UnsupportedComponentException e) {
-//                exceptions.add(e);
-//                return;
-//            }
-//
-//            observeDependencies(job, widgets);
-//
-//            Observable<Map<String, Object>> mapObservable = observeValues(ui, job, window, widgets);
-//            mapObservable.subscribe(map -> {
-//                values.clear();
-//                values.putAll(map);
-//            });
-//
-//            window.setValid(false);
-//
-//            notifyInitialValue(widgets);
-//        })) {
-//            if (!exceptions.isEmpty()) {
-//                throw exceptions.get(0);
-//            }
-//            return job.run(values);
-//        }
-//        return null;
-//    }
 
     private <T extends Serializable, C> WidgetsMap<C> createWidgets(final UI<C> ui, Job<T> job, UIWindow<C> window)
     throws UnsupportedComponentException {

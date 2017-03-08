@@ -43,7 +43,7 @@ public class ProjectGroovyBuilder {
             }
         });
 
-        ProjectGroovy projectGroovy = new ProjectGroovy(projectXML.getName(), jobs, projects);
+        ProjectGroovy projectGroovy = new ProjectGroovy(projectXML.getId(), projectXML.getName(), jobs, projects);
 
         for (JobGroovy<?> job : jobs.values()) {
             job.init(projectGroovy);
