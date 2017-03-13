@@ -28,6 +28,10 @@ public class JobRunnerContext<T extends Serializable, C> {
         }
     }
 
+    public void notifyInitialValue() {
+        widgets.getWidgets().forEach(JobRunnerContext::notifyInitialValue);
+    }
+
     public void observeDependencies() {
         for (final JobParameterDef<? extends Serializable> jobParameterDef : job.getParameterDefs()) {
             final List<JobParameterDef<? extends Serializable>> dependencies = jobParameterDef.getDependencies();
@@ -53,45 +57,6 @@ public class JobRunnerContext<T extends Serializable, C> {
                 });
             }
         }
-    }
-
-    private Observable<Map<String, Serializable>> combineDependenciesObservables(final List<JobParameterDef<? extends Serializable>> dependencies,
-                                                                                        List<Observable<Serializable>> observables) {
-        return Observable.combineLatest(observables, new FuncN<Map<String,Serializable>>() {
-            @Override
-            public Map<String,Serializable> call(Object... args) {
-                Map<String, Serializable> result = new HashMap<>();
-
-                int i = 0;
-                for (JobParameterDef dependency : dependencies) {
-                    final Serializable arg = (Serializable) args[i++];
-                    if (addValidatedValue(result, dependency, arg)) break;
-                }
-                return result;
-            }
-
-            private <T1 extends Serializable> boolean addValidatedValue(Map<String, Serializable> result, JobParameterDef<T1> dependency, T1 arg) {
-                final List<String> validate = dependency.validate(arg);
-                if (!validate.isEmpty()) {
-                    return true;
-                }
-                result.put(dependency.getKey(), arg);
-                return false;
-            }
-        });
-    }
-
-    private List<Observable<Serializable>> getDependenciesObservables(List<JobParameterDef<? extends Serializable>> dependencies) {
-        List<Observable<Serializable>> observables = new ArrayList<>();
-        for (JobParameterDef dependency : dependencies) {
-            final UIWidget widget = widgets.get(dependency);
-            if (widget == null) {
-                throw new IllegalStateException("Cannot find widget for dependency with key \"" +
-                        dependency.getKey() + "\".");
-            }
-            observables.add(widget.getComponent().getObservable());
-        }
-        return observables;
     }
 
     /**
@@ -174,8 +139,50 @@ public class JobRunnerContext<T extends Serializable, C> {
         });
     }
 
-    public WidgetsMap<C> getWidgets() {
-        return widgets;
+    private static <T1 extends Serializable, C> void notifyInitialValue(ParameterAndWidget<T1, C> entry) {
+        final T1 value = entry.getWidget().getComponent().getValue();
+        if (entry.getJobParameterDef().validate(value).isEmpty()) {
+            entry.getWidget().getComponent().notifySubscribers();
+        }
+    }
+
+    private Observable<Map<String, Serializable>> combineDependenciesObservables(final List<JobParameterDef<? extends Serializable>> dependencies,
+                                                                                        List<Observable<Serializable>> observables) {
+        return Observable.combineLatest(observables, new FuncN<Map<String,Serializable>>() {
+            @Override
+            public Map<String,Serializable> call(Object... args) {
+                Map<String, Serializable> result = new HashMap<>();
+
+                int i = 0;
+                for (JobParameterDef dependency : dependencies) {
+                    final Serializable arg = (Serializable) args[i++];
+                    if (addValidatedValue(result, dependency, arg)) break;
+                }
+                return result;
+            }
+
+            private <T1 extends Serializable> boolean addValidatedValue(Map<String, Serializable> result, JobParameterDef<T1> dependency, T1 arg) {
+                final List<String> validate = dependency.validate(arg);
+                if (!validate.isEmpty()) {
+                    return true;
+                }
+                result.put(dependency.getKey(), arg);
+                return false;
+            }
+        });
+    }
+
+    private List<Observable<Serializable>> getDependenciesObservables(List<JobParameterDef<? extends Serializable>> dependencies) {
+        List<Observable<Serializable>> observables = new ArrayList<>();
+        for (JobParameterDef dependency : dependencies) {
+            final UIWidget widget = widgets.get(dependency);
+            if (widget == null) {
+                throw new IllegalStateException("Cannot find widget for dependency with key \"" +
+                        dependency.getKey() + "\".");
+            }
+            observables.add(widget.getComponent().getObservable());
+        }
+        return observables;
     }
 
     private static <T extends Serializable, C> ParameterAndWidget<T, C> createWidget(final UI<C> ui, UIWindow<C> window,

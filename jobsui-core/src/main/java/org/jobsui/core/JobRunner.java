@@ -3,8 +3,6 @@ package org.jobsui.core;
 import com.thoughtworks.xstream.XStream;
 import org.jobsui.core.runner.JobRunnerContext;
 import org.jobsui.core.runner.JobValidation;
-import org.jobsui.core.runner.ParameterAndWidget;
-import org.jobsui.core.runner.WidgetsMap;
 import org.jobsui.core.ui.*;
 import rx.Observable;
 
@@ -103,7 +101,7 @@ class JobRunner {
                 }
             });
 
-            notifyInitialValue(context.getWidgets());
+            context.notifyInitialValue();
 
             window.add(runButton);
             window.add(saveBookmarkButton);
@@ -121,17 +119,6 @@ class JobRunner {
 
     private static <T extends Serializable> void setValue(JobValues values, Map<String, Serializable> map, JobParameterDef<T> jobParameterDef) {
         values.setValue(jobParameterDef, (T)map.get(jobParameterDef.getKey()));
-    }
-
-    private <C> void notifyInitialValue(WidgetsMap<C> widgets) {
-        widgets.getWidgets().forEach(this::notifyInitialValue);
-    }
-
-    private <T extends Serializable, C> void notifyInitialValue(ParameterAndWidget<T, C> entry) {
-        final T value = entry.getWidget().getComponent().getValue();
-        if (entry.getJobParameterDef().validate(value).isEmpty()) {
-            entry.getWidget().getComponent().notifySubscribers();
-        }
     }
 
     public boolean isValid() {

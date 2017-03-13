@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * Created by enrico on 3/11/17.
  */
-public class WidgetsMap<C> {
+class WidgetsMap<C> {
     private final List<ParameterAndWidget<Serializable, C>> widgets = new ArrayList<>();
 
     WidgetsMap() {
@@ -20,7 +20,7 @@ public class WidgetsMap<C> {
         widgets.add(parameterAndWidget);
     }
 
-    public UIWidget<?, C> get(JobParameterDef<?> jobParameterDef) {
+    UIWidget<?, C> get(JobParameterDef<?> jobParameterDef) {
         for (ParameterAndWidget<?, C> widget : widgets) {
             if (jobParameterDef.equals(widget.getJobParameterDef())) {
                 return widget.getWidget();
@@ -29,7 +29,7 @@ public class WidgetsMap<C> {
         return null;
     }
 
-    public List<ParameterAndWidget<Serializable, C>> getWidgets() {
+    List<ParameterAndWidget<Serializable, C>> getWidgets() {
         return widgets;
     }
 }

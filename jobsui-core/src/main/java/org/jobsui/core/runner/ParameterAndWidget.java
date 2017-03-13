@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * Created by enrico on 3/11/17.
  */
-public class ParameterAndWidget<T extends Serializable, C> {
+class ParameterAndWidget<T extends Serializable, C> {
     private final JobParameterDef<T> jobParameterDef;
     private final UIWidget<T, C> widget;
 
@@ -17,11 +17,11 @@ public class ParameterAndWidget<T extends Serializable, C> {
         this.widget = widget;
     }
 
-    public UIWidget<T, C> getWidget() {
+    UIWidget<T, C> getWidget() {
         return widget;
     }
 
-    public JobParameterDef<T> getJobParameterDef() {
+    JobParameterDef<T> getJobParameterDef() {
         return jobParameterDef;
     }
 }
