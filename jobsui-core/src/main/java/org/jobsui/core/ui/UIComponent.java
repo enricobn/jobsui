@@ -1,15 +1,13 @@
 package org.jobsui.core.ui;
 
-import rx.Observable;
+import org.jobsui.core.ObservableProducer;
 
 import java.io.Serializable;
 
 /**
  * Created by enrico on 5/2/16.
  */
-public interface UIComponent<T extends Serializable,C> {
-
-    Observable<T> getObservable();
+public interface UIComponent<T extends Serializable,C> extends ObservableProducer<T> {
 
     C getComponent();
 
