@@ -13,7 +13,7 @@ public abstract class JobParameterDefAbstract<T extends Serializable> implements
     private final String name;
 //    private final StringConverter<T> converter;
     private final ParameterValidator<T> validator;
-    private final List<JobParameterDef<? extends Serializable>> dependencies = new ArrayList<>();
+    private final List<String> dependencies = new ArrayList<>();
     private final boolean optional;
     private final boolean visible;
 
@@ -47,7 +47,7 @@ public abstract class JobParameterDefAbstract<T extends Serializable> implements
     }
 
     @Override
-    public List<JobParameterDef<? extends Serializable>> getDependencies() {
+    public List<String> getDependencies() {
         return Collections.unmodifiableList(dependencies);
     }
 
@@ -70,8 +70,8 @@ public abstract class JobParameterDefAbstract<T extends Serializable> implements
         return visible;
     }
 
-    public void addDependency(JobParameterDef<? extends Serializable> parameterDef) {
-        dependencies.add(parameterDef);
+    public void addDependency(String key) {
+        dependencies.add(key);
     }
 
     @Override

@@ -9,7 +9,7 @@ import java.io.Serializable;
  */
 public interface JobParameterDefGroovy<T extends Serializable> extends JobParameterDef<T> {
 
-    void addDependency(JobParameterDef<? extends Serializable> parameterDef);
+    void addDependency(String key);
 
     void init(ProjectGroovy project);
 

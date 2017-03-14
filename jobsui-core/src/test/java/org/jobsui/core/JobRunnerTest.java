@@ -407,8 +407,7 @@ public class JobRunnerTest {
         when(inv.getName()).thenReturn("Inv");
         when(inv.isVisible()).thenReturn(false);
         when(inv.isOptional()).thenReturn(false);
-        when(inv.getDependencies()).thenReturn(
-                Collections.<JobParameterDef<?>>singletonList(name));
+        when(inv.getDependencies()).thenReturn(Collections.singletonList("name"));
 //        doAnswer(invocation -> {
 //            Map<String,Serializable> values = (Map<String, Serializable>) invocation.getArguments()[1];
 //            uiChoiceInv.setValue(values.get("name"));
@@ -469,7 +468,7 @@ public class JobRunnerTest {
             public void onDependenciesChange(UIWidget widget, Map<String, Serializable> values) {
             }
         };
-        surname.addDependency(name);
+        surname.addDependency(name.getKey());
         parameterDefs.add(surname);
 
         return new JobAbstract<String>() {
@@ -541,7 +540,7 @@ public class JobRunnerTest {
                 false,
                 true) {
         };
-        surname.addDependency(name);
+        surname.addDependency(name.getKey());
         parameterDefs.add(surname);
 
         return new JobAbstract<String>() {
@@ -626,7 +625,7 @@ public class JobRunnerTest {
             }
         };
         parameterDefs.add(db);
-        db.addDependency(version);
+        db.addDependency(version.getKey());
 
         final JobParameterDefAbstract<String> user = new JobParameterDefAbstract<String>(
                 "user",
@@ -651,8 +650,8 @@ public class JobRunnerTest {
             }
         };
         parameterDefs.add(user);
-        user.addDependency(db);
-        user.addDependency(version);
+        user.addDependency(db.getKey());
+        user.addDependency(version.getKey());
 
         return new JobAbstract<String>() {
             @Override

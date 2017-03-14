@@ -103,8 +103,7 @@ public class ProjectGroovyBuilder {
         for (ParameterXML parameterXML : parameterXMLs) {
             JobParameterDefGroovy<Serializable> jobParameterDefGroovy = parameterDefs.get(parameterXML.getKey());
             for (String depKey : parameterXML.getDependencies()) {
-                JobParameterDefGroovy<Serializable> dep = parameterDefs.get(depKey);
-                jobParameterDefGroovy.addDependency(dep);
+                jobParameterDefGroovy.addDependency(depKey);
             }
         }
     }
