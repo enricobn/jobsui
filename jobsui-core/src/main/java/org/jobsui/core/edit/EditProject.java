@@ -402,7 +402,7 @@ public class EditProject extends Application {
         if (!validate.isEmpty()) {
             Label label = new Label("?");
             label.setTextFill(Color.RED);
-            label.setTooltip(new Tooltip(JobsUIUtils.join(validate, " ")));
+            label.setTooltip(new Tooltip(String.join(", ", validate)));
             treeItem.setGraphic(label);
         } else {
             treeItem.setGraphic(null);

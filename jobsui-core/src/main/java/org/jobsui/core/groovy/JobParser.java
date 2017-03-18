@@ -120,7 +120,10 @@ public class JobParser {
 
         final File groovy = new File(projectFolder, "groovy");
         if (groovy.exists()) {
-            Arrays.stream(groovy.listFiles(File::isFile)).forEach(projectXML::addGroovyFile);
+            File[] files = groovy.listFiles(File::isFile);
+            if (files != null) {
+                Arrays.stream(files).forEach(projectXML::addGroovyFile);
+            }
         }
 
         return projectXML;

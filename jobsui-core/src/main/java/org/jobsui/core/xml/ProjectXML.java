@@ -125,7 +125,7 @@ public class ProjectXML implements ValidatingXML {
         for (JobXML jobXML : jobs.values()) {
             List<String> validate = jobXML.validate();
             if (!validate.isEmpty()) {
-                messages.add("Invalid job \"" + jobXML.getName() + "\":\n" + JobsUIUtils.join(validate, " "));
+                messages.add("Invalid job \"" + jobXML.getName() + "\":\n" + String.join(", ", validate));
             }
         }
         return messages;
