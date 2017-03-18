@@ -7,7 +7,6 @@ import org.jobsui.core.utils.JobsUIUtils;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -22,12 +21,12 @@ public class SwingUIContainer implements UIContainer<JComponent> {
     }
 
     @Override
-    public <T extends Serializable> UIWidget<T, JComponent> add(String title, UIComponent<T, JComponent> component) {
+    public UIWidget<JComponent> add(String title, UIComponent<JComponent> component) {
         return addRow(title, component);
     }
 
     @Override
-    public <T extends Serializable> UIWidget<T, JComponent> add(final UIComponent<T, JComponent> component) {
+    public UIWidget<JComponent> add(final UIComponent<JComponent> component) {
         {
             GridBagConstraints gbc = new GridBagConstraints();
             gbc.gridx = 0;
@@ -57,14 +56,14 @@ public class SwingUIContainer implements UIContainer<JComponent> {
             this.component.add(jMessages, gbc);
         }
 
-        return new UIWidget<T, JComponent>() {
+        return new UIWidget<JComponent>() {
             @Override
             public void setVisible(boolean visible) {
                 getComponent().setVisible(visible);
             }
 
             @Override
-            public UIComponent<T, JComponent> getComponent() {
+            public UIComponent<JComponent> getComponent() {
                 return component;
             }
 
@@ -113,7 +112,7 @@ public class SwingUIContainer implements UIContainer<JComponent> {
         component.add(new JLabel(), constraints);
     }
 
-    private <T extends Serializable> UIWidget<T, JComponent> addRow(String label, final UIComponent<T, JComponent> component) {
+    private UIWidget<JComponent> addRow(String label, final UIComponent<JComponent> component) {
         component.setTitle(label);
 
         final JLabel jlabel;
@@ -161,7 +160,7 @@ public class SwingUIContainer implements UIContainer<JComponent> {
             this.component.add(jMessages, gbc);
         }
 
-        return new UIWidget<T, JComponent>() {
+        return new UIWidget<JComponent>() {
             @Override
             public void setVisible(boolean visible) {
                 component.setVisible(visible);
@@ -169,7 +168,7 @@ public class SwingUIContainer implements UIContainer<JComponent> {
             }
 
             @Override
-            public UIComponent<T, JComponent> getComponent() {
+            public UIComponent<JComponent> getComponent() {
                 return component;
             }
 

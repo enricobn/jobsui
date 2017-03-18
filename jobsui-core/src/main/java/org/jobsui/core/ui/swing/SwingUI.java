@@ -38,11 +38,11 @@ public class SwingUI implements UI<JComponent> {
         if (componentType == UIButton.class) {
             return (COMP) new SwingUIButton();
         } else if (componentType == UIChoice.class) {
-            return (COMP) new SwingUIChoice<>();
+            return (COMP) new SwingUIChoice();
         } else if (componentType == UIList.class) {
-            return (COMP) new SwingUIList<>();
+            return (COMP) new SwingUIList();
         } else if (componentType == UIValue.class) {
-            return (COMP) new SwingUIValue<>();
+            return (COMP) new SwingUIValue();
         } else if (componentType == UICheckBox.class) {
             return (COMP) new SwingUICheckBox();
         }

@@ -4,11 +4,15 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.jobsui.core.JobAbstract;
+import org.jobsui.core.JobExpression;
 import org.jobsui.core.JobFuture;
 import org.jobsui.core.JobParameterDef;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by enrico on 5/4/16.
@@ -16,18 +20,20 @@ import java.util.*;
 public class JobGroovy<T> extends JobAbstract<T> {
     private final String key;
     private final String name;
-    private final List<JobParameterDef<? extends Serializable>> parameterDefs;
+    private final List<JobExpression> expressions;
+    private final List<JobParameterDef> parameterDefs;
     private final Script run;
     private final Script validate;
 //    private final File projectFolder;
     private final Binding shellBinding;
     private final GroovyShell shell;
 
-    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDefGroovy<Serializable>> parameterDefs,
-                     String runScript, String validateScript) {
+    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDefGroovy> parameterDefs,
+                     List<JobExpression> expressions, String runScript, String validateScript) {
         this.shell = shell;
         this.key = key;
         this.name = name;
+        this.expressions = expressions;
         this.parameterDefs = new ArrayList<>();
         // TODO can I remove this loop?
         this.parameterDefs.addAll(parameterDefs);
@@ -44,8 +50,13 @@ public class JobGroovy<T> extends JobAbstract<T> {
     }
 
     @Override
-    public List<JobParameterDef<? extends Serializable>> getParameterDefs() {
+    public List<JobParameterDef> getParameterDefs() {
         return parameterDefs;
+    }
+
+    @Override
+    public List<JobExpression> getExpressions() {
+        return expressions;
     }
 
     @Override

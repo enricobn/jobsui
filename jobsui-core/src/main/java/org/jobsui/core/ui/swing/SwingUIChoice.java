@@ -16,35 +16,32 @@ import java.util.Objects;
 /**
  * Created by enrico on 5/1/16.
  */
-public class SwingUIChoice<T extends Serializable> implements UIChoice<T,JComponent> {
+public class SwingUIChoice implements UIChoice<JComponent> {
     private final JPanel component = new JPanel();
-    private final JComboBox<T> combo = new JComboBox<>();
-    private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
-    private final Observable<T> observable;
-    private List<T> items = new ArrayList<>();
+    private final JComboBox<Serializable> combo = new JComboBox<>();
+    private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
+    private final Observable<Serializable> observable;
+    private List<Serializable> items = new ArrayList<>();
     private String title;
     private boolean disableListener = false;
 
     public SwingUIChoice() {
         JButton button = new JButton("...");
         button.setMargin(new Insets(2, 2, 2, 2));
-        observable = Observable.create(new Observable.OnSubscribe<T>() {
-            @Override
-            public void call(final Subscriber<? super T> subscriber) {
-                subscriber.onStart();
-                combo.addActionListener(new ActionListener() {
-                    private T selectedItem = null;
+        observable = Observable.create(subscriber -> {
+            subscriber.onStart();
+            combo.addActionListener(new ActionListener() {
+                private Serializable selectedItem = null;
 
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        if (!disableListener && !Objects.equals(selectedItem, getValue())) {
-                            selectedItem = getValue();
-                            subscriber.onNext(selectedItem);
-                        }
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (!disableListener && !Objects.equals(selectedItem, getValue())) {
+                        selectedItem = getValue();
+                        subscriber.onNext(selectedItem);
                     }
-                });
-                subscribers.add(subscriber);
-            }
+                }
+            });
+            subscribers.add(subscriber);
         });
 
         component.setLayout(new GridBagLayout());
@@ -64,7 +61,7 @@ public class SwingUIChoice<T extends Serializable> implements UIChoice<T,JCompon
         }
 
         button.addActionListener(e -> {
-            final SwingFilteredList<T> filteredList = new SwingFilteredList<>(title, items, (T) combo.getSelectedItem());
+            final SwingFilteredList<Serializable> filteredList = new SwingFilteredList<>(title, items, (Serializable)combo.getSelectedItem());
             filteredList.show();
             if (filteredList.isOk()) {
                 setValue(filteredList.getSelectedItem());
@@ -74,7 +71,7 @@ public class SwingUIChoice<T extends Serializable> implements UIChoice<T,JCompon
     }
 
     @Override
-    public Observable<T> getObservable() {
+    public Observable<Serializable> getObservable() {
         return observable;
     }
 
@@ -84,7 +81,7 @@ public class SwingUIChoice<T extends Serializable> implements UIChoice<T,JCompon
     }
 
     @Override
-    public T getValue() {
+    public Serializable getValue() {
         int selectedIndex = combo.getSelectedIndex();
         if (selectedIndex < 0) {
             return null;
@@ -94,7 +91,7 @@ public class SwingUIChoice<T extends Serializable> implements UIChoice<T,JCompon
     }
 
     @Override
-    public void setItems(final List<T> items) {
+    public void setItems(final List<Serializable> items) {
 //        System.out.println("SwingUIChoice.setItems " + items);
 //        if (items.equals(this.items)) {
 //            return;
@@ -115,7 +112,7 @@ public class SwingUIChoice<T extends Serializable> implements UIChoice<T,JCompon
                 }
 
                 boolean found = false;
-                for (T v : items) {
+                for (Serializable v : items) {
                     combo.addItem(v);
                     if (Objects.equals(selectedItem, v)) {
                         found = true;
@@ -149,7 +146,7 @@ public class SwingUIChoice<T extends Serializable> implements UIChoice<T,JCompon
 
     @Override
     public void notifySubscribers() {
-        for (Subscriber<? super T> subscriber : subscribers) {
+        for (Subscriber<? super Serializable> subscriber : subscribers) {
             subscriber.onNext(getValue());
         }
     }
@@ -160,7 +157,7 @@ public class SwingUIChoice<T extends Serializable> implements UIChoice<T,JCompon
     }
 
     @Override
-    public void setValue(T value) {
+    public void setValue(Serializable value) {
         if (value != null) {
 //            System.out.println("SwingUIChoice.setValue " + System.identityHashCode(value.getClass()));
 //            boolean found = false;

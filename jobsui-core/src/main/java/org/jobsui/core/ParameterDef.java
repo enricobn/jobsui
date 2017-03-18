@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by enrico on 2/18/17.
  */
-public interface ParameterDef<T extends Serializable> extends ParameterValidator<T> {
+public interface ParameterDef extends ParameterValidator {
 
     String getKey();
 
@@ -14,7 +14,7 @@ public interface ParameterDef<T extends Serializable> extends ParameterValidator
 
     boolean isOptional();
 
-    T getDefaultValue();
+    Serializable getDefaultValue();
 
     List<String> getDependencies();
 

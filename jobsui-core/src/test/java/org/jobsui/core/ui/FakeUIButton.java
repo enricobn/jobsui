@@ -3,10 +3,12 @@ package org.jobsui.core.ui;
 import org.jobsui.core.SerializableVoid;
 import rx.functions.Action1;
 
+import java.io.Serializable;
+
 /**
  * Created by enrico on 5/5/16.
  */
-public class FakeUIButton<C> extends FakeUIComponent<SerializableVoid,C> implements UIButton<C> {
+public class FakeUIButton<C> extends FakeUIComponent<C> implements UIButton<C> {
 
     @Override
     public void setEnabled(boolean enabled) {
@@ -19,7 +21,7 @@ public class FakeUIButton<C> extends FakeUIComponent<SerializableVoid,C> impleme
     }
 
     public void click() {
-        for (Action1<SerializableVoid> action : actions) {
+        for (Action1<Serializable> action : actions) {
             action.call(null);
         }
     }
@@ -30,6 +32,6 @@ public class FakeUIButton<C> extends FakeUIComponent<SerializableVoid,C> impleme
     }
 
     @Override
-    public void setValue(SerializableVoid value) {
+    public void setValue(Serializable value) {
     }
 }

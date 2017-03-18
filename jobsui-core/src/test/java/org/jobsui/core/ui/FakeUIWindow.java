@@ -54,7 +54,7 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
     }
 
     @Override
-    public <T1 extends Serializable> UIWidget<T1, T> add(String title, final UIComponent<T1, T> component) {
+    public UIWidget<T> add(String title, final UIComponent<T> component) {
         final UIWidget widget = mock(UIWidget.class);
         when(widget.getComponent()).thenReturn(component);
         widgets.put(title, widget);
@@ -62,7 +62,7 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
     }
 
     @Override
-    public <T1 extends Serializable> UIWidget<T1, T> add(UIComponent<T1, T> component) {
+    public UIWidget<T> add(UIComponent<T> component) {
         return add(Integer.toString(unnamed.addAndGet(1)), component);
     }
 

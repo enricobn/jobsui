@@ -7,17 +7,17 @@ import java.io.Serializable;
 /**
  * Created by enrico on 5/2/16.
  */
-public interface UIComponent<T extends Serializable,C> extends ObservableProducer<T> {
+public interface UIComponent<C> extends ObservableProducer {
 
     C getComponent();
 
-    T getValue();
+    Serializable getValue();
 
     void notifySubscribers();
 
     void setVisible(boolean visible);
 
-    void setValue(T value);
+    void setValue(Serializable value);
 
     void setTitle(String label);
 

@@ -3,14 +3,19 @@ package org.jobsui.core;
 import com.thoughtworks.xstream.XStream;
 import org.jobsui.core.runner.JobRunnerContext;
 import org.jobsui.core.runner.JobValidation;
-import org.jobsui.core.ui.*;
+import org.jobsui.core.ui.UI;
+import org.jobsui.core.ui.UIButton;
+import org.jobsui.core.ui.UIWindow;
+import org.jobsui.core.ui.UnsupportedComponentException;
 import rx.Observable;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -96,7 +101,7 @@ class JobRunner {
 
             valuesChangeObserver.subscribe(map -> {
                 values.clear();
-                for (JobParameterDef<? extends Serializable> jobParameterDef : job.getParameterDefs()) {
+                for (JobParameterDef jobParameterDef : job.getParameterDefs()) {
                     setValue(values, map, jobParameterDef);
                 }
             });
@@ -117,8 +122,8 @@ class JobRunner {
         return (Bookmark) xstream.fromXML(new FileReader(fileName));
     }
 
-    private static <T extends Serializable> void setValue(JobValues values, Map<String, Serializable> map, JobParameterDef<T> jobParameterDef) {
-        values.setValue(jobParameterDef, (T)map.get(jobParameterDef.getKey()));
+    private static void setValue(JobValues values, Map<String, Serializable> map, JobParameterDef jobParameterDef) {
+        values.setValue(jobParameterDef, map.get(jobParameterDef.getKey()));
     }
 
     public boolean isValid() {

@@ -14,13 +14,15 @@ public interface Job<T> {
 
     String getName();
 
-    List<JobParameterDef<? extends Serializable>> getParameterDefs();
+    List<JobParameterDef> getParameterDefs();
+
+    List<JobExpression> getExpressions();
 
     JobFuture<T> run(Map<String,Serializable> values);
 
     default JobFuture<T> run(JobValues values) {
         Map<String, Serializable> groovyValues = new HashMap<>();
-        for (JobParameterDef<? extends Serializable> parameterDef : getParameterDefs()) {
+        for (JobParameterDef parameterDef : getParameterDefs()) {
             groovyValues.put(parameterDef.getKey(), values.getValue(parameterDef));
         }
         return run(groovyValues);
@@ -28,7 +30,7 @@ public interface Job<T> {
 
     List<String> validate(Map<String, Serializable> values);
 
-    JobParameterDef<?> getParameter(String key);
+    JobParameterDef getParameter(String key);
 
     default ClassLoader getClassLoader() {
         return null;

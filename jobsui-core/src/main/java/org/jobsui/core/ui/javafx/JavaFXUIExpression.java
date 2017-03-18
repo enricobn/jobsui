@@ -13,25 +13,22 @@ import java.util.List;
 /**
  * Created by enrico on 10/7/16.
  */
-class JavaFXUIExpression<T extends Serializable> implements UIExpression<T, Node> {
-    private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
-    private final Observable<T> observable;
+class JavaFXUIExpression implements UIExpression<Node> {
+    private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
+    private final Observable<Serializable> observable;
     private final Label component = new Label();
-    private T value = null;
+    private Serializable value = null;
 
     JavaFXUIExpression() {
-        observable = Observable.create(new Observable.OnSubscribe<T>() {
-            @Override
-            public void call(final Subscriber<? super T> subscriber) {
-                subscriber.onStart();
-                subscribers.add(subscriber);
-            }
+        observable = Observable.create(subscriber -> {
+            subscriber.onStart();
+            subscribers.add(subscriber);
         });
         component.setVisible(false);
     }
 
     @Override
-    public Observable<T> getObservable() {
+    public Observable<Serializable> getObservable() {
         return observable;
     }
 
@@ -41,7 +38,7 @@ class JavaFXUIExpression<T extends Serializable> implements UIExpression<T, Node
     }
 
     @Override
-    public T getValue() {
+    public Serializable getValue() {
         return value;
     }
 
@@ -53,7 +50,7 @@ class JavaFXUIExpression<T extends Serializable> implements UIExpression<T, Node
 
     @Override
     public void notifySubscribers() {
-        for (Subscriber<? super T> subscriber : subscribers) {
+        for (Subscriber<? super Serializable> subscriber : subscribers) {
             subscriber.onNext(getValue());
         }
     }
@@ -64,7 +61,7 @@ class JavaFXUIExpression<T extends Serializable> implements UIExpression<T, Node
     }
 
     @Override
-    public void setValue(T value) {
+    public void setValue(Serializable value) {
         this.value = value;
         if (value == null) {
             component.setText(null);

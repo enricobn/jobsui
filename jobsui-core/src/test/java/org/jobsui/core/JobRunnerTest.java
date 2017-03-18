@@ -55,8 +55,8 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_simplejob_is_valid_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
         JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
@@ -73,8 +73,8 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
         JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
@@ -91,8 +91,8 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters() throws Exception {
-        FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
-        FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        FakeUiValue<?> uiValueName = new FakeUiValue<>();
+        FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
         JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
@@ -107,8 +107,8 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_groovy_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
         JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
@@ -126,8 +126,8 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_groovy_loaded_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
         when(ui.create(UIChoice.class)).thenReturn(new FakeUIChoice());
 
@@ -158,9 +158,9 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_complexjob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUIChoice<String,?> uiChoiceVersion = new FakeUIChoice<>();
-        final FakeUIChoice<String,?> uiChoiceDb = new FakeUIChoice<>();
-        final FakeUIChoice<String,?> uiChoiceUser = new FakeUIChoice<>();
+        final FakeUIChoice<?> uiChoiceVersion = new FakeUIChoice<>();
+        final FakeUIChoice<?> uiChoiceDb = new FakeUIChoice<>();
+        final FakeUIChoice<?> uiChoiceUser = new FakeUIChoice<>();
         when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
         JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
@@ -180,9 +180,9 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_the_default_value_of_a_parameter_triggers_validation() throws Exception {
-        final FakeUIChoice<String,?> uiChoiceVersion = new FakeUIChoice<>();
-        final FakeUIChoice<String,?> uiChoiceDb = new FakeUIChoice<>();
-        final FakeUIChoice<String,?> uiChoiceUser = new FakeUIChoice<>();
+        final FakeUIChoice<?> uiChoiceVersion = new FakeUIChoice<>();
+        final FakeUIChoice<?> uiChoiceDb = new FakeUIChoice<>();
+        final FakeUIChoice<?> uiChoiceUser = new FakeUIChoice<>();
         when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
         JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
@@ -200,8 +200,8 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_not_valid_parameter_invokes_set_validation_on_widget() throws Exception {
-        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
         when(ui.create(UIChoice.class)).thenReturn(new FakeUIChoice());
 
@@ -229,8 +229,8 @@ public class JobRunnerTest {
     }
 
     @Test public void verify_that_validation_does_NOT_occur_if_dependencies_are_NOT_valid() throws Exception {
-        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
         final FakeUIChoice uiChoiceInv = new FakeUIChoice();
@@ -255,8 +255,8 @@ public class JobRunnerTest {
     }
 
     @Test public void verify_that_onDepependencyChange_occurs_if_dependencies_are_valid() throws Exception {
-        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
         final FakeUIChoice uiChoiceInv = new FakeUIChoice();
@@ -282,8 +282,8 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_a_message_is_shown_when_job_is_not_valid() throws Exception {
-        final FakeUiValue<String, ?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<String, ?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
         final FakeUIChoice uiChoiceInv = new FakeUIChoice();
@@ -306,8 +306,8 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_groovy_external_concat_job_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<String, ?> uiValueFirst = new FakeUiValue<>();
-        final FakeUiValue<String, ?> uiValueSecond = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueFirst = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueSecond = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
 
         JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
@@ -326,9 +326,9 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_groovy_simple_with_ext_job_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<String, ?> uiValueFirst = new FakeUiValue<>();
-        final FakeUiValue<String, ?> uiValueSecond = new FakeUiValue<>();
-        final FakeUIChoice<String, ?> uiValueInv = new FakeUIChoice<>();
+        final FakeUiValue<?> uiValueFirst = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueSecond = new FakeUiValue<>();
+        final FakeUIChoice<?> uiValueInv = new FakeUIChoice<>();
 
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
         when(ui.create(UIChoice.class)).thenReturn(uiValueInv);
@@ -349,9 +349,9 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_groovy_simple_with_int_call_job_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<String, ?> uiValueFirst = new FakeUiValue<>();
-        final FakeUiValue<String, ?> uiValueSecond = new FakeUiValue<>();
-        final FakeUIChoice<String, ?> uiValueInv = new FakeUIChoice<>();
+        final FakeUiValue<?> uiValueFirst = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueSecond = new FakeUiValue<>();
+        final FakeUIChoice<?> uiValueInv = new FakeUIChoice<>();
 
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
         when(ui.create(UIChoice.class)).thenReturn(uiValueInv);
@@ -371,11 +371,11 @@ public class JobRunnerTest {
         assertThat(result, equalTo("John Doe"));
     }
 
-    private Job<String> getMockedSimpleJob(FakeUiValue<String, ?> uiValueName, FakeUiValue<String, ?> uiValueSurname,
+    private Job<String> getMockedSimpleJob(FakeUiValue<?> uiValueName, FakeUiValue<?> uiValueSurname,
                                            FakeUIChoice uiChoiceInv) throws UnsupportedComponentException {
         final Job<String> job = mock(Job.class);
 
-        final Map<String, JobParameterDef<?>> parameters = new LinkedHashMap<>();
+        final Map<String, JobParameterDef> parameters = new LinkedHashMap<>();
         final JobParameterDef name = mock(JobParameterDef.class, "name");
         parameters.put("name", name);
         final JobParameterDef surname = mock(JobParameterDef.class, "surname");
@@ -383,10 +383,10 @@ public class JobRunnerTest {
         final JobParameterDef inv = mock(JobParameterDef.class, "inv");
         parameters.put("inv", inv);
 
-        List<JobParameterDef<?>> parametersList = new ArrayList<>(parameters.values());
+        List<JobParameterDef> parametersList = new ArrayList<>(parameters.values());
         when(job.getParameterDefs()).thenReturn(parametersList);
 
-        when(name.createComponent(any(UI.class))).thenReturn(uiValueName);
+        when(name.createComponent(any(UI.class))).thenReturn((UIComponent<Object>) uiValueName);
         when(name.getKey()).thenReturn("name");
         when(name.getName()).thenReturn("Name");
         when(name.isVisible()).thenReturn(true);
@@ -394,7 +394,7 @@ public class JobRunnerTest {
         when(name.validate(isNull(Serializable.class))).thenReturn(Collections.singletonList("Error"));
         when(name.validate(isNotNull(Serializable.class))).thenReturn(Collections.emptyList());
 
-        when(surname.createComponent(any(UI.class))).thenReturn(uiValueSurname);
+        when(surname.createComponent(any(UI.class))).thenReturn((UIComponent<Object>) uiValueSurname);
         when(surname.getKey()).thenReturn("surname");
         when(surname.getName()).thenReturn("Surname");
         when(surname.isVisible()).thenReturn(true);
@@ -433,15 +433,15 @@ public class JobRunnerTest {
 
 
     private Job<String> createSimpleJob() {
-        final List<JobParameterDef<?>> parameterDefs = new ArrayList<>();
+        final List<JobParameterDef> parameterDefs = new ArrayList<>();
 
-        final JobParameterDefAbstract<String> name = new JobParameterDefAbstract<String>(
+        final JobParameterDefAbstract name = new JobParameterDefAbstract(
                 "name",
                 "Name",
                 new NotEmptyStringValidator(), false, true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-                final UIValue<String, ?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
+                final UIValue<?> uiValue = (UIValue<?>) ui.create(UIValue.class);
                 uiValue.setConverter(new StringConverterString());
                 uiValue.setDefaultValue("John");
                 return uiValue;
@@ -453,13 +453,13 @@ public class JobRunnerTest {
         };
         parameterDefs.add(name);
 
-        final JobParameterDefAbstract<String> surname = new JobParameterDefAbstract<String>(
+        final JobParameterDefAbstract surname = new JobParameterDefAbstract(
                 "surname",
                 "Surname",
                 new NotEmptyStringValidator(), false, true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-                final UIValue<String, ?> uiValue = (UIValue<String, ?>) ui.create(UIValue.class);
+                final UIValue<?> uiValue = (UIValue<?>) ui.create(UIValue.class);
                 uiValue.setConverter(new StringConverterString());
                 return uiValue;
             }
@@ -484,8 +484,13 @@ public class JobRunnerTest {
             }
 
             @Override
-            public List<JobParameterDef<?>> getParameterDefs() {
+            public List<JobParameterDef> getParameterDefs() {
                 return parameterDefs;
+            }
+
+            @Override
+            public List<JobExpression> getExpressions() {
+                return Collections.emptyList();
             }
 
             @Override
@@ -508,9 +513,9 @@ public class JobRunnerTest {
 
     private Job<String> createGroovySimpleJob() {
         GroovyShell shell = new GroovyShell();
-        final List<JobParameterDef<? extends Serializable>> parameterDefs = new ArrayList<>();
+        final List<JobParameterDef> parameterDefs = new ArrayList<>();
 
-        final JobParameterDefAbstract<String> name = new JobParameterDefGroovySimple<String>(
+        final JobParameterDefAbstract name = new JobParameterDefGroovySimple(
                 shell,
                 "name",
                 "Name",
@@ -528,7 +533,7 @@ public class JobRunnerTest {
         };
         parameterDefs.add(name);
 
-        final JobParameterDefAbstract<String> surname = new JobParameterDefGroovySimple<String>(
+        final JobParameterDefAbstract surname = new JobParameterDefGroovySimple(
                 shell,
                 "surname",
                 "Surname",
@@ -555,8 +560,13 @@ public class JobRunnerTest {
             }
 
             @Override
-            public List<JobParameterDef<?>> getParameterDefs() {
+            public List<JobParameterDef> getParameterDefs() {
                 return parameterDefs;
+            }
+
+            @Override
+            public List<JobExpression> getExpressions() {
+                return Collections.emptyList();
             }
 
             @Override
@@ -582,9 +592,9 @@ public class JobRunnerTest {
     }
 
     private Job<String> createComplexJob() {
-        final List<JobParameterDef<? extends Serializable>> parameterDefs = new ArrayList<>();
+        final List<JobParameterDef> parameterDefs = new ArrayList<>();
 
-        final JobParameterDefAbstract<String> version = new JobParameterDefAbstract<String>(
+        final JobParameterDefAbstract version = new JobParameterDefAbstract(
                 "version",
                 "Version",
                 new NotEmptyStringValidator(),
@@ -601,7 +611,7 @@ public class JobRunnerTest {
         };
         parameterDefs.add(version);
 
-        final JobParameterDefAbstract<String> db = new JobParameterDefAbstract<String>(
+        final JobParameterDefAbstract db = new JobParameterDefAbstract(
                 "db",
                 "DB",
                 new NotEmptyStringValidator(),
@@ -627,7 +637,7 @@ public class JobRunnerTest {
         parameterDefs.add(db);
         db.addDependency(version.getKey());
 
-        final JobParameterDefAbstract<String> user = new JobParameterDefAbstract<String>(
+        final JobParameterDefAbstract user = new JobParameterDefAbstract(
                 "user",
                 "User",
                 new NotEmptyStringValidator(),
@@ -665,8 +675,13 @@ public class JobRunnerTest {
             }
 
             @Override
-            public List<JobParameterDef<? extends Serializable>> getParameterDefs() {
+            public List<JobParameterDef> getParameterDefs() {
                 return parameterDefs;
+            }
+
+            @Override
+            public List<JobExpression> getExpressions() {
+                return Collections.emptyList();
             }
 
             @Override

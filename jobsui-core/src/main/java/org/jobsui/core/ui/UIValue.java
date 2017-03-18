@@ -5,10 +5,10 @@ import java.io.Serializable;
 /**
  * Created by enrico on 4/29/16.
  */
-public interface UIValue<T extends Serializable,C> extends UIComponent<T,C>{
+public interface UIValue<C> extends UIComponent<C>{
 
-    void setConverter(StringConverter<T> converter);
+    void setConverter(StringConverter<Serializable> converter);
 
-    void setDefaultValue(T value);
+    void setDefaultValue(Serializable value);
 
 }

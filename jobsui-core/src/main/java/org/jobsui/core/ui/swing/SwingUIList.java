@@ -14,34 +14,30 @@ import java.util.List;
 /**
  * Created by enrico on 2/24/16.
  */
-public class SwingUIList<T extends Serializable> implements UIList<T,JComponent> {
+public class SwingUIList implements UIList<JComponent> {
     private final JPanel component = new JPanel();
-    private final Observable<ArrayList<T>> observable;
-    private final List<Subscriber<? super ArrayList<T>>> subscribers = new ArrayList<>();
-    private ArrayList<T> items;
+    private final Observable<Serializable> observable;
+    private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
+    private ArrayList<Serializable> items;
     private boolean allowRemove = true;
 
     public SwingUIList() {
         component.setLayout(new GridBagLayout());
-        observable = Observable.create(new Observable.OnSubscribe<ArrayList<T>>() {
-
-            @Override
-            public void call(Subscriber<? super ArrayList<T>> subscriber) {
-                subscriber.onStart();
-                subscribers.add(subscriber);
-            }
+        observable = Observable.create(subscriber -> {
+            subscriber.onStart();
+            subscribers.add(subscriber);
         });
     }
 
     @Override
-    public void addItem(T item) {
+    public void addItem(Serializable item) {
         items.add(item);
         updateItems();
     }
 
     @Override
-    public void setValue(final ArrayList<T> items) {
-        this.items = new ArrayList<>(items);
+    public void setValue(final Serializable items) {
+        this.items = new ArrayList<>((List<Serializable>)items);
         updateItems();
     }
 
@@ -54,7 +50,7 @@ public class SwingUIList<T extends Serializable> implements UIList<T,JComponent>
         SwingUtilities.invokeLater(() -> {
             component.removeAll();
             int i = 0;
-            for (final T item : items) {
+            for (final Serializable item : items) {
                 GridBagConstraints constraints = new GridBagConstraints();
                 constraints.fill = GridBagConstraints.HORIZONTAL;
                 constraints.weightx = 1.0;
@@ -72,13 +68,13 @@ public class SwingUIList<T extends Serializable> implements UIList<T,JComponent>
 
     @Override
     public void notifySubscribers() {
-        for (Subscriber<? super ArrayList<T>> subscriber : subscribers) {
+        for (Subscriber<? super Serializable> subscriber : subscribers) {
             subscriber.onNext(getValue());
         }
     }
 
     @Override
-    public ArrayList<T> getValue() {
+    public Serializable getValue() {
         return new ArrayList<>(items);
     }
 
@@ -93,13 +89,13 @@ public class SwingUIList<T extends Serializable> implements UIList<T,JComponent>
     }
 
     @Override
-    public Observable<ArrayList<T>> getObservable() {
+    public Observable<Serializable> getObservable() {
         return observable;
     }
 
     private class Item extends JPanel {
 
-        Item(final T item) {
+        Item(final Serializable item) {
             setLayout(new GridBagLayout());
 
             GridBagConstraints constraints = new GridBagConstraints();

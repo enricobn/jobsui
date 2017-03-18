@@ -10,7 +10,6 @@ import org.jobsui.core.ui.UIComponent;
 import org.jobsui.core.ui.UIWidget;
 import org.jobsui.core.ui.UnsupportedComponentException;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +18,7 @@ import java.util.Map;
 /**
  * Created by enrico on 5/4/16.
  */
-public class JobParameterDefGroovySimple<T extends Serializable> extends JobParameterDefAbstract<T> implements JobParameterDefGroovy<T> {
+public class JobParameterDefGroovySimple extends JobParameterDefAbstract implements JobParameterDefGroovy {
     private static final String IMPORTS =
             "import org.jobsui.core.*;\n" +
             "import org.jobsui.core.ui.*;\n";
@@ -59,7 +58,7 @@ public class JobParameterDefGroovySimple<T extends Serializable> extends JobPara
     }
 
     @Override
-    public <C> UIComponent<T, C> createComponent(UI<C> ui) throws UnsupportedComponentException {
+    public <C> UIComponent<C> createComponent(UI<C> ui) throws UnsupportedComponentException {
         // I reset the bindings otherwise I get "global" or previous bindings
         createComponent.setBinding(new Binding(shellBinding.getVariables()));
         createComponent.setProperty("ui", ui);
@@ -93,7 +92,7 @@ public class JobParameterDefGroovySimple<T extends Serializable> extends JobPara
     }
 
     @Override
-    public List<String> validate(T value) {
+    public List<String> validate(Serializable value) {
         if (validate == null) {
             final List<String> validation = super.validate(value);
             if (!validation.isEmpty()) {

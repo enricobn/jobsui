@@ -8,16 +8,16 @@ import java.util.Map;
  * Created by enrico on 2/24/17.
  */
 public class JobValuesImpl implements JobValues {
-    private final Map<ParameterDef<? extends Serializable>, Object> values = new HashMap<>();
+    private final Map<ParameterDef, Serializable> values = new HashMap<>();
 
     @Override
-    public <V extends Serializable> void setValue(ParameterDef<V> parameterDef, V value) {
+    public void setValue(ParameterDef parameterDef, Serializable value) {
         values.put(parameterDef, value);
     }
 
     @Override
-    public <V extends Serializable> V getValue(ParameterDef<V> parameterDef) {
-        return (V) values.get(parameterDef);
+    public Serializable getValue(ParameterDef parameterDef) {
+        return values.get(parameterDef);
     }
 
     @Override

@@ -11,9 +11,9 @@ import java.util.Map;
 /**
  * Created by enrico on 2/18/17.
  */
-public interface ParameterDefUI<T extends Serializable> {
+public interface ParameterDefUI {
 
-    <C> UIComponent<T, C> createComponent(UI<C> ui) throws UnsupportedComponentException;
+    <C> UIComponent<C> createComponent(UI<C> ui) throws UnsupportedComponentException;
 
     /**
      *

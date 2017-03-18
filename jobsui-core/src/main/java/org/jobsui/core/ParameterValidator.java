@@ -6,7 +6,8 @@ import java.util.List;
 /**
  * Created by enrico on 4/30/16.
  */
-public interface ParameterValidator<T extends Serializable> {
+public interface ParameterValidator {
 
-    List<String> validate(T value);
+    List<String> validate(Serializable value);
+
 }

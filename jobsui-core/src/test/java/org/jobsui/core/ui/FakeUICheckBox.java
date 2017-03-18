@@ -1,9 +1,11 @@
 package org.jobsui.core.ui;
 
+import java.io.Serializable;
+
 /**
  * Created by enrico on 5/31/16.
  */
-public class FakeUICheckBox<C> extends FakeUIComponent<Boolean,C> implements UICheckBox<C> {
+public class FakeUICheckBox<C> extends FakeUIComponent<C> implements UICheckBox<C> {
     private Boolean value;
 
     @Override
@@ -17,7 +19,7 @@ public class FakeUICheckBox<C> extends FakeUIComponent<Boolean,C> implements UIC
     }
 
     @Override
-    public void setValue(Boolean value) {
-        this.value = value;
+    public void setValue(Serializable value) {
+        this.value = (Boolean) value;
     }
 }

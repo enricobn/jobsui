@@ -6,7 +6,7 @@ import java.util.List;
 /**
  * Created by enrico on 3/8/17.
  */
-public interface JobExpression<T extends Serializable> extends ObservableProducer<T> {
+public interface JobExpression extends ObservableProducer {
 
     String getKey();
 
@@ -14,8 +14,8 @@ public interface JobExpression<T extends Serializable> extends ObservableProduce
 
     boolean isOptional();
 
-    T getDefaultValue();
+    Serializable getDefaultValue();
 
-    List<JobParameterDef<? extends Serializable>> getDependencies();
+    List<JobParameterDef> getDependencies();
 
 }

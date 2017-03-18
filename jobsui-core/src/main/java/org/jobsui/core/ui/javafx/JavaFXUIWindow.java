@@ -12,7 +12,6 @@ import org.jobsui.core.ui.UIContainer;
 import org.jobsui.core.ui.UIWidget;
 import org.jobsui.core.ui.UIWindow;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,14 +43,14 @@ class JavaFXUIWindow implements UIWindow<Node> {
     }
 
     @Override
-    public <T extends Serializable> UIWidget<T, Node> add(String title, final UIComponent<T, Node> component) {
-        NodeUIWidget<T> widget = new NodeUIWidget<>(title, component);
+    public UIWidget<Node> add(String title, final UIComponent<Node> component) {
+        NodeUIWidget widget = new NodeUIWidget(title, component);
         components.add(widget);
         return widget;
     }
 
     @Override
-    public <T extends Serializable> UIWidget<T, Node> add(UIComponent<T, Node> component) {
+    public UIWidget<Node> add(UIComponent<Node> component) {
         return add(null, component);
     }
 
@@ -121,13 +120,13 @@ class JavaFXUIWindow implements UIWindow<Node> {
 //        }
     }
 
-    private static class NodeUIWidget<T extends Serializable> implements UIWidget<T, Node> {
+    private static class NodeUIWidget implements UIWidget<Node> {
         private final String title;
-        private final UIComponent<T, Node> component;
+        private final UIComponent<Node> component;
         private final VBox nodeComponent;
         private final Label messagesLabel;
 
-        NodeUIWidget(String title, UIComponent<T, Node> component) {
+        NodeUIWidget(String title, UIComponent<Node> component) {
             this.title = title;
             this.component = component;
             nodeComponent = new VBox(2);
@@ -144,7 +143,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
         }
 
         @Override
-        public UIComponent<T, Node> getComponent() {
+        public UIComponent<Node> getComponent() {
             return component;
         }
 

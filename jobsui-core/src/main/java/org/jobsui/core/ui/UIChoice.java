@@ -6,10 +6,10 @@ import java.util.List;
 /**
  * Created by enrico on 2/14/16.
  */
-public interface UIChoice<T extends Serializable,C> extends UIComponent<T,C> {
+public interface UIChoice<C> extends UIComponent<C> {
 
     void setEnabled(boolean enable);
 
-    void setItems(List<T> items);
+    void setItems(List<Serializable> items);
 
 }

@@ -43,13 +43,13 @@ public class JavaFXUI implements UI<Node> {
     @SuppressWarnings("unchecked")
     public <COMP extends UIComponent> COMP create(Class<COMP> componentType) throws UnsupportedComponentException {
         if (componentType == UIChoice.class) {
-            return (COMP) new JavaFXUIChoice<>();
+            return (COMP) new JavaFXUIChoice();
         } else if (componentType == UICheckBox.class) {
             return (COMP) new JavaFXUICheckBox();
         } else if (componentType == UIButton.class) {
             return (COMP) new JavaFXUIButton();
         } else if (componentType == UIExpression.class) {
-            return (COMP) new JavaFXUIExpression<>();
+            return (COMP) new JavaFXUIExpression();
         }
         throw new UnsupportedComponentException("JavaFX: cannot find component for " + componentType.getName());
     }

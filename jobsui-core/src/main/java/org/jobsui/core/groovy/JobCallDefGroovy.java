@@ -14,7 +14,7 @@ import java.util.Map;
 /**
  * Created by enrico on 5/4/16.
  */
-public class JobCallDefGroovy<T extends Serializable> extends JobParameterDefAbstract<T> implements JobParameterDefGroovy<T> {
+public class JobCallDefGroovy<T extends Serializable> extends JobParameterDefAbstract implements JobParameterDefGroovy {
     private final String projectRef;
     private final String jobRef;
     private final Map<String, String> mapArguments;
@@ -28,9 +28,9 @@ public class JobCallDefGroovy<T extends Serializable> extends JobParameterDefAbs
     }
 
     @Override
-    public <C> UIComponent<T, C> createComponent(UI<C> ui) throws UnsupportedComponentException {
+    public <C> UIComponent<C> createComponent(UI<C> ui) throws UnsupportedComponentException {
         @SuppressWarnings("unchecked")
-        final UIChoice<T, C> component = ui.create(UIChoice.class);
+        final UIChoice<C> component = ui.create(UIChoice.class);
         if (getDependencies().isEmpty()) {
             evaluate(component, Collections.emptyMap());
         }

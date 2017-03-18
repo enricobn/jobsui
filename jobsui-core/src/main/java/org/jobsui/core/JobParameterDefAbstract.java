@@ -8,16 +8,16 @@ import java.util.List;
 /**
  * Created by enrico on 4/30/16.
  */
-public abstract class JobParameterDefAbstract<T extends Serializable> implements JobParameterDef<T> {
+public abstract class JobParameterDefAbstract implements JobParameterDef {
     private final String key;
     private final String name;
 //    private final StringConverter<T> converter;
-    private final ParameterValidator<T> validator;
+    private final ParameterValidator validator;
     private final List<String> dependencies = new ArrayList<>();
     private final boolean optional;
     private final boolean visible;
 
-    public JobParameterDefAbstract(String key, String name, ParameterValidator<T> validator, boolean optional, boolean visible) {
+    public JobParameterDefAbstract(String key, String name, ParameterValidator validator, boolean optional, boolean visible) {
         this.key = key;
         this.name = name;
 //        this.converter = converter;
@@ -42,7 +42,7 @@ public abstract class JobParameterDefAbstract<T extends Serializable> implements
     }
 
     @Override
-    public T getDefaultValue() {
+    public Serializable getDefaultValue() {
         return null;
     }
 
@@ -52,7 +52,7 @@ public abstract class JobParameterDefAbstract<T extends Serializable> implements
     }
 
     @Override
-    public List<String> validate(T value) {
+    public List<String> validate(Serializable value) {
         if (!isOptional()) {
             final List<String> validate = new NotNullValidator().validate(value);
             if (!validate.isEmpty()) {
@@ -84,7 +84,7 @@ public abstract class JobParameterDefAbstract<T extends Serializable> implements
         if (this == o) return true;
         if (o == null) return false;
 
-        JobParameterDefAbstract<?> that = (JobParameterDefAbstract<?>) o;
+        JobParameterDefAbstract that = (JobParameterDefAbstract) o;
 
         return key.equals(that.key);
     }

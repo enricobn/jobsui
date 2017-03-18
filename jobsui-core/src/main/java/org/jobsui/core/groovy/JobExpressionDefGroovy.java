@@ -7,16 +7,14 @@ import org.codehaus.groovy.control.CompilationFailedException;
 import org.jobsui.core.JobParameterDefAbstract;
 import org.jobsui.core.ui.*;
 
-import java.io.File;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
 
 /**
  * Created by enrico on 5/4/16.
  */
-public class JobExpressionDefGroovy<T extends Serializable> extends JobParameterDefAbstract<T> implements JobParameterDefGroovy<T> {
+public class JobExpressionDefGroovy extends JobParameterDefAbstract implements JobParameterDefGroovy {
     private static final String IMPORTS =
             "import org.jobsui.core.*;\n" +
             "import org.jobsui.core.ui.*;\n";
@@ -39,7 +37,7 @@ public class JobExpressionDefGroovy<T extends Serializable> extends JobParameter
     }
 
     @Override
-    public <C> UIComponent<T, C> createComponent(UI<C> ui) throws UnsupportedComponentException {
+    public <C> UIComponent<C> createComponent(UI<C> ui) throws UnsupportedComponentException {
         final UIExpression component = ui.create(UIExpression.class);
         if (getDependencies().isEmpty()) {
             evaluate(component, Collections.emptyMap());

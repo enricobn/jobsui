@@ -5,6 +5,7 @@ import rx.Observable;
 import rx.Subscriber;
 
 import javax.swing.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,22 +14,19 @@ import java.util.List;
  */
 public class SwingUICheckBox implements UICheckBox<JComponent> {
     private final JCheckBox component = new JCheckBox();
-    private final Observable<Boolean> observable;
-    private final List<Subscriber<? super Boolean>> subscribers = new ArrayList<>();
+    private final Observable<Serializable> observable;
+    private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
 
     public SwingUICheckBox() {
-        observable = Observable.create(new Observable.OnSubscribe<Boolean>() {
-            @Override
-            public void call(final Subscriber<? super Boolean> subscriber) {
-                subscriber.onStart();
-                component.addActionListener(e -> subscriber.onNext(getValue()));
-                subscribers.add(subscriber);
-            }
+        observable = Observable.create(subscriber -> {
+            subscriber.onStart();
+            component.addActionListener(e -> subscriber.onNext(getValue()));
+            subscribers.add(subscriber);
         });
     }
 
     @Override
-    public Observable<Boolean> getObservable() {
+    public Observable<Serializable> getObservable() {
         return observable;
     }
 
@@ -55,8 +53,8 @@ public class SwingUICheckBox implements UICheckBox<JComponent> {
     }
 
     @Override
-    public void setValue(Boolean value) {
-        component.setSelected(value);
+    public void setValue(Serializable value) {
+        component.setSelected((Boolean)value);
     }
 
     @Override

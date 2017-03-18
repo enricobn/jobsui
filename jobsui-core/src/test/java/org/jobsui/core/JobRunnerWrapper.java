@@ -3,7 +3,6 @@ package org.jobsui.core;
 import org.jobsui.core.ui.FakeUIButton;
 import org.jobsui.core.ui.FakeUIWindow;
 import org.jobsui.core.ui.UI;
-import org.jobsui.core.ui.UIButton;
 
 import java.io.Serializable;
 import java.util.concurrent.ExecutorService;

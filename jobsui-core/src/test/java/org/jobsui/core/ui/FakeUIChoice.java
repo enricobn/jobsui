@@ -11,9 +11,9 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by enrico on 5/5/16.
  */
-public class FakeUIChoice<T extends Serializable, C> extends FakeUIComponent<T, C> implements UIChoice<T, C> {
-    private List<T> items;
-    private T selectedItem;
+public class FakeUIChoice<C> extends FakeUIComponent<C> implements UIChoice<C> {
+    private List<Serializable> items;
+    private Serializable selectedItem;
 
     @Override
     public C getComponent() {
@@ -26,12 +26,12 @@ public class FakeUIChoice<T extends Serializable, C> extends FakeUIComponent<T, 
     }
 
     @Override
-    public T getValue() {
+    public Serializable getValue() {
         return selectedItem;
     }
 
     @Override
-    public void setItems(List<T> items) {
+    public void setItems(List<Serializable> items) {
         this.items = items;
         if (items.size() == 0) {
             setValue(null);
@@ -41,9 +41,9 @@ public class FakeUIChoice<T extends Serializable, C> extends FakeUIComponent<T, 
     }
 
     @Override
-    public void setValue(T item) {
+    public void setValue(Serializable item) {
         boolean found = false;
-        for (T t : items) {
+        for (Serializable t : items) {
             if (Objects.equals(t, item)) {
                 found = true;
                 break;
@@ -53,13 +53,13 @@ public class FakeUIChoice<T extends Serializable, C> extends FakeUIComponent<T, 
         assertTrue(Objects.toString(item), found);
 
         this.selectedItem = item;
-        for (Action1<T> action1 : actions) {
+        for (Action1<Serializable> action1 : actions) {
             action1.call(item);
         }
     }
 
     public void setSelectedItemByToString(String s) {
-        for (T item : items) {
+        for (Serializable item : items) {
             if (Objects.equals(s, item == null ? null : item.toString())) {
                 setValue(item);
                 return;
@@ -68,7 +68,7 @@ public class FakeUIChoice<T extends Serializable, C> extends FakeUIComponent<T, 
         throw new IllegalArgumentException("Cannot find item do \"" + s + "\".");
     }
 
-    public List<T> getItems() {
+    public List<Serializable> getItems() {
         return items;
     }
 }

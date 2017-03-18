@@ -7,8 +7,8 @@ import java.io.Serializable;
 /**
  * Created by enrico on 3/8/17.
  */
-public interface ObservableProducer<T extends Serializable> {
+public interface ObservableProducer {
 
-    Observable<T> getObservable();
+    Observable<Serializable> getObservable();
 
 }

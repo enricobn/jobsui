@@ -15,43 +15,40 @@ import java.util.List;
 /**
  * Created by enrico on 5/1/16.
  */
-public class SwingUIValue<T extends Serializable> implements UIValue<T,JComponent> {
+public class SwingUIValue implements UIValue<JComponent> {
     private final JTextField component = new JTextField();
-    private final Observable<T> observable;
-    private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
-    private StringConverter<T> converter;
-    private T defaultValue;
+    private final Observable<Serializable> observable;
+    private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
+    private StringConverter<Serializable> converter;
+    private Serializable defaultValue;
 
     public SwingUIValue() {
-        observable = Observable.create(new Observable.OnSubscribe<T>() {
-            @Override
-            public void call(final Subscriber<? super T> subscriber) {
-                subscriber.onStart();
-                component.addFocusListener(new FocusListener() {
-                    @Override
-                    public void focusGained(FocusEvent e) {
+        observable = Observable.create(subscriber -> {
+            subscriber.onStart();
+            component.addFocusListener(new FocusListener() {
+                @Override
+                public void focusGained(FocusEvent e) {
 
-                    }
+                }
 
-                    @Override
-                    public void focusLost(FocusEvent e) {
-                        T value = converter.fromString(component.getText());
-                        subscriber.onNext(value);
-                    }
-                });
+                @Override
+                public void focusLost(FocusEvent e) {
+                    Serializable value = converter.fromString(component.getText());
+                    subscriber.onNext(value);
+                }
+            });
 //                subscriber.onNext(defaultValue);
-                subscribers.add(subscriber);
-            }
+            subscribers.add(subscriber);
         });
     }
 
     @Override
-    public Observable<T> getObservable() {
+    public Observable<Serializable> getObservable() {
         return observable;
     }
 
     @Override
-    public T getValue() {
+    public Serializable getValue() {
         return converter.fromString(component.getText());
     }
 
@@ -59,18 +56,18 @@ public class SwingUIValue<T extends Serializable> implements UIValue<T,JComponen
         return component;
     }
 
-    public void setDefaultValue(T value) {
+    public void setDefaultValue(Serializable value) {
         this.defaultValue = value;
         setValue(value);
     }
 
-    public void setConverter(StringConverter<T> converter) {
+    public void setConverter(StringConverter<Serializable> converter) {
         this.converter = converter;
     }
 
     @Override
     public void notifySubscribers() {
-        for (Subscriber<? super T> subscriber : subscribers) {
+        for (Subscriber<? super Serializable> subscriber : subscribers) {
             subscriber.onNext(getValue());
         }
     }
@@ -81,7 +78,7 @@ public class SwingUIValue<T extends Serializable> implements UIValue<T,JComponen
     }
 
     @Override
-    public void setValue(T value) {
+    public void setValue(Serializable value) {
         component.setText(converter.toString(value));
     }
 

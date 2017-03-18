@@ -3,7 +3,6 @@ package org.jobsui.core.runner;
 import org.jobsui.core.JobParameterDef;
 import org.jobsui.core.ui.UIWidget;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,17 +10,17 @@ import java.util.List;
  * Created by enrico on 3/11/17.
  */
 class WidgetsMap<C> {
-    private final List<ParameterAndWidget<Serializable, C>> widgets = new ArrayList<>();
+    private final List<ParameterAndWidget<C>> widgets = new ArrayList<>();
 
     WidgetsMap() {
     }
 
-    void add(ParameterAndWidget<Serializable, C> parameterAndWidget) {
+    void add(ParameterAndWidget<C> parameterAndWidget) {
         widgets.add(parameterAndWidget);
     }
 
-    UIWidget<?, C> get(JobParameterDef<?> jobParameterDef) {
-        for (ParameterAndWidget<?, C> widget : widgets) {
+    UIWidget<C> get(JobParameterDef jobParameterDef) {
+        for (ParameterAndWidget<C> widget : widgets) {
             if (jobParameterDef.equals(widget.getJobParameterDef())) {
                 return widget.getWidget();
             }
@@ -29,7 +28,7 @@ class WidgetsMap<C> {
         return null;
     }
 
-    List<ParameterAndWidget<Serializable, C>> getWidgets() {
+    List<ParameterAndWidget<C>> getWidgets() {
         return widgets;
     }
 }

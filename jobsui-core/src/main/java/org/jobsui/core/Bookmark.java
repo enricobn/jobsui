@@ -13,7 +13,7 @@ public class Bookmark {
 
     public Bookmark(Job<?> job, String name, JobValues values) {
         this.name = name;
-        for (JobParameterDef<? extends Serializable> parameterDef : job.getParameterDefs()) {
+        for (JobParameterDef parameterDef : job.getParameterDefs()) {
             if (!parameterDef.isCalculated()) {
                 this.values.put(parameterDef.getKey(), values.getValue(parameterDef));
             }

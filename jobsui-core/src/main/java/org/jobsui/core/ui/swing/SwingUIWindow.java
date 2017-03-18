@@ -7,7 +7,6 @@ import org.jobsui.core.ui.UIWindow;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.Serializable;
 
 /**
  * Created by enrico on 2/14/16.
@@ -131,12 +130,12 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     }
 
     @Override
-    public <T extends Serializable> UIWidget<T,JComponent> add(String title, UIComponent<T, JComponent> component) {
+    public UIWidget<JComponent> add(String title, UIComponent<JComponent> component) {
         return container.add(title, component);
     }
 
     @Override
-    public <T extends Serializable> UIWidget<T,JComponent> add(UIComponent<T, JComponent> component) {
+    public UIWidget<JComponent> add(UIComponent<JComponent> component) {
         return container.add(component);
     }
 

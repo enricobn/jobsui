@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by enrico on 4/30/16.
  */
-public class NotNullValidator implements ParameterValidator<Serializable> {
+public class NotNullValidator implements ParameterValidator {
     @Override
     public List<String> validate(Serializable value) {
         if (value == null) {

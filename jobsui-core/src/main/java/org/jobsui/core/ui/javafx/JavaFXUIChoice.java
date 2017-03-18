@@ -19,28 +19,25 @@ import java.util.Objects;
 /**
  * Created by enrico on 10/7/16.
  */
-class JavaFXUIChoice<T extends Serializable> implements UIChoice<T, Node> {
+class JavaFXUIChoice implements UIChoice<Node> {
     private final FlowPane component = new FlowPane();
-    private final ComboBox<T> combo = new ComboBox<>();
+    private final ComboBox<Serializable> combo = new ComboBox<>();
     private final Button button = new Button("...");
-    private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
-    private final Observable<T> observable;
+    private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
+    private final Observable<Serializable> observable;
     private String title;
     private boolean disableListener = false;
 
     JavaFXUIChoice() {
-        observable = Observable.create(new Observable.OnSubscribe<T>() {
-            @Override
-            public void call(final Subscriber<? super T> subscriber) {
-                subscriber.onStart();
-                subscribers.add(subscriber);
-            }
+        observable = Observable.create(subscriber -> {
+            subscriber.onStart();
+            subscribers.add(subscriber);
         });
         initialize();
     }
 
     @Override
-    public Observable<T> getObservable() {
+    public Observable<Serializable> getObservable() {
         return observable;
     }
 
@@ -50,13 +47,13 @@ class JavaFXUIChoice<T extends Serializable> implements UIChoice<T, Node> {
     }
 
     @Override
-    public T getValue() {
+    public Serializable getValue() {
         return combo.getSelectionModel().getSelectedItem();
     }
 
     @Override
-    public void setItems(final List<T> items) {
-        final T selectedItem = combo.getSelectionModel().getSelectedItem();
+    public void setItems(final List<Serializable> items) {
+        final Serializable selectedItem = combo.getSelectionModel().getSelectedItem();
 
         disableListener = true;
         combo.getSelectionModel().clearSelection();
@@ -68,7 +65,7 @@ class JavaFXUIChoice<T extends Serializable> implements UIChoice<T, Node> {
         }
 
         boolean found = false;
-        for (T v : items) {
+        for (Serializable v : items) {
             combo.getItems().add(v);
             if (Objects.equals(selectedItem, v)) {
                 found = true;
@@ -107,7 +104,7 @@ class JavaFXUIChoice<T extends Serializable> implements UIChoice<T, Node> {
         component.setHgap(5);
 
         combo.setOnAction(new EventHandler<ActionEvent>() {
-            private T selectedItem = null;
+            private Serializable selectedItem = null;
 
             @Override
             public void handle(ActionEvent event) {
@@ -121,7 +118,7 @@ class JavaFXUIChoice<T extends Serializable> implements UIChoice<T, Node> {
         component.getChildren().add(combo);
 
         button.setOnAction(event -> {
-            final SwingFilteredList<T> filteredList = new SwingFilteredList<>(title, combo.getItems(),
+            final SwingFilteredList<Serializable> filteredList = new SwingFilteredList<>(title, combo.getItems(),
                     combo.getSelectionModel().getSelectedItem());
             filteredList.show();
             if (filteredList.isOk()) {
@@ -134,7 +131,7 @@ class JavaFXUIChoice<T extends Serializable> implements UIChoice<T, Node> {
 
     @Override
     public void notifySubscribers() {
-        for (Subscriber<? super T> subscriber : subscribers) {
+        for (Subscriber<? super Serializable> subscriber : subscribers) {
             subscriber.onNext(getValue());
         }
     }
@@ -145,7 +142,7 @@ class JavaFXUIChoice<T extends Serializable> implements UIChoice<T, Node> {
     }
 
     @Override
-    public void setValue(T value) {
+    public void setValue(Serializable value) {
         if (value != null) {
 //            System.out.println("SwingUIChoice.setValue " + System.identityHashCode(value.getClass()));
 //            boolean found = false;

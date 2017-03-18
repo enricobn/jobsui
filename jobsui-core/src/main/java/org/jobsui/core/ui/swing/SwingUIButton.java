@@ -5,13 +5,14 @@ import org.jobsui.core.ui.UIButton;
 import rx.Observable;
 
 import javax.swing.*;
+import java.io.Serializable;
 
 /**
  * Created by enrico on 2/24/16.
  */
 public class SwingUIButton implements UIButton<JComponent> {
     private final JButton component = new JButton();
-    private final Observable<SerializableVoid> observable;
+    private final Observable<Serializable> observable;
 
     public SwingUIButton() {
         observable = Observable.create(subscriber -> {
@@ -21,7 +22,7 @@ public class SwingUIButton implements UIButton<JComponent> {
     }
 
     @Override
-    public Observable<SerializableVoid> getObservable() {
+    public Observable<Serializable> getObservable() {
         return observable;
     }
 
@@ -53,7 +54,7 @@ public class SwingUIButton implements UIButton<JComponent> {
     }
 
     @Override
-    public void setValue(SerializableVoid value) {
+    public void setValue(Serializable value) {
     }
 
     @Override

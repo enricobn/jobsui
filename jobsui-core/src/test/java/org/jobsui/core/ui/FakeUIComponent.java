@@ -11,36 +11,28 @@ import java.util.List;
 /**
  * Created by enrico on 5/5/16.
  */
-public abstract class FakeUIComponent<T extends Serializable, C> implements UIComponent<T, C> {
-    private final Observable<T> observable;
-    protected final List<Action1<T>> actions = new ArrayList<>();
-    private final List<Subscriber<? super T>> subscribers = new ArrayList<>();
+public abstract class FakeUIComponent<C> implements UIComponent<C> {
+    private final Observable<Serializable> observable;
+    protected final List<Action1<Serializable>> actions = new ArrayList<>();
+    private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
     private boolean visible = true;
     private boolean enabled = true;
 
     public FakeUIComponent() {
-        observable = Observable.create(new Observable.OnSubscribe<T>() {
-            @Override
-            public void call(final Subscriber<? super T> subscriber) {
-                actions.add(new Action1<T>() {
-                    @Override
-                    public void call(T o) {
-                        subscriber.onNext(o);
-                    }
-                });
-                subscribers.add(subscriber);
-            }
+        observable = Observable.create(subscriber -> {
+            actions.add(subscriber::onNext);
+            subscribers.add(subscriber);
         });
     }
 
     @Override
-    public Observable<T> getObservable() {
+    public Observable<Serializable> getObservable() {
         return observable;
     }
 
     @Override
     public void notifySubscribers() {
-        for (Subscriber<? super T> subscriber : subscribers) {
+        for (Subscriber<? super Serializable> subscriber : subscribers) {
             subscriber.onNext(getValue());
         }
     }
