@@ -2,7 +2,6 @@ package org.jobsui.core.ui.javafx;
 
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import org.jobsui.core.SerializableVoid;
 import org.jobsui.core.ui.UIButton;
 import rx.Observable;
 import rx.Subscriber;
@@ -17,7 +16,7 @@ import java.util.List;
 public class JavaFXUIButton implements UIButton<Node> {
     private final Button component = new Button();
     private final Observable<Serializable> observable;
-    private final List<Subscriber<? super SerializableVoid>> subscribers = new ArrayList<>();
+    private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
 
     public JavaFXUIButton() {
         observable = Observable.create(subscriber -> {
@@ -38,13 +37,13 @@ public class JavaFXUIButton implements UIButton<Node> {
     }
 
     @Override
-    public SerializableVoid getValue() {
+    public Serializable getValue() {
         return null;
     }
 
     @Override
     public void notifySubscribers() {
-        for (Subscriber<? super SerializableVoid> subscriber : subscribers) {
+        for (Subscriber<? super Serializable> subscriber : subscribers) {
             subscriber.onNext(getValue());
         }
     }

@@ -1,6 +1,5 @@
 package org.jobsui.core.ui;
 
-import org.jobsui.core.SerializableVoid;
 import rx.functions.Action1;
 
 import java.io.Serializable;
@@ -27,7 +26,7 @@ public class FakeUIButton<C> extends FakeUIComponent<C> implements UIButton<C> {
     }
 
     @Override
-    public SerializableVoid getValue() {
+    public Serializable getValue() {
         return null;
     }
 

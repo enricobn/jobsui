@@ -1,6 +1,5 @@
 package org.jobsui.core.ui.swing;
 
-import org.jobsui.core.SerializableVoid;
 import org.jobsui.core.ui.UIButton;
 import rx.Observable;
 
@@ -40,7 +39,7 @@ public class SwingUIButton implements UIButton<JComponent> {
     }
 
     @Override
-    public SerializableVoid getValue() {
+    public Serializable getValue() {
         return null;
     }
 
