@@ -3,6 +3,7 @@ package org.jobsui.core;
 import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.Job;
+import org.jobsui.core.runner.JobRunner;
 import org.jobsui.core.ui.UI;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.ui.swing.SwingUI;

@@ -1,4 +1,4 @@
-package org.jobsui.core;
+package org.jobsui.core.runner;
 
 import org.jobsui.core.job.JobDependency;
 

@@ -1,7 +1,7 @@
 package org.jobsui.core.job;
 
-import org.jobsui.core.JobFuture;
-import org.jobsui.core.JobValues;
+import org.jobsui.core.runner.JobFuture;
+import org.jobsui.core.runner.JobValues;
 
 import java.io.Serializable;
 import java.util.*;

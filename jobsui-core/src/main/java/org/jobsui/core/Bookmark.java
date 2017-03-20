@@ -2,6 +2,7 @@ package org.jobsui.core;
 
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobParameterDef;
+import org.jobsui.core.runner.JobValues;
 
 import java.io.Serializable;
 import java.util.HashMap;

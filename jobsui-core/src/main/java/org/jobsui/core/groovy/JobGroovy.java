@@ -3,10 +3,11 @@ package org.jobsui.core.groovy;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
-import org.jobsui.core.*;
 import org.jobsui.core.job.JobAbstract;
 import org.jobsui.core.job.JobExpression;
 import org.jobsui.core.job.JobParameterDef;
+import org.jobsui.core.runner.JobFuture;
+import org.jobsui.core.runner.JobFutureImpl;
 
 import java.io.Serializable;
 import java.util.ArrayList;

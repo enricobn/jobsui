@@ -1,10 +1,9 @@
-package org.jobsui.core;
+package org.jobsui.core.runner;
 
 import com.thoughtworks.xstream.XStream;
+import org.jobsui.core.Bookmark;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobDependency;
-import org.jobsui.core.runner.JobRunnerContext;
-import org.jobsui.core.runner.JobValidation;
 import org.jobsui.core.ui.UI;
 import org.jobsui.core.ui.UIButton;
 import org.jobsui.core.ui.UIWindow;
@@ -23,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Created by enrico on 4/29/16.
  */
-class JobRunner {
+public class JobRunner {
     private boolean valid = false;
 
     public <T extends Serializable, C> T run(final UI<C> ui, final Job<T> job) throws Exception {
