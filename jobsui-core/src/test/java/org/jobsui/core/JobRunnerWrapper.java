@@ -14,16 +14,14 @@ import java.util.concurrent.Future;
 /**
  * Created by enrico on 5/10/16.
  */
-abstract class JobRunnerWrapper<T extends Serializable> {
+abstract class JobRunnerWrapper<T extends Serializable, C> {
     private final ExecutorService pool = Executors.newFixedThreadPool(1);
     private final FakeUIWindow window;
-    private final JobRunner runner;
-    private final UI<T> ui;
+    private final JobRunner<C> runner;
     private final FakeUIButton<?> runButton;
 
-    JobRunnerWrapper(JobRunner runner, UI<T> ui, FakeUIWindow window, FakeUIButton<?> runButton) {
+    JobRunnerWrapper(JobRunner<C> runner, FakeUIWindow window, FakeUIButton<?> runButton) {
         this.runner = runner;
-        this.ui = ui;
         this.window = window;
         this.runButton = runButton;
     }
@@ -43,10 +41,10 @@ abstract class JobRunnerWrapper<T extends Serializable> {
         return future.get();
     }
 
-    private <T1 extends Serializable> Future<T1> runJob(final Job<T1> job) {
+    private Future<T> runJob(final Job<T> job) {
         return pool.submit(() -> {
             try {
-                return runner.run(ui, job);
+                return runner.run(job);
 //                return job.run(values);
 //                return runner.run(ui, job);
             } catch (Exception e) {

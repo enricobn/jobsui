@@ -22,10 +22,15 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * Created by enrico on 4/29/16.
  */
-public class JobRunner {
+public class JobRunner<C> {
+    private final UI<C> ui;
     private boolean valid = false;
 
-    public <T extends Serializable, C> T run(final UI<C> ui, final Job<T> job) throws Exception {
+    public JobRunner(UI<C> ui) {
+        this.ui = ui;
+    }
+
+    public <T extends Serializable> T run(final Job<T> job) throws Exception {
         valid = false;
 
         final UIWindow<C> window = ui.createWindow(job.getName());

@@ -45,8 +45,8 @@ public class JobRunnerTest {
 
     @Before
     public void init() throws UnsupportedComponentException {
-        runner = new JobRunner();
         ui = mock(UI.class);
+        runner = new JobRunner(ui);
         window = new FakeUIWindow();
         when(ui.createWindow(anyString())).thenReturn(window);
         runButton = spy(new FakeUIButton<>());
@@ -72,7 +72,7 @@ public class JobRunnerTest {
         final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 uiValueName.setValue("John");
@@ -90,7 +90,7 @@ public class JobRunnerTest {
         final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 uiValueName.setValue("John");
@@ -108,7 +108,7 @@ public class JobRunnerTest {
         FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
             }
@@ -124,7 +124,7 @@ public class JobRunnerTest {
         final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 uiValueName.setValue("John");
@@ -144,7 +144,7 @@ public class JobRunnerTest {
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
         when(ui.create(UIChoice.class)).thenReturn(new FakeUIChoice());
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 uiValueName.setValue("John");
@@ -176,7 +176,7 @@ public class JobRunnerTest {
         final FakeUIChoice<?> uiChoiceUser = new FakeUIChoice<>();
         when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 uiChoiceVersion.setItems(Arrays.asList("1.0", "2.0"));
@@ -198,7 +198,7 @@ public class JobRunnerTest {
         final FakeUIChoice<?> uiChoiceUser = new FakeUIChoice<>();
         when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 uiChoiceVersion.setItems(Collections.singletonList("1.0"));
@@ -218,7 +218,7 @@ public class JobRunnerTest {
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
         when(ui.create(UIChoice.class)).thenReturn(new FakeUIChoice());
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 uiValueName.setValue(null);
@@ -251,7 +251,7 @@ public class JobRunnerTest {
 
         final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 // I want to ignore all validations at startup
@@ -277,7 +277,7 @@ public class JobRunnerTest {
 
         final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 // I want to ignore all validations at startup
@@ -305,7 +305,7 @@ public class JobRunnerTest {
         final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
         when(job.validate(anyMapOf(String.class, Serializable.class))).thenReturn(Collections.singletonList("Error"));
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 uiValueName.setValue("John");
@@ -323,7 +323,7 @@ public class JobRunnerTest {
         final FakeUiValue<?> uiValueSecond = new FakeUiValue<>();
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 uiValueFirst.setValue("John");
@@ -346,7 +346,7 @@ public class JobRunnerTest {
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
         when(ui.create(UIChoice.class)).thenReturn(uiValueInv);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 uiValueFirst.setValue("John");
@@ -369,7 +369,7 @@ public class JobRunnerTest {
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
         when(ui.create(UIChoice.class)).thenReturn(uiValueInv);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 uiValueFirst.setValue("John");
@@ -390,7 +390,7 @@ public class JobRunnerTest {
 
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
 
-        JobRunnerWrapper<String> jobRunnerWrapper = new JobRunnerWrapper<String>(runner, ui, window, runButton) {
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 uiValueFirst.setValue("John");

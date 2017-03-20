@@ -1,5 +1,6 @@
 package org.jobsui.core;
 
+import javafx.scene.Node;
 import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.Job;
@@ -9,6 +10,7 @@ import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.ui.swing.SwingUI;
 import org.jobsui.core.xml.ProjectXML;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.Serializable;
 
@@ -42,19 +44,17 @@ public class Main {
             return;
         }
 
-        JobRunner runner = new JobRunner();
+        Serializable result;
 
-        UI ui;
-        if (args.length < 3) {
-            ui = new JavaFXUI();
-        } else if ("swing".equals(args[2].toLowerCase())) {
-            ui = new SwingUI();
+        if (args.length >= 3 && "swing".equals(args[2].toLowerCase())) {
+            UI<JComponent> ui = new SwingUI();
+            JobRunner<JComponent> runner = new JobRunner<>(ui);
+            result = runner.run(job);
         } else {
-            ui = new JavaFXUI();
+            UI<Node> ui = new JavaFXUI();
+            JobRunner<Node> runner = new JobRunner<>(ui);
+            result = runner.run(job);
         }
-
-        Serializable result = runner.run(ui, job);
-
 
 //        final JobFuture<? extends Serializable> future = runner.run(ui, job);
 //
