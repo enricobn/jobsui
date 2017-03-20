@@ -1,6 +1,6 @@
 package org.jobsui.core.groovy;
 
-import org.jobsui.core.Job;
+import org.jobsui.core.job.Job;
 import org.jobsui.core.Project;
 
 import java.io.Serializable;

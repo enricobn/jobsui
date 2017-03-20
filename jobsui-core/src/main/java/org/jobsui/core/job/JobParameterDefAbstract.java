@@ -1,4 +1,7 @@
-package org.jobsui.core;
+package org.jobsui.core.job;
+
+import org.jobsui.core.NotNullValidator;
+import org.jobsui.core.ParameterValidator;
 
 import java.io.Serializable;
 import java.util.ArrayList;

@@ -1,9 +1,9 @@
 package org.jobsui.core.runner;
 
-import org.jobsui.core.Job;
-import org.jobsui.core.JobDependency;
-import org.jobsui.core.JobExpression;
-import org.jobsui.core.JobParameterDef;
+import org.jobsui.core.job.Job;
+import org.jobsui.core.job.JobDependency;
+import org.jobsui.core.job.JobExpression;
+import org.jobsui.core.job.JobParameterDef;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.utils.JobsUIUtils;

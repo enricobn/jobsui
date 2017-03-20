@@ -1,6 +1,6 @@
 package org.jobsui.core.groovy;
 
-import org.jobsui.core.JobParameterDef;
+import org.jobsui.core.job.JobParameterDef;
 
 /**
  * Created by enrico on 10/6/16.

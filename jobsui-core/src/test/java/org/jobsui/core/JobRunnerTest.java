@@ -5,6 +5,7 @@ import org.jobsui.core.groovy.JobExpressionGroovy;
 import org.jobsui.core.groovy.JobParameterDefGroovySimple;
 import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
+import org.jobsui.core.job.*;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.xml.ProjectXML;
 import org.junit.After;
@@ -15,7 +16,6 @@ import org.mockito.MockSettings;
 import org.mockito.Mockito;
 import org.mockito.listeners.InvocationListener;
 import org.mockito.listeners.MethodInvocationReport;
-import org.mockito.stubbing.Answer;
 
 import java.io.File;
 import java.io.Serializable;

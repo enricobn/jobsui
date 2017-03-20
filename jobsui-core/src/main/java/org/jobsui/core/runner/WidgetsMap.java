@@ -1,6 +1,6 @@
 package org.jobsui.core.runner;
 
-import org.jobsui.core.JobParameterDef;
+import org.jobsui.core.job.JobParameterDef;
 import org.jobsui.core.ui.UIWidget;
 
 import java.util.ArrayList;

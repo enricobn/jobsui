@@ -3,7 +3,7 @@ package org.jobsui.core.groovy;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
-import org.jobsui.core.JobDependency;
+import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.Project;
 import org.jobsui.core.xml.*;
 

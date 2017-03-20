@@ -4,7 +4,7 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.codehaus.groovy.control.CompilationFailedException;
-import org.jobsui.core.JobParameterDefAbstract;
+import org.jobsui.core.job.JobParameterDefAbstract;
 import org.jobsui.core.ui.*;
 
 import java.io.Serializable;

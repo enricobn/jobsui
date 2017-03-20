@@ -4,9 +4,7 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.codehaus.groovy.control.CompilationFailedException;
-import org.jobsui.core.JobExpression;
-import org.jobsui.core.ui.UIExpression;
-import org.jobsui.core.ui.UIWidget;
+import org.jobsui.core.job.JobExpression;
 import rx.Observable;
 import rx.Subscriber;
 

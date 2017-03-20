@@ -1,6 +1,8 @@
 package org.jobsui.core;
 
 import com.thoughtworks.xstream.XStream;
+import org.jobsui.core.job.Job;
+import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.runner.JobRunnerContext;
 import org.jobsui.core.runner.JobValidation;
 import org.jobsui.core.ui.UI;

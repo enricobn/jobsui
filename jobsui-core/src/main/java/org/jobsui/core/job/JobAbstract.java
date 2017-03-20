@@ -1,4 +1,4 @@
-package org.jobsui.core;
+package org.jobsui.core.job;
 
 /**
  * Created by enrico on 5/13/16.

@@ -1,4 +1,4 @@
-package org.jobsui.core;
+package org.jobsui.core.job;
 
 import java.util.*;
 import java.util.stream.Collectors;

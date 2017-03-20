@@ -1,6 +1,6 @@
 package org.jobsui.core.xml;
 
-import org.jobsui.core.JobDependency;
+import org.jobsui.core.job.JobDependency;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,5 +1,7 @@
 package org.jobsui.core;
 
+import org.jobsui.core.job.JobDependency;
+
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;

@@ -1,5 +1,6 @@
 package org.jobsui.core;
 
+import org.jobsui.core.job.Job;
 import org.jobsui.core.ui.FakeUIButton;
 import org.jobsui.core.ui.FakeUIWindow;
 import org.jobsui.core.ui.UI;

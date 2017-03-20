@@ -1,11 +1,14 @@
-package org.jobsui.core;
+package org.jobsui.core.job;
+
+import org.jobsui.core.ParameterDefUI;
+import org.jobsui.core.ParameterValidator;
 
 import java.io.Serializable;
 
 /**
- * Created by enrico on 2/18/17.
+ * Created by enrico on 4/29/16.
  */
-public interface ParameterDef extends JobDependency,ParameterValidator {
+public interface JobParameterDef extends JobDependency, ParameterValidator, ParameterDefUI {
 
     String getName();
 
