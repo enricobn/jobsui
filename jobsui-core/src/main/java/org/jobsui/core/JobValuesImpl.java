@@ -8,16 +8,16 @@ import java.util.Map;
  * Created by enrico on 2/24/17.
  */
 public class JobValuesImpl implements JobValues {
-    private final Map<ParameterDef, Serializable> values = new HashMap<>();
+    private final Map<String, Serializable> values = new HashMap<>();
 
     @Override
-    public void setValue(ParameterDef parameterDef, Serializable value) {
-        values.put(parameterDef, value);
+    public void setValue(JobDependency jobDependency, Serializable value) {
+        values.put(jobDependency.getKey(), value);
     }
 
     @Override
-    public Serializable getValue(ParameterDef parameterDef) {
-        return values.get(parameterDef);
+    public Serializable getValue(JobDependency jobDependency) {
+        return values.get(jobDependency.getKey());
     }
 
     @Override
@@ -28,7 +28,7 @@ public class JobValuesImpl implements JobValues {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
-        values.entrySet().forEach(e -> stringBuilder.append(e.getKey().getName())
+        values.entrySet().forEach(e -> stringBuilder.append(e.getKey())
                 .append("=")
                 .append(e.getValue())
                 .append("\n")

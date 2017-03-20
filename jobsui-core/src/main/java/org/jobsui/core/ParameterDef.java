@@ -1,14 +1,11 @@
 package org.jobsui.core;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Created by enrico on 2/18/17.
  */
-public interface ParameterDef extends ParameterValidator {
-
-    String getKey();
+public interface ParameterDef extends JobDependency,ParameterValidator {
 
     String getName();
 
@@ -16,8 +13,7 @@ public interface ParameterDef extends ParameterValidator {
 
     Serializable getDefaultValue();
 
-    List<String> getDependencies();
-
+    //TODO to be removed: I must create a JobCall, now there's a weird implementation for groovy (JobCallDefGroovy)
     default boolean isCalculated() {
         return false;
     }

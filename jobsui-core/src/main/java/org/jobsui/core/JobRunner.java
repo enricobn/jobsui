@@ -24,14 +24,14 @@ import java.util.concurrent.atomic.AtomicReference;
 class JobRunner {
     private boolean valid = false;
 
-    public <T extends Serializable, C> T run(final UI<C> ui, final Job<T> job) throws UnsupportedComponentException {
+    public <T extends Serializable, C> T run(final UI<C> ui, final Job<T> job) throws Exception {
         valid = false;
 
         final UIWindow<C> window = ui.createWindow(job.getName());
 
         final JobValues values = new JobValuesImpl();
 
-        List<UnsupportedComponentException> exceptions = new ArrayList<>();
+        List<Exception> exceptions = new ArrayList<>();
 
         AtomicReference<T> result = new AtomicReference<>(null);
 
@@ -41,7 +41,7 @@ class JobRunner {
 
             try {
                  context = new JobRunnerContext<>(job, ui, window);
-            } catch (UnsupportedComponentException e) {
+            } catch (Exception e) {
                 exceptions.add(e);
                 return;
             }
@@ -64,7 +64,11 @@ class JobRunner {
             runButton.getObservable().subscribe(serializableVoid -> {
                 try {
                     JobFuture<T> resultFuture = job.run(values);
-                    result.set(resultFuture.get());
+                    if (resultFuture.getException() != null) {
+                        ui.showError("Error running job.", resultFuture.getException());
+                    } else {
+                        result.set(resultFuture.get());
+                    }
                 } catch (Exception e) {
                     ui.showError("Error running job.", e);
                 }
@@ -101,8 +105,8 @@ class JobRunner {
 
             valuesChangeObserver.subscribe(map -> {
                 values.clear();
-                for (JobParameterDef jobParameterDef : job.getParameterDefs()) {
-                    setValue(values, map, jobParameterDef);
+                for (JobDependency jobDependency : job.getUnsortedDependencies()) {
+                    setValue(values, map, jobDependency);
                 }
             });
 
@@ -122,8 +126,8 @@ class JobRunner {
         return (Bookmark) xstream.fromXML(new FileReader(fileName));
     }
 
-    private static void setValue(JobValues values, Map<String, Serializable> map, JobParameterDef jobParameterDef) {
-        values.setValue(jobParameterDef, map.get(jobParameterDef.getKey()));
+    private static void setValue(JobValues values, Map<String, Serializable> map, JobDependency jobDependency) {
+        values.setValue(jobDependency, map.get(jobDependency.getKey()));
     }
 
     public boolean isValid() {

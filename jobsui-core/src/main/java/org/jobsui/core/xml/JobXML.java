@@ -7,7 +7,10 @@ import org.w3c.dom.Element;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -31,11 +34,11 @@ public class JobXML implements ValidatingXML {
         this.file = file;
         this.name = name;
 
-        String fileName = file.getName();
-        int pos = fileName.lastIndexOf(".");
-        if (pos > 0) {
-            fileName = fileName.substring(0, pos);
-        }
+//        String fileName = file.getName();
+//        int pos = fileName.lastIndexOf(".");
+//        if (pos > 0) {
+//            fileName = fileName.substring(0, pos);
+//        }
         this.id = id;
         this.version = version;
     }
@@ -163,38 +166,6 @@ public class JobXML implements ValidatingXML {
         }
         parameterXML.setOrder(order);
         order += 1_000;
-    }
-
-    public List<String> getSortedParameters() throws Exception {
-        Map<String, List<String>> toSort = new LinkedHashMap<>();
-
-        parameters.values().stream()
-            .sorted(Comparator.comparing(ParameterXML::getOrder))
-            .forEach(parameterXML -> toSort.put(parameterXML.getKey(), new ArrayList<>(parameterXML.getDependencies())));
-
-        List<String> sorted = new ArrayList<>();
-
-        while (!toSort.isEmpty()) {
-            boolean found = false;
-            for (Map.Entry<String, List<String>> entry : toSort.entrySet()) {
-                if (entry.getValue().isEmpty()) {
-                    sorted.add(entry.getKey());
-                    toSort.remove(entry.getKey());
-                    for (List<String> dependencies : toSort.values()) {
-                        dependencies.remove(entry.getKey());
-                    }
-                    found = true;
-                    break;
-                }
-            }
-            if (!found) {
-                StringBuilder sb = new StringBuilder("Unresolved dependencies:\n");
-                toSort.entrySet()
-                        .forEach(entry -> sb.append(entry.getKey()).append(":").append(entry.getValue()).append('\n'));
-                throw new Exception(sb.toString());
-            }
-        }
-        return sorted;
     }
 
     public ParameterXML getParameter(String key) {

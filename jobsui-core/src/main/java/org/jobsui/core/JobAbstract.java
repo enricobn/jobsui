@@ -15,4 +15,14 @@ public abstract class JobAbstract<T> implements Job<T> {
         return null;
     }
 
+    @Override
+    public JobExpression getExpression(String key) {
+        for (JobExpression jobExpression : getExpressions()) {
+            if (jobExpression.getKey().equals(key)) {
+                return jobExpression;
+            }
+        }
+        return null;
+    }
+
 }

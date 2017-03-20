@@ -1,5 +1,7 @@
 package org.jobsui.core.groovy;
 
+import org.jobsui.core.Job;
+import org.jobsui.core.JobDependency;
 import org.jobsui.core.xml.JobXML;
 import org.jobsui.core.xml.ParameterXML;
 import org.jobsui.core.xml.ProjectXML;
@@ -24,11 +26,13 @@ public class JobParserTest {
 
     @Test
     public void test_parse() throws Exception {
-        ProjectXML project = parser.loadProject(new File("src/test/resources/simplejob"));
-        final JobXML job = project.getJobs().get("simple");
+        ProjectXML projectXML = parser.loadProject(new File("src/test/resources/simplejob"));
+
+        ProjectGroovy projectGroovy = new ProjectGroovyBuilder().build(projectXML);
+        Job<Object> job = projectGroovy.getJob("simple");
 
         assertThat(job, is(notNullValue()));
-        assertThat(job.getSortedParameters().size(), is(3));
+        assertThat(JobDependency.getSortedDependenciesKeys(job.getParameterDefs()).size(), is(3));
         assertThat(job.getParameter("name").getName(), is("Name"));
         assertThat(job.getParameter("surname").getName(), is("Surname"));
         assertThat(job.getParameter("inv").getName(), is("Inv"));

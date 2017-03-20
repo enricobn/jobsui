@@ -51,6 +51,10 @@ public class JobCallDefGroovy<T extends Serializable> extends JobParameterDefAbs
 
         JobFuture future = job.run(mappedValues);
 
+        if (future.getException() != null) {
+            throw new RuntimeException(future.getException());
+        }
+
         Object value = future.get();
 
         try {

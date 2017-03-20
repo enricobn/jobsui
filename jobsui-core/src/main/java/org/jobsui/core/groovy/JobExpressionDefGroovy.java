@@ -14,6 +14,7 @@ import java.util.Map;
 /**
  * Created by enrico on 5/4/16.
  */
+@Deprecated
 public class JobExpressionDefGroovy extends JobParameterDefAbstract implements JobParameterDefGroovy {
     private static final String IMPORTS =
             "import org.jobsui.core.*;\n" +

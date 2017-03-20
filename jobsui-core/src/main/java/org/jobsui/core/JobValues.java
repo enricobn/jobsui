@@ -9,16 +9,16 @@ import java.util.Map;
  */
 public interface JobValues {
 
-    void setValue(ParameterDef parameterDef, Serializable value);
+    void setValue(JobDependency jobDependency, Serializable value);
 
-    Serializable getValue(ParameterDef parameterDef);
+    Serializable getValue(JobDependency jobDependency);
 
     void clear();
 
     default Map<String, Serializable> getMap(Job<?> job) {
         Map<String, Serializable> result = new HashMap<>();
-        for (JobParameterDef parameterDef : job.getParameterDefs()) {
-            result.put(parameterDef.getKey(), getValue(parameterDef));
+        for (JobDependency jobDependency : job.getUnsortedDependencies()) {
+            result.put(jobDependency.getKey(), getValue(jobDependency));
         }
         return result;
     }

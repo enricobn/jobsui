@@ -7,4 +7,6 @@ public interface JobFuture<T> {
 
     T get();
 
+    Exception getException();
+
 }

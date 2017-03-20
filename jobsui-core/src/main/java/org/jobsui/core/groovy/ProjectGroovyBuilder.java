@@ -3,6 +3,7 @@ package org.jobsui.core.groovy;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
+import org.jobsui.core.JobDependency;
 import org.jobsui.core.Project;
 import org.jobsui.core.xml.*;
 
@@ -11,10 +12,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -55,9 +53,16 @@ public class ProjectGroovyBuilder {
     private static <T> JobGroovy<T> build(ProjectXML projectXML, JobXML jobXML) throws Exception {
         GroovyShell groovyShell = createGroovyShell(projectXML);
         groovyShell.setProperty("projectFolder", projectXML.getProjectFolder());
-        Map<String, JobParameterDefGroovy> parameterDefsMap = new HashMap<>();
+        Map<String, JobDependencyGroovy> jobDependencyXMLMap = new LinkedHashMap<>();
 
-        for (SimpleParameterXML simpleParameterXML : jobXML.getSimpleParameterXMLs()) {
+        List<JobParameterDefGroovy> jobParameterDefs = new ArrayList<>();
+        List<JobExpressionGroovy> jobExpressions = new ArrayList<>();
+
+        List<SimpleParameterXML> sortedSimpleParameterXML = jobXML.getSimpleParameterXMLs().stream()
+                .sorted(Comparator.comparing(SimpleParameterXML::getOrder))
+                .collect(Collectors.toList());
+
+        for (SimpleParameterXML simpleParameterXML : sortedSimpleParameterXML) {
             JobParameterDefGroovy parameterDef = new JobParameterDefGroovySimple(
                     groovyShell,
                     simpleParameterXML.getKey(),
@@ -67,16 +72,18 @@ public class ProjectGroovyBuilder {
                     simpleParameterXML.getValidateScript(),
                     simpleParameterXML.isOptional(),
                     simpleParameterXML.isVisible());
-            parameterDefsMap.put(parameterDef.getKey(), parameterDef);
+            jobDependencyXMLMap.put(parameterDef.getKey(), parameterDef);
+            jobParameterDefs.add(parameterDef);
         }
 
         for (ExpressionXML expressionXML : jobXML.getExpressionXMLs()) {
-            JobParameterDefGroovy parameterDef = new JobExpressionDefGroovy(
+            JobExpressionGroovy jobExpressionGroovy = new JobExpressionGroovy(
                     groovyShell,
                     expressionXML.getKey(),
                     expressionXML.getName(),
                     expressionXML.getEvaluateScript());
-            parameterDefsMap.put(parameterDef.getKey(), parameterDef);
+            jobDependencyXMLMap.put(jobExpressionGroovy.getKey(), jobExpressionGroovy);
+            jobExpressions.add(jobExpressionGroovy);
         }
 
         for (CallXML callXML : jobXML.getCallXMLs()) {
@@ -86,25 +93,25 @@ public class ProjectGroovyBuilder {
                     callXML.getProject(),
                     callXML.getJob(),
                     callXML.getMap());
-            parameterDefsMap.put(call.getKey(), call);
+            jobDependencyXMLMap.put(call.getKey(), call);
+            jobParameterDefs.add(call);
         }
 
-        addDependencies(jobXML.getSimpleParameterXMLs(), parameterDefsMap);
-        addDependencies(jobXML.getExpressionXMLs(), parameterDefsMap);
-        addDependencies(jobXML.getCallXMLs(), parameterDefsMap);
+        addDependencies(jobXML.getSimpleParameterXMLs(), jobDependencyXMLMap);
+        addDependencies(jobXML.getExpressionXMLs(), jobDependencyXMLMap);
+        addDependencies(jobXML.getCallXMLs(), jobDependencyXMLMap);
 
-        List<JobParameterDefGroovy> sorted = jobXML.getSortedParameters().stream()
-                .map(parameterDefsMap::get).collect(Collectors.toList());
+        List<JobParameterDefGroovy> sorteJobParameterDefs = JobDependency.sort(jobParameterDefs);
 
-        return new JobGroovy<>(groovyShell, jobXML.getId(), jobXML.getName(), sorted, Collections.emptyList(),
+        return new JobGroovy<>(groovyShell, jobXML.getId(), jobXML.getName(), sorteJobParameterDefs, jobExpressions,
                 jobXML.getRunScript(), jobXML.getValidateScript());
     }
 
-    private static void addDependencies(List<? extends ParameterXML> parameterXMLs, Map<String, JobParameterDefGroovy> parameterDefs) {
-        for (ParameterXML parameterXML : parameterXMLs) {
-            JobParameterDefGroovy jobParameterDefGroovy = parameterDefs.get(parameterXML.getKey());
+    private static void addDependencies(List<? extends JobDependency> parameterXMLs, Map<String, JobDependencyGroovy> jobDependencyXMLMap) {
+        for (JobDependency parameterXML : parameterXMLs) {
+            JobDependencyGroovy jobDependencyXML = jobDependencyXMLMap.get(parameterXML.getKey());
             for (String depKey : parameterXML.getDependencies()) {
-                jobParameterDefGroovy.addDependency(depKey);
+                jobDependencyXML.addDependency(depKey);
             }
         }
     }

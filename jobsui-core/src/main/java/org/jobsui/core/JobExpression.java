@@ -1,21 +1,17 @@
 package org.jobsui.core;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Map;
 
 /**
  * Created by enrico on 3/8/17.
  */
-public interface JobExpression extends ObservableProducer {
-
-    String getKey();
+public interface JobExpression extends JobDependency, ObservableProducer {
 
     String getName();
 
-    boolean isOptional();
+    void onDependenciesChange(Map<String, Serializable> values);
 
-    Serializable getDefaultValue();
-
-    List<JobParameterDef> getDependencies();
+    void evaluate(Map<String, Serializable> values);
 
 }

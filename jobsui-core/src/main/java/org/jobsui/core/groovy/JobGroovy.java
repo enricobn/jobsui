@@ -3,10 +3,7 @@ package org.jobsui.core.groovy;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
-import org.jobsui.core.JobAbstract;
-import org.jobsui.core.JobExpression;
-import org.jobsui.core.JobFuture;
-import org.jobsui.core.JobParameterDef;
+import org.jobsui.core.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -29,11 +26,12 @@ public class JobGroovy<T> extends JobAbstract<T> {
     private final GroovyShell shell;
 
     public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDefGroovy> parameterDefs,
-                     List<JobExpression> expressions, String runScript, String validateScript) {
+                     List<JobExpressionGroovy> expressions, String runScript, String validateScript) {
         this.shell = shell;
         this.key = key;
         this.name = name;
-        this.expressions = expressions;
+        this.expressions = new ArrayList<>();
+        this.expressions.addAll(expressions);
         this.parameterDefs = new ArrayList<>();
         // TODO can I remove this loop?
         this.parameterDefs.addAll(parameterDefs);
@@ -61,24 +59,22 @@ public class JobGroovy<T> extends JobAbstract<T> {
 
     @Override
     public JobFuture<T> run(final Map<String, Serializable> values) {
-        return () -> {
-            // I reset the bindings otherwise I get "global" or previous bindings
-            run.setBinding(new Binding(shellBinding.getVariables()));
+        // I reset the bindings otherwise I get "global" or previous bindings
+        run.setBinding(new Binding(shellBinding.getVariables()));
 
-            run.setProperty("values", values);
-            for (Map.Entry<String, Serializable> entry : values.entrySet()) {
-                run.setProperty(entry.getKey(), entry.getValue());
-            }
+        run.setProperty("values", values);
+        for (Map.Entry<String, Serializable> entry : values.entrySet()) {
+            run.setProperty(entry.getKey(), entry.getValue());
+        }
 
 //            run.setProperty("projectFolder", projectFolder);
-            try {
-                @SuppressWarnings("unchecked")
-                T result = (T) this.run.run();
-                return result;
-            } catch (Exception e) {
-                throw new RuntimeException("Cannot execute run for job with id \"" + getId() + "\".", e);
-            }
-        };
+        try {
+            @SuppressWarnings("unchecked")
+            T result = (T) this.run.run();
+            return new JobFutureImpl<>(result);
+        } catch (Exception e) {
+            return new JobFutureImpl<>(new RuntimeException("Cannot execute run for job with id \"" + getId() + "\".", e));
+        }
     }
 
     @Override
