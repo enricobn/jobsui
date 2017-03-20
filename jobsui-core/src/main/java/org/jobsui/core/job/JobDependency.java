@@ -56,8 +56,6 @@ public interface JobDependency {
         }).collect(Collectors.toList());
     }
 
-    String getName();
-
     String getKey();
 
     List<String> getDependencies();

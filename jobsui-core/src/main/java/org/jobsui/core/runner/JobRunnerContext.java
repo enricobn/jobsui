@@ -59,7 +59,7 @@ public class JobRunnerContext<T extends Serializable, C> {
                             try {
                                 jobParameterDef.onDependenciesChange(widget, objects);
                             } catch (Exception e) {
-                                JavaFXUI.showErrorStatic("Error on onDependenciesChange for parameter " + jobDependency.getName(), e);
+                                JavaFXUI.showErrorStatic("Error on onDependenciesChange for parameter " + jobParameterDef.getName(), e);
                                 widget.setValidationMessages(Collections.singletonList(e.getMessage()));
                                 widget.getComponent().setValue(null);
                                 widget.getComponent().setEnabled(false);
