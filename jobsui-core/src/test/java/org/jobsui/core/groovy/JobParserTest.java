@@ -5,7 +5,9 @@ import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.xml.JobXML;
 import org.jobsui.core.xml.ParameterXML;
 import org.jobsui.core.xml.ProjectXML;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -17,17 +19,21 @@ import static org.junit.Assert.*;
  * Created by enrico on 5/4/16.
  */
 public class JobParserTest {
-    private JobParser parser;
+    private static ProjectXML projectXML;
 
-    @Before
-    public void setUp() throws Exception {
-        parser = new JobParser();
+    @BeforeClass
+    public static void setUpStatic() throws Exception {
+        JobParser parser = new JobParser();
+        projectXML = parser.parse(new File("src/test/resources/simplejob"));
+    }
+
+    @AfterClass
+    public static void tearDownStatic() throws Exception {
+        projectXML = null;
     }
 
     @Test
     public void test_parse() throws Exception {
-        ProjectXML projectXML = parser.parse(new File("src/test/resources/simplejob"));
-
         ProjectGroovy projectGroovy = new ProjectGroovyBuilder().build(projectXML);
         Job<Object> job = projectGroovy.getJob("simple");
 
@@ -45,8 +51,7 @@ public class JobParserTest {
 
     @Test
     public void test_that_inv_parameter_in_Simplejob_is_invisible() throws Exception {
-        ProjectXML project = parser.parse(new File("src/test/resources/simplejob"));
-        final JobXML job = project.getJobs().get("simple");
+        final JobXML job = projectXML.getJobs().get("simple");
         ParameterXML inv = job.getParameter("inv");
         assertThat(inv.isVisible(), equalTo(false));
     }

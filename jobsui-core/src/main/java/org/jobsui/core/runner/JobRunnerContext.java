@@ -256,17 +256,19 @@ public class JobRunnerContext<T extends Serializable, C> {
         for (Map.Entry<JobDependency, Observable<Serializable>> entry : observables.entrySet()) {
             entry.getValue().subscribe(value -> {
                 values.put(entry.getKey().getKey(), value);
-                validValues.put(entry.getKey().getKey(), value);
                 if (entry.getKey() instanceof JobParameterDef) {
                     JobParameterDef jobParameterDef = (JobParameterDef) entry.getKey();
                     UIWidget<C> widget = widgets.get(jobParameterDef);
-                    List<String> validate = jobParameterDef.validate(values, value);
-                    if (!validate.isEmpty()) {
-                        validValues.remove(entry.getKey().getKey());
-                    }
 
                     // I set the validation message only if all dependencies are valid
                     if (getDependenciesValues(validValues, jobParameterDef).size() == jobParameterDef.getDependencies().size()) {
+                        List<String> validate = jobParameterDef.validate(validValues, value);
+                        if (validate.isEmpty()) {
+                            validValues.put(entry.getKey().getKey(), value);
+                        } else {
+                            validValues.remove(entry.getKey().getKey());
+                        }
+
                         setValidationMessage(validate, jobParameterDef, widget, ui);
                     } else {
                         setValidationMessage(Collections.emptyList(), jobParameterDef, widget, ui);
