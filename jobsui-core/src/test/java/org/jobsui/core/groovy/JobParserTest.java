@@ -26,7 +26,7 @@ public class JobParserTest {
 
     @Test
     public void test_parse() throws Exception {
-        ProjectXML projectXML = parser.loadProject(new File("src/test/resources/simplejob"));
+        ProjectXML projectXML = parser.parse(new File("src/test/resources/simplejob"));
 
         ProjectGroovy projectGroovy = new ProjectGroovyBuilder().build(projectXML);
         Job<Object> job = projectGroovy.getJob("simple");
@@ -45,7 +45,7 @@ public class JobParserTest {
 
     @Test
     public void test_that_inv_parameter_in_Simplejob_is_invisible() throws Exception {
-        ProjectXML project = parser.loadProject(new File("src/test/resources/simplejob"));
+        ProjectXML project = parser.parse(new File("src/test/resources/simplejob"));
         final JobXML job = project.getJobs().get("simple");
         ParameterXML inv = job.getParameter("inv");
         assertThat(inv.isVisible(), equalTo(false));

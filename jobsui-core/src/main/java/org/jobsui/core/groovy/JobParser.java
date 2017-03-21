@@ -35,7 +35,7 @@ public class JobParser {
         projectValidator = projectSchema.newValidator();
     }
 
-    public ProjectXML loadProject(File folder) throws Exception {
+    public ProjectXML parse(File folder) throws Exception {
         File projectFile = new File(folder, PROJECT_FILE_NAME);
 
         if (!projectFile.exists()) {

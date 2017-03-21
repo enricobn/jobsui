@@ -34,7 +34,7 @@ public class ProjectGroovyBuilder {
         ProjectGroovyBuilder projectGroovyBuilder = new ProjectGroovyBuilder();
         projectXML.getImports().entrySet().forEach(entry -> {
             try {
-                ProjectXML refProjectXML = jobParser.loadProject(new File(projectXML.getProjectFolder(), entry.getValue()));
+                ProjectXML refProjectXML = jobParser.parse(new File(projectXML.getProjectFolder(), entry.getValue()));
                 projects.put(entry.getKey(), projectGroovyBuilder.build(refProjectXML));
             } catch (Exception e) {
                 // TODO

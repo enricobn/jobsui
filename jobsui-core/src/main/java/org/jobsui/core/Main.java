@@ -4,7 +4,7 @@ import javafx.scene.Node;
 import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.Job;
-import org.jobsui.core.runner.JobRunner;
+import org.jobsui.core.runner.JobUIRunner;
 import org.jobsui.core.ui.UI;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.ui.swing.SwingUI;
@@ -32,7 +32,7 @@ public class Main {
             return;
         }
 
-        ProjectXML projectXML = new JobParser().loadProject(projectFolder);
+        ProjectXML projectXML = new JobParser().parse(projectFolder);
         final Project project = new ProjectGroovyBuilder().build(projectXML);
 
         String key = args[1];
@@ -48,11 +48,11 @@ public class Main {
 
         if (args.length >= 3 && "swing".equals(args[2].toLowerCase())) {
             UI<JComponent> ui = new SwingUI();
-            JobRunner<JComponent> runner = new JobRunner<>(ui);
+            JobUIRunner<JComponent> runner = new JobUIRunner<>(ui);
             result = runner.run(job);
         } else {
             UI<Node> ui = new JavaFXUI();
-            JobRunner<Node> runner = new JobRunner<>(ui);
+            JobUIRunner<Node> runner = new JobUIRunner<>(ui);
             result = runner.run(job);
         }
 

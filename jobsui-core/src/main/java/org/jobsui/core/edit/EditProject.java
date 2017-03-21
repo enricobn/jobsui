@@ -17,7 +17,6 @@ import javafx.stage.Stage;
 import org.fxmisc.richtext.CodeArea;
 import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.ui.javafx.JavaFXUI;
-import org.jobsui.core.utils.JobsUIUtils;
 import org.jobsui.core.xml.*;
 
 import java.io.File;
@@ -157,7 +156,7 @@ public class EditProject extends Application {
 
     private TreeItem<Item> loadProject(File file) throws Exception {
         JobParser parser = new JobParser();
-        projectXML = parser.loadProject(file);
+        projectXML = parser.parse(file);
         TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, projectXML::getName, projectXML));
 
         TreeItem<Item> libraries = new TreeItem<>(new Item(ItemType.Libraries, () -> "libraries", projectXML));

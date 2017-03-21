@@ -1,10 +1,9 @@
 package org.jobsui.core;
 
 import org.jobsui.core.job.Job;
-import org.jobsui.core.runner.JobRunner;
+import org.jobsui.core.runner.JobUIRunner;
 import org.jobsui.core.ui.FakeUIButton;
 import org.jobsui.core.ui.FakeUIWindow;
-import org.jobsui.core.ui.UI;
 
 import java.io.Serializable;
 import java.util.concurrent.ExecutorService;
@@ -17,10 +16,10 @@ import java.util.concurrent.Future;
 abstract class JobRunnerWrapper<T extends Serializable, C> {
     private final ExecutorService pool = Executors.newFixedThreadPool(1);
     private final FakeUIWindow window;
-    private final JobRunner<C> runner;
+    private final JobUIRunner<C> runner;
     private final FakeUIButton<?> runButton;
 
-    JobRunnerWrapper(JobRunner<C> runner, FakeUIWindow window, FakeUIButton<?> runButton) {
+    JobRunnerWrapper(JobUIRunner<C> runner, FakeUIWindow window, FakeUIButton<?> runButton) {
         this.runner = runner;
         this.window = window;
         this.runButton = runButton;

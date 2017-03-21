@@ -6,10 +6,7 @@ import org.jobsui.core.groovy.JobParameterDefGroovySimple;
 import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.*;
-import org.jobsui.core.runner.JobFuture;
-import org.jobsui.core.runner.JobFutureImpl;
-import org.jobsui.core.runner.JobRunner;
-import org.jobsui.core.runner.JobValues;
+import org.jobsui.core.runner.*;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.xml.ProjectXML;
 import org.junit.After;
@@ -36,7 +33,7 @@ import static org.mockito.Mockito.*;
  * Created by enrico on 4/30/16.
  */
 public class JobRunnerTest {
-    private JobRunner runner;
+    private JobUIRunner runner;
     private UI ui;
     private FakeUIWindow window;
     private FakeUIButton<?> runButton;
@@ -45,7 +42,7 @@ public class JobRunnerTest {
     @Before
     public void init() throws UnsupportedComponentException {
         ui = mock(UI.class);
-        runner = new JobRunner(ui);
+        runner = new JobUIRunner(ui);
         window = new FakeUIWindow();
         when(ui.createWindow(anyString())).thenReturn(window);
         runButton = spy(new FakeUIButton<>());
@@ -160,7 +157,7 @@ public class JobRunnerTest {
     }
 
     private <T> Job<T> getJob(String file, String job) throws Exception {
-        ProjectXML projectXML = new JobParser().loadProject(new File(file));
+        ProjectXML projectXML = new JobParser().parse(new File(file));
         Project project = new ProjectGroovyBuilder().build(projectXML);
         Job<T> result = project.getJob(job);
         if (result == null) {
