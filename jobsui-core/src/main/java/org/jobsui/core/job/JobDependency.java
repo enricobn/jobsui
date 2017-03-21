@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 public interface JobDependency {
 
     /**
-     * Dependencies from other elements are ignored. Validation is out of scope for this method.
+     * Dependencies from other elements are ignored.
      */
     static List<String> getSortedDependenciesKeys(Collection<? extends JobDependency> jobDependencies) throws Exception {
         Map<String, List<String>> toSort = new LinkedHashMap<>();

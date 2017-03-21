@@ -8,6 +8,7 @@ import org.jobsui.core.ui.*;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
+import rx.functions.Action1;
 import rx.functions.FuncN;
 
 import java.io.Serializable;
@@ -20,10 +21,12 @@ import java.util.stream.Collectors;
 public class JobRunnerContext<T extends Serializable, C> {
     private final WidgetsMap<C> widgets;
     private final Job<T> job;
+    private final UI<C> ui;
     private final List<JobDependency> sortedJobDependencies;
 
     public JobRunnerContext(Job<T> job, UI<C> ui, UIWindow<C> window) throws Exception {
         this.job = job;
+        this.ui = ui;
         widgets = new WidgetsMap<>();
 
         for (final JobParameterDef jobParameterDef : job.getParameterDefs()) {
@@ -33,19 +36,42 @@ public class JobRunnerContext<T extends Serializable, C> {
     }
 
     public void notifyInitialValue() {
-        for (JobExpression jobExpression : job.getExpressions()) {
-            if (jobExpression.getDependencies().isEmpty()) {
-                jobExpression.evaluate(Collections.emptyMap());
+        Map<String,Serializable> values = new HashMap<>();
+        for (JobDependency jobDependency : sortedJobDependencies) {
+            if (jobDependency instanceof JobExpression) {
+                JobExpression jobExpression = (JobExpression) jobDependency;
+                if (jobExpression.getDependencies().isEmpty()) {
+                    Serializable value = jobExpression.evaluate(values);
+                    values.put(jobDependency.getKey(), value);
+                    jobExpression.notifySubscribers(value);
+                }
+            } else if (jobDependency instanceof JobParameterDef) {
+                JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
+                UIComponent<C> component = widgets.get(jobParameterDef).getComponent();
+                Serializable value = component.getValue();
+                if (isValid(jobParameterDef, values, value)) {
+//                    component.setValue(value);
+                    values.put(jobDependency.getKey(), value);
+                    component.notifySubscribers();
+                }
+            } else {
+                throw new IllegalStateException("Unexpected type " + jobDependency.getClass());
             }
         }
-        widgets.getWidgets().forEach(JobRunnerContext::notifyInitialValue);
+
+//        for (JobExpression jobExpression : job.getExpressions()) {
+//            if (jobExpression.getDependencies().isEmpty()) {
+//                jobExpression.evaluate(Collections.emptyMap());
+//            }
+//        }
+//        widgets.getWidgets().forEach(JobRunnerContext::notifyInitialValue);
     }
 
     public void observeDependencies() {
         for (final JobDependency jobDependency : sortedJobDependencies) {
             final List<String> dependencies = jobDependency.getDependencies();
             if (!dependencies.isEmpty()) {
-                List<Observable<Serializable>> observables = getDependenciesObservables(dependencies);
+                Collection<Observable<Serializable>> observables = getDependenciesObservables(dependencies).values();
 
                 final Observable<Map<String, Serializable>> observable = combineDependenciesObservables(dependencies, observables);
 
@@ -86,45 +112,40 @@ public class JobRunnerContext<T extends Serializable, C> {
                 .collect(Collectors.toList());
         observables.addAll(job.getExpressions().stream().map(JobExpression::getObservable).collect(Collectors.toList()));
 
-        return Observable.combineLatest(observables, new FuncN<JobValidation>() {
-            @Override
-            public JobValidation call(Object... args) {
-                int i = 0;
+        //            private boolean isValid(JobParameterDef jobParameterDef, Serializable value) {
+//                final List<String> validate = jobParameterDef.validate(value);
+//                return validate.isEmpty();
+//            }
+        return Observable.combineLatest(observables, args -> {
+            int i = 0;
 
-                JobValidation jobValidation = new JobValidation();
+            JobValidation jobValidation = new JobValidation();
 
-                Map<String, Serializable> values = new HashMap<>();
+            Map<String, Serializable> values = new HashMap<>();
 
-                for (JobDependency jobDependency : sortedJobDependencies) {
-                    Serializable value = (Serializable) args[i++];
-                    if (jobDependency instanceof JobParameterDef) {
-                        JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
-                        if (!isValid(jobParameterDef, value)) {
-                            jobValidation.invalidate();
-                            break;
-                        }
-                        values.put(jobParameterDef.getKey(), value);
-                    } else if (jobDependency instanceof JobExpression) {
-                        JobExpression jobExpression = (JobExpression) jobDependency;
-                        values.put(jobExpression.getKey(), value);
-                    } else {
-                        throw new IllegalStateException("Unknown type " + jobDependency.getClass());
+            for (JobDependency jobDependency : sortedJobDependencies) {
+                Serializable value = (Serializable) args[i++];
+                if (jobDependency instanceof JobParameterDef) {
+                    JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
+                    if (!isValid(jobParameterDef, values, value)) {
+                        jobValidation.invalidate();
+                        break;
                     }
+                    values.put(jobParameterDef.getKey(), value);
+                } else if (jobDependency instanceof JobExpression) {
+                    values.put(jobDependency.getKey(), value);
+                } else {
+                    throw new IllegalStateException("Unknown type " + jobDependency.getClass());
                 }
+            }
 
-                if (!jobValidation.isValid()) {
-                    return jobValidation;
-                }
-
-                jobValidation.setMessages(job.validate(values));
-
+            if (!jobValidation.isValid()) {
                 return jobValidation;
             }
 
-            private boolean isValid(JobParameterDef jobParameterDef, Serializable value) {
-                final List<String> validate = jobParameterDef.validate(value);
-                return validate.isEmpty();
-            }
+            jobValidation.setMessages(job.validate(values));
+
+            return jobValidation;
         });
     }
 
@@ -133,85 +154,130 @@ public class JobRunnerContext<T extends Serializable, C> {
      * a value is changed.
      */
     public Observable<Map<String,Serializable>> valuesChangeObserver() {
-        List<Observable<?>> observables = widgets.getWidgets().stream()
+        List<Observable<Serializable>> observables = widgets.getWidgets().stream()
                 .map(widget -> widget.getWidget().getComponent().getObservable())
                 .collect(Collectors.toList());
         observables.addAll(job.getExpressions().stream().map(JobExpression::getObservable).collect(Collectors.toList()));
 
-        return Observable.combineLatest(observables, new FuncN<Map<String,Serializable>>() {
-            @Override
-            public Map<String,Serializable> call(Object... args) {
-                int i = 0;
+        return Observable.combineLatest(observables, args -> {
+            int i = 0;
 
-                Map<String, Serializable> values = new HashMap<>();
+            Map<String, Serializable> values = new HashMap<>();
 
-                for (final ParameterAndWidget<C> entry : widgets.getWidgets()) {
-                    Serializable value = (Serializable) args[i++];
-                    if (isValid(entry, value)) {
-                        values.put(entry.getJobParameterDef().getKey(), value);
-                    }
-                }
-
-                for (JobExpression jobExpression : job.getExpressions()) {
-                    Serializable value = (Serializable) args[i++];
-                    values.put(jobExpression.getKey(), value);
-                }
-
-                return values;
+            for (final ParameterAndWidget<C> entry : widgets.getWidgets()) {
+                Serializable value = (Serializable) args[i++];
+                values.put(entry.getJobParameterDef().getKey(), value);
             }
 
-            private boolean isValid(ParameterAndWidget<C> entry, Serializable value) {
-                final JobParameterDef parameterDef = entry.getJobParameterDef();
-                final List<String> validate = parameterDef.validate(value);
-
-                return validate.isEmpty();
+            for (JobExpression jobExpression : job.getExpressions()) {
+                Serializable value = (Serializable) args[i++];
+                values.put(jobExpression.getKey(), value);
             }
+
+            for (final ParameterAndWidget<C> entry : widgets.getWidgets()) {
+                JobParameterDef jobParameterDef = entry.getJobParameterDef();
+                Serializable value = values.get(jobParameterDef.getKey());
+
+                Map<String, Serializable> dependenciesValues = getDependenciesValues(values, jobParameterDef);
+
+                if (!isValid(jobParameterDef, dependenciesValues, value)) {
+                    values.remove(jobParameterDef.getKey());
+                }
+            }
+
+            return values;
         });
     }
 
-    private static <C> void notifyInitialValue(ParameterAndWidget<C> entry) {
-        final Serializable value = entry.getWidget().getComponent().getValue();
-        if (entry.getJobParameterDef().validate(value).isEmpty()) {
-            entry.getWidget().getComponent().notifySubscribers();
+    private static boolean isValid(JobParameterDef parameterDef, Map<String,Serializable> dependenciesValues, Serializable value) {
+        final List<String> validate = parameterDef.validate(dependenciesValues, value);
+
+        return validate.isEmpty();
+    }
+
+    private static Map<String, Serializable> getDependenciesValues(Map<String, Serializable> values, JobParameterDef jobParameterDef) {
+        Map<String,Serializable> dependenciesValues = new HashMap<>();
+        for (String dependency : jobParameterDef.getDependencies()) {
+            if (values.containsKey(dependency)) {
+                Serializable dependencyValue = values.get(dependency);
+                dependenciesValues.put(dependency, dependencyValue);
+            }
+        }
+        return dependenciesValues;
+    }
+
+
+//    private static <C> void notifyInitialValue(ParameterAndWidget<C> entry) {
+//        final Serializable value = entry.getWidget().getComponent().getValue();
+//        if (entry.getJobParameterDef().validate(, value).isEmpty()) {
+//            entry.getWidget().getComponent().notifySubscribers();
+//        }
+//    }
+
+    private Observable<Map<String, Serializable>> combineDependenciesObservables(final List<String> dependencies,
+                                                                                        Collection<Observable<Serializable>> observables) {
+        //            private boolean addValidatedValue(Map<String, Serializable> result, JobParameterDef dependency,
+//                                              Serializable arg) {
+//                final List<String> validate = dependency.validate(arg);
+//                if (!validate.isEmpty()) {
+//                    return true;
+//                }
+//                result.put(dependency.getKey(), arg);
+//                return false;
+//            }
+        return Observable.combineLatest(observables, args -> {
+            Map<String, Serializable> result = new HashMap<>();
+
+            int i = 0;
+            for (String dependency : dependencies) {
+                final Serializable arg = (Serializable) args[i++];
+//                    JobParameterDef jobParameterDef = job.getParameter(dependency);
+//                    if (jobParameterDef != null) {
+//                        if (addValidatedValue(result, jobParameterDef, arg)) {
+//                            break;
+//                        }
+//                    } else {
+                    result.put(dependency, arg);
+//                    }
+            }
+            return result;
+        });
+    }
+
+    public void setComponentValidationMessage() {
+        Map<JobDependency, Observable<Serializable>> observables = getDependenciesObservables(
+                sortedJobDependencies.stream().map(JobDependency::getKey).collect(Collectors.toList())
+        );
+
+        Map<String, Serializable> values = new HashMap<>();
+
+        Map<String, Serializable> validValues = new HashMap<>();
+
+        for (Map.Entry<JobDependency, Observable<Serializable>> entry : observables.entrySet()) {
+            entry.getValue().subscribe(value -> {
+                values.put(entry.getKey().getKey(), value);
+                validValues.put(entry.getKey().getKey(), value);
+                if (entry.getKey() instanceof JobParameterDef) {
+                    JobParameterDef jobParameterDef = (JobParameterDef) entry.getKey();
+                    UIWidget<C> widget = widgets.get(jobParameterDef);
+                    List<String> validate = jobParameterDef.validate(values, value);
+                    if (!validate.isEmpty()) {
+                        validValues.remove(entry.getKey().getKey());
+                    }
+
+                    // I set the validation message only if all dependencies are valid
+                    if (getDependenciesValues(validValues, jobParameterDef).size() == jobParameterDef.getDependencies().size()) {
+                        setValidationMessage(validate, jobParameterDef, widget, ui);
+                    } else {
+                        setValidationMessage(Collections.emptyList(), jobParameterDef, widget, ui);
+                    }
+                }
+            });
         }
     }
 
-    private Observable<Map<String, Serializable>> combineDependenciesObservables(final List<String> dependencies,
-                                                                                        List<Observable<Serializable>> observables) {
-        return Observable.combineLatest(observables, new FuncN<Map<String,Serializable>>() {
-            @Override
-            public Map<String,Serializable> call(Object... args) {
-                Map<String, Serializable> result = new HashMap<>();
-
-                int i = 0;
-                for (String dependency : dependencies) {
-                    final Serializable arg = (Serializable) args[i++];
-                    JobParameterDef jobParameterDef = job.getParameter(dependency);
-                    if (jobParameterDef != null) {
-                        if (addValidatedValue(result, jobParameterDef, arg)) {
-                            break;
-                        }
-                    } else {
-                        result.put(dependency, arg);
-                    }
-                }
-                return result;
-            }
-
-            private boolean addValidatedValue(Map<String, Serializable> result, JobParameterDef dependency,
-                                              Serializable arg) {
-                final List<String> validate = dependency.validate(arg);
-                if (!validate.isEmpty()) {
-                    return true;
-                }
-                result.put(dependency.getKey(), arg);
-                return false;
-            }
-        });
-    }
-
-    private List<Observable<Serializable>> getDependenciesObservables(List<String> dependencies) {
-        List<Observable<Serializable>> observables = new ArrayList<>();
+    private Map<JobDependency, Observable<Serializable>> getDependenciesObservables(List<String> dependencies) {
+        Map<JobDependency, Observable<Serializable>> observables = new LinkedHashMap<>();
         for (String dependency : dependencies) {
             JobParameterDef jobParameterDef = job.getParameter(dependency);
             if (jobParameterDef != null) {
@@ -220,17 +286,17 @@ public class JobRunnerContext<T extends Serializable, C> {
                     throw new IllegalStateException("Cannot find widget for dependency with key \"" +
                             dependency + "\".");
                 }
-                observables.add(widget.getComponent().getObservable());
+                observables.put(jobParameterDef, widget.getComponent().getObservable());
             } else {
                 JobExpression jobExpression = job.getExpression(dependency);
-                observables.add(jobExpression.getObservable());
+                observables.put(jobExpression, jobExpression.getObservable());
             }
         }
         return observables;
     }
 
     private static <C> ParameterAndWidget<C> createWidget(final UI<C> ui, UIWindow<C> window,
-                                                                 final JobParameterDef jobParameterDef)
+                                                          final JobParameterDef jobParameterDef)
             throws UnsupportedComponentException {
         final UIComponent<C> component = jobParameterDef.createComponent(ui);
         if (component == null) {
@@ -246,9 +312,9 @@ public class JobRunnerContext<T extends Serializable, C> {
 
         widget.setVisible(jobParameterDef.isVisible());
 
-        final Observable<Serializable> observable = widget.getComponent().getObservable();
-
-        observable.subscribe(o -> setValidationMessage(jobParameterDef.validate(o), jobParameterDef, widget, ui));
+//        final Observable<Serializable> observable = widget.getComponent().getObservable();
+//
+//        observable.subscribe(o -> setValidationMessage(jobParameterDef.validate(, o), jobParameterDef, widget, ui));
         return new ParameterAndWidget<>(jobParameterDef, widget);
     }
 

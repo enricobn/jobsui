@@ -14,6 +14,7 @@ public interface JobExpression extends JobDependency, ObservableProducer {
 
     void onDependenciesChange(Map<String, Serializable> values);
 
-    void evaluate(Map<String, Serializable> values);
+    Serializable evaluate(Map<String, Serializable> values);
 
+    void notifySubscribers(Serializable value);
 }

@@ -116,6 +116,8 @@ public class JobRunner<C> {
                 }
             });
 
+            context.setComponentValidationMessage();
+
             context.notifyInitialValue();
 
             window.add(runButton);

@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by enrico on 4/30/16.
@@ -55,9 +56,9 @@ public abstract class JobParameterDefAbstract implements JobParameterDef {
     }
 
     @Override
-    public List<String> validate(Serializable value) {
+    public List<String> validate(Map<String, Serializable> values, Serializable value) {
         if (!isOptional()) {
-            final List<String> validate = new NotNullValidator().validate(value);
+            final List<String> validate = new NotNullValidator().validate(values, value);
             if (!validate.isEmpty()) {
                 return validate;
             }
@@ -65,7 +66,7 @@ public abstract class JobParameterDefAbstract implements JobParameterDef {
         if (validator == null) {
             return Collections.emptyList();
         }
-        return validator.validate(value);
+        return validator.validate(values, value);
     }
 
     @Override

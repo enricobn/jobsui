@@ -69,9 +69,8 @@ public class JavaFXUI implements UI<Node> {
 
         if (Platform.isFxApplicationThread()) {
             showErrorStatic(message, errorMsg.toString());
-        } else {
-            e.printStackTrace();
         }
+        e.printStackTrace();
     }
 
     private static void showErrorStatic(String message, String errorMessage) {

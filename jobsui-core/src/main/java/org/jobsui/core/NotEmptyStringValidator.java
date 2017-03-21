@@ -3,6 +3,7 @@ package org.jobsui.core;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by enrico on 4/30/16.
@@ -10,7 +11,7 @@ import java.util.List;
 public class NotEmptyStringValidator implements ParameterValidator {
 
     @Override
-    public List<String> validate(Serializable value) {
+    public List<String> validate(Map<String, Serializable> values, Serializable value) {
 
         if (value == null) {
             return Collections.singletonList("Value is null.");

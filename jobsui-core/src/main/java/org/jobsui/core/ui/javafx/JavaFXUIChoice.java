@@ -1,5 +1,6 @@
 package org.jobsui.core.ui.javafx;
 
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
@@ -144,24 +145,13 @@ class JavaFXUIChoice implements UIChoice<Node> {
     @Override
     public void setValue(Serializable value) {
         if (value != null) {
-//            System.out.println("SwingUIChoice.setValue " + System.identityHashCode(value.getClass()));
-//            boolean found = false;
-//            for (int i = 0; i < component.getItemCount(); i++) {
-//                final T item = component.getItemAt(i);
-////                if (item != null) {
-////                    System.out.println("SwingUIChoice.setValue item " + System.identityHashCode(item.getClass()));
-////                }
-//                if (Objects.equals(item, value)) {
-//                    found = true;
-//                    break;
-//                }
-//            }
-
             if (!combo.getItems().contains(value)) {
                 throw new RuntimeException("Cannot find item " + value);
             }
         }
+
         combo.getSelectionModel().select(value);
+
         if (!combo.isVisible()) {
             notifySubscribers();
         }

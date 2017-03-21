@@ -11,7 +11,7 @@
         </CreateComponent>
 
         <Validate>
-            return new NotEmptyStringValidator().validate(value);
+            return new NotEmptyStringValidator().validate(values, value);
         </Validate>
 
     </Parameter>
@@ -24,7 +24,7 @@
         </CreateComponent>
 
         <Validate>
-            return new NotEmptyStringValidator().validate(value);
+            return new NotEmptyStringValidator().validate(values, value);
         </Validate>
 
     </Parameter>
@@ -49,6 +49,6 @@
         ]]>
     </Run>
     <!--Validate>
-        return new NotEmptyStringValidator().validate(value);
+        return new NotEmptyStringValidator().validate(values, value);
     </Validate-->
 </Job>

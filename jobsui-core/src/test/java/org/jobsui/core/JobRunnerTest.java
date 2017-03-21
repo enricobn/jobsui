@@ -29,7 +29,6 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -263,8 +262,8 @@ public class JobRunnerTest {
         jobRunnerWrapper.start(job);
 
         final JobParameterDef inv = job.getParameter("inv");
-        verify(inv, never()).validate(isNull(Serializable.class));
-        verify(inv, never()).validate(isNotNull(Serializable.class));
+        verify(inv, never()).validate(anyMapOf(String.class, Serializable.class), isNull(Serializable.class));
+        verify(inv, never()).validate(anyMapOf(String.class, Serializable.class), isNotNull(Serializable.class));
     }
 
     @Test public void verify_that_onDepependencyChange_occurs_if_dependencies_are_valid() throws Exception {
@@ -291,7 +290,8 @@ public class JobRunnerTest {
 
         final JobParameterDef inv = job.getParameter("inv");
         verify(inv).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
-        verify(inv, atLeast(1)).validate(isNull(Serializable.class));
+        verify(inv, atLeast(1)).validate(anyMapOf(String.class, Serializable.class),
+                isNull(Serializable.class));
     }
 
     @Test public void assert_that_a_message_is_shown_when_job_is_not_valid() throws Exception {
@@ -425,16 +425,16 @@ public class JobRunnerTest {
         when(name.getName()).thenReturn("Name");
         when(name.isVisible()).thenReturn(true);
         when(name.isOptional()).thenReturn(false);
-        when(name.validate(isNull(Serializable.class))).thenReturn(Collections.singletonList("Error"));
-        when(name.validate(isNotNull(Serializable.class))).thenReturn(Collections.emptyList());
+        when(name.validate(anyMapOf(String.class, Serializable.class), isNull(Serializable.class))).thenReturn(Collections.singletonList("Error"));
+        when(name.validate(anyMapOf(String.class, Serializable.class), isNotNull(Serializable.class))).thenReturn(Collections.emptyList());
 
         when(surname.createComponent(any(UI.class))).thenReturn((UIComponent<Object>) uiValueSurname);
         when(surname.getKey()).thenReturn("surname");
         when(surname.getName()).thenReturn("Surname");
         when(surname.isVisible()).thenReturn(true);
         when(surname.isOptional()).thenReturn(false);
-        when(surname.validate(isNull(Serializable.class))).thenReturn(Collections.singletonList("Error"));
-        when(surname.validate(isNotNull(Serializable.class))).thenReturn(Collections.emptyList());
+        when(surname.validate(anyMapOf(String.class, Serializable.class), isNull(Serializable.class))).thenReturn(Collections.singletonList("Error"));
+        when(surname.validate(anyMapOf(String.class, Serializable.class), isNotNull(Serializable.class))).thenReturn(Collections.emptyList());
 
         when(inv.createComponent(any(UI.class))).thenReturn(uiChoiceInv);
         when(inv.getKey()).thenReturn("inv");

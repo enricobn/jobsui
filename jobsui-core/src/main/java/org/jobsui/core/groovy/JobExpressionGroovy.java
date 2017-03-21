@@ -69,10 +69,11 @@ public class JobExpressionGroovy implements JobDependencyGroovy,JobExpression {
 
     @Override
     public void onDependenciesChange(Map<String, Serializable> values) {
-        evaluate(values);
+        Serializable value = evaluate(values);
+        notifySubscribers(value);
     }
 
-    public void evaluate(Map<String, Serializable> values) {
+    public Serializable evaluate(Map<String, Serializable> values) {
         // I reset the bindings otherwise I get "global" or previous bindings
         evaluate.setBinding(new Binding(shellBinding.getVariables()));
         evaluate.setProperty("values", values);
@@ -81,13 +82,17 @@ public class JobExpressionGroovy implements JobDependencyGroovy,JobExpression {
         }
 
         try {
-            Serializable value = (Serializable) evaluate.run();
-            for (Subscriber<? super Serializable> subscriber : subscribers) {
-                subscriber.onNext(value);
-            }
+            return (Serializable) evaluate.run();
         } catch (Throwable e) {
             throw new RuntimeException("Error in evaluate script for expression whit key \"" +
                     getKey() + "\"", e);
+        }
+    }
+
+    @Override
+    public void notifySubscribers(Serializable value) {
+        for (Subscriber<? super Serializable> subscriber : subscribers) {
+            subscriber.onNext(value);
         }
     }
 

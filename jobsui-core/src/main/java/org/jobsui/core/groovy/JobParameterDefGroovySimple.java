@@ -92,9 +92,9 @@ public class JobParameterDefGroovySimple extends JobParameterDefAbstract impleme
     }
 
     @Override
-    public List<String> validate(Serializable value) {
+    public List<String> validate(Map<String, Serializable> values, Serializable value) {
         if (validate == null) {
-            final List<String> validation = super.validate(value);
+            final List<String> validation = super.validate(values, value);
             if (!validation.isEmpty()) {
                 return validation;
             }
@@ -103,6 +103,7 @@ public class JobParameterDefGroovySimple extends JobParameterDefAbstract impleme
         // I reset the bindings otherwise I get "global" or previous bindings
         validate.setBinding(new Binding());
         validate.setProperty("value", value);
+        validate.setProperty("values", values);
 //        validate.setProperty("projectFolder", projectFolder);
         try {
             @SuppressWarnings("unchecked")

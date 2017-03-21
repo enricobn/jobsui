@@ -21,26 +21,24 @@ import java.util.Map;
 public class JobGroovy<T> extends JobAbstract<T> {
     private final String key;
     private final String name;
+    private final List<JobParameterDefGroovy> parameterDefsGroovy;
     private final List<JobExpression> expressions;
     private final List<JobParameterDef> parameterDefs;
     private final Script run;
     private final Script validate;
-//    private final File projectFolder;
     private final Binding shellBinding;
     private final GroovyShell shell;
 
-    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDefGroovy> parameterDefs,
+    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDefGroovy> parameterDefsGroovy,
                      List<JobExpressionGroovy> expressions, String runScript, String validateScript) {
         this.shell = shell;
         this.key = key;
         this.name = name;
+        this.parameterDefsGroovy = parameterDefsGroovy;
         this.expressions = new ArrayList<>();
         this.expressions.addAll(expressions);
         this.parameterDefs = new ArrayList<>();
-        // TODO can I remove this loop?
-        this.parameterDefs.addAll(parameterDefs);
-
-//        this.projectFolder = projectFolder;
+        this.parameterDefs.addAll(parameterDefsGroovy);
         this.run = shell.parse(runScript);
         this.validate = validateScript == null ? null : shell.parse(validateScript);
         shellBinding = shell.getContext();
@@ -53,12 +51,12 @@ public class JobGroovy<T> extends JobAbstract<T> {
 
     @Override
     public List<JobParameterDef> getParameterDefs() {
-        return parameterDefs;
+        return Collections.unmodifiableList(parameterDefs);
     }
 
     @Override
     public List<JobExpression> getExpressions() {
-        return expressions;
+        return Collections.unmodifiableList(expressions);
     }
 
     @Override
@@ -71,7 +69,6 @@ public class JobGroovy<T> extends JobAbstract<T> {
             run.setProperty(entry.getKey(), entry.getValue());
         }
 
-//            run.setProperty("projectFolder", projectFolder);
         try {
             @SuppressWarnings("unchecked")
             T result = (T) this.run.run();
@@ -89,7 +86,10 @@ public class JobGroovy<T> extends JobAbstract<T> {
         // I reset the bindings otherwise I get "global" or previous bindings
         validate.setBinding(new Binding(shellBinding.getVariables()));
         validate.setProperty("values", values);
-        return (List<String>) validate.run();
+
+        @SuppressWarnings("unchecked")
+        List<String> validation = (List<String>) validate.run();
+        return validation;
     }
 
     public String getId() {
@@ -97,9 +97,8 @@ public class JobGroovy<T> extends JobAbstract<T> {
     }
 
     public void init(ProjectGroovy project) {
-        for (JobParameterDef jobParameterDef : getParameterDefs()) {
-            // TODO can I remove cast?
-            ((JobParameterDefGroovy)jobParameterDef).init(project);
+        for (JobParameterDefGroovy jobParameterDef : parameterDefsGroovy) {
+            jobParameterDef.init(project);
         }
     }
 

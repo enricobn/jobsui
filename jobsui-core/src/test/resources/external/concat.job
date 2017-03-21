@@ -13,7 +13,7 @@
 
         <Validate>
             <![CDATA[
-                return new NotEmptyStringValidator().validate(value);
+                return new NotEmptyStringValidator().validate(values, value);
             ]]>
         </Validate>
 
@@ -31,7 +31,7 @@
 
         <Validate>
             <![CDATA[
-                return new NotEmptyStringValidator().validate(value);
+                return new NotEmptyStringValidator().validate(values, value);
             ]]>
         </Validate>
 
