@@ -4,7 +4,10 @@ import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobValues;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**

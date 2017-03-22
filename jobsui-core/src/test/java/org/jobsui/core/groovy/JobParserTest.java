@@ -1,12 +1,10 @@
 package org.jobsui.core.groovy;
 
 import org.jobsui.core.job.Job;
-import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.xml.JobXML;
 import org.jobsui.core.xml.ParameterXML;
 import org.jobsui.core.xml.ProjectXML;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

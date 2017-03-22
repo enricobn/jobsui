@@ -3,7 +3,6 @@ package org.jobsui.core.ui;
 import rx.functions.Action1;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;

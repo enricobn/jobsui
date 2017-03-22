@@ -1,9 +1,9 @@
 package org.jobsui.core.groovy;
 
-import org.jobsui.core.job.Job;
-import org.jobsui.core.runner.JobResult;
-import org.jobsui.core.job.JobParameterDefAbstract;
 import org.jobsui.core.Project;
+import org.jobsui.core.job.Job;
+import org.jobsui.core.job.JobParameterDefAbstract;
+import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.ui.*;
 
 import java.io.Serializable;

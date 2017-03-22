@@ -6,7 +6,10 @@ import org.jobsui.core.groovy.JobParameterDefGroovySimple;
 import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.*;
-import org.jobsui.core.runner.*;
+import org.jobsui.core.runner.JobResult;
+import org.jobsui.core.runner.JobResultImpl;
+import org.jobsui.core.runner.JobUIRunner;
+import org.jobsui.core.runner.JobValues;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.xml.ProjectXML;
 import org.junit.*;
@@ -20,12 +23,11 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 
-import static org.hamcrest.CoreMatchers.containsString;
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
 /**
