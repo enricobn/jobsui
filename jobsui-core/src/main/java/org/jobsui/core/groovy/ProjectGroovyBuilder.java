@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  */
 public class ProjectGroovyBuilder {
 
-    public ProjectGroovy build(String projectRoot, ProjectXML projectXML) throws Exception {
+    public ProjectGroovy build(ProjectXML projectXML) throws Exception {
         Map<String, JobGroovy<Serializable>> jobs = new HashMap<>();
 
         for (JobXML jobXML : projectXML.getJobs().values()) {
@@ -32,9 +32,9 @@ public class ProjectGroovyBuilder {
         ProjectGroovyBuilder projectGroovyBuilder = new ProjectGroovyBuilder();
         projectXML.getImports().entrySet().forEach(entry -> {
             try {
-                JobParser jobParser = JobParser.getParser(projectRoot + "/" + entry.getValue());
+                JobParser jobParser = projectXML.getParser(entry.getValue());
                 ProjectXML refProjectXML = jobParser.parse();
-                projects.put(entry.getKey(), projectGroovyBuilder.build(projectRoot, refProjectXML));
+                projects.put(entry.getKey(), projectGroovyBuilder.build(refProjectXML));
             } catch (Exception e) {
                 // TODO
                 throw new RuntimeException(e);
@@ -121,9 +121,7 @@ public class ProjectGroovyBuilder {
         if (projectXML.getGroovyFiles().isEmpty()) {
             cl = new GroovyClassLoader();
         } else {
-            // TODO
-            final File groovy = new File(projectXML.getProjectFolder(), "groovy");
-            GroovyScriptEngine engine = new GroovyScriptEngine(new URL[]{ groovy.toURI().toURL() });
+            GroovyScriptEngine engine = new GroovyScriptEngine(new URL[] {projectXML.getRelativeURL("groovy")});
             cl = engine.getGroovyClassLoader();
         }
 

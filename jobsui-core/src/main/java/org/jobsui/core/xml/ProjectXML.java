@@ -4,10 +4,13 @@ import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,6 +30,16 @@ public class ProjectXML implements ValidatingXML {
     public ProjectXML(File projectFolder, String name) {
         this.projectFolder = projectFolder;
         this.name = name;
+    }
+
+    public JobParser getParser(String relativePath) throws SAXException {
+        File path = new File(projectFolder, relativePath);
+        return JobParser.getParser(path.getAbsolutePath());
+    }
+
+    public URL getRelativeURL(String relativePath) throws MalformedURLException {
+        final File path = new File(projectFolder, relativePath);
+        return path.toURI().toURL();
     }
 
     public void export() throws Exception {

@@ -8,8 +8,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
-
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
 
@@ -17,12 +15,11 @@ import static org.junit.Assert.*;
  * Created by enrico on 5/4/16.
  */
 public class JobParserTest {
-    private static final String SRC_TEST_RESOURCES_SIMPLEJOB = "src/test/resources/simplejob";
     private static ProjectXML projectXML;
 
     @BeforeClass
     public static void setUpStatic() throws Exception {
-        JobParser parser = JobParser.getParser(SRC_TEST_RESOURCES_SIMPLEJOB);
+        JobParser parser = JobParser.getParser("src/test/resources/simplejob");
         projectXML = parser.parse();
     }
 
@@ -33,7 +30,7 @@ public class JobParserTest {
 
     @Test
     public void test_parse() throws Exception {
-        ProjectGroovy projectGroovy = new ProjectGroovyBuilder().build(SRC_TEST_RESOURCES_SIMPLEJOB, projectXML);
+        ProjectGroovy projectGroovy = new ProjectGroovyBuilder().build(projectXML);
         Job<Object> job = projectGroovy.getJob("simple");
 
         assertThat(job, is(notNullValue()));

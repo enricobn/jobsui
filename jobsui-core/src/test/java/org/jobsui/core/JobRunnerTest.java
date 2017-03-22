@@ -1,10 +1,7 @@
 package org.jobsui.core;
 
 import groovy.lang.GroovyShell;
-import org.jobsui.core.groovy.JobExpressionGroovy;
-import org.jobsui.core.groovy.JobParameterDefGroovySimple;
-import org.jobsui.core.groovy.JobParser;
-import org.jobsui.core.groovy.ProjectGroovyBuilder;
+import org.jobsui.core.groovy.*;
 import org.jobsui.core.job.*;
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobResultImpl;
@@ -19,7 +16,6 @@ import org.mockito.Mockito;
 import org.mockito.listeners.InvocationListener;
 import org.mockito.listeners.MethodInvocationReport;
 
-import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 
@@ -479,7 +475,7 @@ public class JobRunnerTest {
 
     private static <T> Job<T> getJob(String file, String job) throws Exception {
         ProjectXML projectXML = JobParser.getParser(file).parse();
-        Project project = new ProjectGroovyBuilder().build(file, projectXML);
+        Project project = new ProjectGroovyBuilder().build(projectXML);
         Job<T> result = project.getJob(job);
         if (result == null) {
             throw new Exception("Cannot find job with id \"" + job + "\". Ids:" + project.getJobsIds());

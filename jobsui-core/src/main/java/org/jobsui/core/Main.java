@@ -11,9 +11,7 @@ import org.jobsui.core.ui.swing.SwingUI;
 import org.jobsui.core.xml.ProjectXML;
 
 import javax.swing.*;
-import java.io.File;
 import java.io.Serializable;
-import java.net.URL;
 
 /**
  * Created by enrico on 5/5/16.
@@ -36,7 +34,7 @@ public class Main {
 //        }
 
         ProjectXML projectXML = JobParser.getParser(projectRoot).parse();
-        final Project project = new ProjectGroovyBuilder().build(projectRoot, projectXML);
+        final Project project = new ProjectGroovyBuilder().build(projectXML);
 
         String key = args[1];
 
