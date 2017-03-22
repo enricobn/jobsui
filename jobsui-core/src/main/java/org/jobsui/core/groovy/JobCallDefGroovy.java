@@ -1,7 +1,7 @@
 package org.jobsui.core.groovy;
 
 import org.jobsui.core.job.Job;
-import org.jobsui.core.runner.JobFuture;
+import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.job.JobParameterDefAbstract;
 import org.jobsui.core.Project;
 import org.jobsui.core.ui.*;
@@ -49,13 +49,13 @@ public class JobCallDefGroovy<T extends Serializable> extends JobParameterDefAbs
             mappedValues.put(entry.getValue(), values.get(entry.getKey()));
         }
 
-        JobFuture future = job.run(mappedValues);
+        JobResult result = job.run(mappedValues);
 
-        if (future.getException() != null) {
-            throw new RuntimeException(future.getException());
+        if (result.getException() != null) {
+            throw new RuntimeException(result.getException());
         }
 
-        Object value = future.get();
+        Object value = result.get();
 
         try {
             if (value == null) {

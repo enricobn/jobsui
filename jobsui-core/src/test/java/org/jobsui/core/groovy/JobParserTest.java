@@ -38,7 +38,6 @@ public class JobParserTest {
         Job<Object> job = projectGroovy.getJob("simple");
 
         assertThat(job, is(notNullValue()));
-        assertThat(JobDependency.getSortedDependenciesKeys(job.getParameterDefs()).size(), is(3));
         assertThat(job.getParameter("name").getName(), is("Name"));
         assertThat(job.getParameter("surname").getName(), is("Surname"));
         assertThat(job.getParameter("inv").getName(), is("Inv"));

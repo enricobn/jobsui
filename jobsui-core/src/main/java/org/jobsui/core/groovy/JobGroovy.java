@@ -6,8 +6,8 @@ import groovy.lang.Script;
 import org.jobsui.core.job.JobAbstract;
 import org.jobsui.core.job.JobExpression;
 import org.jobsui.core.job.JobParameterDef;
-import org.jobsui.core.runner.JobFuture;
-import org.jobsui.core.runner.JobFutureImpl;
+import org.jobsui.core.runner.JobResult;
+import org.jobsui.core.runner.JobResultImpl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public class JobGroovy<T> extends JobAbstract<T> {
     }
 
     @Override
-    public JobFuture<T> run(final Map<String, Serializable> values) {
+    public JobResult<T> run(final Map<String, Serializable> values) {
         // I reset the bindings otherwise I get "global" or previous bindings
         run.setBinding(new Binding(shellBinding.getVariables()));
 
@@ -72,9 +72,9 @@ public class JobGroovy<T> extends JobAbstract<T> {
         try {
             @SuppressWarnings("unchecked")
             T result = (T) this.run.run();
-            return new JobFutureImpl<>(result);
+            return new JobResultImpl<>(result);
         } catch (Exception e) {
-            return new JobFutureImpl<>(new RuntimeException("Cannot execute run for job with id \"" + getId() + "\".", e));
+            return new JobResultImpl<>(new RuntimeException("Cannot execute run for job with id \"" + getId() + "\".", e));
         }
     }
 

@@ -1,6 +1,6 @@
 package org.jobsui.core.job;
 
-import org.jobsui.core.runner.JobFuture;
+import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobValues;
 
 import java.io.Serializable;
@@ -20,9 +20,9 @@ public interface Job<T> {
 
     List<JobExpression> getExpressions();
 
-    JobFuture<T> run(Map<String,Serializable> values);
+    JobResult<T> run(Map<String,Serializable> values);
 
-    default JobFuture<T> run(JobValues values) {
+    default JobResult<T> run(JobValues values) {
         Map<String, Serializable> groovyValues = new HashMap<>();
         for (JobDependency jobDependency : getUnsortedDependencies()) {
             groovyValues.put(jobDependency.getKey(), values.getValue(jobDependency));

@@ -56,10 +56,10 @@ public class Main {
             result = runner.run(job);
         }
 
-//        final JobFuture<? extends Serializable> future = runner.run(ui, job);
+//        final JobResult<? extends Serializable> result = runner.run(ui, job);
 //
-//        if (future != null) {
-//            future.get();
+//        if (result != null) {
+//            result.get();
 //        }
     }
 

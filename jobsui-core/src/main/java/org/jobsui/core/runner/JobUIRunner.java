@@ -40,7 +40,7 @@ public class JobUIRunner<C> implements JobRunner {
 
         List<Exception> exceptions = new ArrayList<>();
 
-        AtomicReference<T> result = new AtomicReference<>(null);
+        AtomicReference<T> atomicResult = new AtomicReference<>(null);
 
         window.show(() -> {
 
@@ -70,11 +70,11 @@ public class JobUIRunner<C> implements JobRunner {
 
             runButton.getObservable().subscribe(serializableVoid -> {
                 try {
-                    JobFuture<T> resultFuture = job.run(values);
-                    if (resultFuture.getException() != null) {
-                        ui.showError("Error running job.", resultFuture.getException());
+                    JobResult<T> result = job.run(values);
+                    if (result.getException() != null) {
+                        ui.showError("Error running job.", result.getException());
                     } else {
-                        result.set(resultFuture.get());
+                        atomicResult.set(result.get());
                     }
                 } catch (Exception e) {
                     ui.showError("Error running job.", e);
@@ -128,7 +128,7 @@ public class JobUIRunner<C> implements JobRunner {
         if (!exceptions.isEmpty()) {
             throw exceptions.get(0);
         }
-        return result.get();
+        return atomicResult.get();
     }
 
     private Bookmark loadBookmark(XStream xstream, String fileName) throws FileNotFoundException {

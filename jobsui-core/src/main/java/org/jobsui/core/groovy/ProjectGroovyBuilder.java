@@ -131,6 +131,7 @@ public class ProjectGroovyBuilder {
         for (String library : projectXML.getLibraries()) {
             String[] split = library.split(":");
             File file = IvyUtils.resolveArtifact(split[0], split[1], split[2]);
+
             cl.addURL(file.toURI().toURL());
         }
 

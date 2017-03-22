@@ -459,8 +459,8 @@ public class JobRunnerTest {
             throw new RuntimeException(e);
         }
         when(job.getUnsortedDependencies()).thenReturn(Arrays.asList(inv, name, surname));
-        when(job.run(anyMapOf(String.class, Serializable.class))).thenReturn(new JobFutureImpl<>((String)null));
-        when(job.run(any(JobValues.class))).thenReturn(new JobFutureImpl<>((String)null));
+        when(job.run(anyMapOf(String.class, Serializable.class))).thenReturn(new JobResultImpl<>((String)null));
+        when(job.run(any(JobValues.class))).thenReturn(new JobResultImpl<>((String)null));
         return job;
     }
 
@@ -547,8 +547,8 @@ public class JobRunnerTest {
             }
 
             @Override
-            public JobFuture<String> run(final Map<String, Serializable> values) {
-                return new JobFuture<String>() {
+            public JobResult<String> run(final Map<String, Serializable> values) {
+                return new JobResult<String>() {
                     @Override
                     public String get() {
                         return values.get("name") + " " + values.get("surname");
@@ -633,8 +633,8 @@ public class JobRunnerTest {
             }
 
             @Override
-            public JobFuture<String> run(final Map<String, Serializable> values) {
-                return new JobFuture<String>() {
+            public JobResult<String> run(final Map<String, Serializable> values) {
+                return new JobResult<String>() {
                     @Override
                     public String get() {
                         return values.get("name") + " " + values.get("surname");
@@ -732,8 +732,8 @@ public class JobRunnerTest {
             }
 
             @Override
-            public JobFuture<String> run(final Map<String, Serializable> values) {
-                return new JobFuture<String>() {
+            public JobResult<String> run(final Map<String, Serializable> values) {
+                return new JobResult<String>() {
                     @Override
                     public String get() {
                         return (String)values.get("prefixed");
@@ -847,8 +847,8 @@ public class JobRunnerTest {
             }
 
             @Override
-            public JobFuture<String> run(final Map<String, Serializable> values) {
-                return new JobFuture<String>() {
+            public JobResult<String> run(final Map<String, Serializable> values) {
+                return new JobResult<String>() {
                     @Override
                     public String get() {
                         return (String) values.get("user");

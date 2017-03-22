@@ -21,52 +21,38 @@ import java.text.ParseException;
  * Created by enrico on 10/4/16.
  */
 public class IvyUtils {
+    //creates clear ivy settings
+    private static final IvySettings IVY_SETTINGS = getIvySettings();
+    //creates an Ivy instance with settings
+    private static final Ivy IVY = Ivy.newInstance(IVY_SETTINGS);
+    private static DefaultMessageLogger logger = new DefaultMessageLogger(Message.MSG_ERR);
+    private static final String[] CONFS = new String[] {"default"};
+    private static final ResolveOptions RESOLVE_OPTIONS = new ResolveOptions().setConfs(CONFS);
+
+    static {
+        IVY.getLoggerEngine().setDefaultLogger(logger);
+        Message.setDefaultLogger(logger);
+    }
 
     // from https://makandracards.com/evgeny-goldin/5817-calling-ivy-from-groovy-or-java
     public static File resolveArtifact(String groupId, String artifactId, String version) throws IOException, ParseException {
-        //creates clear ivy settings
-        IvySettings ivySettings = new IvySettings();
-        //url resolver for configuration of maven repo
-        URLResolver resolver = new URLResolver();
-        resolver.setM2compatible(true);
-        resolver.setName("central");
-        //you can specify the url resolution pattern strategy
-        resolver.addArtifactPattern(
-                "http://repo1.maven.org/maven2/[organisation]/[module]/[revision]/[artifact](-[revision]).[ext]");
-        //adding maven repo resolver
-        ivySettings.addResolver(resolver);
-        //set to the default resolver
-        ivySettings.setDefaultResolver(resolver.getName());
-
-        //creates an Ivy instance with settings
-        Ivy ivy = Ivy.newInstance(ivySettings);
-
-        DefaultMessageLogger logger = new DefaultMessageLogger(Message.MSG_ERR);
-
-        ivy.getLoggerEngine().setDefaultLogger(logger);
-        Message.setDefaultLogger(logger);
-
-        File ivyfile = File.createTempFile("ivy", ".xml");
-        ivyfile.deleteOnExit();
+        File ivyFile = File.createTempFile("ivy", ".xml");
+        ivyFile.deleteOnExit();
 
         String[] dep = {groupId, artifactId, version};
 
-        DefaultModuleDescriptor md =
-                DefaultModuleDescriptor.newDefaultInstance(ModuleRevisionId.newInstance(dep[0],
-                        dep[1] + "-caller", "working"));
+        ModuleRevisionId moduleRevisionId = ModuleRevisionId.newInstance(dep[0], dep[1] + "-caller", "working");
+        DefaultModuleDescriptor md = DefaultModuleDescriptor.newDefaultInstance(moduleRevisionId);
 
         DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md,
-                ModuleRevisionId.newInstance(dep[0], dep[1], dep[2]), false, false, true);
+                ModuleRevisionId.newInstance(dep[0], dep[1], dep[2]), false, false, false);
         md.addDependency(dd);
 
         //creates an ivy configuration file
-        XmlModuleDescriptorWriter.write(md, ivyfile);
-
-        String[] confs = {"default"};
-        ResolveOptions resolveOptions = new ResolveOptions().setConfs(confs);
+        XmlModuleDescriptorWriter.write(md, ivyFile);
 
         // TODO it does not work
-        ivy.getEventManager().addIvyListener(event -> {
+        IVY.getEventManager().addIvyListener(event -> {
             if (event instanceof StartArtifactDownloadEvent) {
                 StartArtifactDownloadEvent artifactEvent = (StartArtifactDownloadEvent) event;
                 System.out.println("Downloading " + artifactEvent.getArtifact());
@@ -74,10 +60,35 @@ public class IvyUtils {
         });
 
         //init resolve report
-        ResolveReport report = ivy.resolve(ivyfile.toURI().toURL(), resolveOptions);
+        ResolveReport report = IVY.resolve(ivyFile.toURI().toURL(), RESOLVE_OPTIONS);
 
         //so you can get the jar library
-
         return report.getAllArtifactsReports()[0].getLocalFile();
     }
+
+    private static IvySettings getIvySettings() {
+        IvySettings ivySettings = new IvySettings();
+
+        //url resolver for configuration of maven repo
+        URLResolver mavenCentralResolver = getMavenCentralResolver();
+
+        //adding maven repo resolver
+        ivySettings.addResolver(mavenCentralResolver);
+
+        //set to the default resolver
+        ivySettings.setDefaultResolver(mavenCentralResolver.getName());
+        return ivySettings;
+    }
+
+    private static URLResolver getMavenCentralResolver() {
+        URLResolver mavenCentralResolver = new URLResolver();
+        mavenCentralResolver.setM2compatible(true);
+        mavenCentralResolver.setName("central");
+        mavenCentralResolver.setCheckconsistency(false);
+        //you can specify the url resolution pattern strategy
+        mavenCentralResolver.addArtifactPattern(
+                "http://repo1.maven.org/maven2/[organisation]/[module]/[revision]/[artifact](-[revision]).[ext]");
+        return mavenCentralResolver;
+    }
+
 }
