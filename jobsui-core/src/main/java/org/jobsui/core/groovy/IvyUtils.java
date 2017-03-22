@@ -36,20 +36,7 @@ public class IvyUtils {
 
     // from https://makandracards.com/evgeny-goldin/5817-calling-ivy-from-groovy-or-java
     public static File resolveArtifact(String groupId, String artifactId, String version) throws IOException, ParseException {
-        File ivyFile = File.createTempFile("ivy", ".xml");
-        ivyFile.deleteOnExit();
-
-        String[] dep = {groupId, artifactId, version};
-
-        ModuleRevisionId moduleRevisionId = ModuleRevisionId.newInstance(dep[0], dep[1] + "-caller", "working");
-        DefaultModuleDescriptor md = DefaultModuleDescriptor.newDefaultInstance(moduleRevisionId);
-
-        DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md,
-                ModuleRevisionId.newInstance(dep[0], dep[1], dep[2]), false, false, false);
-        md.addDependency(dd);
-
-        //creates an ivy configuration file
-        XmlModuleDescriptorWriter.write(md, ivyFile);
+        File ivyFile = getIvyFile(groupId, artifactId, version);
 
         // TODO it does not work
         IVY.getEventManager().addIvyListener(event -> {
@@ -64,6 +51,24 @@ public class IvyUtils {
 
         //so you can get the jar library
         return report.getAllArtifactsReports()[0].getLocalFile();
+    }
+
+    private static File getIvyFile(String groupId, String artifactId, String version) throws IOException {
+        File ivyFile = File.createTempFile("ivy", ".xml");
+        ivyFile.deleteOnExit();
+
+        String[] dep = {groupId, artifactId, version};
+
+        ModuleRevisionId moduleRevisionId = ModuleRevisionId.newInstance(dep[0], dep[1] + "-caller", "working");
+        DefaultModuleDescriptor md = DefaultModuleDescriptor.newDefaultInstance(moduleRevisionId);
+
+        DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md,
+                ModuleRevisionId.newInstance(dep[0], dep[1], dep[2]), false, false, false);
+        md.addDependency(dd);
+
+        //creates an ivy configuration file
+        XmlModuleDescriptorWriter.write(md, ivyFile);
+        return ivyFile;
     }
 
     private static IvySettings getIvySettings() {
