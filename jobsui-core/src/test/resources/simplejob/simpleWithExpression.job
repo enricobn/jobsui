@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<Job id="simpleWithExpression" name="Simple with expression" version="1.0.0">
+
+    <Parameter key="name" name="Name">
+        <CreateComponent>
+            def uiValue = ui.create(UIValue.class);
+            uiValue.setConverter(new StringConverterString());
+            uiValue.setDefaultValue("Enrico");
+            return uiValue;
+        </CreateComponent>
+
+        <Validate>
+            return new NotEmptyStringValidator().validate(values, value);
+        </Validate>
+
+    </Parameter>
+
+    <Parameter key="surname" name="Surname">
+        <CreateComponent>
+            def uiValue = ui.create(UIValue.class);
+            uiValue.setConverter(new StringConverterString());
+            return uiValue;
+        </CreateComponent>
+
+        <Validate>
+            return new NotEmptyStringValidator().validate(values, value);
+        </Validate>
+    </Parameter>
+
+    <Expression key="completeName" name="Complete name">
+        <Dependency key="name"/>
+        <Dependency key="surname"/>
+
+        <Evaluate>
+            return name + ' ' + surname;
+        </Evaluate>
+    </Expression>
+
+    <Run>
+        return 'Mr. ' + completeName;
+    </Run>
+    <!--Validate>
+        return new NotEmptyStringValidator().validate(values, value);
+    </Validate-->
+</Job>

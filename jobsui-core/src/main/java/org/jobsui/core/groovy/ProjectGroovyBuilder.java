@@ -3,6 +3,8 @@ package org.jobsui.core.groovy;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jobsui.core.Project;
 import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.xml.*;
@@ -136,7 +138,13 @@ public class ProjectGroovyBuilder {
             cl.addURL(fileLibrary.toURI().toURL());
         }
 
-        return new GroovyShell(cl);
+        ImportCustomizer importCustomizer = new ImportCustomizer();
+        importCustomizer.addStarImports("org.jobsui.core", "org.jobsui.core.ui");
+
+        CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
+        compilerConfiguration.addCompilationCustomizers(importCustomizer);
+
+        return new GroovyShell(cl, compilerConfiguration);
     }
 
 }

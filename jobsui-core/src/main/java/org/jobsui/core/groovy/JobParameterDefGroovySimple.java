@@ -14,14 +14,15 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by enrico on 5/4/16.
  */
 public class JobParameterDefGroovySimple extends JobParameterDefAbstract implements JobParameterDefGroovy {
-    private static final String IMPORTS =
-            "import org.jobsui.core.*;\n" +
-            "import org.jobsui.core.ui.*;\n";
+//    private static final String IMPORTS =
+//            "import org.jobsui.core.*;\n" +
+//            "import org.jobsui.core.ui.*;\n";
 //    private final File projectFolder;
     private final String createComponentScript;
     private final String onDependenciesChangeScript;
@@ -35,23 +36,24 @@ public class JobParameterDefGroovySimple extends JobParameterDefAbstract impleme
                                        String createComponentScript, String onDependenciesChangeScript,
                                        String validateScript, boolean optional, boolean visible) {
         super(key, name, null, optional, visible);
+        Objects.requireNonNull(createComponentScript);
 //        this.projectFolder = projectFolder;
         this.createComponentScript = createComponentScript;
         this.onDependenciesChangeScript = onDependenciesChangeScript;
         this.validateScript = validateScript;
         try {
-            this.createComponent = shell.parse(IMPORTS + createComponentScript);
-        } catch (CompilationFailedException e) {
+            this.createComponent = shell.parse(createComponentScript);
+        } catch (Exception e) {
             throw new RuntimeException("Error parsing createComponent for parameter with key \"" + key + "\".", e);
         }
         try {
-            this.onDependenciesChange = shell.parse(IMPORTS + onDependenciesChangeScript);
-        } catch (CompilationFailedException e) {
+            this.onDependenciesChange = onDependenciesChangeScript == null ? null : shell.parse(onDependenciesChangeScript);
+        } catch (Exception e) {
             throw new RuntimeException("Error parsing onDependenciesChange for parameter with key \"" + key + "\".", e);
         }
         try {
-            this.validate = validateScript == null ? null : shell.parse(IMPORTS + validateScript);
-        } catch (CompilationFailedException e) {
+            this.validate = validateScript == null ? null : shell.parse(validateScript);
+        } catch (Exception e) {
             throw new RuntimeException("Error parsing validate for parameter with key \"" + key + "\".", e);
         }
         shellBinding = shell.getContext();

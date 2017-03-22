@@ -4,10 +4,7 @@ import org.jobsui.core.NotNullValidator;
 import org.jobsui.core.ParameterValidator;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by enrico on 4/30/16.
@@ -22,6 +19,8 @@ public abstract class JobParameterDefAbstract implements JobParameterDef {
     private final boolean visible;
 
     public JobParameterDefAbstract(String key, String name, ParameterValidator validator, boolean optional, boolean visible) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(name);
         this.key = key;
         this.name = name;
 //        this.converter = converter;

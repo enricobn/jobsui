@@ -18,9 +18,6 @@ import java.util.Objects;
  * Created by enrico on 3/19/17.
  */
 public class JobExpressionGroovy implements JobDependencyGroovy,JobExpression {
-    private static final String IMPORTS =
-            "import org.jobsui.core.*;\n" +
-            "import org.jobsui.core.ui.*;\n";
     private final String key;
     private final String name;
     private final List<String> dependencies = new ArrayList<>();
@@ -40,7 +37,7 @@ public class JobExpressionGroovy implements JobDependencyGroovy,JobExpression {
             subscribers.add(subscriber);
         });
         try {
-            this.evaluate = shell.parse(IMPORTS + evaluateScript);
+            this.evaluate = shell.parse(evaluateScript);
         } catch (CompilationFailedException e) {
             throw new RuntimeException("Error parsing evaluate for expression with key \"" + key + "\".", e);
         }

@@ -1,7 +1,10 @@
 package org.jobsui.core;
 
 import groovy.lang.GroovyShell;
-import org.jobsui.core.groovy.*;
+import org.jobsui.core.groovy.JobExpressionGroovy;
+import org.jobsui.core.groovy.JobParameterDefGroovySimple;
+import org.jobsui.core.groovy.JobParser;
+import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.*;
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobResultImpl;
@@ -38,15 +41,15 @@ public class JobRunnerTest {
     private static Job<String> simpleWithInternalCallFSJob;
     private static Job<String> simpleJob;
     private static Job<String> simpleFSJob;
-    private static Job<String> groovySimpleJob;
     private static Job<String> complexJob;
+    private static Job<String> simpleJobWithExpression;
 
     @BeforeClass
     public static void initStatic() throws Exception {
         simpleWithInternalCallFSJob = getJob("src/test/resources/simplejob", "simpleWithInternalCall");
         simpleFSJob = getJob("src/test/resources/simplejob", "simple");
+        simpleJobWithExpression = getJob("src/test/resources/simplejob", "simpleWithExpression");
         simpleJob = createSimpleJob();
-        groovySimpleJob = createGroovySimpleJob();
         complexJob = createComplexJob();
     }
 
@@ -54,8 +57,8 @@ public class JobRunnerTest {
     public static void teardownStatic() throws Exception {
         simpleWithInternalCallFSJob = null;
         simpleFSJob = null;
+        simpleJobWithExpression = null;
         simpleJob = null;
-        groovySimpleJob = null;
         complexJob = null;
     }
 
@@ -149,7 +152,7 @@ public class JobRunnerTest {
             }
         };
 
-        String result = jobRunnerWrapper.start(groovySimpleJob);
+        String result = jobRunnerWrapper.start(simpleJob);
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -398,7 +401,7 @@ public class JobRunnerTest {
             }
         };
 
-        final Job<String> job = createGroovySimpleJobWithExpression();
+        final Job<String> job = simpleJobWithExpression;
 
         String result = jobRunnerWrapper.start(job);
 
@@ -570,185 +573,6 @@ public class JobRunnerTest {
             }
         };
 
-    }
-
-    private static Job<String> createGroovySimpleJob() {
-        GroovyShell shell = new GroovyShell();
-        final List<JobParameterDef> parameterDefs = new ArrayList<>();
-
-        final JobParameterDefAbstract name = new JobParameterDefGroovySimple(
-                shell,
-                "name",
-                "Name",
-                "def uiValue = ui.create(UIValue.class);\n" +
-                "uiValue.setConverter(new StringConverterString());\n" +
-                "uiValue.setDefaultValue(\"John\");\n" +
-                "return uiValue;",
-                null,
-                null,
-                false,
-                true) {
-            @Override
-            public void onDependenciesChange(UIWidget widget, Map<String, Serializable> values) {
-            }
-        };
-        parameterDefs.add(name);
-
-        final JobParameterDefAbstract surname = new JobParameterDefGroovySimple(
-                shell,
-                "surname",
-                "Surname",
-                "def uiValue = ui.create(UIValue.class);\n" +
-                        "uiValue.setConverter(new StringConverterString());\n" +
-                        "return uiValue;",
-                null,
-                null,
-                false,
-                true) {
-        };
-        surname.addDependency(name.getKey());
-        parameterDefs.add(surname);
-
-        return new JobAbstract<String>() {
-            @Override
-            public String getId() {
-                return "JobRunnerTest.groovySimpleJob";
-            }
-
-            @Override
-            public String getName() {
-                return "Test";
-            }
-
-            @Override
-            public List<JobParameterDef> getParameterDefs() {
-                return parameterDefs;
-            }
-
-            @Override
-            public List<JobExpression> getExpressions() {
-                return Collections.emptyList();
-            }
-
-            @Override
-            public JobResult<String> run(final Map<String, Serializable> values) {
-                return new JobResult<String>() {
-                    @Override
-                    public String get() {
-                        return values.get("name") + " " + values.get("surname");
-                    }
-
-                    @Override
-                    public Exception getException() {
-                        return null;
-                    }
-                };
-            }
-
-            @Override
-            public List<String> validate(Map<String, Serializable> values) {
-                return Collections.emptyList();
-            }
-        };
-    }
-
-    private static Job<String> createGroovySimpleJobWithExpression() {
-        GroovyShell shell = new GroovyShell();
-        final List<JobParameterDef> parameterDefs = new ArrayList<>();
-        final List<JobExpression> expressions = new ArrayList<>();
-
-        final JobParameterDefAbstract name = new JobParameterDefGroovySimple(
-                shell,
-                "name",
-                "Name",
-                "def uiValue = ui.create(UIValue.class);\n" +
-                        "uiValue.setConverter(new StringConverterString());\n" +
-                        "uiValue.setDefaultValue(\"John\");\n" +
-                        "return uiValue;",
-                null,
-                null,
-                false,
-                true) {
-            @Override
-            public void onDependenciesChange(UIWidget widget, Map<String, Serializable> values) {
-            }
-        };
-        parameterDefs.add(name);
-
-        final JobParameterDefAbstract surname = new JobParameterDefGroovySimple(
-                shell,
-                "surname",
-                "Surname",
-                "def uiValue = ui.create(UIValue.class);\n" +
-                        "uiValue.setConverter(new StringConverterString());\n" +
-                        "return uiValue;",
-                null,
-                null,
-                false,
-                true) {
-        };
-        parameterDefs.add(surname);
-
-        final JobExpressionGroovy completeName = new JobExpressionGroovy(
-                shell,
-                "completeName",
-                "Complete name",
-                "return name + ' ' + surname;"
-        );
-        completeName.addDependency("name");
-        completeName.addDependency("surname");
-        expressions.add(completeName);
-
-        final JobExpressionGroovy prefixed = new JobExpressionGroovy(
-                shell,
-                "prefixed",
-                "Name prefix",
-                "return 'Mr. ' + completeName;"
-        );
-        prefixed.addDependency("completeName");
-        expressions.add(prefixed);
-
-        return new JobAbstract<String>() {
-            @Override
-            public String getId() {
-                return "JobRunnerTest.groovySimpleJobWithParameters";
-            }
-
-            @Override
-            public String getName() {
-                return "Test";
-            }
-
-            @Override
-            public List<JobParameterDef> getParameterDefs() {
-                return parameterDefs;
-            }
-
-            @Override
-            public List<JobExpression> getExpressions() {
-                return expressions;
-            }
-
-            @Override
-            public JobResult<String> run(final Map<String, Serializable> values) {
-                return new JobResult<String>() {
-                    @Override
-                    public String get() {
-                        return (String)values.get("prefixed");
-                    }
-
-                    @Override
-                    public Exception getException() {
-                        return null;
-                    }
-                };
-            }
-
-            @Override
-            public List<String> validate(Map<String, Serializable> values) {
-                return Collections.emptyList();
-            }
-        };
     }
 
     private static Job<String> createComplexJob() {
