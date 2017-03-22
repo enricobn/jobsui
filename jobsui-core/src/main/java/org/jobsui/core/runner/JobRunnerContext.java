@@ -1,5 +1,6 @@
 package org.jobsui.core.runner;
 
+import org.jobsui.core.ParameterValidator;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.JobExpression;
@@ -8,8 +9,7 @@ import org.jobsui.core.ui.*;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
-import rx.functions.Action1;
-import rx.functions.FuncN;
+import rx.Subscriber;
 
 import java.io.Serializable;
 import java.util.*;
@@ -106,7 +106,7 @@ public class JobRunnerContext<T extends Serializable, C> {
      * Creates an Observable that emits a JobValidation, with the validation status of the job, when all values are set or
      * a value is changed.
      */
-    public Observable<JobValidation> validationObserver() {
+    public Observable<JobValidation> jobValidationObserver() {
         List<Observable<?>> observables = widgets.getWidgets().stream()
                 .map(widget -> widget.getWidget().getComponent().getObservable())
                 .collect(Collectors.toList());
@@ -125,17 +125,15 @@ public class JobRunnerContext<T extends Serializable, C> {
 
             for (JobDependency jobDependency : sortedJobDependencies) {
                 Serializable value = (Serializable) args[i++];
-                if (jobDependency instanceof JobParameterDef) {
-                    JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
-                    if (!isValid(jobParameterDef, values, value)) {
+                if (jobDependency instanceof JobValidation) {
+                    ParameterValidator parameterValidator = (ParameterValidator) jobDependency;
+                    if (!isValid(parameterValidator, values, value)) {
                         jobValidation.invalidate();
                         break;
                     }
-                    values.put(jobParameterDef.getKey(), value);
-                } else if (jobDependency instanceof JobExpression) {
                     values.put(jobDependency.getKey(), value);
                 } else {
-                    throw new IllegalStateException("Unknown type " + jobDependency.getClass());
+                    values.put(jobDependency.getKey(), value);
                 }
             }
 
@@ -189,15 +187,16 @@ public class JobRunnerContext<T extends Serializable, C> {
         });
     }
 
-    private static boolean isValid(JobParameterDef parameterDef, Map<String,Serializable> dependenciesValues, Serializable value) {
-        final List<String> validate = parameterDef.validate(dependenciesValues, value);
+    private static boolean isValid(ParameterValidator parameterValidator, Map<String,Serializable> dependenciesValues, Serializable value) {
+        final List<String> validate = parameterValidator.validate(dependenciesValues, value);
 
         return validate.isEmpty();
     }
 
-    private static Map<String, Serializable> getDependenciesValues(Map<String, Serializable> values, JobParameterDef jobParameterDef) {
+    private static Map<String, Serializable> getDependenciesValues(Map<String, Serializable> values,
+                                                                   JobDependency jobDependency) {
         Map<String,Serializable> dependenciesValues = new HashMap<>();
-        for (String dependency : jobParameterDef.getDependencies()) {
+        for (String dependency : jobDependency.getDependencies()) {
             if (values.containsKey(dependency)) {
                 Serializable dependencyValue = values.get(dependency);
                 dependenciesValues.put(dependency, dependencyValue);
@@ -244,29 +243,74 @@ public class JobRunnerContext<T extends Serializable, C> {
         });
     }
 
+    public Observable<ChangedValue> valueChangeObserver() {
+        Map<JobDependency, Observable<Serializable>> observables = getDependenciesObservables(
+                sortedJobDependencies.stream().map(JobDependency::getKey).collect(Collectors.toList())
+        );
+
+        List<Subscriber<? super ChangedValue>> subscribers = new ArrayList<>();
+
+        Map<String, Serializable> values = new HashMap<>();
+        Map<String, Serializable> unmodifiableValues = Collections.unmodifiableMap(values);
+        Map<String, Serializable> validValues = new HashMap<>();
+        Map<String, Serializable> unmodifiableValidValues = Collections.unmodifiableMap(validValues);
+
+        Observable<ChangedValue> mapObservable = Observable.create(subscribers::add);
+
+        for (Map.Entry<JobDependency, Observable<Serializable>> entry : observables.entrySet()) {
+            entry.getValue().subscribe(value -> {
+                JobDependency jobDependency = entry.getKey();
+                values.put(jobDependency.getKey(), value);
+                validValues.put(jobDependency.getKey(), value);
+
+                List<String> validation;
+                if (jobDependency instanceof ParameterValidator) {
+                    ParameterValidator parameterValidator = (ParameterValidator) jobDependency;
+                    Map<String, Serializable> dependenciesValues = getDependenciesValues(validValues, jobDependency);
+                    if (dependenciesValues.size() == jobDependency.getDependencies().size()) {
+                        validation = parameterValidator.validate(dependenciesValues, value);
+                        if (!validation.isEmpty()) {
+                            validValues.remove(jobDependency.getKey());
+                        }
+                    } else {
+                        validation = Collections.singletonList("Invalid dependencies.");
+                        validValues.remove(jobDependency.getKey());
+                    }
+                } else {
+                    validation = Collections.emptyList();
+                }
+
+                ChangedValue changedValue = new ChangedValue(entry.getKey(), unmodifiableValues, unmodifiableValidValues,
+                        validation);
+
+                subscribers.forEach(s -> s.onNext(changedValue));
+            });
+        }
+
+        return mapObservable;
+    }
+
     public void setComponentValidationMessage() {
         Map<JobDependency, Observable<Serializable>> observables = getDependenciesObservables(
                 sortedJobDependencies.stream().map(JobDependency::getKey).collect(Collectors.toList())
         );
 
-        Map<String, Serializable> values = new HashMap<>();
-
         Map<String, Serializable> validValues = new HashMap<>();
 
         for (Map.Entry<JobDependency, Observable<Serializable>> entry : observables.entrySet()) {
             entry.getValue().subscribe(value -> {
-                values.put(entry.getKey().getKey(), value);
-                if (entry.getKey() instanceof JobParameterDef) {
-                    JobParameterDef jobParameterDef = (JobParameterDef) entry.getKey();
+                JobDependency jobDependency = entry.getKey();
+                if (jobDependency instanceof JobParameterDef) {
+                    JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
                     UIWidget<C> widget = widgets.get(jobParameterDef);
 
                     // I set the validation message only if all dependencies are valid
                     if (getDependenciesValues(validValues, jobParameterDef).size() == jobParameterDef.getDependencies().size()) {
                         List<String> validate = jobParameterDef.validate(validValues, value);
                         if (validate.isEmpty()) {
-                            validValues.put(entry.getKey().getKey(), value);
+                            validValues.put(jobDependency.getKey(), value);
                         } else {
-                            validValues.remove(entry.getKey().getKey());
+                            validValues.remove(jobDependency.getKey());
                         }
 
                         setValidationMessage(validate, jobParameterDef, widget, ui);
@@ -275,6 +319,42 @@ public class JobRunnerContext<T extends Serializable, C> {
                     }
                 }
             });
+        }
+    }
+
+//    a try of using valueChangeObserver()
+//    public void setComponentValidationMessage() {
+//        Observable<ChangedValue> mapObservable = valueChangeObserver();
+//
+//        mapObservable.subscribe(changedValue -> {
+//            if (changedValue.jobDependency instanceof JobParameterDef) {
+//                JobParameterDef jobParameterDef = (JobParameterDef) changedValue.jobDependency;
+//                UIWidget<C> widget = widgets.get(jobParameterDef);
+//
+//                Map<String, Serializable> dependenciesValues = getDependenciesValues(changedValue.validValues, jobParameterDef);
+//
+//                // I set the validation message only if all dependencies are valid
+//                if (dependenciesValues.size() == jobParameterDef.getDependencies().size()) {
+//                    setValidationMessage(changedValue.validation, jobParameterDef, widget, ui);
+//                } else {
+//                    setValidationMessage(Collections.emptyList(), jobParameterDef, widget, ui);
+//                }
+//            }
+//        });
+//    }
+
+    public static class ChangedValue {
+        public final JobDependency jobDependency;
+        public final Map<String, Serializable> values;
+        private final Map<String, Serializable> validValues;
+        private final List<String> validation;
+
+        private ChangedValue(JobDependency jobDependency, Map<String, Serializable> values, Map<String, Serializable> validValues,
+                             List<String> validation) {
+            this.jobDependency = jobDependency;
+            this.values = values;
+            this.validValues = validValues;
+            this.validation = validation;
         }
     }
 

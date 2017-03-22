@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.util.*;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -241,7 +242,8 @@ public class JobRunnerTest {
         assertThat(messages1.isEmpty(), is(true));
 
         final List<String> messages2 = captor.getAllValues().get(1);
-        assertThat(messages2.isEmpty(), is(false));
+        assertThat(messages2.size(), is(1));
+        assertThat(messages2.get(0), containsString("is null"));
     }
 
     @Test public void verify_that_validation_does_NOT_occur_if_dependencies_are_NOT_valid() throws Exception {

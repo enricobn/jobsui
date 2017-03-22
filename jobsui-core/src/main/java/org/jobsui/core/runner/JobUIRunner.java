@@ -99,7 +99,7 @@ public class JobUIRunner<C> implements JobRunner {
                 }
             });
 
-            Observable<JobValidation> validationObserver = context.validationObserver();
+            Observable<JobValidation> validationObserver = context.jobValidationObserver();
 
             validationObserver.subscribe(v -> {
                 valid = v.isValid();
