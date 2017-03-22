@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  */
 public class ProjectGroovyBuilder {
 
-    public ProjectGroovy build(ProjectXML projectXML) throws Exception {
+    public ProjectGroovy build(String projectRoot, ProjectXML projectXML) throws Exception {
         Map<String, JobGroovy<Serializable>> jobs = new HashMap<>();
 
         for (JobXML jobXML : projectXML.getJobs().values()) {
@@ -29,13 +29,12 @@ public class ProjectGroovyBuilder {
 
         Map<String, Project> projects = new HashMap<>();
 
-        JobParser jobParser = new JobParser();
-
         ProjectGroovyBuilder projectGroovyBuilder = new ProjectGroovyBuilder();
         projectXML.getImports().entrySet().forEach(entry -> {
             try {
-                ProjectXML refProjectXML = jobParser.parse(new File(projectXML.getProjectFolder(), entry.getValue()));
-                projects.put(entry.getKey(), projectGroovyBuilder.build(refProjectXML));
+                JobParser jobParser = JobParser.getParser(projectRoot + "/" + entry.getValue());
+                ProjectXML refProjectXML = jobParser.parse();
+                projects.put(entry.getKey(), projectGroovyBuilder.build(projectRoot, refProjectXML));
             } catch (Exception e) {
                 // TODO
                 throw new RuntimeException(e);

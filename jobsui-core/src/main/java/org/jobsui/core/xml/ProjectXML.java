@@ -54,8 +54,8 @@ public class ProjectXML implements ValidatingXML {
             XMLUtils.addAttr(element, "name", entry.getKey());
         }
 
-        XMLUtils.write(doc, new File(projectFolder, JobParser.PROJECT_FILE_NAME),
-                getClass().getResource("/org/jobsui/project.xsd"));
+//        XMLUtils.write(doc, new File(projectFolder, JobParser.PROJECT_FILE_NAME),
+//                getClass().getResource("/org/jobsui/project.xsd"));
 
         for (JobXML jobXML : jobs.values()) {
             jobXML.export();

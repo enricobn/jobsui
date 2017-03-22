@@ -478,8 +478,8 @@ public class JobRunnerTest {
     }
 
     private static <T> Job<T> getJob(String file, String job) throws Exception {
-        ProjectXML projectXML = new JobParser().parse(new File(file));
-        Project project = new ProjectGroovyBuilder().build(projectXML);
+        ProjectXML projectXML = JobParser.getParser(file).parse();
+        Project project = new ProjectGroovyBuilder().build(file, projectXML);
         Job<T> result = project.getJob(job);
         if (result == null) {
             throw new Exception("Cannot find job with id \"" + job + "\". Ids:" + project.getJobsIds());

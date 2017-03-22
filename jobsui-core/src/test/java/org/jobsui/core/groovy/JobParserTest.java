@@ -17,12 +17,13 @@ import static org.junit.Assert.*;
  * Created by enrico on 5/4/16.
  */
 public class JobParserTest {
+    private static final String SRC_TEST_RESOURCES_SIMPLEJOB = "src/test/resources/simplejob";
     private static ProjectXML projectXML;
 
     @BeforeClass
     public static void setUpStatic() throws Exception {
-        JobParser parser = new JobParser();
-        projectXML = parser.parse(new File("src/test/resources/simplejob"));
+        JobParser parser = JobParser.getParser(SRC_TEST_RESOURCES_SIMPLEJOB);
+        projectXML = parser.parse();
     }
 
     @AfterClass
@@ -32,7 +33,7 @@ public class JobParserTest {
 
     @Test
     public void test_parse() throws Exception {
-        ProjectGroovy projectGroovy = new ProjectGroovyBuilder().build(projectXML);
+        ProjectGroovy projectGroovy = new ProjectGroovyBuilder().build(SRC_TEST_RESOURCES_SIMPLEJOB, projectXML);
         Job<Object> job = projectGroovy.getJob("simple");
 
         assertThat(job, is(notNullValue()));

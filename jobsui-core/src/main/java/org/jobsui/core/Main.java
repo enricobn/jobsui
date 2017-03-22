@@ -13,6 +13,7 @@ import org.jobsui.core.xml.ProjectXML;
 import javax.swing.*;
 import java.io.File;
 import java.io.Serializable;
+import java.net.URL;
 
 /**
  * Created by enrico on 5/5/16.
@@ -25,22 +26,24 @@ public class Main {
             return;
         }
 
-        File projectFolder = new File(args[0]);
+        String projectRoot = args[0];
 
-        if (!projectFolder.exists()) {
-            System.out.println("Folder " + projectFolder + " does not exist.");
-            return;
-        }
+//        File projectFolder = new File(args[0]);
+//
+//        if (!projectFolder.exists()) {
+//            System.out.println("Folder " + projectFolder + " does not exist.");
+//            return;
+//        }
 
-        ProjectXML projectXML = new JobParser().parse(projectFolder);
-        final Project project = new ProjectGroovyBuilder().build(projectXML);
+        ProjectXML projectXML = JobParser.getParser(projectRoot).parse();
+        final Project project = new ProjectGroovyBuilder().build(projectRoot, projectXML);
 
         String key = args[1];
 
         final Job<Serializable> job = project.getJob(key);
 
         if (job == null) {
-            System.out.println("Cannot find project with key \"" + key + "\" in folder " + projectFolder + " .");
+            System.out.println("Cannot find project with key \"" + key + "\" in folder " + projectRoot + " .");
             return;
         }
 

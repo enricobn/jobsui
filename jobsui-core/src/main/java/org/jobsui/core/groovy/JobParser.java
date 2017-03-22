@@ -16,6 +16,7 @@ import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Arrays;
 
 /**
@@ -25,8 +26,15 @@ public class JobParser {
     public static final String PROJECT_FILE_NAME = "project.xml";
     private final Validator jobValidator;
     private final Validator projectValidator;
+    private final File folder;
 
-    public JobParser() throws SAXException {
+    public static JobParser getParser(String projectRoot) throws SAXException {
+        File folder = new File(projectRoot);
+        return new JobParser(folder);
+    }
+
+    private JobParser(File folder) throws SAXException {
+        this.folder = folder;
         String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
         SchemaFactory factory = SchemaFactory.newInstance(language);
         Schema jobSchema = factory.newSchema(getClass().getResource("/org/jobsui/job.xsd"));
@@ -35,7 +43,7 @@ public class JobParser {
         projectValidator = projectSchema.newValidator();
     }
 
-    public ProjectXML parse(File folder) throws Exception {
+    public ProjectXML parse() throws Exception {
         File projectFile = new File(folder, PROJECT_FILE_NAME);
 
         if (!projectFile.exists()) {

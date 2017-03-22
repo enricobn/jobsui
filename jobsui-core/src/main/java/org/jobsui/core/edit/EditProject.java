@@ -155,8 +155,8 @@ public class EditProject extends Application {
 //    }
 
     private TreeItem<Item> loadProject(File file) throws Exception {
-        JobParser parser = new JobParser();
-        projectXML = parser.parse(file);
+        JobParser parser = JobParser.getParser(file.getAbsolutePath());
+        projectXML = parser.parse();
         TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, projectXML::getName, projectXML));
 
         TreeItem<Item> libraries = new TreeItem<>(new Item(ItemType.Libraries, () -> "libraries", projectXML));
