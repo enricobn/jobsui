@@ -9,7 +9,6 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,11 +23,12 @@ public class ProjectXML implements ValidatingXML {
     private final Map<String, JobXML> jobs = new HashMap<>();
     private final Collection<File> fileLibraries = new ArrayList<>();
     private final Collection<File> groovyFiles = new ArrayList<>();
+    private final String id;
     private String name;
-    private String id;
 
-    public ProjectXML(File projectFolder, String name) {
+    public ProjectXML(File projectFolder, String id, String name) {
         this.projectFolder = projectFolder;
+        this.id = id;
         this.name = name;
     }
 
@@ -37,9 +37,13 @@ public class ProjectXML implements ValidatingXML {
         return JobParser.getParser(path.getAbsolutePath());
     }
 
-    public URL getRelativeURL(String relativePath) throws MalformedURLException {
+    public URL getRelativeURL(String relativePath) {
         final File path = new File(projectFolder, relativePath);
-        return path.toURI().toURL();
+        try {
+            return path.toURI().toURL();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void export() throws Exception {
@@ -114,10 +118,6 @@ public class ProjectXML implements ValidatingXML {
 
     public Collection<File> getGroovyFiles() {
         return groovyFiles;
-    }
-
-    public File getProjectFolder() {
-        return projectFolder;
     }
 
     public Map<String, JobXML> getJobs() {

@@ -12,9 +12,11 @@ import org.jobsui.core.xml.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.ParseException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -53,7 +55,7 @@ public class ProjectGroovyBuilder {
 
     private static <T> JobGroovy<T> build(ProjectXML projectXML, JobXML jobXML) throws Exception {
         GroovyShell groovyShell = createGroovyShell(projectXML);
-        groovyShell.setProperty("projectFolder", projectXML.getProjectFolder());
+        groovyShell.setProperty("relativeURL", toGroovyFunction(projectXML::getRelativeURL));
         Map<String, JobDependencyGroovy> jobDependencyXMLMap = new LinkedHashMap<>();
 
         List<JobParameterDefGroovy> jobParameterDefs = new ArrayList<>();
@@ -106,6 +108,14 @@ public class ProjectGroovyBuilder {
 
         return new JobGroovy<>(groovyShell, jobXML.getId(), jobXML.getName(), sorteJobParameterDefs, jobExpressions,
                 jobXML.getRunScript(), jobXML.getValidateScript());
+    }
+
+    private static <T,R> Object toGroovyFunction(Function<T,R> function) {
+        return new Object() {
+            public R call(T arg) throws Exception {
+                return function.apply(arg);
+            }
+        };
     }
 
     private static void addDependencies(List<? extends JobDependency> parameterXMLs, Map<String, JobDependencyGroovy> jobDependencyXMLMap) {

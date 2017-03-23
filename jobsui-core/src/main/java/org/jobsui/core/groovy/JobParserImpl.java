@@ -90,9 +90,10 @@ public class JobParserImpl implements JobParser {
         Document doc = dBuilder.parse(is);
 
         NodeList projects = doc.getElementsByTagName("Project");
+        String projectId = getMandatoryAttribute((Element) projects.item(0), "id");
         String projectName = getMandatoryAttribute((Element) projects.item(0), "name");
 
-        ProjectXML projectXML = new ProjectXML(projectFolder, projectName);
+        ProjectXML projectXML = new ProjectXML(projectFolder, projectId, projectName);
 
         NodeList libraries = doc.getElementsByTagName("Library");
 
