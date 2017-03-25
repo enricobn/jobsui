@@ -286,8 +286,6 @@ public class JobRunnerTest {
         JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
-                // I want to ignore all validations at startup
-                Mockito.reset(job.getParameter("inv"));
                 uiValueName.setValue("John");
                 uiValueSurname.setValue("Doe");
             }

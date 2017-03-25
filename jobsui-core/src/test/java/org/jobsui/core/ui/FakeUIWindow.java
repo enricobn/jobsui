@@ -14,7 +14,7 @@ import static org.mockito.Mockito.when;
  * Created by enrico on 5/8/16.
  */
 public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
-    private static final int TIMEOUT = 5_000;
+    private static final int TIMEOUT = 50000_000;
     private static final int SLEEP = 50;
     private volatile boolean exit = false;
     private volatile boolean started = false;

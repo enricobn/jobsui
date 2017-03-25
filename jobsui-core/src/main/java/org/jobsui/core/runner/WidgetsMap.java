@@ -3,32 +3,30 @@ package org.jobsui.core.runner;
 import org.jobsui.core.job.JobParameterDef;
 import org.jobsui.core.ui.UIWidget;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by enrico on 3/11/17.
  */
 class WidgetsMap<C> {
-    private final List<ParameterAndWidget<C>> widgets = new ArrayList<>();
+    private final Map<String,ParameterAndWidget<C>> widgets = new LinkedHashMap<>();
 
     WidgetsMap() {
     }
 
     void add(ParameterAndWidget<C> parameterAndWidget) {
-        widgets.add(parameterAndWidget);
+        widgets.put(parameterAndWidget.getJobParameterDef().getKey(), parameterAndWidget);
     }
 
     UIWidget<C> get(JobParameterDef jobParameterDef) {
-        for (ParameterAndWidget<C> widget : widgets) {
-            if (jobParameterDef.equals(widget.getJobParameterDef())) {
-                return widget.getWidget();
-            }
+        ParameterAndWidget<C> parameterAndWidget = widgets.get(jobParameterDef.getKey());
+        if (parameterAndWidget == null) {
+            throw new IllegalArgumentException("Cannot find widget for parameter " + jobParameterDef);
         }
-        return null;
+        return parameterAndWidget.getWidget();
     }
 
-    List<ParameterAndWidget<C>> getWidgets() {
-        return widgets;
+    Collection<ParameterAndWidget<C>> getWidgets() {
+        return widgets.values();
     }
 }
