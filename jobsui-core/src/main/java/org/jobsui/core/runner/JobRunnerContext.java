@@ -125,7 +125,7 @@ public class JobRunnerContext<T extends Serializable, C> {
 
             for (JobDependency jobDependency : sortedJobDependencies) {
                 Serializable value = (Serializable) args[i++];
-                if (jobDependency instanceof JobValidation) {
+                if (jobDependency instanceof ParameterValidator) {
                     ParameterValidator parameterValidator = (ParameterValidator) jobDependency;
                     if (!isValid(parameterValidator, values, value)) {
                         jobValidation.invalidate();

@@ -1,8 +1,5 @@
 package org.jobsui.core;
 
-import groovy.lang.GroovyShell;
-import org.jobsui.core.groovy.JobExpressionGroovy;
-import org.jobsui.core.groovy.JobParameterDefGroovySimple;
 import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.*;
@@ -21,6 +18,7 @@ import org.mockito.listeners.MethodInvocationReport;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
@@ -33,33 +31,53 @@ import static org.mockito.Mockito.*;
  * Created by enrico on 4/30/16.
  */
 public class JobRunnerTest {
+    private static Map<String, Project> projects;
+    private static Map<JobType, CachedJob> jobs;
     private JobUIRunner runner;
     private UI ui;
     private FakeUIWindow window;
     private FakeUIButton<?> runButton;
     private FakeUIButton<?> bookmarkButton;
-    private static Job<String> simpleWithInternalCallFSJob;
-    private static Job<String> simpleJob;
-    private static Job<String> simpleFSJob;
-    private static Job<String> complexJob;
-    private static Job<String> simpleJobWithExpression;
+
+    private static class CachedJob {
+        private final Supplier<Job<String>> supplier;
+        private Job<String> job = null;
+
+        private CachedJob(Supplier<Job<String>> supplier) {
+            this.supplier = supplier;
+        }
+
+        public Job<String> get() {
+            if (job == null) {
+                job = supplier.get();
+            }
+            return job;
+        }
+    }
+
+    private enum JobType {
+        simpleWithInternalCallFSJob,
+        simpleJob,
+        simpleFSJob,
+        complexJob,
+        simpleJobWithExpression
+    }
 
     @BeforeClass
     public static void initStatic() throws Exception {
-        simpleWithInternalCallFSJob = getJob("src/test/resources/simplejob", "simpleWithInternalCall");
-        simpleFSJob = getJob("src/test/resources/simplejob", "simple");
-        simpleJobWithExpression = getJob("src/test/resources/simplejob", "simpleWithExpression");
-        simpleJob = createSimpleJob();
-        complexJob = createComplexJob();
+        projects = new HashMap<>();
+        jobs = new HashMap<>();
+        jobs.put(JobType.simpleWithInternalCallFSJob, new CachedJob(() -> getJob("src/test/resources/simplejob", "simpleWithInternalCall")));
+        jobs.put(JobType.simpleFSJob, new CachedJob(() -> getJob("src/test/resources/simplejob", "simple")));
+        jobs.put(JobType.simpleJobWithExpression, new CachedJob(() -> getJob("src/test/resources/simplejob", "simpleWithExpression")));
+        jobs.put(JobType.simpleJob, new CachedJob(JobRunnerTest::createSimpleJob));
+        jobs.put(JobType.complexJob, new CachedJob(JobRunnerTest::createComplexJob));
     }
 
     @AfterClass
     public static void teardownStatic() throws Exception {
-        simpleWithInternalCallFSJob = null;
-        simpleFSJob = null;
-        simpleJobWithExpression = null;
-        simpleJob = null;
-        complexJob = null;
+        jobs = null;
+        projects = null;
     }
 
     @Before
@@ -99,7 +117,7 @@ public class JobRunnerTest {
             }
         };
 
-        jobRunnerWrapper.start(simpleJob);
+        jobRunnerWrapper.start(jobs.get(JobType.simpleJob).get());
 
         assertThat(jobRunnerWrapper.isValid(), is(true));
     }
@@ -117,7 +135,7 @@ public class JobRunnerTest {
             }
         };
 
-        String result = jobRunnerWrapper.start(simpleJob);
+        String result = jobRunnerWrapper.start(jobs.get(JobType.simpleJob).get());
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -133,11 +151,29 @@ public class JobRunnerTest {
             }
         };
 
-        jobRunnerWrapper.start(simpleJob);
+        jobRunnerWrapper.start(jobs.get(JobType.simpleJob).get());
 
         assertThat(jobRunnerWrapper.isValid(), is(false));
     }
 
+    @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters_on_interact() throws Exception {
+        FakeUiValue<?> uiValueName = new FakeUiValue<>();
+        FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
+        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
+            @Override
+            protected void interact() {
+                uiValueName.setValue("John");
+                uiValueSurname.setValue("Doe");
+                uiValueSurname.setValue(null);
+            }
+        };
+
+        jobRunnerWrapper.start(jobs.get(JobType.simpleJob).get());
+
+        assertThat(jobRunnerWrapper.isValid(), is(false));
+    }
     @Test public void assert_that_groovy_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
         final FakeUiValue<?> uiValueName = new FakeUiValue<>();
         final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
@@ -152,7 +188,7 @@ public class JobRunnerTest {
             }
         };
 
-        String result = jobRunnerWrapper.start(simpleJob);
+        String result = jobRunnerWrapper.start(jobs.get(JobType.simpleJob).get());
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -172,7 +208,7 @@ public class JobRunnerTest {
             }
         };
 
-        String result = jobRunnerWrapper.start(simpleFSJob);
+        String result = jobRunnerWrapper.start(jobs.get(JobType.simpleFSJob).get());
 
         assertThat(result, equalTo("(John,Doe)"));
     }
@@ -192,7 +228,7 @@ public class JobRunnerTest {
             }
         };
 
-        String result = jobRunnerWrapper.start(complexJob);
+        String result = jobRunnerWrapper.start(jobs.get(JobType.complexJob).get());
 
         assertThat(result, equalTo("1.0 Dev-1.0"));
         assertThat(uiChoiceDb.getItems(), equalTo(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev")));
@@ -214,7 +250,7 @@ public class JobRunnerTest {
             }
         };
 
-        jobRunnerWrapper.start(complexJob);
+        jobRunnerWrapper.start(jobs.get(JobType.complexJob).get());
 
         assertThat(jobRunnerWrapper.isValid(), is(true));
     }
@@ -232,7 +268,7 @@ public class JobRunnerTest {
             }
         };
 
-        jobRunnerWrapper.start(simpleFSJob);
+        jobRunnerWrapper.start(jobs.get(JobType.simpleFSJob).get());
 
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
 
@@ -359,7 +395,7 @@ public class JobRunnerTest {
             }
         };
 
-        String result = jobRunnerWrapper.start(simpleWithInternalCallFSJob);
+        String result = jobRunnerWrapper.start(jobs.get(JobType.simpleWithInternalCallFSJob).get());
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -380,7 +416,7 @@ public class JobRunnerTest {
             }
         };
 
-        String result = jobRunnerWrapper.start(simpleWithInternalCallFSJob);
+        String result = jobRunnerWrapper.start(jobs.get(JobType.simpleWithInternalCallFSJob).get());
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -399,7 +435,7 @@ public class JobRunnerTest {
             }
         };
 
-        final Job<String> job = simpleJobWithExpression;
+        final Job<String> job = jobs.get(JobType.simpleJobWithExpression).get();
 
         String result = jobRunnerWrapper.start(job);
 
@@ -474,12 +510,21 @@ public class JobRunnerTest {
         });
     }
 
-    private static <T> Job<T> getJob(String file, String job) throws Exception {
-        ProjectXML projectXML = JobParser.getParser(file).parse();
-        Project project = new ProjectGroovyBuilder().build(projectXML);
-        Job<T> result = project.getJob(job);
-        if (result == null) {
-            throw new Exception("Cannot find job with id \"" + job + "\". Ids:" + project.getJobsIds());
+    private static <T> Job<T> getJob(String file, String job) {
+        Job<T> result;
+        try {
+            Project project = projects.get(file);
+            if (project == null) {
+                ProjectXML projectXML = JobParser.getParser(file).parse();
+                project = new ProjectGroovyBuilder().build(projectXML);
+                projects.put(file, project);
+            }
+            result = project.getJob(job);
+            if (result == null) {
+                throw new Exception("Cannot find job with id \"" + job + "\". Ids:" + project.getJobsIds());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         return result;
     }
