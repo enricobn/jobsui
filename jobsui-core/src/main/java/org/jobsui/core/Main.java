@@ -24,6 +24,10 @@ public class Main {
             return;
         }
 
+//        Logger rootLogger = Logger.getLogger("");
+//        rootLogger.setLevel(Level.FINE);
+//        rootLogger.getHandlers()[0].setLevel(Level.FINE);
+
         String projectRoot = args[0];
 
 //        File projectFolder = new File(args[0]);

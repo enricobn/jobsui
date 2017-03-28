@@ -16,16 +16,22 @@ import java.net.URL;
 import java.text.ParseException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 10/11/16.
  */
 public class ProjectGroovyBuilder {
+    private static final Logger LOGGER = Logger.getLogger(ProjectGroovyBuilder.class.getName());
 
     public ProjectGroovy build(ProjectXML projectXML) throws Exception {
+        LOGGER.info("Building project " + projectXML.getId());
+
+        LOGGER.info("Creating groovy shell for project " + projectXML.getId());
         GroovyShell groovyShell = createGroovyShell(projectXML);
         groovyShell.setProperty("relativeURL", toGroovyFunction(projectXML::getRelativeURL));
+        LOGGER.info("Created groovy shell for project " + projectXML.getId());
 
         Map<String, JobGroovy<Serializable>> jobs = new HashMap<>();
 
@@ -52,6 +58,7 @@ public class ProjectGroovyBuilder {
         for (JobGroovy<?> job : jobs.values()) {
             job.init(projectGroovy);
         }
+        LOGGER.info("Built project " + projectXML.getId());
         return projectGroovy;
     }
 

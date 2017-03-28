@@ -17,28 +17,40 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.logging.Logger;
 
 /**
  * Created by enrico on 5/4/16.
  */
 public class JobParserImpl implements JobParser {
+    private static final Logger LOGGER = Logger.getLogger(JobParserImpl.class.getName());
     public static final String PROJECT_FILE_NAME = "project.xml";
-    private final Validator jobValidator;
-    private final Validator projectValidator;
+    private static final Validator jobValidator;
+    private static final Validator projectValidator;
     private final File folder;
+
+    static {
+        String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
+        SchemaFactory factory = SchemaFactory.newInstance(language);
+        Schema jobSchema;
+        Schema projectSchema;
+        try {
+            jobSchema = factory.newSchema(JobParserImpl.class.getResource("/org/jobsui/job.xsd"));
+            projectSchema = factory.newSchema(JobParserImpl.class.getResource("/org/jobsui/project.xsd"));
+        } catch (SAXException e) {
+            throw new RuntimeException(e);
+        }
+        jobValidator = jobSchema.newValidator();
+        projectValidator = projectSchema.newValidator();
+    }
 
     JobParserImpl(File folder) throws SAXException {
         this.folder = folder;
-        String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
-        SchemaFactory factory = SchemaFactory.newInstance(language);
-        Schema jobSchema = factory.newSchema(getClass().getResource("/org/jobsui/job.xsd"));
-        jobValidator = jobSchema.newValidator();
-        Schema projectSchema = factory.newSchema(getClass().getResource("/org/jobsui/project.xsd"));
-        projectValidator = projectSchema.newValidator();
     }
 
     @Override
     public ProjectXML parse() throws Exception {
+        LOGGER.info("Parsing " + folder);
         File projectFile = new File(folder, PROJECT_FILE_NAME);
 
         if (!projectFile.exists()) {
@@ -78,7 +90,7 @@ public class JobParserImpl implements JobParser {
                 }
             }
         }
-
+        LOGGER.info("Parsed " + folder);
         return projectXML;
     }
 

@@ -13,18 +13,21 @@ import rx.Subscriber;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 3/11/17.
  */
 public class JobRunnerContext<T extends Serializable, C> {
+    private static final Logger LOGGER = Logger.getLogger(JobRunnerContext.class.getName());
     private final WidgetsMap<C> widgets;
     private final Job<T> job;
     private final UI<C> ui;
     private final List<JobDependency> sortedJobDependencies;
 
     public JobRunnerContext(Job<T> job, UI<C> ui, UIWindow<C> window) throws Exception {
+        LOGGER.fine("Creating Job runner context");
         this.job = job;
         this.ui = ui;
         widgets = new WidgetsMap<>();
@@ -33,6 +36,7 @@ public class JobRunnerContext<T extends Serializable, C> {
             widgets.add(createWidget(ui, window, jobParameterDef));
         }
         sortedJobDependencies = job.getSortedDependencies();
+        LOGGER.fine("Created Job runner context");
     }
 
     public void notifyInitialValue() {
