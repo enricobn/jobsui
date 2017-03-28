@@ -3,7 +3,9 @@ package org.jobsui.core.runner;
 import org.jobsui.core.job.JobParameterDef;
 import org.jobsui.core.ui.UIWidget;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Created by enrico on 3/11/17.
