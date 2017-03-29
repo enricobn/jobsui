@@ -7,8 +7,8 @@ import java.util.List;
  */
 public interface JobsUIPreferences {
 
-    List<String> getLastOpenedProjects();
+    List<OpenedItem> getLastOpenedItems();
 
-    void registerOpenedProject(String project);
+    void registerOpenedProject(OpenedItem item);
 
 }
