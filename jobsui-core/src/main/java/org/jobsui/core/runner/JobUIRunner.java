@@ -57,9 +57,11 @@ public class JobUIRunner<C> implements JobRunner {
 
             UIButton<C> runButton;
             UIButton<C> saveBookmarkButton;
+//            UIButton<C> closeButton;
             try {
                 runButton = ui.create(UIButton.class);
                 saveBookmarkButton = ui.create(UIButton.class);
+//                closeButton = ui.create(UIButton.class);
             } catch (UnsupportedComponentException e) {
                 // TODO
                 throw new RuntimeException(e);
@@ -99,6 +101,11 @@ public class JobUIRunner<C> implements JobRunner {
                 }
             });
 
+//            closeButton.setTitle("Close");
+//            closeButton.getObservable().subscribe(serializableVoid -> {
+//                ui.gotoStart();
+//            });
+
             Observable<JobValidation> validationObserver = context.jobValidationObserver();
 
             validationObserver.subscribe(v -> {
@@ -123,6 +130,7 @@ public class JobUIRunner<C> implements JobRunner {
 
             window.add(runButton);
             window.add(saveBookmarkButton);
+//            window.add(closeButton);
         });
 
         if (!exceptions.isEmpty()) {

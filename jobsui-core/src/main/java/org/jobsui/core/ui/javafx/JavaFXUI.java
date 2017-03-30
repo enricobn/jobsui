@@ -59,6 +59,11 @@ public class JavaFXUI implements UI<Node> {
         showErrorStatic(message, t);
     }
 
+    @Override
+    public void gotoStart() {
+        StartApp.getInstance().gotoStart();
+    }
+
     public static void uncaughtException(Thread t, Throwable e) {
         showErrorStatic("Error on thread " + t.getName(), e);
     }

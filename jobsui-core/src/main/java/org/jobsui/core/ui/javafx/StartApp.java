@@ -34,12 +34,12 @@ package org.jobsui.core.ui.javafx;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.jobsui.core.job.Job;
+import org.jobsui.core.runner.JobUIRunner;
 
 import java.io.Serializable;
 import java.util.logging.Level;
@@ -50,6 +50,7 @@ import java.util.logging.Logger;
  */
 public class StartApp extends Application {
     private static StartApp instance;
+    private Stage primaryStage;
     private Stage stage;
 
     public StartApp() {
@@ -68,9 +69,15 @@ public class StartApp extends Application {
     }
 
     @Override public void start(Stage primaryStage) {
+        Thread.setDefaultUncaughtExceptionHandler(JavaFXUI::uncaughtException);
         try {
-            stage = primaryStage;
-            gotoStart();
+            this.primaryStage = primaryStage;
+            try {
+                replaceSceneContent(primaryStage, "Start.fxml");
+            } catch (Exception ex) {
+                Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
+            }
+//            gotoStart();
             primaryStage.show();
         } catch (Exception ex) {
             Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
@@ -79,36 +86,46 @@ public class StartApp extends Application {
 
 
     public void gotoRun(Job<Serializable> job) {
-        VBox vBox = new VBox();
-        Button button = new Button("To login");
-        button.onActionProperty().setValue(event -> gotoStart());
-
-        vBox.getChildren().add(button);
+        JobUIRunner<Node> runner = new JobUIRunner<>(new JavaFXUI());
         try {
-            replaceSceneContent(vBox);
-        } catch (Exception ex) {
-            Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
+            runner.run(job);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        stage.setWidth(300);
-        stage.setHeight(500);
+//        VBox vBox = new VBox();
+//        Button button = new Button("To login");
+//        button.onActionProperty().setValue(event -> gotoStart());
+//
+//        vBox.getChildren().add(button);
+//        try {
+//            replaceSceneContent(vBox);
+//        } catch (Exception ex) {
+//            Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        stage.setWidth(300);
+//        stage.setHeight(500);
     }
 
-    private void gotoStart() {
-        try {
-            replaceSceneContent("Start.fxml");
-        } catch (Exception ex) {
-            Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
+    public void gotoStart() {
+        if (stage != null) {
+            stage.close();
         }
+        primaryStage.show();
+//        try {
+//            replaceSceneContent("Start.fxml");
+//        } catch (Exception ex) {
+//            Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
+//        }
 //        stage.setWidth(200);
 //        stage.setHeight(100);
     }
 
-    private Parent replaceSceneContent(String fxml) throws Exception {
+    private void replaceSceneContent(Stage stage, String fxml) throws Exception {
         Parent page = FXMLLoader.load(StartApp.class.getResource(fxml), null, new JavaFXBuilderFactory());
-        return replaceSceneContent(page);
+        replaceSceneContent(stage, page);
     }
 
-    private Parent replaceSceneContent(Parent page) throws Exception {
+    private void replaceSceneContent(Stage stage, Parent page) throws Exception {
         Scene scene = stage.getScene();
         if (scene == null) {
             scene = new Scene(page, 700, 450);
@@ -118,6 +135,25 @@ public class StartApp extends Application {
             stage.getScene().setRoot(page);
         }
         stage.sizeToScene();
-        return page;
+    }
+
+    public Stage replaceSceneContent(Parent page) throws Exception {
+        Stage stage = new Stage();
+        replaceSceneContent(stage, page);
+//        Scene scene = stage.getScene();
+//        if (scene == null) {
+//            scene = new Scene(page, 700, 450);
+////            scene.getStylesheets().add(LoginApp.class.getResource("demo.css").toExternalForm());
+//            stage.setScene(scene);
+//        } else {
+//            stage.getScene().setRoot(page);
+//        }
+//        stage.sizeToScene();
+//        this.stage = stage;
+        return stage;
+    }
+
+    public Stage getStage() {
+        return stage;
     }
 }

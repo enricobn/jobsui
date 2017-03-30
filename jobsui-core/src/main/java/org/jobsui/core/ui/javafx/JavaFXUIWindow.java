@@ -12,7 +12,6 @@ import org.jobsui.core.ui.UIContainer;
 import org.jobsui.core.ui.UIWidget;
 import org.jobsui.core.ui.UIWindow;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -20,16 +19,28 @@ import java.util.stream.Collectors;
  * Created by enrico on 10/7/16.
  */
 class JavaFXUIWindow implements UIWindow<Node> {
-    private static final List<NodeUIWidget> components = new ArrayList<>();
+    private VBox root;
+//    private static final List<NodeUIWidget> components = new ArrayList<>();
 
 //    private static boolean ok = false;
-    private static Runnable callback;
+//    private static Runnable callback;
 
     @Override
     public void show(Runnable callback) {
-        JavaFXUIWindow.callback = callback;
+        root = new VBox(5);
+        root.setPadding(new Insets(5, 5, 5, 5));
 
-        Application.launch(JavaFXUIWindow.JavaFXApplication.class);
+        callback.run();
+
+        try {
+            Stage stage = StartApp.getInstance().replaceSceneContent(root);
+            stage.showAndWait();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+//        JavaFXUIWindow.callback = callback;
+
+//        Application.launch(JavaFXUIWindow.JavaFXApplication.class);
     }
 
 //    @Override
@@ -45,7 +56,9 @@ class JavaFXUIWindow implements UIWindow<Node> {
     @Override
     public UIWidget<Node> add(String title, final UIComponent<Node> component) {
         NodeUIWidget widget = new NodeUIWidget(title, component);
-        components.add(widget);
+        Node node = widget.getNodeComponent();
+        node.managedProperty().bind(node.visibleProperty());
+        root.getChildren().add(node);
         return widget;
     }
 
@@ -62,12 +75,13 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
     @Override
     public Node getComponent() {
-        return JavaFXApplication.root;
+//        return JavaFXApplication.root;
+        return root;
     }
 
     public static class JavaFXApplication extends Application {
         private Scene scene;
-        private static VBox root;
+        private VBox root;
 //        private static Button okButton;
 //        private static boolean valid = false;
 
@@ -78,13 +92,13 @@ class JavaFXUIWindow implements UIWindow<Node> {
             root = new VBox(5);
             root.setPadding(new Insets(5, 5, 5, 5));
 
-            callback.run();
+//            callback.run();
 
-            for (NodeUIWidget widget : components) {
-                Node node = widget.getNodeComponent();
-                node.managedProperty().bind(node.visibleProperty());
-                root.getChildren().add(node);
-            }
+//            for (NodeUIWidget widget : components) {
+//                Node node = widget.getNodeComponent();
+//                node.managedProperty().bind(node.visibleProperty());
+//                root.getChildren().add(node);
+//            }
 
 //            HBox okCancel = new HBox(5);
 //

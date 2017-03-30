@@ -19,4 +19,6 @@ public interface UI<T> {
 
     void showError(String message, Throwable t);
 
+    void gotoStart();
+
 }

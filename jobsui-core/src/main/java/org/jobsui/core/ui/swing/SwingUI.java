@@ -61,4 +61,9 @@ public class SwingUI implements UI<JComponent> {
         }
     }
 
+    @Override
+    public void gotoStart() {
+        // TODO
+    }
+
 }
