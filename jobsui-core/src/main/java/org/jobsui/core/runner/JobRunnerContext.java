@@ -77,7 +77,8 @@ public class JobRunnerContext<T extends Serializable, C> {
             if (!dependencies.isEmpty()) {
                 Collection<Observable<Serializable>> observables = getDependenciesObservables(dependencies).values();
 
-                final Observable<Map<String, Serializable>> observable = combineDependenciesObservables(dependencies, observables);
+                final Observable<Map<String, Serializable>> observable = combineDependenciesObservables(dependencies,
+                        observables);
 
                 observable.subscribe(objects -> {
                     // all dependencies are valid

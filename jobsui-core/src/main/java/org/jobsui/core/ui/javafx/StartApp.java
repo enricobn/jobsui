@@ -77,7 +77,6 @@ public class StartApp extends Application {
             } catch (Exception ex) {
                 Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
             }
-//            gotoStart();
             primaryStage.show();
         } catch (Exception ex) {
             Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
@@ -92,18 +91,6 @@ public class StartApp extends Application {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-//        VBox vBox = new VBox();
-//        Button button = new Button("To login");
-//        button.onActionProperty().setValue(event -> gotoStart());
-//
-//        vBox.getChildren().add(button);
-//        try {
-//            replaceSceneContent(vBox);
-//        } catch (Exception ex) {
-//            Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        stage.setWidth(300);
-//        stage.setHeight(500);
     }
 
     public void gotoStart() {

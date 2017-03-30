@@ -50,6 +50,8 @@ public class JavaFXUI implements UI<Node> {
             return (COMP) new JavaFXUIButton();
         } else if (componentType == UIExpression.class) {
             return (COMP) new JavaFXUIExpression();
+        } else if (componentType == UIValue.class) {
+            return (COMP) new JavaFXUIValue();
         }
         throw new UnsupportedComponentException("JavaFX: cannot find component for " + componentType.getName());
     }

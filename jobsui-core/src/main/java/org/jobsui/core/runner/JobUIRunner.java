@@ -49,8 +49,9 @@ public class JobUIRunner<C> implements JobRunner {
             try {
                  context = new JobRunnerContext<>(job, ui, window);
             } catch (Exception e) {
-                exceptions.add(e);
-                return;
+                throw new RuntimeException((e));
+//                exceptions.add(e);
+//                return;
             }
 
             context.observeDependencies();
