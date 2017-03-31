@@ -8,13 +8,9 @@ import java.util.function.Consumer;
  * Created by enrico on 3/29/17.
  */
 public class JobsUIMainParameters {
-    private final String projectRoot;
-    private final String jobKey;
     private final UIType uiType;
 
-    private JobsUIMainParameters(String projectRoot, String jobKey, UIType uiType) {
-        this.projectRoot = projectRoot;
-        this.jobKey = jobKey;
+    private JobsUIMainParameters(UIType uiType) {
         this.uiType = uiType;
     }
 
@@ -23,44 +19,42 @@ public class JobsUIMainParameters {
         JavFX
     }
 
-    public static void parse(String[] args, Consumer<JobsUIMainParameters> onSuccess, Consumer<List<String>> onError) {
+    public static boolean parse(String[] args, Consumer<JobsUIMainParameters> onSuccess, Consumer<List<String>> onError) {
         List<String> validation = new ArrayList<>();
 
-        if (args.length < 2 || args.length > 3) {
-            validation.add("Usage: jobsui projectFolder jobkey [ui]");
+        if (args.length > 1) {
+            validation.add("Usage: jobsui [ui]");
             onError.accept(validation);
-            return;
+            return false;
         }
 
-        String projectRoot = args[0];
-
-        String jobKey = args[1];
-
         UIType uiType;
-        if (args.length >= 3) {
-            if ("swing".equals(args[2].toLowerCase())) {
+        if (args.length >= 1) {
+            String uiTypeString = args[0];
+
+            if ("swing".equals(uiTypeString.toLowerCase())) {
                 uiType = UIType.Swing;
-            } else if ("javafx".equals(args[2].toLowerCase())) {
+            } else if ("javafx".equals(uiTypeString.toLowerCase())) {
                 uiType = UIType.JavFX;
             } else {
                 uiType = null;
-                validation.add("Unknown ui type '" + args[2]);
+                validation.add("Unknown ui type '" + uiTypeString);
             }
         } else {
             uiType = UIType.JavFX;
         }
-        onSuccess.accept(new JobsUIMainParameters(projectRoot, jobKey, uiType));
-    }
 
-    public String getProjectRoot() {
-        return projectRoot;
+        if (validation.isEmpty()) {
+            onSuccess.accept(new JobsUIMainParameters(uiType));
+            return true;
+        } else {
+            onError.accept(validation);
+            return false;
+        }
     }
 
     public UIType getUiType() {
         return uiType;
     }
 
-    public String getJobKey() {
-        return jobKey;
-    }
 }

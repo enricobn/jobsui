@@ -28,20 +28,15 @@
         </Validate>
 
     </Parameter>
-    <Parameter key="inv" name="Inv" visible="false">
 
-        <CreateComponent>
-            return ui.create(UIChoice.class);
-        </CreateComponent>
-
+    <Expression key="inv" name="Inv">
         <Dependency key="name"/>
         <Dependency key="surname"/>
 
-        <OnDependenciesChange>
-            widget.getComponent().setItems([Foo.concat(name, surname)])
-        </OnDependenciesChange>
-
-    </Parameter>
+        <Evaluate>
+            return Foo.concat(name, surname)
+        </Evaluate>
+    </Expression>
 
     <Run>
         <![CDATA[

@@ -62,8 +62,8 @@ public class JavaFXUI implements UI<Node> {
     }
 
     @Override
-    public void gotoStart() {
-        StartApp.getInstance().gotoStart();
+    public void start(String[] args) {
+        StartApp.main(args);
     }
 
     public static void uncaughtException(Thread t, Throwable e) {
@@ -80,7 +80,7 @@ public class JavaFXUI implements UI<Node> {
         e.printStackTrace();
     }
 
-    private static void showErrorStatic(String message, String errorMessage) {
+    public static Stage getErrorStage(String message, String errorMessage) {
         Stage dialog = new Stage();
         dialog.initModality(Modality.APPLICATION_MODAL);
         FXMLLoader loader = new FXMLLoader(JavaFXUI.class.getResource("Error.fxml"));
@@ -90,9 +90,17 @@ public class JavaFXUI implements UI<Node> {
             ((ErrorController)loader.getController()).setErrorText(errorMessage);
             dialog.setScene(new Scene(root, 600, 600));
             dialog.setTitle("JobsUI");
-            dialog.show();
+            return dialog;
         } catch (IOException exc) {
             exc.printStackTrace();
+            return null;
+        }
+    }
+
+    private static void showErrorStatic(String message, String errorMessage) {
+        Stage dialog = getErrorStage(message, errorMessage);
+        if (dialog != null) {
+            dialog.show();
         }
     }
 

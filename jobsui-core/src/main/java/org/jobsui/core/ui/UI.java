@@ -19,6 +19,6 @@ public interface UI<T> {
 
     void showError(String message, Throwable t);
 
-    void gotoStart();
+    void start(String[] args);
 
 }

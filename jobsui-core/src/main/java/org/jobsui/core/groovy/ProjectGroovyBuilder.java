@@ -30,7 +30,7 @@ public class ProjectGroovyBuilder {
 
         LOGGER.info("Creating groovy shell for project " + projectXML.getId());
         GroovyShell groovyShell = createGroovyShell(projectXML);
-        groovyShell.setProperty("relativeURL", toGroovyFunction(projectXML::getRelativeURL));
+        groovyShell.setProperty("projectRelativeURL", toGroovyFunction(projectXML::getRelativeURL));
         LOGGER.info("Created groovy shell for project " + projectXML.getId());
 
         Map<String, JobGroovy<Serializable>> jobs = new HashMap<>();

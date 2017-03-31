@@ -1,6 +1,7 @@
 package org.jobsui.core.groovy;
 
 import org.jobsui.core.job.Job;
+import org.jobsui.core.xml.ExpressionXML;
 import org.jobsui.core.xml.JobXML;
 import org.jobsui.core.xml.ParameterXML;
 import org.jobsui.core.xml.ProjectXML;
@@ -36,18 +37,16 @@ public class JobParserTest {
         assertThat(job, is(notNullValue()));
         assertThat(job.getParameter("name").getName(), is("Name"));
         assertThat(job.getParameter("surname").getName(), is("Surname"));
-        assertThat(job.getParameter("inv").getName(), is("Inv"));
+        assertThat(job.getExpression("inv").getName(), is("Inv"));
 
-        assertEquals(job.getParameter("inv").getDependencies().get(0), "name");
-        assertEquals(job.getParameter("inv").getDependencies().get(1), "surname");
-
-        assertFalse(job.getParameter("inv").isOptional());
+        assertEquals(job.getExpression("inv").getDependencies().get(0), "name");
+        assertEquals(job.getExpression("inv").getDependencies().get(1), "surname");
     }
 
     @Test
-    public void test_that_inv_parameter_in_Simplejob_is_invisible() throws Exception {
+    public void assert_that_is_visible_for_inv_expression_in_Simplejob_is_false() throws Exception {
         final JobXML job = projectXML.getJobs().get("simple");
-        ParameterXML inv = job.getParameter("inv");
-        assertThat(inv.isVisible(), equalTo(false));
+        ExpressionXML inv = job.getExpression("inv");
+        assertThat(inv.isVisible(), is(false));
     }
 }

@@ -21,6 +21,7 @@ public class JobXML implements ValidatingXML {
     private final List<ExpressionXML> expressionXMLs = new ArrayList<>();
     private final List<CallXML> callXMLs = new ArrayList<>();
     private final Map<String, ParameterXML> parameters = new HashMap<>();
+    private final Map<String, ExpressionXML> expressions = new HashMap<>();
 
     private final File file;
     private final String id;
@@ -122,7 +123,7 @@ public class JobXML implements ValidatingXML {
     }
 
     public void add(ExpressionXML expressionXML) throws Exception {
-        addCheckedParameter(expressionXML);
+        addCheckedExpression(expressionXML);
         expressionXMLs.add(expressionXML);
     }
 
@@ -160,16 +161,39 @@ public class JobXML implements ValidatingXML {
     }
 
     private void addCheckedParameter(ParameterXML parameterXML) throws Exception {
+        if (expressions.containsKey(parameterXML.getKey())) {
+            throw new Exception("Duplicate key '" + parameterXML.getKey() + "' for parameter " +
+                    "with name '" + parameterXML.getName() + "'.");
+        }
+
         if (parameters.put(parameterXML.getKey(), parameterXML) != null) {
-            throw new Exception("Duplicate parameter key '" + parameterXML.getKey() + "' for parameter " +
+            throw new Exception("Duplicate key '" + parameterXML.getKey() + "' for parameter " +
                     "with name '" + parameterXML.getName() + "'.");
         }
         parameterXML.setOrder(order);
         order += 1_000;
     }
 
+    private void addCheckedExpression(ExpressionXML expressionXML) throws Exception {
+        if (parameters.containsKey(expressionXML.getKey())) {
+            throw new Exception("Duplicate key '" + expressionXML.getKey() + "' for expression " +
+                    "with name '" + expressionXML.getName() + "'.");
+        }
+        if (expressions.put(expressionXML.getKey(), expressionXML) != null) {
+            throw new Exception("Duplicate key '" + expressionXML.getKey() + "' for expression " +
+                    "with name '" + expressionXML.getName() + "'.");
+        }
+    }
+
     public ParameterXML getParameter(String key) {
+        if (!parameters.containsKey(key)) {
+            return expressions.get(key);
+        }
         return parameters.get(key);
+    }
+
+    public ExpressionXML getExpression(String key) {
+        return expressions.get(key);
     }
 
     public void changeParameterKey(ParameterXML parameterXML, String newKey) {

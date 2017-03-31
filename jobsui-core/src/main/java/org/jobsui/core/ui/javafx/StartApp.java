@@ -38,6 +38,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.edit.EditProject;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.runner.JobUIRunner;
@@ -46,12 +47,14 @@ import org.jobsui.core.xml.ProjectXML;
 import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Main Application. This class handles navigation
  */
 public class StartApp extends Application {
     private static StartApp instance;
+    private JobsUIMainParameters parameters;
     private Stage primaryStage;
     private Stage stage;
 
@@ -72,6 +75,20 @@ public class StartApp extends Application {
 
     @Override public void start(Stage primaryStage) {
         Thread.setDefaultUncaughtExceptionHandler(JavaFXUI::uncaughtException);
+
+        String[] args = getParameters().getUnnamed().toArray(new String[0]);
+
+        JobsUIMainParameters.parse(args,
+                p -> this.parameters = p,
+                errors -> {
+                    Stage stage = JavaFXUI.getErrorStage("Error starting application",
+                        errors.stream().collect(Collectors.joining("\n")));
+                    if (stage != null) {
+                        stage.showAndWait();
+                        System.exit(1);
+                    }
+                });
+
         try {
             this.primaryStage = primaryStage;
             try {
@@ -155,5 +172,9 @@ public class StartApp extends Application {
 
     public Stage getStage() {
         return stage;
+    }
+
+    public JobsUIMainParameters getJobsUIParameters() {
+        return parameters;
     }
 }

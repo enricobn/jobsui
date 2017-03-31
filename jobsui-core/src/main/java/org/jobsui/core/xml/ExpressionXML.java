@@ -30,4 +30,14 @@ public class ExpressionXML extends ParameterXML {
         }
         return messages;
     }
+
+    @Override
+    public boolean isVisible() {
+        return false;
+    }
+
+    @Override
+    public boolean isOptional() {
+        return false;
+    }
 }
