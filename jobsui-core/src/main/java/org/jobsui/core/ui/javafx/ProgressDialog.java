@@ -22,6 +22,10 @@ class ProgressDialog {
     private final ProgressIndicator pin = new ProgressIndicator();
 
     public static <T> void run(Task<T> task, String title, Consumer<T> consumer) {
+        run(task, title, consumer, ex -> {throw new RuntimeException(ex);});
+    }
+
+    public static <T> void run(Task<T> task, String title, Consumer<T> consumer, Consumer<Throwable> exceptionHandler) {
         ProgressDialog pForm = new ProgressDialog(title);
 
         task.setOnSucceeded(event -> {
@@ -33,8 +37,14 @@ class ProgressDialog {
             }
         });
 
+        task.setOnFailed(event -> {
+            pForm.getDialogStage().close();
+            exceptionHandler.accept(event.getSource().getException());
+        });
+
+        pForm.getDialogStage().show();
+
         Platform.runLater(() -> {
-            pForm.getDialogStage().show();
             pForm.getDialogStage().centerOnScreen();
         });
 

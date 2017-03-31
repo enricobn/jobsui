@@ -154,9 +154,8 @@ public class EditProject extends Application {
 //        alert.showAndWait();
 //    }
 
-    private TreeItem<Item> loadProject(File file) throws Exception {
-        JobParser parser = JobParser.getParser(file.getAbsolutePath());
-        projectXML = parser.parse();
+    private TreeItem<Item> loadProject(ProjectXML projectXML) {
+        this.projectXML = projectXML;
         TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, projectXML::getName, projectXML));
 
         TreeItem<Item> libraries = new TreeItem<>(new Item(ItemType.Libraries, () -> "libraries", projectXML));
@@ -178,6 +177,11 @@ public class EditProject extends Application {
                 .map(this::createJobTreeItem)
                 .forEach(root.getChildren()::add);
         return root;
+    }
+
+    private TreeItem<Item> loadProject(File file) throws Exception {
+        JobParser parser = JobParser.getParser(file.getAbsolutePath());
+        return loadProject(parser.parse());
     }
 
     private TreeItem<Item> createJobTreeItem(JobXML job) {
@@ -210,6 +214,15 @@ public class EditProject extends Application {
                 .map(dep -> new Item(ItemType.Dependency, dep::getName, dep.getKey()))
                 .map(TreeItem::new)
                 .forEach(dependencies.getChildren()::add);
+    }
+
+    public void edit(ProjectXML projectXML) {
+        TreeItem<Item> root = loadProject(projectXML);
+
+        Platform.runLater(() -> {
+            itemsTree.setRoot(root);
+            root.setExpanded(true);
+        });
     }
 
     private enum ItemType {

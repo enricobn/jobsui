@@ -4,15 +4,15 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.util.Callback;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.JobsUIPreferencesImpl;
 import org.jobsui.core.OpenedItem;
 import org.jobsui.core.job.Job;
+import org.jobsui.core.xml.ProjectXML;
 
 import java.io.Serializable;
 import java.net.URL;
@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
  */
 public class StartController implements Initializable {
     public ListView<OpenedItem> projects;
-    private OpenedItem selectedproject;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -31,16 +30,6 @@ public class StartController implements Initializable {
         projects.getItems().addAll(preferences.getLastOpenedItems());
         projects.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         projects.setCellFactory(new CellFactory());
-    }
-
-    public void projectOnMouseClicked(MouseEvent mouseEvent) {
-        if (selectedproject != null) {
-            System.out.println("Selected " + selectedproject);
-
-            Task<Job<Serializable>> task = new LoadJobTask(selectedproject.project, selectedproject.job);
-
-            ProgressDialog.run(task, "Opening job", job -> StartApp.getInstance().gotoRun(job));
-        }
     }
 
     public void onOpen(ActionEvent actionEvent) {
@@ -68,13 +57,27 @@ public class StartController implements Initializable {
             cell.setOnMouseEntered(e -> {
                 projects.setCursor(Cursor.HAND);
                 projects.getSelectionModel().select(cell.getItem());
-                selectedproject = cell.getItem();
             });
             cell.setOnMouseExited(e -> {
                 projects.setCursor(Cursor.DEFAULT);
                 projects.getSelectionModel().clearSelection();
-                selectedproject = null;
             });
+            cell.setOnMouseClicked(e -> {
+                if (cell.getItem() != null && e.getButton() == MouseButton.PRIMARY) {
+                    Task<Job<Serializable>> task = new LoadJobTask(cell.getItem().project, cell.getItem().job);
+                    ProgressDialog.run(task, "Opening job", job -> StartApp.getInstance().gotoRun(job));
+                }
+            });
+
+            ContextMenu menu = new ContextMenu();
+
+            MenuItem editMenuItem = new MenuItem("Edit");
+            editMenuItem.setOnAction(event -> {
+                Task<ProjectXML> task = new LoadProjectXMLTask(cell.getItem().project);
+                ProgressDialog.run(task, "Opening project", project -> StartApp.getInstance().gotoEdit(project));
+            });
+            menu.getItems().add(editMenuItem);
+            cell.setContextMenu(menu);
 
             return cell;
         }

@@ -39,7 +39,7 @@ class LoadJobTask extends Task<Job<Serializable>> {
         final Job<Serializable> job = project.getJob(jobId);
 
         if (job == null) {
-            throw new RuntimeException("Cannot find project with id \"" + jobId + "\" in folder " +
+            throw new RuntimeException("Cannot find job with id \"" + jobId + "\" in folder " +
                     projectFolder + " .");
         }
         return job;

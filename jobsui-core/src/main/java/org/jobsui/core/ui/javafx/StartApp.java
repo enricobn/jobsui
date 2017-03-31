@@ -38,8 +38,10 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.jobsui.core.edit.EditProject;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.runner.JobUIRunner;
+import org.jobsui.core.xml.ProjectXML;
 
 import java.io.Serializable;
 import java.util.logging.Level;
@@ -88,6 +90,17 @@ public class StartApp extends Application {
         JobUIRunner<Node> runner = new JobUIRunner<>(new JavaFXUI());
         try {
             runner.run(job);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void gotoEdit(ProjectXML projectXML) {
+        EditProject editProject = new EditProject();
+        stage = new Stage();
+        try {
+            editProject.start(stage);
+            editProject.edit(projectXML);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
