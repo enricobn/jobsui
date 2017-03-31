@@ -174,6 +174,7 @@ public class JobRunnerTest {
 
         assertThat(jobRunnerWrapper.isValid(), is(false));
     }
+
     @Test public void assert_that_groovy_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
         final FakeUiValue<?> uiValueName = new FakeUiValue<>();
         final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
@@ -440,6 +441,30 @@ public class JobRunnerTest {
         String result = jobRunnerWrapper.start(job);
 
         assertThat(result, equalTo("Mr. John Doe"));
+    }
+
+    @Test public void verify_that_onDependenciesChange_does_NOT_occur_if_dependencies_are_NOT_valid() throws Exception {
+        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
+        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
+        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+
+        final FakeUIChoice uiChoiceInv = new FakeUIChoice();
+        when(this.ui.create(UIChoice.class)).thenReturn(uiChoiceInv);
+
+        final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
+
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
+            @Override
+            protected void interact() {
+                uiValueName.setValue(null);
+                uiValueSurname.setValue(null);
+            }
+        };
+
+        jobRunnerWrapper.start(job);
+
+        final JobParameterDef inv = job.getParameter("inv");
+        verify(inv, never()).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
     }
 
     private static Job<String> getMockedSimpleJob(FakeUiValue<?> uiValueName, FakeUiValue<?> uiValueSurname,

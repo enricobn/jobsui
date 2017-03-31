@@ -72,13 +72,20 @@ public class JobRunnerContext<T extends Serializable, C> {
     }
 
     public void observeDependencies() {
+        Map<String, Serializable> validValues = new HashMap<>();
+
+        valueChangeObserver().subscribe(changedValue -> {
+            validValues.clear();
+            validValues.putAll(changedValue.validValues);
+        });
+
         for (final JobDependency jobDependency : sortedJobDependencies) {
             final List<String> dependencies = jobDependency.getDependencies();
             if (!dependencies.isEmpty()) {
                 Collection<Observable<Serializable>> observables = getDependenciesObservables(dependencies).values();
 
                 final Observable<Map<String, Serializable>> observable = combineDependenciesObservables(dependencies,
-                        observables);
+                        observables, validValues);
 
                 observable.subscribe(objects -> {
                     // all dependencies are valid
@@ -219,7 +226,8 @@ public class JobRunnerContext<T extends Serializable, C> {
 //    }
 
     private Observable<Map<String, Serializable>> combineDependenciesObservables(final List<String> dependencies,
-                                                                                        Collection<Observable<Serializable>> observables) {
+                                                                                 Collection<Observable<Serializable>> observables,
+                                                                                 Map<String, Serializable> validValues) {
         //            private boolean addValidatedValue(Map<String, Serializable> result, JobParameterDef dependency,
 //                                              Serializable arg) {
 //                final List<String> validate = dependency.validate(arg);
@@ -235,14 +243,18 @@ public class JobRunnerContext<T extends Serializable, C> {
             int i = 0;
             for (String dependency : dependencies) {
                 final Serializable arg = (Serializable) args[i++];
-//                    JobParameterDef jobParameterDef = job.getParameter(dependency);
-//                    if (jobParameterDef != null) {
-//                        if (addValidatedValue(result, jobParameterDef, arg)) {
-//                            break;
-//                        }
-//                    } else {
+                JobParameterDef jobParameterDef = job.getParameter(dependency);
+                if (jobParameterDef != null) {
+                    Map<String, Serializable> dependenciesValues = getDependenciesValues(validValues, jobParameterDef);
+                    if (dependenciesValues.size() == jobParameterDef.getDependencies().size() &&
+                            jobParameterDef.validate(dependenciesValues, arg).isEmpty()) {
+                        result.put(dependency, arg);
+                    } else {
+                        break;
+                    }
+                } else {
                     result.put(dependency, arg);
-//                    }
+                }
             }
             return result;
         });
