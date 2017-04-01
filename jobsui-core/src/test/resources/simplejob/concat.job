@@ -30,8 +30,6 @@
     </Parameter>
 
     <Run>
-        <![CDATA[
-            return first + second
-        ]]>
+        return first + second
     </Run>
 </Job>

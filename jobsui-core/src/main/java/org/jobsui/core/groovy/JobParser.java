@@ -10,7 +10,7 @@ import java.io.File;
  */
 public interface JobParser {
 
-    static JobParser getParser(String projectRoot) throws SAXException {
+    static JobParser getParser(String projectRoot) throws Exception {
         File folder = new File(projectRoot);
         return new JobParserImpl(folder);
     }

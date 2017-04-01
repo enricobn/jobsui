@@ -32,7 +32,7 @@ public class ProjectXML implements ValidatingXML {
         this.name = name;
     }
 
-    public JobParser getParser(String relativePath) throws SAXException {
+    public JobParser getParser(String relativePath) throws Exception {
         File path = new File(projectFolder, relativePath);
         return JobParser.getParser(path.getAbsolutePath());
     }

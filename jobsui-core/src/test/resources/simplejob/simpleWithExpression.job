@@ -27,10 +27,7 @@
         </Validate>
     </Parameter>
 
-    <Expression key="completeName" name="Complete name">
-        <Dependency key="name"/>
-        <Dependency key="surname"/>
-
+    <Expression key="completeName" name="Complete name" dependsOn="name,surname">
         <Evaluate>
             return name + ' ' + surname;
         </Evaluate>

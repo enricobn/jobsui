@@ -262,11 +262,13 @@ public class JobParserImpl implements JobParser {
     }
 
     private static void addDependencies(Element element, ParameterXML parameterXML) throws JobsUIParseException {
-        final NodeList dependenciesList = element.getElementsByTagName("Dependency");
-        for (int iDep = 0; iDep < dependenciesList.getLength(); iDep++) {
-            final Element dependency = (Element) dependenciesList.item(iDep);
-            final String depKey = getMandatoryAttribute(dependency, "key");
-            parameterXML.addDependency(depKey);
+        String dependesOn = element.getAttribute("dependsOn");
+        if (dependesOn == null || dependesOn.length() == 0) {
+            return;
+        }
+
+        for (String dependency : dependesOn.split(",")) {
+            parameterXML.addDependency(dependency);
         }
     }
 
@@ -290,15 +292,15 @@ public class JobParserImpl implements JobParser {
         }
     }
 
-    private static String getMandatoryAttribute(Element parent, String name) throws JobsUIParseException {
-        final String attribute = parent.getAttribute(name);
+    private static String getMandatoryAttribute(Element element, String name) throws JobsUIParseException {
+        final String attribute = element.getAttribute(name);
 
         if (attribute == null || attribute.length() == 0) {
 //            if (parent instanceof DeferredNode) {
 //                throw new JobsUIParseException("Cannot find mandatory attribute \"" + name + "\" in " + parent + " at line " +
 //                        ((DeferredNode)parent).getNodeIndex());
 //            } else {
-                throw new JobsUIParseException("Cannot find mandatory attribute \"" + name + "\" in " + parent);
+                throw new JobsUIParseException("Cannot find mandatory attribute \"" + name + "\" in " + element);
 //            }
         }
         return attribute;

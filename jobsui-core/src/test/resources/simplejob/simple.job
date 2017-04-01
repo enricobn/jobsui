@@ -29,10 +29,7 @@
 
     </Parameter>
 
-    <Expression key="inv" name="Inv">
-        <Dependency key="name"/>
-        <Dependency key="surname"/>
-
+    <Expression key="inv" name="Inv" dependsOn="name,surname">
         <Evaluate>
             return Foo.concat(name, surname)
         </Evaluate>
