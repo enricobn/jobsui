@@ -3,6 +3,7 @@ package org.jobsui.core.ui.javafx;
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
 import org.jobsui.core.ui.StringConverter;
+import org.jobsui.core.ui.StringConverterString;
 import org.jobsui.core.ui.UIValue;
 import rx.Observable;
 import rx.Subscriber;
@@ -18,7 +19,7 @@ public class JavaFXUIValue implements UIValue<Node> {
     private final TextField component = new TextField();
     private final Observable<Serializable> observable;
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
-    private StringConverter<Serializable> converter;
+    private StringConverter<Serializable> converter = new StringConverterString();
 
     public JavaFXUIValue() {
         observable = Observable.create(subscriber -> {

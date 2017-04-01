@@ -64,8 +64,8 @@ public class JobXML implements ValidatingXML {
         for (SimpleParameterXML parameter : simpleParameterXMLs) {
             Element element = createParameterElement(doc, rootElement, parameter);
 
-            if (parameter.getCreateComponentScript() != null && !parameter.getCreateComponentScript().isEmpty()) {
-                XMLUtils.addTextElement(element, "CreateComponent", parameter.getCreateComponentScript());
+            if (parameter.getOnInitScript() != null && !parameter.getOnInitScript().isEmpty()) {
+                XMLUtils.addTextElement(element, "OnInit", parameter.getOnInitScript());
             }
 
             if (!JobsUIUtils.isNullOrEmptyOrSpaces(parameter.getValidateScript())) {

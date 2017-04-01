@@ -102,8 +102,10 @@ public class JobParserImpl implements JobParser {
         Document doc = dBuilder.parse(is);
 
         NodeList projects = doc.getElementsByTagName("Project");
-        String projectId = getMandatoryAttribute((Element) projects.item(0), "id");
-        String projectName = getMandatoryAttribute((Element) projects.item(0), "name");
+        String subject = "Project";
+        String projectId = getMandatoryAttribute((Element) projects.item(0), "id", subject);
+        subject = "Project with id='" + projectId + "'";
+        String projectName = getMandatoryAttribute((Element) projects.item(0), "name", subject);
 
         ProjectXML projectXML = new ProjectXML(projectFolder, projectId, projectName);
 
@@ -111,7 +113,8 @@ public class JobParserImpl implements JobParser {
 
         for (int i = 0; i < libraries.getLength(); i++) {
             Element element = (Element) libraries.item(i);
-            String library = getElementContent(element, "#text", false);
+            subject = "Library for Project with id='" + projectId + "'";
+            String library = getElementContent(element, "#text", false, subject);
             projectXML.addLibrary(library);
         }
 
@@ -119,8 +122,9 @@ public class JobParserImpl implements JobParser {
 
         for (int i = 0; i < imports.getLength(); i++) {
             Element element = (Element) imports.item(i);
-            String imp = getElementContent(element, "#text", false);
-            String name = getMandatoryAttribute(element, "name");
+            subject = "Import for Project with id='" + projectId + "'";
+            String imp = getElementContent(element, "#text", false, subject);
+            String name = getMandatoryAttribute(element, "name", subject);
             projectXML.addImport(name, imp);
         }
 
@@ -156,18 +160,19 @@ public class JobParserImpl implements JobParser {
             //optional, but recommended
             //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
             doc.getDocumentElement().normalize();
-
-            String id = getMandatoryAttribute(doc.getDocumentElement(), "id");
-            String name = getMandatoryAttribute(doc.getDocumentElement(), "name");
-            String version = getMandatoryAttribute(doc.getDocumentElement(), "version");
+            String subject = "Job";
+            String id = getMandatoryAttribute(doc.getDocumentElement(), "id", subject);
+            subject = "Job with id='" + id + "'";
+            String name = getMandatoryAttribute(doc.getDocumentElement(), "name", subject);
+            String version = getMandatoryAttribute(doc.getDocumentElement(), "version", subject);
 
             JobXML jobXML = new JobXML(file, id, name, version);
 
-            String runScript = getElementContent(doc.getDocumentElement(), "Run", true);
+            String runScript = getElementContent(doc.getDocumentElement(), "Run", true, subject);
 
             jobXML.setRunScript(runScript);
 
-            String validateScript = getElementContent(doc.getDocumentElement(), "Validate", false);
+            String validateScript = getElementContent(doc.getDocumentElement(), "Validate", false, subject);
 
             jobXML.setValidateScript(validateScript);
 
@@ -189,9 +194,11 @@ public class JobParserImpl implements JobParser {
         NodeList expressionsList = doc.getElementsByTagName("Expression");
         for (int i = 0; i < expressionsList.getLength(); i++) {
             Element element = (Element) expressionsList.item(i);
-            String parameterKey = getMandatoryAttribute(element, "key");
-            String parameterName = getMandatoryAttribute(element, "name");
-            String evaluateScript = getElementContent(element, "Evaluate", false);
+            String subject = "Expression";
+            String parameterKey = getMandatoryAttribute(element, "key", subject);
+            subject = "Expression with key='" + parameterKey + "'";
+            String parameterName = getMandatoryAttribute(element, "name", subject);
+            String evaluateScript = getElementContent(element, "Evaluate", false, subject);
 
             ExpressionXML expressionXML = new ExpressionXML(parameterKey, parameterName);
             expressionXML.setEvaluateScript(evaluateScript);
@@ -208,10 +215,12 @@ public class JobParserImpl implements JobParser {
         for (int i = 0; i < callsList.getLength(); i++) {
             Element element = (Element) callsList.item(i);
 
-            String key = getMandatoryAttribute(element, "key");
-            String name = getMandatoryAttribute(element, "name");
-            String project = getMandatoryAttribute(element, "project");
-            String job = getMandatoryAttribute(element, "job");
+            String subject = "Call";
+            String key = getMandatoryAttribute(element, "key", subject);
+            subject = "Call with key='" + key + "'";
+            String name = getMandatoryAttribute(element, "name", subject);
+            String project = getMandatoryAttribute(element, "project", subject);
+            String job = getMandatoryAttribute(element, "job", subject);
 
             CallXML callXML = new CallXML(key, name);
             callXML.setProject(project);
@@ -220,8 +229,9 @@ public class JobParserImpl implements JobParser {
             NodeList maps = element.getElementsByTagName("Map");
             for (int j = 0; j < maps.getLength(); j++) {
                 Element mapElement = (Element) maps.item(j);
-                String in = getMandatoryAttribute(mapElement, "in");
-                String out = getMandatoryAttribute(mapElement, "out");
+                subject = "Map for Call with key='" + key + "'";
+                String in = getMandatoryAttribute(mapElement, "in", subject);
+                String out = getMandatoryAttribute(mapElement, "out", subject);
                 callXML.addMap(in, out);
                 callXML.addDependency(in);
             }
@@ -236,12 +246,18 @@ public class JobParserImpl implements JobParser {
 
         for (int i = 0; i < parametersList.getLength(); i++) {
             Element element = (Element) parametersList.item(i);
-
-            String parameterKey = getMandatoryAttribute(element, "key");
-            String parameterName = getMandatoryAttribute(element, "name");
-            String parameterValidateScript = getElementContent(element, "Validate", false);
-            String createComponentScript = getElementContent(element, "CreateComponent", true);
-            String onDependenciesChangeScript = getElementContent(element, "OnDependenciesChange", false);
+            String subject = "Parameter";
+            String parameterKey = getMandatoryAttribute(element, "key", subject);
+            subject = "Parameter with key='" + parameterKey + "'";
+            String parameterName = getMandatoryAttribute(element, "name", subject);
+//            String component = getMandatoryAttribute(element, "component", subject);
+            String component = element.getAttribute("component");
+            if (component == null || component.isEmpty()) {
+                component = "Value";
+            }
+            String parameterValidateScript = getElementContent(element, "Validate", false, subject);
+            String onInitScript = getElementContent(element, "OnInit", false, subject);
+            String onDependenciesChangeScript = getElementContent(element, "OnDependenciesChange", false, subject);
             String visibleString = element.getAttribute("visible");
             String optionalString = element.getAttribute("optional");
 
@@ -250,10 +266,11 @@ public class JobParserImpl implements JobParser {
 
             SimpleParameterXML simpleParameterXML = new SimpleParameterXML(parameterKey, parameterName);
             simpleParameterXML.setValidateScript(parameterValidateScript);
-            simpleParameterXML.setCreateComponentScript(createComponentScript);
+            simpleParameterXML.setOnInitScript(onInitScript);
             simpleParameterXML.setOnDependenciesChangeScript(onDependenciesChangeScript);
             simpleParameterXML.setVisible(visible);
             simpleParameterXML.setOptional(optional);
+            simpleParameterXML.setComponent(component);
 
             addDependencies(element, simpleParameterXML);
 
@@ -272,7 +289,7 @@ public class JobParserImpl implements JobParser {
         }
     }
 
-    private static String getElementContent(Element parent, String name, boolean mandatory) throws JobsUIParseException {
+    private static String getElementContent(Element parent, String name, boolean mandatory, String subject) throws JobsUIParseException {
         final NodeList childNodes = parent.getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
             final String nodeName = childNodes.item(i).getNodeName();
@@ -285,14 +302,14 @@ public class JobParserImpl implements JobParser {
 //                throw new JobsUIParseException("Cannot find mandatory element \"" + name + "\" in " + parent +
 //                        parent.getUserData("lineNumber"));
 //            } else {
-                throw new JobsUIParseException("Cannot find mandatory element \"" + name + "\" in " + parent);
+                throw new JobsUIParseException("Cannot find mandatory element \"" + name + "\" in " + subject);
 //            }
         } else {
             return null;
         }
     }
 
-    private static String getMandatoryAttribute(Element element, String name) throws JobsUIParseException {
+    private static String getMandatoryAttribute(Element element, String name, String subject) throws JobsUIParseException {
         final String attribute = element.getAttribute(name);
 
         if (attribute == null || attribute.length() == 0) {
@@ -300,7 +317,7 @@ public class JobParserImpl implements JobParser {
 //                throw new JobsUIParseException("Cannot find mandatory attribute \"" + name + "\" in " + parent + " at line " +
 //                        ((DeferredNode)parent).getNodeIndex());
 //            } else {
-                throw new JobsUIParseException("Cannot find mandatory attribute \"" + name + "\" in " + element);
+                throw new JobsUIParseException("Cannot find mandatory attribute \"" + name + "\" in " + subject);
 //            }
         }
         return attribute;

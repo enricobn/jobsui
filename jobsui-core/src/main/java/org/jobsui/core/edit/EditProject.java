@@ -348,8 +348,8 @@ public class EditProject extends Application {
 
             addTextProperty("Name:", parameter::getName, parameter::setName);
 
-            addTextAreaProperty("Create component:", parameter::getCreateComponentScript,
-                    parameter::setCreateComponentScript, false);
+            addTextAreaProperty("On init:", parameter::getOnInitScript,
+                    parameter::setOnInitScript, false);
 
             addTextAreaProperty("On dependencies change:", parameter::getOnDependenciesChangeScript,
                     parameter::setOnDependenciesChangeScript, false);

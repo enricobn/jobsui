@@ -3,12 +3,9 @@
 
     <Parameter key="name" name="Name">
 
-        <CreateComponent>
-            def uiValue = ui.create(UIValue.class);
-            uiValue.setConverter(new StringConverterString());
-            uiValue.setDefaultValue("Enrico");
-            return uiValue;
-        </CreateComponent>
+        <OnInit>
+            component.setDefaultValue("Enrico");
+        </OnInit>
 
         <Validate>
             return new NotEmptyStringValidator().validate(values, value);
@@ -17,12 +14,6 @@
     </Parameter>
 
     <Parameter key="surname" name="Surname">
-        <CreateComponent>
-            def uiValue = ui.create(UIValue.class);
-            uiValue.setConverter(new StringConverterString());
-            return uiValue;
-        </CreateComponent>
-
         <Validate>
             return new NotEmptyStringValidator().validate(values, value);
         </Validate>

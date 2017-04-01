@@ -2,33 +2,14 @@
 <Job id="concat" name="Concat" version="1.0.0">
 
     <Parameter key="first" name="First">
-
-        <CreateComponent>
-            <![CDATA[
-                def uiValue = ui.create(UIValue.class);
-                uiValue.setConverter(new StringConverterString());
-                return uiValue;
-            ]]>
-        </CreateComponent>
-
         <Validate>
             <![CDATA[
                 return new NotEmptyStringValidator().validate(values, value);
             ]]>
         </Validate>
-
     </Parameter>
 
     <Parameter key="second" name="Second">
-
-        <CreateComponent>
-            <![CDATA[
-                def uiValue = ui.create(UIValue.class);
-                uiValue.setConverter(new StringConverterString());
-                return uiValue;
-            ]]>
-        </CreateComponent>
-
         <Validate>
             <![CDATA[
                 return new NotEmptyStringValidator().validate(values, value);

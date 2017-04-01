@@ -2,13 +2,6 @@
 <Job id="concat" name="Concat" version="1.0.0">
 
     <Parameter key="first" name="First">
-
-        <CreateComponent>
-            def uiValue = ui.create(UIValue.class);
-            uiValue.setConverter(new StringConverterString());
-            return uiValue;
-        </CreateComponent>
-
         <Validate>
             return new NotEmptyStringValidator().validate(value);
         </Validate>
@@ -16,17 +9,9 @@
     </Parameter>
 
     <Parameter key="second" name="Second">
-
-        <CreateComponent>
-            def uiValue = ui.create(UIValue.class);
-            uiValue.setConverter(new StringConverterString());
-            return uiValue;
-        </CreateComponent>
-
         <Validate>
             return new NotEmptyStringValidator().validate(value);
         </Validate>
-
     </Parameter>
 
     <Run>

@@ -4,16 +4,12 @@ import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.jobsui.core.job.JobParameterDefAbstract;
-import org.jobsui.core.ui.UI;
-import org.jobsui.core.ui.UIComponent;
-import org.jobsui.core.ui.UIWidget;
-import org.jobsui.core.ui.UnsupportedComponentException;
+import org.jobsui.core.ui.*;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 /**
  * Created by enrico on 5/4/16.
@@ -23,27 +19,31 @@ public class JobParameterDefGroovySimple extends JobParameterDefAbstract impleme
 //            "import org.jobsui.core.*;\n" +
 //            "import org.jobsui.core.ui.*;\n";
 //    private final File projectFolder;
-    private final String createComponentScript;
+//    private final String createComponentScript;
     private final String onDependenciesChangeScript;
     private final String validateScript;
-    private final Script createComponent;
+    private final Script onInit;
     private final Script onDependenciesChange;
     private final Script validate;
     private final Binding shellBinding;
+    private final String component;
+    private final String onInitScript;
 
-    public JobParameterDefGroovySimple(GroovyShell shell, String key, String name,
-                                       String createComponentScript, String onDependenciesChangeScript,
+    public JobParameterDefGroovySimple(GroovyShell shell, String key, String name, String component,
+                                       String onInitScript, String onDependenciesChangeScript,
                                        String validateScript, boolean optional, boolean visible) {
         super(key, name, null, optional, visible);
-        Objects.requireNonNull(createComponentScript);
+        this.component = component;
+        this.onInitScript = onInitScript;
+//        Objects.requireNonNull(createComponentScript);
 //        this.projectFolder = projectFolder;
-        this.createComponentScript = createComponentScript;
+//        this.createComponentScript = createComponentScript;
         this.onDependenciesChangeScript = onDependenciesChangeScript;
         this.validateScript = validateScript;
         try {
-            this.createComponent = shell.parse(createComponentScript);
+            this.onInit = onInitScript == null ? null : shell.parse(onInitScript);
         } catch (Exception e) {
-            throw new RuntimeException("Error parsing createComponent for parameter with key \"" + key + "\".", e);
+            throw new RuntimeException("Error parsing onInit for parameter with key \"" + key + "\".", e);
         }
         try {
             this.onDependenciesChange = onDependenciesChangeScript == null ? null : shell.parse(onDependenciesChangeScript);
@@ -60,16 +60,30 @@ public class JobParameterDefGroovySimple extends JobParameterDefAbstract impleme
 
     @Override
     public <C> UIComponent<C> createComponent(UI<C> ui) throws UnsupportedComponentException {
-        // I reset the bindings otherwise I get "global" or previous bindings
-        createComponent.setBinding(new Binding(shellBinding.getVariables()));
-        createComponent.setProperty("ui", ui);
-//        createComponent.setProperty("projectFolder", projectFolder);
-        try {
-            return (UIComponent) createComponent.run();
-        } catch (Throwable e) {
-            throw new RuntimeException("Error in createComponent script for parameter whit key \"" +
-                    getKey() + "\"", e);
+        UIComponent uiComponent;
+
+        switch (component) {
+            case "Value": uiComponent = ui.create(UIValue.class); break;
+            case "Choice": uiComponent = ui.create(UIChoice.class); break;
+            case "CheckBox": uiComponent = ui.create(UICheckBox.class); break;
+            case "Button": uiComponent = ui.create(UIButton.class); break;
+            case "List": uiComponent = ui.create(UIList.class); break;
+            default: throw new IllegalArgumentException("Cannot instantiate component " + component);
         }
+
+        if (onInit != null) {
+            // I reset the bindings otherwise I get "global" or previous bindings
+            onInit.setBinding(new Binding(shellBinding.getVariables()));
+            onInit.setProperty("ui", ui);
+            onInit.setProperty("component", uiComponent);
+            try {
+                onInit.run();
+            } catch (Throwable e) {
+                throw new RuntimeException("Error in onInit script for parameter whit key \"" +
+                        getKey() + "\"", e);
+            }
+        }
+        return uiComponent;
     }
 
     @Override
@@ -118,11 +132,6 @@ public class JobParameterDefGroovySimple extends JobParameterDefAbstract impleme
 
     @Override
     public void init(ProjectGroovy projectGroovy) {
-
-    }
-
-    public String getCreateComponentScript() {
-        return createComponentScript;
     }
 
     public String getOnDependenciesChangeScript() {
