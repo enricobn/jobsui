@@ -13,16 +13,35 @@ import java.util.concurrent.Future;
 /**
  * Created by enrico on 5/10/16.
  */
-abstract class JobRunnerWrapper<T extends Serializable, C> {
+public class JobRunnerWrapper<T extends Serializable, C> {
     private final ExecutorService pool = Executors.newFixedThreadPool(1);
     private final FakeUIWindow window;
     private final JobUIRunner<C> runner;
     private final FakeUIButton<?> runButton;
+    private final Runnable interaction;
 
     JobRunnerWrapper(JobUIRunner<C> runner, FakeUIWindow window, FakeUIButton<?> runButton) {
+        this(runner, window, runButton, null);
+    }
+
+    JobRunnerWrapper(JobUIRunner<C> runner, FakeUIWindow window, FakeUIButton<?> runButton, Runnable interaction) {
         this.runner = runner;
         this.window = window;
         this.runButton = runButton;
+        this.interaction = interaction;
+    }
+
+    public boolean interactAndValidate(Job<T> job) {
+        runJob(job);
+
+        window.waitUntilStarted();
+
+        try {
+            interact();
+        } finally {
+            window.exit();
+        }
+        return runner.isValid();
     }
 
     T run(Job<T> job) throws Exception {
@@ -54,7 +73,11 @@ abstract class JobRunnerWrapper<T extends Serializable, C> {
         });
     }
 
-    protected abstract void interact();
+    private void interact() {
+        if (interaction != null) {
+            interaction.run();
+        }
+    }
 
     public boolean isValid() {
         return runner.isValid();
