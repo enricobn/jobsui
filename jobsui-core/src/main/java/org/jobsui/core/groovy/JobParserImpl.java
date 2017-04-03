@@ -198,8 +198,7 @@ public class JobParserImpl implements JobParser {
             String parameterKey = getMandatoryAttribute(element, "key", subject);
             subject = "Expression with key='" + parameterKey + "'";
             String parameterName = getMandatoryAttribute(element, "name", subject);
-            String evaluateScript = getElementContent(element, "Evaluate", false, subject);
-
+            String evaluateScript = element.getTextContent();
             ExpressionXML expressionXML = new ExpressionXML(parameterKey, parameterName);
             expressionXML.setEvaluateScript(evaluateScript);
 

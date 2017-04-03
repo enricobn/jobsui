@@ -20,9 +20,7 @@
     </Parameter>
 
     <Expression key="inv" name="Inv" dependsOn="name,surname">
-        <Evaluate>
-            return Foo.concat(name, surname)
-        </Evaluate>
+        return Foo.concat(name, surname)
     </Expression>
 
     <Run>

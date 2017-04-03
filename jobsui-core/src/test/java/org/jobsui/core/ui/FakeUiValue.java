@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * Created by enrico on 5/5/16.
  */
-public class FakeUiValue< C> extends FakeUIComponent<C> implements UIValue<C> {
+public class FakeUiValue<C> extends FakeUIComponent<C> implements UIValue<C> {
     private Serializable value;
 
     @Override

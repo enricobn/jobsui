@@ -25,18 +25,18 @@ abstract class JobRunnerWrapper<T extends Serializable, C> {
         this.runButton = runButton;
     }
 
-    T start(Job<T> job) throws Exception {
+    T run(Job<T> job) throws Exception {
 
         final Future<T> future = runJob(job);
 
         window.waitUntilStarted();
 
-        interact();
-
-        runButton.click();
-
-        window.exit();
-
+        try {
+            interact();
+            runButton.click();
+        } finally {
+            window.exit();
+        }
         return future.get();
     }
 
@@ -47,6 +47,7 @@ abstract class JobRunnerWrapper<T extends Serializable, C> {
 //                return job.run(values);
 //                return runner.run(ui, job);
             } catch (Exception e) {
+                window.exit();
                 e.printStackTrace();
                 throw e;
             }

@@ -61,4 +61,13 @@ public interface Job<T> {
         }).collect(Collectors.toList());
     }
 
+    default JobDependency getJobDependency(String key) {
+        JobDependency jobDependency = getParameter(key);
+        if (jobDependency == null) {
+            return getExpression(key);
+        } else {
+            return jobDependency;
+        }
+    }
+
 }

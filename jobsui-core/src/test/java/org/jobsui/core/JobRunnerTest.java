@@ -4,9 +4,7 @@ import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.*;
 import org.jobsui.core.runner.JobResult;
-import org.jobsui.core.runner.JobResultImpl;
 import org.jobsui.core.runner.JobUIRunner;
-import org.jobsui.core.runner.JobValues;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.xml.ProjectXML;
 import org.junit.*;
@@ -14,7 +12,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.MockSettings;
 import org.mockito.Mockito;
 import org.mockito.listeners.InvocationListener;
-import org.mockito.listeners.MethodInvocationReport;
 
 import java.io.Serializable;
 import java.util.*;
@@ -34,7 +31,7 @@ public class JobRunnerTest {
     private static Map<String, Project> projects;
     private static Map<JobType, CachedJob> jobs;
     private JobUIRunner runner;
-    private UI ui;
+    private UI<?> ui;
     private FakeUIWindow window;
     private FakeUIButton<?> runButton;
     private FakeUIButton<?> bookmarkButton;
@@ -117,7 +114,7 @@ public class JobRunnerTest {
             }
         };
 
-        jobRunnerWrapper.start(jobs.get(JobType.simpleJob).get());
+        jobRunnerWrapper.run(jobs.get(JobType.simpleJob).get());
 
         assertThat(jobRunnerWrapper.isValid(), is(true));
     }
@@ -135,7 +132,7 @@ public class JobRunnerTest {
             }
         };
 
-        String result = jobRunnerWrapper.start(jobs.get(JobType.simpleJob).get());
+        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleJob).get());
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -151,7 +148,7 @@ public class JobRunnerTest {
             }
         };
 
-        jobRunnerWrapper.start(jobs.get(JobType.simpleJob).get());
+        jobRunnerWrapper.run(jobs.get(JobType.simpleJob).get());
 
         assertThat(jobRunnerWrapper.isValid(), is(false));
     }
@@ -170,7 +167,7 @@ public class JobRunnerTest {
             }
         };
 
-        jobRunnerWrapper.start(jobs.get(JobType.simpleJob).get());
+        jobRunnerWrapper.run(jobs.get(JobType.simpleJob).get());
 
         assertThat(jobRunnerWrapper.isValid(), is(false));
     }
@@ -189,7 +186,7 @@ public class JobRunnerTest {
             }
         };
 
-        String result = jobRunnerWrapper.start(jobs.get(JobType.simpleJob).get());
+        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleJob).get());
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -209,7 +206,7 @@ public class JobRunnerTest {
             }
         };
 
-        String result = jobRunnerWrapper.start(jobs.get(JobType.simpleFSJob).get());
+        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleFSJob).get());
 
         assertThat(result, equalTo("(John,Doe)"));
     }
@@ -229,7 +226,7 @@ public class JobRunnerTest {
             }
         };
 
-        String result = jobRunnerWrapper.start(jobs.get(JobType.complexJob).get());
+        String result = jobRunnerWrapper.run(jobs.get(JobType.complexJob).get());
 
         assertThat(result, equalTo("1.0 Dev-1.0"));
         assertThat(uiChoiceDb.getItems(), equalTo(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev")));
@@ -251,7 +248,7 @@ public class JobRunnerTest {
             }
         };
 
-        jobRunnerWrapper.start(jobs.get(JobType.complexJob).get());
+        jobRunnerWrapper.run(jobs.get(JobType.complexJob).get());
 
         assertThat(jobRunnerWrapper.isValid(), is(true));
     }
@@ -269,7 +266,7 @@ public class JobRunnerTest {
             }
         };
 
-        jobRunnerWrapper.start(jobs.get(JobType.simpleFSJob).get());
+        jobRunnerWrapper.run(jobs.get(JobType.simpleFSJob).get());
 
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
 
@@ -285,77 +282,84 @@ public class JobRunnerTest {
     }
 
     @Test public void verify_that_validation_does_NOT_occur_if_dependencies_are_NOT_valid() throws Exception {
-        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
-        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+        MockedJobBuilder<String> builder = new MockedJobBuilder<>();
 
-        final FakeUIChoice uiChoiceInv = new FakeUIChoice();
-        when(this.ui.create(UIChoice.class)).thenReturn(uiChoiceInv);
+        builder.addParameter("name", UIValue.class).build();
+        UIValue surnameComponent = builder.addParameter("surname", UIValue.class).build();
+        builder.addParameter("inv", UIChoice.class)
+                .dependsOn("name")
+                .build();
 
-        final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
+        final Job<String> job = builder.build();
 
         JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
                 // I want to ignore all validations at startup
                 Mockito.reset(job.getParameter("inv"));
-                uiValueSurname.setValue(null);
+                surnameComponent.setValue(null);
             }
         };
 
-        jobRunnerWrapper.start(job);
+        jobRunnerWrapper.run(job);
 
-        final JobParameterDef inv = job.getParameter("inv");
-        verify(inv, never()).validate(anyMapOf(String.class, Serializable.class), isNull(Serializable.class));
-        verify(inv, never()).validate(anyMapOf(String.class, Serializable.class), isNotNull(Serializable.class));
+        final JobParameterDef invParameter = job.getParameter("inv");
+        verify(invParameter, never()).validate(anyMapOf(String.class, Serializable.class), isNull(Serializable.class));
+        verify(invParameter, never()).validate(anyMapOf(String.class, Serializable.class), isNotNull(Serializable.class));
     }
 
     @Test public void verify_that_onDepependencyChange_occurs_if_dependencies_are_valid() throws Exception {
-        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
-        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+        MockedJobBuilder<String> builder = new MockedJobBuilder<>();
 
-        final FakeUIChoice uiChoiceInv = new FakeUIChoice();
-        when(this.ui.create(UIChoice.class)).thenReturn(uiChoiceInv);
+        UIValue nameComponent = builder.addParameter("name", UIValue.class).build();
+        UIValue surnameComponent = builder.addParameter("surname", UIValue.class).build();
+        builder.addParameter("inv", UIChoice.class)
+                .dependsOn("name")
+                .build();
 
-        final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
+        final Job<String> job = builder.build();
 
         JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
-                uiValueName.setValue("John");
-                uiValueSurname.setValue("Doe");
+                nameComponent.setValue("John");
+                surnameComponent.setValue("Doe");
             }
         };
 
-        jobRunnerWrapper.start(job);
+        jobRunnerWrapper.run(job);
 
-        final JobParameterDef inv = job.getParameter("inv");
-        verify(inv).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
-        verify(inv, atLeast(1)).validate(anyMapOf(String.class, Serializable.class),
+        final JobParameterDef invParameter = job.getParameter("inv");
+        verify(invParameter).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
+        verify(invParameter, atLeast(1)).validate(anyMapOf(String.class, Serializable.class),
                 isNull(Serializable.class));
     }
 
     @Test public void assert_that_a_message_is_shown_when_job_is_not_valid() throws Exception {
-        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
-        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+        MockedJobBuilder<String> builder = new MockedJobBuilder<>();
 
-        final FakeUIChoice uiChoiceInv = new FakeUIChoice();
-        when(this.ui.create(UIChoice.class)).thenReturn(uiChoiceInv);
+        UIValue nameComponent = builder.addParameter("name", UIValue.class).build();
+        UIValue surnameComponent = builder.addParameter("surname", UIValue.class).build();
+        builder.addParameter("inv", UIChoice.class)
+                .dependsOn("name")
+                .invisible()
+                .onInit(component -> component.setItems(Arrays.asList("Hello", "wold")))
+                .onDependenciesChange((component, values) -> component.setValue("Hello"))
+                .build();
 
-        final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
+        final Job<String> job = builder.build();
+
         when(job.validate(anyMapOf(String.class, Serializable.class))).thenReturn(Collections.singletonList("Error"));
 
         JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
-                uiValueName.setValue("John");
-                uiValueSurname.setValue("Doe");
+                nameComponent.setValue("John");
+                surnameComponent.setValue("Doe");
             }
         };
 
-        jobRunnerWrapper.start(job);
+        jobRunnerWrapper.run(job);
 
         assertEquals(Collections.singletonList("Error"), window.getValidationMessages());
     }
@@ -375,7 +379,7 @@ public class JobRunnerTest {
 
         final Job<String> job = getJob("src/test/resources/external", "concat");
 
-        String result = jobRunnerWrapper.start(job);
+        String result = jobRunnerWrapper.run(job);
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -396,7 +400,7 @@ public class JobRunnerTest {
             }
         };
 
-        String result = jobRunnerWrapper.start(jobs.get(JobType.simpleWithInternalCallFSJob).get());
+        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleWithInternalCallFSJob).get());
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -417,7 +421,7 @@ public class JobRunnerTest {
             }
         };
 
-        String result = jobRunnerWrapper.start(jobs.get(JobType.simpleWithInternalCallFSJob).get());
+        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleWithInternalCallFSJob).get());
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -438,99 +442,135 @@ public class JobRunnerTest {
 
         final Job<String> job = jobs.get(JobType.simpleJobWithExpression).get();
 
-        String result = jobRunnerWrapper.start(job);
+        String result = jobRunnerWrapper.run(job);
 
         assertThat(result, equalTo("Mr. John Doe"));
     }
 
     @Test public void verify_that_onDependenciesChange_does_NOT_occur_if_dependencies_are_NOT_valid() throws Exception {
-        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
-        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+        MockedJobBuilder<String> builder = new MockedJobBuilder<>();
 
-        final FakeUIChoice uiChoiceInv = new FakeUIChoice();
-        when(this.ui.create(UIChoice.class)).thenReturn(uiChoiceInv);
+        UIValue nameComponent = builder.addParameter("name", UIValue.class).build();
+        UIValue surnameComponent = builder.addParameter("surname", UIValue.class).build();
+        builder.addParameter("inv", UIChoice.class)
+                .dependsOn("name")
+                .invisible()
+//                .onInitThen(component -> component.setItems(Arrays.asList("Hello", "world")))
+//                .onDependenciesChangeThen(component -> component.setValue("Hello"))
+                .build();
 
-        final Job<String> job = getMockedSimpleJob(uiValueName, uiValueSurname, uiChoiceInv);
+        final Job<String> job = builder.build();
 
         JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
             @Override
             protected void interact() {
-                uiValueName.setValue(null);
-                uiValueSurname.setValue(null);
+                nameComponent.setValue(null);
+                surnameComponent.setValue(null);
             }
         };
 
-        jobRunnerWrapper.start(job);
+        jobRunnerWrapper.run(job);
 
         final JobParameterDef inv = job.getParameter("inv");
         verify(inv, never()).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
     }
 
-    private static Job<String> getMockedSimpleJob(FakeUiValue<?> uiValueName, FakeUiValue<?> uiValueSurname,
-                                           FakeUIChoice uiChoiceInv) throws UnsupportedComponentException {
-        final Job<String> job = mock(Job.class);
+    @Test public void assert_that_a_job_gets_expressions_with_dependencies() throws Exception {
+        MockedJobBuilder<String> builder = new MockedJobBuilder<>();
 
-        final Map<String, JobParameterDef> parameters = new LinkedHashMap<>();
-        final JobParameterDef name = mock(JobParameterDef.class, "name");
-        parameters.put("name", name);
-        final JobParameterDef surname = mock(JobParameterDef.class, "surname");
-        parameters.put("surname", surname);
-        final JobParameterDef inv = mock(JobParameterDef.class, "inv");
-        parameters.put("inv", inv);
+        UIValue nameComponent = builder.addParameter("name", UIValue.class).build();
+        builder.addExpression("mr", values -> "Mr. " + values.get("name"), "name");
 
-        List<JobParameterDef> parametersList = new ArrayList<>(parameters.values());
-        when(job.getParameterDefs()).thenReturn(parametersList);
+        builder.onRun(values -> (String)values.get("mr"));
 
-        when(name.createComponent(any(UI.class))).thenReturn((UIComponent<Object>) uiValueName);
-        when(name.getKey()).thenReturn("name");
-        when(name.getName()).thenReturn("Name");
-        when(name.isVisible()).thenReturn(true);
-        when(name.isOptional()).thenReturn(false);
-        when(name.validate(anyMapOf(String.class, Serializable.class), isNull(Serializable.class))).thenReturn(Collections.singletonList("Error"));
-        when(name.validate(anyMapOf(String.class, Serializable.class), isNotNull(Serializable.class))).thenReturn(Collections.emptyList());
+        final Job<String> job = builder.build();
 
-        when(surname.createComponent(any(UI.class))).thenReturn((UIComponent<Object>) uiValueSurname);
-        when(surname.getKey()).thenReturn("surname");
-        when(surname.getName()).thenReturn("Surname");
-        when(surname.isVisible()).thenReturn(true);
-        when(surname.isOptional()).thenReturn(false);
-        when(surname.validate(anyMapOf(String.class, Serializable.class), isNull(Serializable.class))).thenReturn(Collections.singletonList("Error"));
-        when(surname.validate(anyMapOf(String.class, Serializable.class), isNotNull(Serializable.class))).thenReturn(Collections.emptyList());
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
+            @Override
+            protected void interact() {
+                nameComponent.setValue("Jones");
+            }
+        };
 
-        when(inv.createComponent(any(UI.class))).thenReturn(uiChoiceInv);
-        when(inv.getKey()).thenReturn("inv");
-        when(inv.getName()).thenReturn("Inv");
-        when(inv.isVisible()).thenReturn(false);
-        when(inv.isOptional()).thenReturn(false);
-        when(inv.getDependencies()).thenReturn(Collections.singletonList("name"));
-//        doAnswer(invocation -> {
-//            Map<String,Serializable> values = (Map<String, Serializable>) invocation.getArguments()[1];
-//            uiChoiceInv.setValue(values.get("name"));
-//            return null;
-//        }).when(inv).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
+        assertThat(jobRunnerWrapper.run(job), is("Mr. Jones"));
+    }
 
-        when(job.getParameter(anyString())).thenAnswer(invocation ->
-                parameters.get(invocation.getArguments()[0].toString())
-        );
-        try {
-            when(job.getSortedDependencies()).thenReturn(Arrays.asList(name, surname, inv));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        when(job.getUnsortedDependencies()).thenReturn(Arrays.asList(inv, name, surname));
-        when(job.run(anyMapOf(String.class, Serializable.class))).thenReturn(new JobResultImpl<>((String)null));
-        when(job.run(any(JobValues.class))).thenReturn(new JobResultImpl<>((String)null));
-        return job;
+    /**
+     * This test is for testing a bug that was in JobRunnerContext.jobValidationObserver when mixing parameters
+     * and expressions due to ordering.
+     */
+    @Test public void assert_that_mixing_expressions_and_parameters_does_not_fool_dependencies() throws Exception {
+        MockedJobBuilder<String> builder = new MockedJobBuilder<>();
+
+        UIValue pathComponent = builder.addParameter("path", UIValue.class).build();
+
+        builder.addExpression("config", values -> values.get("path") + "/config", "path");
+
+        builder.addParameter("file", UIChoice.class)
+                .dependsOn("config")
+                .onDependenciesChange((component, values) -> {
+                        // it's needed since it triggers setValue(null) to component, so validation observer is triggered
+                        component.setItems(Collections.emptyList());
+                })
+                .build();
+
+        builder.onRun(values -> (String)values.get("file"));
+
+        final Job<String> job = builder.build();
+
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
+            @Override
+            protected void interact() {
+                pathComponent.setValue("home");
+            }
+        };
+
+        jobRunnerWrapper.run(job);
+
+        assertThat(jobRunnerWrapper.isValid(), is(false));
+    }
+
+    /**
+     * This test is for testing a bug that was in JobRunnerContext.valuesChangeObserver when mixing parameters
+     * and expressions due to ordering.
+     */
+    @Test public void assert_that_mixing_expressions_and_parameters() throws Exception {
+        MockedJobBuilder<String> builder = new MockedJobBuilder<>();
+
+        UIValue pathComponent = builder.addParameter("path", UIValue.class).build();
+
+        builder.addExpression("config", values -> values.get("path") + "/config", "path");
+
+        UIChoice fileComponent = builder.addParameter("file", UIChoice.class)
+                .dependsOn("config")
+                .onDependenciesChange((component, values) -> {
+                    component.setItems(Arrays.asList("one.xml", "two.xml"));
+                })
+                .build();
+
+        builder.onRun(values -> (String)values.get("config"));
+
+        final Job<String> job = builder.build();
+
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton) {
+            @Override
+            protected void interact() {
+                pathComponent.setValue("home");
+                fileComponent.setValue("one.xml");
+            }
+        };
+
+        String result = jobRunnerWrapper.run(job);
+
+        assertThat(jobRunnerWrapper.isValid(), is(true));
+
+        assertThat(result, is("home/config"));
     }
 
     private MockSettings printInvocation(String name, final CharSequence methodName) {
-        return Mockito.withSettings().name(name).invocationListeners(new InvocationListener() {
-            @Override
-            public void reportInvocation(MethodInvocationReport methodInvocationReport) {
-                if (methodInvocationReport.getInvocation().toString().contains(methodName)) {
-                    new RuntimeException().printStackTrace();
-                }
+        return Mockito.withSettings().name(name).invocationListeners((InvocationListener) methodInvocationReport -> {
+            if (methodInvocationReport.getInvocation().toString().contains(methodName)) {
+                new RuntimeException().printStackTrace();
             }
         });
     }
