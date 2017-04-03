@@ -11,11 +11,6 @@ public class FakeUiValue<C> extends FakeUIComponent<C> implements UIValue<C> {
     private Serializable value;
 
     @Override
-    public C getComponent() {
-        return null;
-    }
-
-    @Override
     public Serializable getValue() {
         return value;
     }

@@ -14,11 +14,6 @@ public class FakeUIButton<C> extends FakeUIComponent<C> implements UIButton<C> {
 
     }
 
-    @Override
-    public C getComponent() {
-        return null;
-    }
-
     public void click() {
         for (Action1<Serializable> action : actions) {
             action.call(null);

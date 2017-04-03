@@ -59,4 +59,10 @@ public abstract class FakeUIComponent<C> implements UIComponent<C> {
     public void setEnabled(boolean enabled) {
         this.enabled = enabled;
     }
+
+    @Override
+    public final C getComponent() {
+        return null;
+    }
+
 }

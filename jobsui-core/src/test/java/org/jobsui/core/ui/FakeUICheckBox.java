@@ -9,11 +9,6 @@ public class FakeUICheckBox<C> extends FakeUIComponent<C> implements UICheckBox<
     private Boolean value;
 
     @Override
-    public C getComponent() {
-        return null;
-    }
-
-    @Override
     public Boolean getValue() {
         return value;
     }
