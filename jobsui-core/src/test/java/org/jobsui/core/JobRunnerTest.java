@@ -33,8 +33,8 @@ public class JobRunnerTest {
     private JobUIRunner runner;
     private UI<?> ui;
     private FakeUIWindow window;
-    private FakeUIButton<?> runButton;
-    private FakeUIButton<?> bookmarkButton;
+    private FakeUIButton runButton;
+    private FakeUIButton bookmarkButton;
 
     private static class CachedJob {
         private final Supplier<Job<String>> supplier;
@@ -83,8 +83,8 @@ public class JobRunnerTest {
         runner = new JobUIRunner(ui);
         window = new FakeUIWindow();
         when(ui.createWindow(anyString())).thenReturn(window);
-        runButton = spy(new FakeUIButton<>());
-        bookmarkButton = spy(new FakeUIButton<>());
+        runButton = spy(new FakeUIButton());
+        bookmarkButton = spy(new FakeUIButton());
         when(ui.create(UIButton.class)).thenReturn(runButton, bookmarkButton);
         doAnswer(invocation -> {
             String message = invocation.getArgumentAt(0, String.class);
@@ -102,11 +102,11 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_simplejob_is_valid_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue uiValueName = new FakeUiValue();
+        final FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton,
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
                     uiValueName.setValue("John");
                     uiValueSurname.setValue("Doe");
@@ -118,11 +118,11 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue uiValueName = new FakeUiValue();
+        final FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton,
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
                     uiValueName.setValue("John");
                     uiValueSurname.setValue("Doe");
@@ -134,8 +134,8 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters() throws Exception {
-        FakeUiValue<?> uiValueName = new FakeUiValue<>();
-        FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
+        FakeUiValue uiValueName = new FakeUiValue();
+        FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
         JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton);
@@ -146,11 +146,11 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters_on_interact() throws Exception {
-        FakeUiValue<?> uiValueName = new FakeUiValue<>();
-        FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
+        FakeUiValue uiValueName = new FakeUiValue();
+        FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton,
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
                     uiValueName.setValue("John");
                     uiValueSurname.setValue("Doe");
@@ -163,11 +163,11 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_groovy_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue uiValueName = new FakeUiValue();
+        final FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton,
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
                     uiValueName.setValue("John");
                     uiValueSurname.setValue("Doe");
@@ -179,16 +179,16 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_groovy_loaded_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue uiValueName = new FakeUiValue();
+        final FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
         when(ui.create(UIChoice.class)).thenReturn(new FakeUIChoice());
 
-        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton,
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
-                uiValueName.setValue("John");
-                uiValueSurname.setValue("Doe");
-            });
+                    uiValueName.setValue("John");
+                    uiValueSurname.setValue("Doe");
+                });
 
         String result = jobRunnerWrapper.run(jobs.get(JobType.simpleFSJob).get());
 
@@ -196,9 +196,9 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_complexjob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUIChoice<?> uiChoiceVersion = new FakeUIChoice<>();
-        final FakeUIChoice<?> uiChoiceDb = new FakeUIChoice<>();
-        final FakeUIChoice<?> uiChoiceUser = new FakeUIChoice<>();
+        final FakeUIChoice uiChoiceVersion = new FakeUIChoice();
+        final FakeUIChoice uiChoiceDb = new FakeUIChoice();
+        final FakeUIChoice uiChoiceUser = new FakeUIChoice();
         when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
         JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton,
@@ -216,17 +216,17 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_the_default_value_of_a_parameter_triggers_validation() throws Exception {
-        final FakeUIChoice<?> uiChoiceVersion = new FakeUIChoice<>();
-        final FakeUIChoice<?> uiChoiceDb = new FakeUIChoice<>();
-        final FakeUIChoice<?> uiChoiceUser = new FakeUIChoice<>();
+        final FakeUIChoice uiChoiceVersion = new FakeUIChoice();
+        final FakeUIChoice uiChoiceDb = new FakeUIChoice();
+        final FakeUIChoice uiChoiceUser = new FakeUIChoice();
         when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
-        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<String,Object>(runner, window, runButton,
+        JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
-                uiChoiceVersion.setItems(Collections.singletonList("1.0"));
-                uiChoiceDb.setItems(Collections.singletonList("Dev-1.0"));
-                uiChoiceUser.setItems(Collections.singletonList("John"));
-            });
+                    uiChoiceVersion.setItems(Collections.singletonList("1.0"));
+                    uiChoiceDb.setItems(Collections.singletonList("Dev-1.0"));
+                    uiChoiceUser.setItems(Collections.singletonList("John"));
+                });
 
         boolean validate = jobRunnerWrapper.interactAndValidate(jobs.get(JobType.complexJob).get());
 
@@ -234,8 +234,8 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_not_valid_parameter_invokes_set_validation_on_widget() throws Exception {
-        final FakeUiValue<?> uiValueName = new FakeUiValue<>();
-        final FakeUiValue<?> uiValueSurname = new FakeUiValue<>();
+        final FakeUiValue uiValueName = new FakeUiValue();
+        final FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
         when(ui.create(UIChoice.class)).thenReturn(new FakeUIChoice());
 
@@ -335,8 +335,8 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_groovy_external_concat_job_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<?> uiValueFirst = new FakeUiValue<>();
-        final FakeUiValue<?> uiValueSecond = new FakeUiValue<>();
+        final FakeUiValue uiValueFirst = new FakeUiValue();
+        final FakeUiValue uiValueSecond = new FakeUiValue();
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
 
         JobRunnerWrapper<String,?> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
@@ -353,9 +353,9 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_groovy_simple_with_ext_job_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<?> uiValueFirst = new FakeUiValue<>();
-        final FakeUiValue<?> uiValueSecond = new FakeUiValue<>();
-        final FakeUIChoice<?> uiValueInv = new FakeUIChoice<>();
+        final FakeUiValue uiValueFirst = new FakeUiValue();
+        final FakeUiValue uiValueSecond = new FakeUiValue();
+        final FakeUIChoice uiValueInv = new FakeUIChoice();
 
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
         when(ui.create(UIChoice.class)).thenReturn(uiValueInv);
@@ -372,9 +372,9 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_groovy_simple_with_int_call_job_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<?> uiValueFirst = new FakeUiValue<>();
-        final FakeUiValue<?> uiValueSecond = new FakeUiValue<>();
-        final FakeUIChoice<?> uiValueInv = new FakeUIChoice<>();
+        final FakeUiValue uiValueFirst = new FakeUiValue();
+        final FakeUiValue uiValueSecond = new FakeUiValue();
+        final FakeUIChoice uiValueInv = new FakeUIChoice();
 
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
         when(ui.create(UIChoice.class)).thenReturn(uiValueInv);
@@ -391,8 +391,8 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_groovy_simple_with_expression_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-        final FakeUiValue<?> uiValueFirst = new FakeUiValue<>();
-        final FakeUiValue<?> uiValueSecond = new FakeUiValue<>();
+        final FakeUiValue uiValueFirst = new FakeUiValue();
+        final FakeUiValue uiValueSecond = new FakeUiValue();
 
         when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
 

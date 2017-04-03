@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by enrico on 5/5/16.
  */
-public abstract class FakeUIComponent<C> implements UIComponent<C> {
+public abstract class FakeUIComponent implements UIComponent<FakeComponent> {
     private final Observable<Serializable> observable;
     protected final List<Action1<Serializable>> actions = new ArrayList<>();
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
@@ -61,7 +61,7 @@ public abstract class FakeUIComponent<C> implements UIComponent<C> {
     }
 
     @Override
-    public final C getComponent() {
+    public final FakeComponent getComponent() {
         return null;
     }
 

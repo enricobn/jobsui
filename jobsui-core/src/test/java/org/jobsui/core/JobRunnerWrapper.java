@@ -17,14 +17,14 @@ public class JobRunnerWrapper<T extends Serializable, C> {
     private final ExecutorService pool = Executors.newFixedThreadPool(1);
     private final FakeUIWindow window;
     private final JobUIRunner<C> runner;
-    private final FakeUIButton<?> runButton;
+    private final FakeUIButton runButton;
     private final Runnable interaction;
 
-    JobRunnerWrapper(JobUIRunner<C> runner, FakeUIWindow window, FakeUIButton<?> runButton) {
+    JobRunnerWrapper(JobUIRunner<C> runner, FakeUIWindow window, FakeUIButton runButton) {
         this(runner, window, runButton, null);
     }
 
-    JobRunnerWrapper(JobUIRunner<C> runner, FakeUIWindow window, FakeUIButton<?> runButton, Runnable interaction) {
+    JobRunnerWrapper(JobUIRunner<C> runner, FakeUIWindow window, FakeUIButton runButton, Runnable interaction) {
         this.runner = runner;
         this.window = window;
         this.runButton = runButton;
@@ -79,7 +79,4 @@ public class JobRunnerWrapper<T extends Serializable, C> {
         }
     }
 
-    public boolean isValid() {
-        return runner.isValid();
-    }
 }

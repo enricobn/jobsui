@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Created by enrico on 5/31/16.
  */
-public class FakeUICheckBox<C> extends FakeUIComponent<C> implements UICheckBox<C> {
+public class FakeUICheckBox extends FakeUIComponent implements UICheckBox<FakeComponent> {
     private Boolean value;
 
     @Override

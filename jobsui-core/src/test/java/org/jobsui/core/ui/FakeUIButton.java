@@ -7,7 +7,7 @@ import java.io.Serializable;
 /**
  * Created by enrico on 5/5/16.
  */
-public class FakeUIButton<C> extends FakeUIComponent<C> implements UIButton<C> {
+public class FakeUIButton extends FakeUIComponent implements UIButton<FakeComponent> {
 
     @Override
     public void setEnabled(boolean enabled) {

@@ -12,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Created by enrico on 5/5/16.
  */
-public class FakeUIChoice<C> extends FakeUIComponent<C> implements UIChoice<C> {
+public class FakeUIChoice extends FakeUIComponent implements UIChoice<FakeComponent> {
     private List<Serializable> items = Collections.emptyList();
     private Serializable selectedItem;
 
