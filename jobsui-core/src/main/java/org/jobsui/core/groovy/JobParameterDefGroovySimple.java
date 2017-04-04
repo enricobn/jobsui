@@ -26,14 +26,14 @@ public class JobParameterDefGroovySimple extends JobParameterDefAbstract impleme
     private final Script onDependenciesChange;
     private final Script validate;
     private final Binding shellBinding;
-    private final String component;
+    private final UIComponentType componentType;
     private final String onInitScript;
 
-    public JobParameterDefGroovySimple(GroovyShell shell, String key, String name, String component,
+    public JobParameterDefGroovySimple(GroovyShell shell, String key, String name, UIComponentType componentType,
                                        String onInitScript, String onDependenciesChangeScript,
                                        String validateScript, boolean optional, boolean visible) {
         super(key, name, null, optional, visible);
-        this.component = component;
+        this.componentType = componentType;
         this.onInitScript = onInitScript;
 //        Objects.requireNonNull(createComponentScript);
 //        this.projectFolder = projectFolder;
@@ -62,13 +62,13 @@ public class JobParameterDefGroovySimple extends JobParameterDefAbstract impleme
     public <C> UIComponent<C> createComponent(UI<C> ui) throws UnsupportedComponentException {
         UIComponent uiComponent;
 
-        switch (component) {
-            case "Value": uiComponent = ui.create(UIValue.class); break;
-            case "Choice": uiComponent = ui.create(UIChoice.class); break;
-            case "CheckBox": uiComponent = ui.create(UICheckBox.class); break;
-            case "Button": uiComponent = ui.create(UIButton.class); break;
-            case "List": uiComponent = ui.create(UIList.class); break;
-            default: throw new IllegalArgumentException("Cannot instantiate component " + component);
+        switch (componentType) {
+            case Value: uiComponent = ui.create(UIValue.class); break;
+            case Choice: uiComponent = ui.create(UIChoice.class); break;
+            case CheckBox: uiComponent = ui.create(UICheckBox.class); break;
+            case Button: uiComponent = ui.create(UIButton.class); break;
+            case List: uiComponent = ui.create(UIList.class); break;
+            default: throw new IllegalArgumentException("Cannot instantiate component " + componentType);
         }
 
         if (onInit != null) {

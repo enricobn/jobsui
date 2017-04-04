@@ -1,5 +1,6 @@
 package org.jobsui.core.groovy;
 
+import org.jobsui.core.ui.UIComponentType;
 import org.jobsui.core.xml.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -269,7 +270,7 @@ public class JobParserImpl implements JobParser {
             simpleParameterXML.setOnDependenciesChangeScript(onDependenciesChangeScript);
             simpleParameterXML.setVisible(visible);
             simpleParameterXML.setOptional(optional);
-            simpleParameterXML.setComponent(component);
+            simpleParameterXML.setComponent(UIComponentType.valueOf(component));
 
             addDependencies(element, simpleParameterXML);
 

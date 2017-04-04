@@ -1,5 +1,14 @@
 <?xml version="1.0"?>
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:simpleType name="uiComponentType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="Button" />
+            <xs:enumeration value="CheckBox" />
+            <xs:enumeration value="Choice" />
+            <xs:enumeration value="List" />
+            <xs:enumeration value="Value" />
+        </xs:restriction>
+    </xs:simpleType>
     <xs:element name="Job">
         <xs:complexType>
             <xs:sequence>
@@ -15,7 +24,7 @@
                         <xs:attribute type="xs:boolean" name="visible" use="optional"/>
                         <xs:attribute type="xs:boolean" name="optional" use="optional"/>
                         <xs:attribute type="xs:string" name="dependsOn" use="optional"/>
-                        <xs:attribute type="xs:string" name="component" use="optional" default="Value"/>
+                        <xs:attribute type="uiComponentType" name="component" use="optional" default="Value"/>
                     </xs:complexType>
                 </xs:element>
                 <xs:element name="Expression" maxOccurs="unbounded" minOccurs="0">

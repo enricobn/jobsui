@@ -1,5 +1,7 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.ui.UIComponentType;
+
 /**
  * Created by enrico on 10/11/16.
  */
@@ -9,7 +11,7 @@ public class SimpleParameterXML extends ParameterXML {
     private boolean visible;
     private boolean optional;
     private String onInitScript;
-    private String component;
+    private UIComponentType component;
 
     public SimpleParameterXML(String key, String name) {
         super(key, name);
@@ -55,11 +57,11 @@ public class SimpleParameterXML extends ParameterXML {
         return onInitScript;
     }
 
-    public void setComponent(String component) {
+    public void setComponent(UIComponentType component) {
         this.component = component;
     }
 
-    public String getComponent() {
+    public UIComponentType getComponent() {
         return component;
     }
 }

@@ -7,6 +7,7 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jobsui.core.Project;
 import org.jobsui.core.job.JobDependency;
+import org.jobsui.core.ui.UIComponentType;
 import org.jobsui.core.xml.*;
 
 import java.io.File;
