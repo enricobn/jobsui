@@ -10,18 +10,12 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by enrico on 5/4/16.
  */
 public class JobParameterDefGroovySimple extends JobParameterDefAbstract implements JobParameterDefGroovy {
-//    private static final String IMPORTS =
-//            "import org.jobsui.core.*;\n" +
-//            "import org.jobsui.core.ui.*;\n";
-//    private final File projectFolder;
-//    private final String createComponentScript;
-    private final String onDependenciesChangeScript;
-    private final String validateScript;
     private final Script onInit;
     private final Script onDependenciesChange;
     private final Script validate;
@@ -33,11 +27,7 @@ public class JobParameterDefGroovySimple extends JobParameterDefAbstract impleme
                                        String validateScript, boolean optional, boolean visible) {
         super(key, name, null, optional, visible);
         this.componentType = componentType;
-        //        Objects.requireNonNull(createComponentScript);
-//        this.projectFolder = projectFolder;
-//        this.createComponentScript = createComponentScript;
-        this.onDependenciesChangeScript = onDependenciesChangeScript;
-        this.validateScript = validateScript;
+        Objects.requireNonNull(componentType);
         try {
             this.onInit = onInitScript == null ? null : shell.parse(onInitScript);
         } catch (Exception e) {
@@ -94,7 +84,6 @@ public class JobParameterDefGroovySimple extends JobParameterDefAbstract impleme
             for (Map.Entry<String, Serializable> entry : values.entrySet()) {
                 onDependenciesChange.setProperty(entry.getKey(), entry.getValue());
             }
-//            onDependenciesChange.setProperty("projectFolder", projectFolder);
             try {
                 onDependenciesChange.run();
             } catch (Exception e) {
@@ -117,7 +106,6 @@ public class JobParameterDefGroovySimple extends JobParameterDefAbstract impleme
         validate.setBinding(new Binding());
         validate.setProperty("value", value);
         validate.setProperty("values", values);
-//        validate.setProperty("projectFolder", projectFolder);
         try {
             @SuppressWarnings("unchecked")
             List<String> result = (List<String>) validate.run();
@@ -132,11 +120,4 @@ public class JobParameterDefGroovySimple extends JobParameterDefAbstract impleme
     public void init(ProjectGroovy projectGroovy) {
     }
 
-    public String getOnDependenciesChangeScript() {
-        return onDependenciesChangeScript;
-    }
-
-    public String getValidateScript() {
-        return validateScript;
-    }
 }
