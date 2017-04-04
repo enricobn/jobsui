@@ -27,15 +27,13 @@ public class JobParameterDefGroovySimple extends JobParameterDefAbstract impleme
     private final Script validate;
     private final Binding shellBinding;
     private final UIComponentType componentType;
-    private final String onInitScript;
 
     public JobParameterDefGroovySimple(GroovyShell shell, String key, String name, UIComponentType componentType,
                                        String onInitScript, String onDependenciesChangeScript,
                                        String validateScript, boolean optional, boolean visible) {
         super(key, name, null, optional, visible);
         this.componentType = componentType;
-        this.onInitScript = onInitScript;
-//        Objects.requireNonNull(createComponentScript);
+        //        Objects.requireNonNull(createComponentScript);
 //        this.projectFolder = projectFolder;
 //        this.createComponentScript = createComponentScript;
         this.onDependenciesChangeScript = onDependenciesChangeScript;
