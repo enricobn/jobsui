@@ -147,4 +147,8 @@ public class ProjectXML implements ValidatingXML {
     public String getId() {
         return id;
     }
+
+    public URL[] getScriptsURLS() {
+        return new URL[]{getRelativeURL("groovy")};
+    }
 }

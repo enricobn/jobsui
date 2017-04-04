@@ -142,7 +142,7 @@ public class ProjectGroovyBuilder {
         if (projectXML.getGroovyFiles().isEmpty()) {
             cl = new GroovyClassLoader();
         } else {
-            GroovyScriptEngine engine = new GroovyScriptEngine(new URL[] {projectXML.getRelativeURL("groovy")});
+            GroovyScriptEngine engine = new GroovyScriptEngine(projectXML.getScriptsURLS());
             cl = engine.getGroovyClassLoader();
         }
 
