@@ -17,6 +17,7 @@ import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.logging.Logger;
 
@@ -72,25 +73,6 @@ public class JobParserImpl implements JobParser {
             projectXML = parseProject(folder, is);
         }
 
-        final File[] files = folder.listFiles();
-
-        if (files != null) {
-            for (File file : files) {
-                if (file.getName().endsWith(".job")) {
-
-                    try (InputStream is = new FileInputStream(file)) {
-                        final StreamSource source = new StreamSource(is);
-                        try {
-                            jobValidator.validate(source);
-                        } catch (Exception e) {
-                            throw new Exception("Cannot parse file " + file, e);
-                        }
-                    }
-
-                    parseJob(file, projectXML);
-                }
-            }
-        }
         LOGGER.info("Parsed " + folder);
         return projectXML;
     }
@@ -129,65 +111,85 @@ public class JobParserImpl implements JobParser {
             projectXML.addImport(name, imp);
         }
 
-        final File lib = new File(projectFolder, "lib");
-        if (lib.exists()) {
-            final File[] libFiles = lib.listFiles();
-            if (libFiles != null) {
-                for (File file : libFiles) {
-                    projectXML.addFileLibrary(file);
+        NodeList jobs = doc.getElementsByTagName("Job");
+        for (int i = 0; i < jobs.getLength(); i++) {
+            Element element = (Element) jobs.item(i);
+            subject = "Job for Project with id='" + projectId + "'";
+            String jobFile = getElementContent(element, "#text", false, subject);
+
+            if (jobFile == null || !jobFile.endsWith(".xml")) {
+                throw new Exception(jobFile + " is not a valid job file name: it must end with .xml.");
+            }
+
+            try (InputStream jobis = projectXML.getRelativeURL(jobFile).openStream()) {
+                final StreamSource source = new StreamSource(jobis);
+                try {
+                    jobValidator.validate(source);
+                } catch (Exception e) {
+                    throw new Exception("Cannot parse " + jobFile, e);
                 }
+            }
+
+            try (InputStream jobis = projectXML.getRelativeURL(jobFile).openStream()) {
+                int pos = jobFile.lastIndexOf('.');
+                String id = jobFile.substring(0, pos);
+                parseJob(id, jobis, projectXML);
             }
         }
 
-        final File groovy = new File(projectFolder, "groovy");
-        if (groovy.exists()) {
-            File[] files = groovy.listFiles(File::isFile);
-            if (files != null) {
-                Arrays.stream(files).forEach(projectXML::addGroovyFile);
+        for (URL url : projectXML.getScriptsURLS()) {
+            File groovy = new File(url.toURI().getPath());
+            if (groovy.exists()) {
+                File[] files = groovy.listFiles(File::isFile);
+                if (files != null) {
+                    Arrays.stream(files).forEach(projectXML::addGroovyFile);
+                }
             }
         }
+//
+//
+//        final File groovy = new File(projectFolder, "groovy");
+//        if (groovy.exists()) {
+//            File[] files = groovy.listFiles(File::isFile);
+//            if (files != null) {
+//                Arrays.stream(files).forEach(projectXML::addGroovyFile);
+//            }
+//        }
 
         return projectXML;
     }
 
-    private void parseJob(File file, ProjectXML projectXML) throws Exception {
-        try (InputStream is = new FileInputStream(file)) {
-            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-            dbFactory.setValidating(false);
-            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+    private void parseJob(String id, InputStream is, ProjectXML projectXML) throws Exception {
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+        dbFactory.setValidating(false);
+        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 
-            Document doc = dBuilder.parse(is);
+        Document doc = dBuilder.parse(is);
 
-            //optional, but recommended
-            //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
-            doc.getDocumentElement().normalize();
-            String subject = "Job";
-            String id = getMandatoryAttribute(doc.getDocumentElement(), "id", subject);
-            subject = "Job with id='" + id + "'";
-            String name = getMandatoryAttribute(doc.getDocumentElement(), "name", subject);
-            String version = getMandatoryAttribute(doc.getDocumentElement(), "version", subject);
+        //optional, but recommended
+        //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
+        doc.getDocumentElement().normalize();
+        String subject =  "Job with id='" + id + "'";
+        String name = getMandatoryAttribute(doc.getDocumentElement(), "name", subject);
+        String version = getMandatoryAttribute(doc.getDocumentElement(), "version", subject);
 
-            JobXML jobXML = new JobXML(file, id, name, version);
+        JobXML jobXML = new JobXML(id, name, version);
 
-            String runScript = getElementContent(doc.getDocumentElement(), "Run", true, subject);
+        String runScript = getElementContent(doc.getDocumentElement(), "Run", true, subject);
 
-            jobXML.setRunScript(runScript);
+        jobXML.setRunScript(runScript);
 
-            String validateScript = getElementContent(doc.getDocumentElement(), "Validate", false, subject);
+        String validateScript = getElementContent(doc.getDocumentElement(), "Validate", false, subject);
 
-            jobXML.setValidateScript(validateScript);
+        jobXML.setValidateScript(validateScript);
 
-            parseParameters(doc, jobXML);
+        parseParameters(doc, jobXML);
 
-            parseExpressions(doc, jobXML);
+        parseExpressions(doc, jobXML);
 
-            parseCalls(doc, jobXML);
+        parseCalls(doc, jobXML);
 
-            projectXML.addJob(jobXML);
-
-        } catch (Throwable th) {
-            throw new Exception("Cannot parse file " + file, th);
-        }
+        projectXML.addJob(jobXML);
     }
 
     private void parseExpressions(Document doc, JobXML jobXML)

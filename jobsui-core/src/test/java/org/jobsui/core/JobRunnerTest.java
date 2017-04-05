@@ -533,7 +533,7 @@ public class JobRunnerTest {
             }
             result = project.getJob(job);
             if (result == null) {
-                throw new Exception("Cannot find job with id \"" + job + "\". Ids:" + project.getJobsIds());
+                throw new Exception("Cannot find job with id \"" + job + "\".");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -4,7 +4,6 @@ import org.jobsui.core.groovy.JobParser;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -21,7 +20,6 @@ public class ProjectXML implements ValidatingXML {
     private final List<String> libraries = new ArrayList<>();
     private final Map<String, String> imports = new HashMap<>();
     private final Map<String, JobXML> jobs = new HashMap<>();
-    private final Collection<File> fileLibraries = new ArrayList<>();
     private final Collection<File> groovyFiles = new ArrayList<>();
     private final String id;
     private String name;
@@ -68,6 +66,7 @@ public class ProjectXML implements ValidatingXML {
 
         for (Map.Entry<String, String> entry : imports.entrySet()) {
             Element element = XMLUtils.addTextElement(rootElement, "Import", entry.getValue());
+            // TODO rename to id
             XMLUtils.addAttr(element, "name", entry.getKey());
         }
 
@@ -75,7 +74,7 @@ public class ProjectXML implements ValidatingXML {
 //                getClass().getResource("/org/jobsui/project.xsd"));
 
         for (JobXML jobXML : jobs.values()) {
-            jobXML.export();
+            jobXML.export(new File(projectFolder, jobXML.getId() + ".xml"));
         }
 
     }
@@ -102,14 +101,6 @@ public class ProjectXML implements ValidatingXML {
 
     public String getName() {
         return name;
-    }
-
-    public void addFileLibrary(File file) {
-        fileLibraries.add(file);
-    }
-
-    public Collection<File> getFileLibraries() {
-        return fileLibraries;
     }
 
     public void addGroovyFile(File file) {

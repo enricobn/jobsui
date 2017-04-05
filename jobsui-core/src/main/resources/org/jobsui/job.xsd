@@ -57,8 +57,6 @@
                 <xs:element type="xs:string" name="Validate" minOccurs="0" maxOccurs="1"/>
                 <xs:element type="xs:string" name="Run" minOccurs="1" maxOccurs="1"/>
             </xs:sequence>
-
-            <xs:attribute type="xs:string" name="id" use="required"/>
             <xs:attribute type="xs:string" name="name" use="required"/>
             <xs:attribute type="xs:string" name="version" use="required"/>
         </xs:complexType>

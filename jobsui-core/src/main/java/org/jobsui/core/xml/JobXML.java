@@ -23,7 +23,6 @@ public class JobXML implements ValidatingXML {
     private final Map<String, ParameterXML> parameters = new HashMap<>();
     private final Map<String, ExpressionXML> expressions = new HashMap<>();
 
-    private final File file;
     private final String id;
     private final String version;
     private String name;
@@ -31,20 +30,13 @@ public class JobXML implements ValidatingXML {
     private String validateScript;
     private int order;
 
-    public JobXML(File file, String id, String name, String version) {
-        this.file = file;
+    public JobXML(String id, String name, String version) {
         this.name = name;
-
-//        String fileName = file.getName();
-//        int pos = fileName.lastIndexOf(".");
-//        if (pos > 0) {
-//            fileName = fileName.substring(0, pos);
-//        }
         this.id = id;
         this.version = version;
     }
 
-    public void export() throws Exception {
+    public void export(File file) throws Exception {
         List<String> validate = validate();
 
         if (!validate.isEmpty()) {
