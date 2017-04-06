@@ -12,6 +12,7 @@ import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.JobsUIPreferencesImpl;
 import org.jobsui.core.OpenedItem;
 import org.jobsui.core.job.Job;
+import org.jobsui.core.xml.ProjectFSXMLImpl;
 import org.jobsui.core.xml.ProjectXML;
 
 import java.io.Serializable;
@@ -73,7 +74,7 @@ public class StartController implements Initializable {
 
             MenuItem editMenuItem = new MenuItem("Edit");
             editMenuItem.setOnAction(event -> {
-                Task<ProjectXML> task = new LoadProjectXMLTask(cell.getItem().project);
+                Task<ProjectFSXMLImpl> task = new LoadProjectXMLTask(cell.getItem().project);
                 ProgressDialog.run(task, "Opening project", project -> StartApp.getInstance().gotoEdit(project));
             });
             menu.getItems().add(editMenuItem);

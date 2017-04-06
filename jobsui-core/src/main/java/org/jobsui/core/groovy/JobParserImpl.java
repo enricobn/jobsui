@@ -5,166 +5,33 @@ import org.jobsui.core.xml.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
-import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.stream.StreamSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.logging.Logger;
+
+import static org.jobsui.core.groovy.XMLUtils.getElementContent;
+import static org.jobsui.core.groovy.XMLUtils.getMandatoryAttribute;
 
 /**
- * Created by enrico on 5/4/16.
+ * Created by enrico on 4/5/17.
  */
 public class JobParserImpl implements JobParser {
-    private static final Logger LOGGER = Logger.getLogger(JobParserImpl.class.getName());
-    public static final String PROJECT_FILE_NAME = "project.xml";
-    private static final Validator jobValidator;
-    private static final Validator projectValidator;
-    private final File folder;
 
-    static {
-        String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
-        SchemaFactory factory = SchemaFactory.newInstance(language);
-        Schema jobSchema;
-        Schema projectSchema;
-        try {
-            jobSchema = factory.newSchema(JobParserImpl.class.getResource("/org/jobsui/job.xsd"));
-            projectSchema = factory.newSchema(JobParserImpl.class.getResource("/org/jobsui/project.xsd"));
-        } catch (SAXException e) {
-            throw new RuntimeException(e);
+    public static JobXML parse(ProjectXML projectXML, String jobResource) throws Exception {
+        JobParserImpl jobParser = new JobParserImpl();
+        try (InputStream inputStream = projectXML.getRelativeURL(jobResource).openStream()) {
+            return jobParser.parse(projectXML.getJobId(jobResource), inputStream);
         }
-        jobValidator = jobSchema.newValidator();
-        projectValidator = projectSchema.newValidator();
-    }
-
-    JobParserImpl(File folder) throws SAXException {
-        this.folder = folder;
     }
 
     @Override
-    public ProjectXML parse() throws Exception {
-        LOGGER.info("Parsing " + folder);
-        File projectFile = new File(folder, PROJECT_FILE_NAME);
-
-        if (!projectFile.exists()) {
-            throw new Exception("Cannot find project file (" + PROJECT_FILE_NAME + ") in " + folder);
-        }
-
-        try (FileInputStream is = new FileInputStream(projectFile)) {
-            final StreamSource source = new StreamSource(is);
-            try {
-                projectValidator.validate(source);
-            } catch (Exception e) {
-                throw new Exception("Cannot parse file " + projectFile, e);
-            }
-        }
-
-        ProjectXML projectXML;
-        try (FileInputStream is = new FileInputStream(projectFile)) {
-            projectXML = parseProject(folder, is);
-        }
-
-        LOGGER.info("Parsed " + folder);
-        return projectXML;
-    }
-
-    private ProjectXML parseProject(File projectFolder, InputStream is) throws Exception {
+    public JobXML parse(String id, InputStream inputStream) throws Exception {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setValidating(false);
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 
-        Document doc = dBuilder.parse(is);
-
-        NodeList projects = doc.getElementsByTagName("Project");
-        String subject = "Project";
-        String projectId = getMandatoryAttribute((Element) projects.item(0), "id", subject);
-        subject = "Project with id='" + projectId + "'";
-        String projectName = getMandatoryAttribute((Element) projects.item(0), "name", subject);
-
-        ProjectXML projectXML = new ProjectXML(projectFolder, projectId, projectName);
-
-        NodeList libraries = doc.getElementsByTagName("Library");
-
-        for (int i = 0; i < libraries.getLength(); i++) {
-            Element element = (Element) libraries.item(i);
-            subject = "Library for Project with id='" + projectId + "'";
-            String library = getElementContent(element, "#text", false, subject);
-            projectXML.addLibrary(library);
-        }
-
-        NodeList imports = doc.getElementsByTagName("Import");
-
-        for (int i = 0; i < imports.getLength(); i++) {
-            Element element = (Element) imports.item(i);
-            subject = "Import for Project with id='" + projectId + "'";
-            String imp = getElementContent(element, "#text", false, subject);
-            String name = getMandatoryAttribute(element, "name", subject);
-            projectXML.addImport(name, imp);
-        }
-
-        NodeList jobs = doc.getElementsByTagName("Job");
-        for (int i = 0; i < jobs.getLength(); i++) {
-            Element element = (Element) jobs.item(i);
-            subject = "Job for Project with id='" + projectId + "'";
-            String jobFile = getElementContent(element, "#text", false, subject);
-
-            if (jobFile == null || !jobFile.endsWith(".xml")) {
-                throw new Exception(jobFile + " is not a valid job file name: it must end with .xml.");
-            }
-
-            try (InputStream jobis = projectXML.getRelativeURL(jobFile).openStream()) {
-                final StreamSource source = new StreamSource(jobis);
-                try {
-                    jobValidator.validate(source);
-                } catch (Exception e) {
-                    throw new Exception("Cannot parse " + jobFile, e);
-                }
-            }
-
-            try (InputStream jobis = projectXML.getRelativeURL(jobFile).openStream()) {
-                int pos = jobFile.lastIndexOf('.');
-                String id = jobFile.substring(0, pos);
-                parseJob(id, jobis, projectXML);
-            }
-        }
-
-        for (URL url : projectXML.getScriptsURLS()) {
-            File groovy = new File(url.toURI().getPath());
-            if (groovy.exists()) {
-                File[] files = groovy.listFiles(File::isFile);
-                if (files != null) {
-                    Arrays.stream(files).forEach(projectXML::addGroovyFile);
-                }
-            }
-        }
-//
-//
-//        final File groovy = new File(projectFolder, "groovy");
-//        if (groovy.exists()) {
-//            File[] files = groovy.listFiles(File::isFile);
-//            if (files != null) {
-//                Arrays.stream(files).forEach(projectXML::addGroovyFile);
-//            }
-//        }
-
-        return projectXML;
-    }
-
-    private void parseJob(String id, InputStream is, ProjectXML projectXML) throws Exception {
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        dbFactory.setValidating(false);
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-
-        Document doc = dBuilder.parse(is);
+        Document doc = dBuilder.parse(inputStream);
 
         //optional, but recommended
         //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
@@ -189,11 +56,13 @@ public class JobParserImpl implements JobParser {
 
         parseCalls(doc, jobXML);
 
-        projectXML.addJob(jobXML);
+        return jobXML;
+
+//        projectXML.addJob(jobXML);
     }
 
-    private void parseExpressions(Document doc, JobXML jobXML)
-    throws Exception {
+    private static void parseExpressions(Document doc, JobXML jobXML)
+            throws Exception {
         NodeList expressionsList = doc.getElementsByTagName("Expression");
         for (int i = 0; i < expressionsList.getLength(); i++) {
             Element element = (Element) expressionsList.item(i);
@@ -211,8 +80,8 @@ public class JobParserImpl implements JobParser {
         }
     }
 
-    private void parseCalls(Document doc, JobXML jobXML)
-    throws Exception {
+    private static void parseCalls(Document doc, JobXML jobXML)
+            throws Exception {
         NodeList callsList = doc.getElementsByTagName("Call");
         for (int i = 0; i < callsList.getLength(); i++) {
             Element element = (Element) callsList.item(i);
@@ -242,8 +111,8 @@ public class JobParserImpl implements JobParser {
         }
     }
 
-    private void parseParameters(Document doc, JobXML jobXML)
-    throws Exception {
+    private static void parseParameters(Document doc, JobXML jobXML)
+            throws Exception {
         NodeList parametersList = doc.getElementsByTagName("Parameter");
 
         for (int i = 0; i < parametersList.getLength(); i++) {
@@ -291,37 +160,4 @@ public class JobParserImpl implements JobParser {
         }
     }
 
-    private static String getElementContent(Element parent, String name, boolean mandatory, String subject) throws JobsUIParseException {
-        final NodeList childNodes = parent.getChildNodes();
-        for (int i = 0; i < childNodes.getLength(); i++) {
-            final String nodeName = childNodes.item(i).getNodeName();
-            if (nodeName.equals(name)) {
-                return childNodes.item(i).getTextContent();
-            }
-        }
-        if (mandatory) {
-//            if (parent.getUserData("lineNumber") != null) {
-//                throw new JobsUIParseException("Cannot find mandatory element \"" + name + "\" in " + parent +
-//                        parent.getUserData("lineNumber"));
-//            } else {
-                throw new JobsUIParseException("Cannot find mandatory element \"" + name + "\" in " + subject);
-//            }
-        } else {
-            return null;
-        }
-    }
-
-    private static String getMandatoryAttribute(Element element, String name, String subject) throws JobsUIParseException {
-        final String attribute = element.getAttribute(name);
-
-        if (attribute == null || attribute.length() == 0) {
-//            if (parent instanceof DeferredNode) {
-//                throw new JobsUIParseException("Cannot find mandatory attribute \"" + name + "\" in " + parent + " at line " +
-//                        ((DeferredNode)parent).getNodeIndex());
-//            } else {
-                throw new JobsUIParseException("Cannot find mandatory attribute \"" + name + "\" in " + subject);
-//            }
-        }
-        return attribute;
-    }
 }

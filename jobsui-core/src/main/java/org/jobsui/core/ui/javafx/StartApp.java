@@ -42,7 +42,8 @@ import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.edit.EditProject;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.runner.JobUIRunner;
-import org.jobsui.core.xml.ProjectXML;
+import org.jobsui.core.xml.ProjectFSXMLImpl;
+import org.jobsui.core.xml.ProjectXMLImpl;
 
 import java.io.Serializable;
 import java.util.logging.Level;
@@ -112,7 +113,7 @@ public class StartApp extends Application {
         }
     }
 
-    public void gotoEdit(ProjectXML projectXML) {
+    public void gotoEdit(ProjectFSXMLImpl projectXML) {
         EditProject editProject = new EditProject();
         stage = new Stage();
         try {

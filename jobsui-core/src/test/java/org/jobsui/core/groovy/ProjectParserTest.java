@@ -1,13 +1,13 @@
 package org.jobsui.core.groovy;
 
 import org.jobsui.core.job.Job;
-import org.jobsui.core.xml.ExpressionXML;
-import org.jobsui.core.xml.JobXML;
-import org.jobsui.core.xml.ParameterXML;
-import org.jobsui.core.xml.ProjectXML;
+import org.jobsui.core.xml.*;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import java.io.InputStream;
+import java.net.URL;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.*;
@@ -15,13 +15,13 @@ import static org.junit.Assert.*;
 /**
  * Created by enrico on 5/4/16.
  */
-public class JobParserTest {
-    private static ProjectXML projectXML;
+public class ProjectParserTest {
+    private static ProjectXMLImpl projectXML;
 
     @BeforeClass
     public static void setUpStatic() throws Exception {
-        JobParser parser = JobParser.getParser("src/test/resources/simplejob");
-        projectXML = parser.parse();
+        ProjectParser parser = new ProjectParserImpl();
+        projectXML = parser.parse(ProjectParserTest.class.getResource("/simplejob"));
     }
 
     @AfterClass
@@ -45,8 +45,12 @@ public class JobParserTest {
 
     @Test
     public void assert_that_is_visible_for_inv_expression_in_Simplejob_is_false() throws Exception {
-        final JobXML job = projectXML.getJobs().get("simple");
-        ExpressionXML inv = job.getExpression("inv");
-        assertThat(inv.isVisible(), is(false));
+        JobParser parser = new JobParserImpl();
+        URL url = ProjectParserTest.class.getResource("/simplejob/simple.xml");
+        try (InputStream is = url.openStream()) {
+            final JobXML job = parser.parse("simple", is);
+            ExpressionXML inv = job.getExpression("inv");
+            assertThat(inv.isVisible(), is(false));
+        }
     }
 }

@@ -1,19 +1,14 @@
 package org.jobsui.core.groovy;
 
-import org.jobsui.core.xml.ProjectXML;
-import org.xml.sax.SAXException;
+import org.jobsui.core.xml.JobXML;
 
-import java.io.File;
+import java.io.InputStream;
 
 /**
- * Created by enrico on 3/22/17.
+ * Created by enrico on 4/5/17.
  */
 public interface JobParser {
 
-    static JobParser getParser(String projectRoot) throws Exception {
-        File folder = new File(projectRoot);
-        return new JobParserImpl(folder);
-    }
+    JobXML parse(String id, InputStream inputStream) throws Exception;
 
-    ProjectXML parse() throws Exception;
 }

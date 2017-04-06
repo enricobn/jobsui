@@ -16,6 +16,8 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.fxmisc.richtext.CodeArea;
 import org.jobsui.core.groovy.JobParser;
+import org.jobsui.core.groovy.JobParserImpl;
+import org.jobsui.core.groovy.ProjectParser;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.xml.*;
 
@@ -38,7 +40,7 @@ public class EditProject extends Application {
     private VBox itemDetail;
     private VBox root;
     private Label status;
-    private ProjectXML projectXML = null;
+    private ProjectXMLImpl projectXML = null;
 
     public static void main(String... args) {
         launch(args);
@@ -76,7 +78,9 @@ public class EditProject extends Application {
         Button export = new Button("Export");
         export.setOnAction(event -> {
             try {
-                projectXML.export();
+                ProjectXMLExporter exporter = new ProjectXMLExporter();
+                // TODO
+//                exporter.export(projectXML, folder);
             } catch (Exception e) {
                 JavaFXUI.showErrorStatic("Error exporting project.", e);
             }
@@ -154,7 +158,7 @@ public class EditProject extends Application {
 //        alert.showAndWait();
 //    }
 
-    private TreeItem<Item> loadProject(ProjectXML projectXML) {
+    private TreeItem<Item> loadProject(ProjectFSXMLImpl projectXML) {
         this.projectXML = projectXML;
         TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, projectXML::getName, projectXML));
 
@@ -172,16 +176,26 @@ public class EditProject extends Application {
                 .map(TreeItem::new)
                 .forEach(treeItem -> groovy.getChildren().add(treeItem));
 
-        projectXML.getJobs().values().stream()
-                .sorted(Comparator.comparing(JobXML::getName))
+        JobParser jobParser = new JobParserImpl();
+
+        projectXML.getJobs().stream()
+                .map(job -> {
+                    try {
+                        return JobParserImpl.parse(projectXML, job);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).sorted(Comparator.comparing(JobXML::getName))
                 .map(this::createJobTreeItem)
                 .forEach(root.getChildren()::add);
         return root;
     }
 
     private TreeItem<Item> loadProject(File file) throws Exception {
-        JobParser parser = JobParser.getParser(file.getAbsolutePath());
-        return loadProject(parser.parse());
+        //TODO
+        return null;
+//        ProjectParser parser = ProjectParser.getParser(file.getAbsolutePath());
+//        return loadProject(parser.parse());
     }
 
     private TreeItem<Item> createJobTreeItem(JobXML job) {
@@ -216,7 +230,7 @@ public class EditProject extends Application {
                 .forEach(dependencies.getChildren()::add);
     }
 
-    public void edit(ProjectXML projectXML) {
+    public void edit(ProjectFSXMLImpl projectXML) {
         TreeItem<Item> root = loadProject(projectXML);
 
         Platform.runLater(() -> {
@@ -273,7 +287,7 @@ public class EditProject extends Application {
         }
 
         private void setProjectDetail() {
-            ProjectXML project = (ProjectXML) payload;
+            ProjectXMLImpl project = (ProjectXMLImpl) payload;
 
             addTextProperty("Name:", project::getName, project::setName);
         }

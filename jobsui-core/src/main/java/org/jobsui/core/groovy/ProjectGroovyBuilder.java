@@ -7,7 +7,6 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jobsui.core.Project;
 import org.jobsui.core.job.JobDependency;
-import org.jobsui.core.ui.UIComponentType;
 import org.jobsui.core.xml.*;
 
 import java.io.File;
@@ -36,17 +35,19 @@ public class ProjectGroovyBuilder {
 
         Map<String, JobGroovy<Serializable>> jobs = new HashMap<>();
 
-        for (JobXML jobXML : projectXML.getJobs().values()) {
-            jobs.put(jobXML.getId(), build(groovyShell, jobXML));
+        for (String job : projectXML.getJobs()) {
+            jobs.put(projectXML.getJobId(job), build(groovyShell, JobParserImpl.parse(projectXML, job)));
         }
 
         Map<String, Project> projects = new HashMap<>();
 
+        ProjectParserImpl projectParser = new ProjectParserImpl();
+
         ProjectGroovyBuilder projectGroovyBuilder = new ProjectGroovyBuilder();
         projectXML.getImports().entrySet().forEach(entry -> {
             try {
-                JobParser jobParser = projectXML.getParser(entry.getValue());
-                ProjectXML refProjectXML = jobParser.parse();
+//                ProjectParser projectParser = projectXML.getJobParser(entry.getValue());
+                ProjectXMLImpl refProjectXML = projectParser.parse(projectXML.getRelativeURL(entry.getValue()));
                 projects.put(entry.getKey(), projectGroovyBuilder.build(refProjectXML));
             } catch (Exception e) {
                 // TODO

@@ -1,12 +1,13 @@
 package org.jobsui.core;
 
-import org.jobsui.core.groovy.JobParser;
+import org.jobsui.core.groovy.ProjectParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
+import org.jobsui.core.groovy.ProjectParserImpl;
 import org.jobsui.core.job.*;
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobUIRunner;
 import org.jobsui.core.ui.*;
-import org.jobsui.core.xml.ProjectXML;
+import org.jobsui.core.xml.ProjectXMLImpl;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockSettings;
@@ -14,6 +15,7 @@ import org.mockito.Mockito;
 import org.mockito.listeners.InvocationListener;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -64,9 +66,9 @@ public class JobRunnerTest {
     public static void initStatic() throws Exception {
         projects = new HashMap<>();
         jobs = new HashMap<>();
-        jobs.put(JobType.simpleWithInternalCallFSJob, new CachedJob(() -> getJob("src/test/resources/simplejob", "simpleWithInternalCall")));
-        jobs.put(JobType.simpleFSJob, new CachedJob(() -> getJob("src/test/resources/simplejob", "simple")));
-        jobs.put(JobType.simpleJobWithExpression, new CachedJob(() -> getJob("src/test/resources/simplejob", "simpleWithExpression")));
+        jobs.put(JobType.simpleWithInternalCallFSJob, new CachedJob(() -> getJob("/simplejob", "simpleWithInternalCall")));
+        jobs.put(JobType.simpleFSJob, new CachedJob(() -> getJob("/simplejob", "simple")));
+        jobs.put(JobType.simpleJobWithExpression, new CachedJob(() -> getJob("/simplejob", "simpleWithExpression")));
         jobs.put(JobType.simpleJob, new CachedJob(JobRunnerTest::createSimpleJob));
         jobs.put(JobType.complexJob, new CachedJob(JobRunnerTest::createComplexJob));
     }
@@ -345,7 +347,7 @@ public class JobRunnerTest {
                     uiValueSecond.setValue(" Doe");
                 });
 
-        final Job<String> job = getJob("src/test/resources/external", "concat");
+        final Job<String> job = getJob("/external", "concat");
 
         String result = jobRunnerWrapper.run(job);
 
@@ -527,7 +529,8 @@ public class JobRunnerTest {
         try {
             Project project = projects.get(file);
             if (project == null) {
-                ProjectXML projectXML = JobParser.getParser(file).parse();
+                ProjectParser parser = new ProjectParserImpl();
+                ProjectXMLImpl projectXML = parser.parse(JobRunnerTest.class.getResource(file));
                 project = new ProjectGroovyBuilder().build(projectXML);
                 projects.put(file, project);
             }
