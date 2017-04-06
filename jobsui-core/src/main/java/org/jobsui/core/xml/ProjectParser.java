@@ -12,5 +12,5 @@ public interface ProjectParser {
 //        return new ProjectParserImpl(folder);
 //    }
 
-    ProjectFSXMLImpl parse(URL url) throws Exception;
+    ProjectFSXML parse(URL url) throws Exception;
 }

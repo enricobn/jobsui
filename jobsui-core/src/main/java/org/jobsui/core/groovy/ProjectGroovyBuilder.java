@@ -12,7 +12,6 @@ import org.jobsui.core.xml.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.net.URL;
 import java.text.ParseException;
 import java.util.*;
 import java.util.function.Function;
@@ -47,7 +46,7 @@ public class ProjectGroovyBuilder {
         projectXML.getImports().entrySet().forEach(entry -> {
             try {
 //                ProjectParser projectParser = projectXML.getJobParser(entry.getValue());
-                ProjectXMLImpl refProjectXML = projectParser.parse(projectXML.getRelativeURL(entry.getValue()));
+                ProjectXML refProjectXML = projectParser.parse(projectXML.getRelativeURL(entry.getValue()));
                 projects.put(entry.getKey(), projectGroovyBuilder.build(refProjectXML));
             } catch (Exception e) {
                 // TODO

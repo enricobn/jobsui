@@ -1,25 +1,54 @@
-package org.jobsui.core.groovy;
+package org.jobsui.core.xml;
 
+import org.jobsui.core.groovy.JobsUIParseException;
 import org.jobsui.core.ui.UIComponentType;
-import org.jobsui.core.xml.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
 import java.io.InputStream;
 
-import static org.jobsui.core.groovy.XMLUtils.getElementContent;
-import static org.jobsui.core.groovy.XMLUtils.getMandatoryAttribute;
+import static org.jobsui.core.xml.XMLUtils.getElementContent;
+import static org.jobsui.core.xml.XMLUtils.getMandatoryAttribute;
 
 /**
  * Created by enrico on 4/5/17.
  */
 public class JobParserImpl implements JobParser {
+    private static final Validator jobValidator;
+
+    static {
+        String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
+        SchemaFactory factory = SchemaFactory.newInstance(language);
+        Schema jobSchema;
+        try {
+            jobSchema = factory.newSchema(ProjectParserImpl.class.getResource("/org/jobsui/job.xsd"));
+        } catch (SAXException e) {
+            throw new RuntimeException(e);
+        }
+        jobValidator = jobSchema.newValidator();
+    }
 
     public static JobXML parse(ProjectXML projectXML, String jobResource) throws Exception {
         JobParserImpl jobParser = new JobParserImpl();
+
+        try (InputStream inputStream = projectXML.getRelativeURL(jobResource).openStream()) {
+            final StreamSource source = new StreamSource(inputStream);
+            try {
+                jobValidator.validate(source);
+            } catch (Exception e) {
+                throw new Exception("Cannot parse job \"" + jobResource + "\".");
+            }
+        }
+
         try (InputStream inputStream = projectXML.getRelativeURL(jobResource).openStream()) {
             return jobParser.parse(projectXML.getJobId(jobResource), inputStream);
         }

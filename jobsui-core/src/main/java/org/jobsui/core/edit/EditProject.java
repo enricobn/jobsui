@@ -15,8 +15,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.fxmisc.richtext.CodeArea;
-import org.jobsui.core.xml.JobParser;
-import org.jobsui.core.groovy.JobParserImpl;
+import org.jobsui.core.xml.JobParserImpl;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.xml.*;
 
@@ -39,7 +38,7 @@ public class EditProject extends Application {
     private VBox itemDetail;
     private VBox root;
     private Label status;
-    private ProjectXMLImpl projectXML = null;
+    private ProjectFSXML projectXML = null;
 
     public static void main(String... args) {
         launch(args);
@@ -157,7 +156,7 @@ public class EditProject extends Application {
 //        alert.showAndWait();
 //    }
 
-    private TreeItem<Item> loadProject(ProjectFSXMLImpl projectXML) {
+    private TreeItem<Item> loadProject(ProjectFSXML projectXML) {
         this.projectXML = projectXML;
         TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, projectXML::getName, projectXML));
 
@@ -229,7 +228,7 @@ public class EditProject extends Application {
                 .forEach(dependencies.getChildren()::add);
     }
 
-    public void edit(ProjectFSXMLImpl projectXML) {
+    public void edit(ProjectFSXML projectXML) {
         TreeItem<Item> root = loadProject(projectXML);
 
         Platform.runLater(() -> {

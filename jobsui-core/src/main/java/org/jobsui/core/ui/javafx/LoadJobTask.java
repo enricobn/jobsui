@@ -2,11 +2,11 @@ package org.jobsui.core.ui.javafx;
 
 import javafx.concurrent.Task;
 import org.jobsui.core.Project;
-import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
-import org.jobsui.core.groovy.ProjectParserImpl;
+import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.job.Job;
-import org.jobsui.core.xml.ProjectXMLImpl;
+import org.jobsui.core.xml.ProjectParser;
+import org.jobsui.core.xml.ProjectXML;
 
 import java.io.File;
 import java.io.Serializable;
@@ -26,7 +26,7 @@ class LoadJobTask extends Task<Job<Serializable>> {
     @Override
     protected Job<Serializable> call() throws Exception {
         ProjectParser projectParser = new ProjectParserImpl();
-        ProjectXMLImpl projectXML;
+        ProjectXML projectXML;
         try {
             projectXML = projectParser.parse(new File(projectFolder).toURI().toURL());
         } catch (Exception e) {

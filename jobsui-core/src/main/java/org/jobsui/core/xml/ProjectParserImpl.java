@@ -1,7 +1,5 @@
-package org.jobsui.core.groovy;
+package org.jobsui.core.xml;
 
-import org.jobsui.core.xml.ProjectFSXMLImpl;
-import org.jobsui.core.xml.ProjectParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -19,40 +17,31 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.logging.Logger;
 
-import static org.jobsui.core.groovy.XMLUtils.getElementContent;
-import static org.jobsui.core.groovy.XMLUtils.getMandatoryAttribute;
+import static org.jobsui.core.xml.XMLUtils.getElementContent;
+import static org.jobsui.core.xml.XMLUtils.getMandatoryAttribute;
 
 /**
  * Created by enrico on 5/4/16.
  */
 public class ProjectParserImpl implements ProjectParser {
     private static final Logger LOGGER = Logger.getLogger(ProjectParserImpl.class.getName());
-    public static final String PROJECT_FILE_NAME = "project.xml";
-    private static final Validator jobValidator;
+    private static final String PROJECT_FILE_NAME = "project.xml";
     private static final Validator projectValidator;
-//    private final File folder;
 
     static {
         String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
         SchemaFactory factory = SchemaFactory.newInstance(language);
-        Schema jobSchema;
         Schema projectSchema;
         try {
-            jobSchema = factory.newSchema(ProjectParserImpl.class.getResource("/org/jobsui/job.xsd"));
             projectSchema = factory.newSchema(ProjectParserImpl.class.getResource("/org/jobsui/project.xsd"));
         } catch (SAXException e) {
             throw new RuntimeException(e);
         }
-        jobValidator = jobSchema.newValidator();
         projectValidator = projectSchema.newValidator();
     }
-//
-//    public ProjectParserImpl(File folder) throws SAXException {
-//        this.folder = folder;
-//    }
 
     @Override
-    public ProjectFSXMLImpl parse(URL url) throws Exception {
+    public ProjectFSXML parse(URL url) throws Exception {
         LOGGER.info("Parsing " + url);
         URL projectURL = new URL(url + "/" + PROJECT_FILE_NAME);
 
@@ -69,7 +58,7 @@ public class ProjectParserImpl implements ProjectParser {
             }
         }
 
-        ProjectFSXMLImpl projectXML;
+        ProjectFSXML projectXML;
         try (InputStream is = projectURL.openStream()) {
             // TODO new File
             projectXML = parseProject(new File(url.getPath()), is);
@@ -79,7 +68,7 @@ public class ProjectParserImpl implements ProjectParser {
         return projectXML;
     }
 
-    private ProjectFSXMLImpl parseProject(File projectFolder, InputStream is) throws Exception {
+    private ProjectFSXML parseProject(File projectFolder, InputStream is) throws Exception {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         dbFactory.setValidating(false);
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -125,40 +114,7 @@ public class ProjectParserImpl implements ProjectParser {
 
             projectXML.addJob(jobFile);
 
-//            try (InputStream jobis = projectXML.getRelativeURL(jobFile).openStream()) {
-//                final StreamSource source = new StreamSource(jobis);
-//                try {
-//                    jobValidator.validate(source);
-//                } catch (Exception e) {
-//                    throw new Exception("Cannot parse " + jobFile, e);
-//                }
-//            }
-//
-//            try (InputStream jobis = projectXML.getRelativeURL(jobFile).openStream()) {
-//                int pos = jobFile.lastIndexOf('.');
-//                String id = jobFile.substring(0, pos);
-//                parseJob(id, jobis);
-//            }
         }
-
-//        for (URL url : projectXML.getScriptsURLS()) {
-//            File groovy = new File(url.toURI().getPath());
-//            if (groovy.exists()) {
-//                File[] files = groovy.listFiles(File::isFile);
-//                if (files != null) {
-//                    Arrays.stream(files).forEach(projectXML::addGroovyFile);
-//                }
-//            }
-//        }
-//
-//
-//        final File groovy = new File(projectFolder, "groovy");
-//        if (groovy.exists()) {
-//            File[] files = groovy.listFiles(File::isFile);
-//            if (files != null) {
-//                Arrays.stream(files).forEach(projectXML::addGroovyFile);
-//            }
-//        }
 
         return projectXML;
     }

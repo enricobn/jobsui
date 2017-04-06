@@ -10,7 +10,10 @@ import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobResultImpl;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by enrico on 5/4/16.

@@ -1,13 +1,13 @@
 package org.jobsui.core;
 
-import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
-import org.jobsui.core.groovy.ProjectParserImpl;
+import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.job.*;
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobUIRunner;
 import org.jobsui.core.ui.*;
-import org.jobsui.core.xml.ProjectXMLImpl;
+import org.jobsui.core.xml.ProjectParser;
+import org.jobsui.core.xml.ProjectXML;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockSettings;
@@ -529,7 +529,7 @@ public class JobRunnerTest {
             Project project = projects.get(file);
             if (project == null) {
                 ProjectParser parser = new ProjectParserImpl();
-                ProjectXMLImpl projectXML = parser.parse(JobRunnerTest.class.getResource(file));
+                ProjectXML projectXML = parser.parse(JobRunnerTest.class.getResource(file));
                 project = new ProjectGroovyBuilder().build(projectXML);
                 projects.put(file, project);
             }

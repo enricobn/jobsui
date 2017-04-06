@@ -9,14 +9,16 @@ import org.junit.Test;
 import java.io.InputStream;
 import java.net.URL;
 
-import static org.hamcrest.CoreMatchers.*;
-import static org.junit.Assert.*;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 /**
  * Created by enrico on 5/4/16.
  */
 public class ProjectParserTest {
-    private static ProjectXMLImpl projectXML;
+    private static ProjectXML projectXML;
 
     @BeforeClass
     public static void setUpStatic() throws Exception {

@@ -1,9 +1,11 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.groovy.JobsUIParseException;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
@@ -112,5 +114,40 @@ public interface XMLUtils {
         newLines.forEach(line -> sb.append(line).append('\n'));
         return sb.toString();
     }
+
+    static String getElementContent(Element parent, String name, boolean mandatory, String subject) throws JobsUIParseException {
+        final NodeList childNodes = parent.getChildNodes();
+        for (int i = 0; i < childNodes.getLength(); i++) {
+            final String nodeName = childNodes.item(i).getNodeName();
+            if (nodeName.equals(name)) {
+                return childNodes.item(i).getTextContent();
+            }
+        }
+        if (mandatory) {
+//            if (parent.getUserData("lineNumber") != null) {
+//                throw new JobsUIParseException("Cannot find mandatory element \"" + name + "\" in " + parent +
+//                        parent.getUserData("lineNumber"));
+//            } else {
+            throw new JobsUIParseException("Cannot find mandatory element \"" + name + "\" in " + subject);
+//            }
+        } else {
+            return null;
+        }
+    }
+
+    static String getMandatoryAttribute(Element element, String name, String subject) throws JobsUIParseException {
+        final String attribute = element.getAttribute(name);
+
+        if (attribute == null || attribute.length() == 0) {
+//            if (parent instanceof DeferredNode) {
+//                throw new JobsUIParseException("Cannot find mandatory attribute \"" + name + "\" in " + parent + " at line " +
+//                        ((DeferredNode)parent).getNodeIndex());
+//            } else {
+            throw new JobsUIParseException("Cannot find mandatory attribute \"" + name + "\" in " + subject);
+//            }
+        }
+        return attribute;
+    }
+
 
 }

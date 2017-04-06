@@ -7,12 +7,11 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 4/5/17.
  */
-public class ProjectFSXMLImpl extends ProjectXMLImpl {
+public class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
     private final Collection<File> groovyFiles = new ArrayList<>();
 
     public ProjectFSXMLImpl(File folder, String id, String name) throws MalformedURLException, URISyntaxException {
@@ -29,6 +28,7 @@ public class ProjectFSXMLImpl extends ProjectXMLImpl {
         }
     }
 
+    @Override
     public Collection<File> getGroovyFiles() {
         return groovyFiles;
     }

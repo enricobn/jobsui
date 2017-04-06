@@ -7,8 +7,8 @@ import org.jobsui.core.job.JobParameterDef;
 import org.jobsui.core.runner.JobResultImpl;
 import org.jobsui.core.runner.JobValues;
 import org.jobsui.core.ui.*;
-import rx.*;
 import rx.Observable;
+import rx.Subscriber;
 
 import java.io.Serializable;
 import java.util.*;
@@ -16,10 +16,12 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyMapOf;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.isNotNull;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by enrico on 4/2/17.
