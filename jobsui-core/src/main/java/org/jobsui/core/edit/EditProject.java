@@ -15,9 +15,8 @@ import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.fxmisc.richtext.CodeArea;
-import org.jobsui.core.groovy.JobParser;
+import org.jobsui.core.xml.JobParser;
 import org.jobsui.core.groovy.JobParserImpl;
-import org.jobsui.core.groovy.ProjectParser;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.xml.*;
 

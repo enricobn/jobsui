@@ -1,6 +1,4 @@
-package org.jobsui.core.groovy;
-
-import org.jobsui.core.xml.JobXML;
+package org.jobsui.core.xml;
 
 import java.io.InputStream;
 

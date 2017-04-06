@@ -1,6 +1,4 @@
-package org.jobsui.core.groovy;
-
-import org.jobsui.core.xml.ProjectFSXMLImpl;
+package org.jobsui.core.xml;
 
 import java.net.URL;
 

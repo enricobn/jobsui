@@ -1,6 +1,6 @@
 package org.jobsui.core;
 
-import org.jobsui.core.groovy.ProjectParser;
+import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.groovy.ProjectParserImpl;
 import org.jobsui.core.job.*;
@@ -15,7 +15,6 @@ import org.mockito.Mockito;
 import org.mockito.listeners.InvocationListener;
 
 import java.io.Serializable;
-import java.net.URL;
 import java.util.*;
 import java.util.function.Supplier;
 

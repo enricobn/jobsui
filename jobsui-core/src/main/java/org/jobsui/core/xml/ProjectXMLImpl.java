@@ -123,7 +123,7 @@ public class ProjectXMLImpl implements ProjectXML {
     }
 
     @Override
-    public URL[] getScriptsURLS() throws MalformedURLException {
-        return new URL[]{getRelativeURL("groovy/")};
+    public List<String> getScriptsLocations() {
+        return Collections.singletonList("groovy");
     }
 }

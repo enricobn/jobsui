@@ -2,7 +2,7 @@ package org.jobsui.core.ui.javafx;
 
 import javafx.concurrent.Task;
 import org.jobsui.core.Project;
-import org.jobsui.core.groovy.ProjectParser;
+import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.groovy.ProjectParserImpl;
 import org.jobsui.core.job.Job;

@@ -1,10 +1,8 @@
 package org.jobsui.core.ui.javafx;
 
 import javafx.concurrent.Task;
-import org.jobsui.core.groovy.ProjectParser;
 import org.jobsui.core.groovy.ProjectParserImpl;
 import org.jobsui.core.xml.ProjectFSXMLImpl;
-import org.jobsui.core.xml.ProjectXML;
 
 import java.net.URL;
 

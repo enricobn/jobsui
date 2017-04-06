@@ -1,6 +1,7 @@
 package org.jobsui.core.groovy;
 
 import org.jobsui.core.xml.ProjectFSXMLImpl;
+import org.jobsui.core.xml.ProjectParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -14,7 +15,6 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.logging.Logger;

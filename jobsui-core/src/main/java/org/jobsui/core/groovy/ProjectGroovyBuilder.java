@@ -138,10 +138,8 @@ public class ProjectGroovyBuilder {
     }
 
     private static GroovyShell createGroovyShell(ProjectXML projectXML) throws IOException, ParseException {
-        GroovyClassLoader cl;
-
-        GroovyScriptEngine engine = new GroovyScriptEngine(projectXML.getScriptsURLS());
-        cl = engine.getGroovyClassLoader();
+        GroovyScriptEngine engine = new GroovyScriptEngine(projectXML.getScripsLocationsURLS());
+        GroovyClassLoader cl = engine.getGroovyClassLoader();
 
         for (String library : projectXML.getLibraries()) {
             String[] split = library.split(":");
