@@ -291,7 +291,7 @@ public class EditProject extends Application {
         }
 
         private void setJobDetail() {
-            JobXML jobXML = (JobXML) payload;
+            JobXMLImpl jobXML = (JobXMLImpl) payload;
 
             // TODO key (file name)
             addTextProperty("Name:", jobXML::getName, jobXML::setName);
@@ -347,7 +347,7 @@ public class EditProject extends Application {
                 return;
             }
 
-            JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
+            JobXMLImpl jobXML = findAncestorPayload(treeItem, ItemType.Job);
 
             if (jobXML == null) {
                 JavaFXUI.showMessageStatic("Cannot find job for item \"" + payload + "\".");
@@ -506,7 +506,7 @@ public class EditProject extends Application {
     }
 
     private void addParameterMenu(ContextMenu contextMenu, TreeItem<Item> treeItem) {
-        JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
+        JobXMLImpl jobXML = findAncestorPayload(treeItem, ItemType.Job);
         if (jobXML == null) {
             return;
         }

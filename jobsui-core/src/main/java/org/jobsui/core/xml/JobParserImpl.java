@@ -69,7 +69,7 @@ public class JobParserImpl implements JobParser {
         String name = getMandatoryAttribute(doc.getDocumentElement(), "name", subject);
         String version = getMandatoryAttribute(doc.getDocumentElement(), "version", subject);
 
-        JobXML jobXML = new JobXML(id, name, version);
+        JobXMLImpl jobXML = new JobXMLImpl(id, name, version);
 
         String runScript = getElementContent(doc.getDocumentElement(), "Run", true, subject);
 
@@ -90,7 +90,7 @@ public class JobParserImpl implements JobParser {
 //        projectXML.addJob(jobXML);
     }
 
-    private static void parseExpressions(Document doc, JobXML jobXML)
+    private static void parseExpressions(Document doc, JobXMLImpl jobXML)
             throws Exception {
         NodeList expressionsList = doc.getElementsByTagName("Expression");
         for (int i = 0; i < expressionsList.getLength(); i++) {
@@ -109,7 +109,7 @@ public class JobParserImpl implements JobParser {
         }
     }
 
-    private static void parseCalls(Document doc, JobXML jobXML)
+    private static void parseCalls(Document doc, JobXMLImpl jobXML)
             throws Exception {
         NodeList callsList = doc.getElementsByTagName("Call");
         for (int i = 0; i < callsList.getLength(); i++) {
@@ -140,7 +140,7 @@ public class JobParserImpl implements JobParser {
         }
     }
 
-    private static void parseParameters(Document doc, JobXML jobXML)
+    private static void parseParameters(Document doc, JobXMLImpl jobXML)
             throws Exception {
         NodeList parametersList = doc.getElementsByTagName("Parameter");
 
