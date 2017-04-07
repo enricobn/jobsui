@@ -1,5 +1,6 @@
 package org.jobsui.core.xml;
 
+import java.io.File;
 import java.net.URL;
 
 /**
@@ -7,10 +8,8 @@ import java.net.URL;
  */
 public interface ProjectParser {
 
-//    static ProjectParser getParser(String projectRoot) throws Exception {
-//        File folder = new File(projectRoot);
-//        return new ProjectParserImpl(folder);
-//    }
+    ProjectFSXML parse(File folder) throws Exception;
 
-    ProjectFSXML parse(URL url) throws Exception;
+    ProjectXML parse(URL url) throws Exception;
+
 }

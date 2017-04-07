@@ -10,4 +10,5 @@ public interface ProjectFSXML extends ProjectXML {
 
     Collection<File> getGroovyFiles();
 
+    void setName(String s);
 }

@@ -285,7 +285,7 @@ public class EditProject extends Application {
         }
 
         private void setProjectDetail() {
-            ProjectXMLImpl project = (ProjectXMLImpl) payload;
+            ProjectFSXML project = (ProjectFSXML) payload;
 
             addTextProperty("Name:", project::getName, project::setName);
         }

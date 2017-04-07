@@ -4,6 +4,7 @@ import javafx.concurrent.Task;
 import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.xml.ProjectFSXML;
 
+import java.io.File;
 import java.net.URL;
 
 /**
@@ -20,7 +21,7 @@ class LoadProjectXMLTask extends Task<ProjectFSXML> {
     protected ProjectFSXML call() throws Exception {
         ProjectFSXML projectXML;
         try {
-            projectXML = new ProjectParserImpl().parse(new URL(projectFolder));
+            projectXML = new ProjectParserImpl().parse(new File(projectFolder));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

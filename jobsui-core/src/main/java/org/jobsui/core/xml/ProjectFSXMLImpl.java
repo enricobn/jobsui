@@ -11,10 +11,10 @@ import java.util.Collection;
 /**
  * Created by enrico on 4/5/17.
  */
-public class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
+class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
     private final Collection<File> groovyFiles = new ArrayList<>();
 
-    public ProjectFSXMLImpl(File folder, String id, String name) throws MalformedURLException, URISyntaxException {
+    ProjectFSXMLImpl(File folder, String id, String name) throws MalformedURLException, URISyntaxException {
         super(folder.toURI().toURL(), id, name);
 
         for (URL url : getScripsLocationsURLS()) {

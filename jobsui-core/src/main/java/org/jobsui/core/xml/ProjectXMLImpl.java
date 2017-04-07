@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * Created by enrico on 10/6/16.
  */
-public class ProjectXMLImpl implements ProjectXML {
+class ProjectXMLImpl implements ProjectXML {
     private final URL projectURL;
     private final Set<String> libraries = new HashSet<>();
     private final Map<String, String> imports = new HashMap<>();
@@ -19,7 +19,7 @@ public class ProjectXMLImpl implements ProjectXML {
     private final String id;
     private String name;
 
-    public ProjectXMLImpl(URL projectURL, String id, String name) {
+    ProjectXMLImpl(URL projectURL, String id, String name) {
         this.projectURL = projectURL;
         this.id = id;
         this.name = name;

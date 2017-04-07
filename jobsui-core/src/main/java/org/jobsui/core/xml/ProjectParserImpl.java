@@ -15,6 +15,7 @@ import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.function.BiFunction;
 import java.util.logging.Logger;
 
 import static org.jobsui.core.xml.XMLUtils.getElementContent;
@@ -41,13 +42,29 @@ public class ProjectParserImpl implements ProjectParser {
     }
 
     @Override
-    public ProjectFSXML parse(URL url) throws Exception {
+    public ProjectFSXML parse(File folder) throws Exception {
+        File projectFile = new File(folder, PROJECT_FILE_NAME);
+        if (!projectFile.exists()) {
+            throw new Exception("Cannot find project file (" + PROJECT_FILE_NAME + ") in " + folder);
+        }
+
+        return parse(folder.toURI().toURL(), (id, name) -> {
+            try {
+                return new ProjectFSXMLImpl(folder, id, name);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    @Override
+    public ProjectXML parse(URL url) throws Exception {
+        return parse(url, (id,name) -> new ProjectXMLImpl(url, id, name));
+    }
+
+    private static  <T extends ProjectXMLImpl> T parse(URL url, BiFunction<String,String,T> supplier) throws Exception {
         LOGGER.info("Parsing " + url);
         URL projectURL = new URL(url + "/" + PROJECT_FILE_NAME);
-
-//        if (!projectFile.exists()) {
-//            throw new Exception("Cannot find project file (" + PROJECT_FILE_NAME + ") in " + folder);
-//        }
 
         try (InputStream is = projectURL.openStream()) {
             final StreamSource source = new StreamSource(is);
@@ -58,36 +75,38 @@ public class ProjectParserImpl implements ProjectParser {
             }
         }
 
-        ProjectFSXML projectXML;
+        T projectXML;
         try (InputStream is = projectURL.openStream()) {
-            // TODO new File
-            projectXML = parseProject(new File(url.getPath()), is);
+
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            dbFactory.setValidating(false);
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+
+            Document doc = dBuilder.parse(is);
+
+            NodeList projects = doc.getElementsByTagName("Project");
+            String subject = "Project";
+            String projectId = getMandatoryAttribute((Element) projects.item(0), "id", subject);
+            subject = "Project with id='" + projectId + "'";
+            String projectName = getMandatoryAttribute((Element) projects.item(0), "name", subject);
+
+            projectXML = supplier.apply(projectId, projectName);
+
+            parseProject(doc, projectXML);
         }
 
         LOGGER.info("Parsed " + url);
         return projectXML;
+
     }
 
-    private ProjectFSXML parseProject(File projectFolder, InputStream is) throws Exception {
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        dbFactory.setValidating(false);
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-
-        Document doc = dBuilder.parse(is);
-
-        NodeList projects = doc.getElementsByTagName("Project");
-        String subject = "Project";
-        String projectId = getMandatoryAttribute((Element) projects.item(0), "id", subject);
-        subject = "Project with id='" + projectId + "'";
-        String projectName = getMandatoryAttribute((Element) projects.item(0), "name", subject);
-
-        ProjectFSXMLImpl projectXML = new ProjectFSXMLImpl(projectFolder, projectId, projectName);
-
+    private static void parseProject(Document doc, ProjectXMLImpl projectXML) throws Exception {
+        String subject;
         NodeList libraries = doc.getElementsByTagName("Library");
 
         for (int i = 0; i < libraries.getLength(); i++) {
             Element element = (Element) libraries.item(i);
-            subject = "Library for Project with id='" + projectId + "'";
+            subject = "Library for Project with id='" + projectXML.getId() + "'";
             String library = getElementContent(element, "#text", false, subject);
             projectXML.addLibrary(library);
         }
@@ -96,7 +115,7 @@ public class ProjectParserImpl implements ProjectParser {
 
         for (int i = 0; i < imports.getLength(); i++) {
             Element element = (Element) imports.item(i);
-            subject = "Import for Project with id='" + projectId + "'";
+            subject = "Import for Project with id='" + projectXML.getId() + "'";
             String imp = getElementContent(element, "#text", false, subject);
             String name = getMandatoryAttribute(element, "name", subject);
             projectXML.addImport(name, imp);
@@ -105,7 +124,7 @@ public class ProjectParserImpl implements ProjectParser {
         NodeList jobs = doc.getElementsByTagName("Job");
         for (int i = 0; i < jobs.getLength(); i++) {
             Element element = (Element) jobs.item(i);
-            subject = "Job for Project with id='" + projectId + "'";
+            subject = "Job for Project with id='" + projectXML.getId() + "'";
             String jobFile = getElementContent(element, "#text", false, subject);
 
             if (jobFile == null || !jobFile.endsWith(".xml")) {
@@ -113,10 +132,7 @@ public class ProjectParserImpl implements ProjectParser {
             }
 
             projectXML.addJob(jobFile);
-
         }
-
-        return projectXML;
     }
 
 }
