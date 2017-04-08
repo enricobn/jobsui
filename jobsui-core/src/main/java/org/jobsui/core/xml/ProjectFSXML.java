@@ -8,7 +8,7 @@ import java.util.Collection;
  */
 public interface ProjectFSXML extends ProjectXML {
 
-    Collection<File> getGroovyFiles();
+    Collection<File> getScriptFiles(String root);
 
     void setName(String s);
 }

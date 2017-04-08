@@ -167,12 +167,14 @@ public class EditProject extends Application {
                 .map(TreeItem::new)
                 .forEach(treeItem -> libraries.getChildren().add(treeItem));
 
-        TreeItem<Item> groovy = new TreeItem<>(new Item(ItemType.Groovy, () -> "groovy", projectXML));
-        root.getChildren().add(groovy);
-        projectXML.getGroovyFiles().stream()
-                .map(f -> new Item(ItemType.GroovyFile, f::getName, f))
-                .map(TreeItem::new)
-                .forEach(treeItem -> groovy.getChildren().add(treeItem));
+        for (String location : projectXML.getScriptsLocations()) {
+            TreeItem<Item> locationItem = new TreeItem<>(new Item(ItemType.Scripts, () -> location, projectXML));
+            root.getChildren().add(locationItem);
+            projectXML.getScriptFiles(location).stream()
+                    .map(f -> new Item(ItemType.ScriptFile, f::getName, f))
+                    .map(TreeItem::new)
+                    .forEach(treeItem -> locationItem.getChildren().add(treeItem));
+        }
 
         JobParser jobParser = new JobParserImpl();
 
@@ -238,7 +240,7 @@ public class EditProject extends Application {
     }
 
     private enum ItemType {
-        Project, GroovyFile, Job, Parameter, Expression, Dependency, Dependencies, Parameters, Groovy, Libraries, Library, Call
+        Project, ScriptFile, Job, Parameter, Expression, Dependency, Dependencies, Parameters, Scripts, Libraries, Library, Call
     }
 
     private class Item {
@@ -260,7 +262,7 @@ public class EditProject extends Application {
                     setProjectDetail();
                     break;
 
-                case GroovyFile:
+                case ScriptFile:
                     setGroovyFileDetail();
                     break;
 
