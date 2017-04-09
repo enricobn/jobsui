@@ -48,13 +48,17 @@ public class ProjectParserImpl implements ProjectParser {
             throw new Exception("Cannot find project file (" + PROJECT_FILE_NAME + ") in " + folder);
         }
 
-        return parse(folder.toURI().toURL(), (id, name) -> {
+        ProjectFSXMLImpl projectFSXML = parse(folder.toURI().toURL(), (id, name) -> {
             try {
                 return new ProjectFSXMLImpl(folder, id, name);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
+
+        projectFSXML.afterLoad();
+
+        return projectFSXML;
     }
 
     @Override

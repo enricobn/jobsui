@@ -37,7 +37,7 @@ public interface ProjectXML extends ValidatingXML {
                 .collect(Collectors.toList()).toArray(new URL[0]);
     }
 
-    default List<JobXML> getJobXMLs() {
+    default Map<String, JobXML> getJobXMLs() {
         return getJobs().stream()
             .map(job -> {
                 try {
@@ -45,7 +45,7 @@ public interface ProjectXML extends ValidatingXML {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-            }).collect(Collectors.toList());
+            }).collect(Collectors.toMap(jobXML -> jobXML.getId() + ".xml", jobXML -> jobXML));
     }
 
     String getVersion();

@@ -107,6 +107,7 @@ public class JavaFXUI implements UI<Node> {
     public static void showMessageStatic(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("JobsUI");
+        alert.setHeaderText("");
         alert.setContentText(message);
         alert.showAndWait();
     }

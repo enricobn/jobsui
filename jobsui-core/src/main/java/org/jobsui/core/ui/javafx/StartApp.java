@@ -117,7 +117,7 @@ public class StartApp extends Application {
         stage = new Stage();
         try {
             editProject.start(stage);
-            editProject.edit(projectXML);
+            editProject.edit(projectXML, false);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

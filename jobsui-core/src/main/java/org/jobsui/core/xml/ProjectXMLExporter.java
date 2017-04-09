@@ -7,6 +7,7 @@ import org.w3c.dom.Element;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -51,18 +52,20 @@ public class ProjectXMLExporter {
         XMLUtils.write(doc, new File(folder, ProjectParserImpl.PROJECT_FILE_NAME),
                 getClass().getResource("/org/jobsui/project.xsd"));
 
+        Charset utf8 = Charset.forName("UTF-8");
+
         for (String location : projectXML.getScriptsLocations()) {
             File locationRoot = new File(folder, location);
-            for (File file : projectXML.getScriptFiles(location)) {
-                File dest = new File(locationRoot, file.getName());
-                FileUtils.copyFile(file, dest);
+            for (Map.Entry<String,String> entry: projectXML.getScriptFiles(location).entrySet()) {
+                File dest = new File(locationRoot, entry.getKey());
+                FileUtils.write(dest, entry.getValue(), utf8);
             }
         }
 
         JobXMLExporter jobXMLExporter = new JobXMLExporter();
 
-        for (JobXML job : projectXML.getJobXMLs()) {
-            jobXMLExporter.export(job, new File(folder, job.getId() + ".xml"));
+        for (Map.Entry<String,JobXML> job : projectXML.getJobXMLs().entrySet()) {
+            jobXMLExporter.export(job.getValue(), new File(folder, job.getKey()));
         }
 
     }

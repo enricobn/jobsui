@@ -41,6 +41,10 @@ public class EditProject extends Application {
     private VBox root;
     private Label status;
     private ProjectFSXML projectXML = null;
+    private List<String> originalJobs = null;
+    private List<String> originalScriptLocations = null;
+    private Button saveButton;
+    private Button saveAsButton;
 
     public static void main(String... args) {
         launch(args);
@@ -75,8 +79,31 @@ public class EditProject extends Application {
 //        });
 //        buttons.getChildren().add(openButton);
 
-        Button save = new Button("Save");
-        save.setOnAction(event -> {
+        saveButton = new Button("Save");
+        saveButton.setOnAction(event -> {
+            try {
+                for (String originalJob : originalJobs) {
+                    File file = new File(projectXML.getFolder(), originalJob);
+                    if (file.exists()) {
+                        file.delete();
+                    }
+                }
+
+                for (String location : originalScriptLocations) {
+                    File locationRoot = new File(projectXML.getFolder(), location);
+                    FileUtils.deleteDirectory(locationRoot);
+                }
+
+                ProjectXMLExporter exporter = new ProjectXMLExporter();
+                exporter.export(projectXML, projectXML.getFolder());
+            } catch (Exception e) {
+                JavaFXUI.showErrorStatic("Error saving project.", e);
+            }
+        });
+        buttons.getChildren().add(saveButton);
+
+        saveAsButton = new Button("Save as");
+        saveAsButton.setOnAction(event -> {
             try {
                 DirectoryChooser chooser = new DirectoryChooser();
                 chooser.setTitle("Save project");
@@ -86,18 +113,25 @@ public class EditProject extends Application {
 
                 if (file != null) {
                     if (file.exists()) {
-                        FileUtils.deleteDirectory(file);
+                        String[] files = file.list();
+                        if (files != null && files.length > 0) {
+                            JavaFXUI.showMessageStatic("Directory is not empty.");
+                            return;
+                        }
+                    } else {
+                        file.mkdir();
                     }
-                    file.mkdir();
-
                     ProjectXMLExporter exporter = new ProjectXMLExporter();
                     exporter.export(projectXML, file);
+                    saveButton.setDisable(false);
+                    projectXML.setFolder(file);
+                    setprojectXML(projectXML);
                 }
             } catch (Exception e) {
-                JavaFXUI.showErrorStatic("Error exporting project.", e);
+                JavaFXUI.showErrorStatic("Error saving project.", e);
             }
         });
-        buttons.getChildren().add(save);
+        buttons.getChildren().add(saveAsButton);
 
         root.getChildren().add(buttons);
 
@@ -171,7 +205,6 @@ public class EditProject extends Application {
 //    }
 
     private TreeItem<Item> loadProject(ProjectFSXML projectXML) {
-        this.projectXML = projectXML;
         TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, projectXML::getName, projectXML));
 
         TreeItem<Item> libraries = new TreeItem<>(new Item(ItemType.Libraries, () -> "libraries", projectXML));
@@ -184,13 +217,13 @@ public class EditProject extends Application {
         for (String location : projectXML.getScriptsLocations()) {
             TreeItem<Item> locationItem = new TreeItem<>(new Item(ItemType.Scripts, () -> location, projectXML));
             root.getChildren().add(locationItem);
-            projectXML.getScriptFiles(location).stream()
-                    .map(f -> new Item(ItemType.ScriptFile, f::getName, f))
+            projectXML.getScriptFiles(location).entrySet().stream()
+                    .map(e -> new Item(ItemType.ScriptFile, e::getKey, e))
                     .map(TreeItem::new)
                     .forEach(treeItem -> locationItem.getChildren().add(treeItem));
         }
 
-        projectXML.getJobXMLs().stream().sorted(Comparator.comparing(JobXML::getName))
+        projectXML.getJobXMLs().values().stream().sorted(Comparator.comparing(JobXML::getName))
                 .map(this::createJobTreeItem)
                 .forEach(root.getChildren()::add);
         return root;
@@ -235,13 +268,25 @@ public class EditProject extends Application {
                 .forEach(dependencies.getChildren()::add);
     }
 
-    public void edit(ProjectFSXML projectXML) {
+    public void edit(ProjectFSXML projectXML, boolean isNew) {
+        setprojectXML(projectXML);
+
+        if (isNew) {
+            saveButton.setDisable(true);
+        }
+
         TreeItem<Item> root = loadProject(projectXML);
 
         Platform.runLater(() -> {
             itemsTree.setRoot(root);
             root.setExpanded(true);
         });
+    }
+
+    private void setprojectXML(ProjectFSXML projectXML) {
+        this.projectXML = projectXML;
+        this.originalJobs = new ArrayList<>(projectXML.getJobs());
+        this.originalScriptLocations = new ArrayList<>(projectXML.getScriptsLocations());
     }
 
     private enum ItemType {
@@ -310,12 +355,12 @@ public class EditProject extends Application {
         }
 
         private void setGroovyFileDetail() throws IOException {
-            File file = (File) payload;
-            if (file.getName().endsWith(".groovy") ||
-                    file.getName().endsWith(".txt") ||
-                    file.getName().endsWith(".properties") ||
-                    file.getName().endsWith(".xml")) {
-                String content = new String(Files.readAllBytes(file.toPath()));
+            String content = (String) payload;
+//            if (file.getName().endsWith(".groovy") ||
+//                    file.getName().endsWith(".txt") ||
+//                    file.getName().endsWith(".properties") ||
+//                    file.getName().endsWith(".xml")) {
+//                String content = new String(Files.readAllBytes(file.toPath()));
                 itemDetail.getChildren().add(new Label("Content:"));
 
                 CodeArea codeArea = GroovyCodeArea.getCodeArea(true);
@@ -325,7 +370,7 @@ public class EditProject extends Application {
                 VBox.setVgrow(codeArea, Priority.ALWAYS);
 
                 itemDetail.getChildren().add(codeArea);
-            }
+//            }
         }
 
         private void setCallDetail() {

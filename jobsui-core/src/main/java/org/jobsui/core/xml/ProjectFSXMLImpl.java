@@ -1,35 +1,49 @@
 package org.jobsui.core.xml;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.nio.charset.Charset;
+import java.util.*;
 
 /**
  * Created by enrico on 4/5/17.
  */
 class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
-    private final File folder;
+    private File folder;
+    private Map<String,Map<String,String>> scriptFiles = new HashMap<>();
+    private Map<String, JobXML> jobXMLs;
 
     ProjectFSXMLImpl(File folder, String id, String name) throws MalformedURLException, URISyntaxException {
         super(folder.toURI().toURL(), id, name);
         this.folder = folder;
+
+    }
+
+    public void afterLoad() throws Exception {
+        Charset utf8 = Charset.forName("UTF-8");
+
+        for (String root : getScriptsLocations()) {
+            File rootFolder = new File(folder, root);
+            Map<String,String> scripts = new HashMap<>();
+            scriptFiles.put(root, scripts);
+            if (rootFolder.exists()) {
+                File[] files = rootFolder.listFiles(File::isFile);
+                if (files != null) {
+                    for (File file : files) {
+                        scripts.put(file.getName(), FileUtils.readFileToString(file, utf8));
+                    }
+                }
+            }
+        }
+        jobXMLs = super.getJobXMLs();
     }
 
     @Override
-    public Collection<File> getScriptFiles(String root) {
-        File rootFolder = new File(folder, root);
-        if (rootFolder.exists()) {
-            File[] files = rootFolder.listFiles(File::isFile);
-            if (files != null) {
-                return Arrays.asList(files);
-            } else {
-                return Collections.emptyList();
-            }
-        }
-        return Collections.emptyList();
+    public Map<String, String> getScriptFiles(String root) {
+        return scriptFiles.get(root);
     }
 
     @Override
@@ -37,4 +51,13 @@ class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
         return folder;
     }
 
+    @Override
+    public void setFolder(File folder) {
+        this.folder = folder;
+    }
+
+    @Override
+    public Map<String, JobXML> getJobXMLs() {
+        return jobXMLs;
+    }
 }
