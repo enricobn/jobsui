@@ -1,5 +1,6 @@
 package org.jobsui.core.xml;
 
+import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -15,7 +16,7 @@ import java.util.stream.Collectors;
  */
 public class ProjectXMLExporter {
 
-    public void export(ProjectFSXML projectXML, File folder, List<JobXML> jobs) throws Exception {
+    public void export(ProjectFSXML projectXML, File folder) throws Exception {
         List<String> validate = projectXML.validate();
 
         if (!validate.isEmpty()) {
@@ -50,9 +51,17 @@ public class ProjectXMLExporter {
         XMLUtils.write(doc, new File(folder, ProjectParserImpl.PROJECT_FILE_NAME),
                 getClass().getResource("/org/jobsui/project.xsd"));
 
+        for (String location : projectXML.getScriptsLocations()) {
+            File locationRoot = new File(folder, location);
+            for (File file : projectXML.getScriptFiles(location)) {
+                File dest = new File(locationRoot, file.getName());
+                FileUtils.copyFile(file, dest);
+            }
+        }
+
         JobXMLExporter jobXMLExporter = new JobXMLExporter();
 
-        for (JobXML job : jobs) {
+        for (JobXML job : projectXML.getJobXMLs()) {
             jobXMLExporter.export(job, new File(folder, job.getId() + ".xml"));
         }
 

@@ -34,8 +34,8 @@ public class ProjectGroovyBuilder {
 
         Map<String, JobGroovy<Serializable>> jobs = new HashMap<>();
 
-        for (String job : projectXML.getJobs()) {
-            jobs.put(projectXML.getJobId(job), build(groovyShell, JobParserImpl.parse(projectXML, job)));
+        for (JobXML jobXML : projectXML.getJobXMLs()) {
+            jobs.put(jobXML.getId(), build(groovyShell, jobXML));
         }
 
         Map<String, Project> projects = new HashMap<>();

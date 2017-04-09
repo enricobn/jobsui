@@ -51,10 +51,10 @@ public interface XMLUtils {
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
         DOMSource source = new DOMSource(doc);
-//        StreamResult result = new StreamResult(file);
+        StreamResult result = new StreamResult(file);
 
         // Output to console for testing
-        StreamResult result = new StreamResult(System.out);
+//        StreamResult result = new StreamResult(System.out);
 
         transformer.transform(source, result);
     }

@@ -41,7 +41,6 @@ public class EditProject extends Application {
     private VBox root;
     private Label status;
     private ProjectFSXML projectXML = null;
-    private List<JobXML> jobs = new ArrayList<>();
 
     public static void main(String... args) {
         launch(args);
@@ -92,7 +91,7 @@ public class EditProject extends Application {
                     file.mkdir();
 
                     ProjectXMLExporter exporter = new ProjectXMLExporter();
-                    exporter.export(projectXML, file, jobs);
+                    exporter.export(projectXML, file);
                 }
             } catch (Exception e) {
                 JavaFXUI.showErrorStatic("Error exporting project.", e);
@@ -191,16 +190,7 @@ public class EditProject extends Application {
                     .forEach(treeItem -> locationItem.getChildren().add(treeItem));
         }
 
-        this.jobs = projectXML.getJobs().stream()
-                .map(job -> {
-                    try {
-                        return JobParserImpl.parse(projectXML, job);
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                }).collect(Collectors.toList());
-
-        jobs.stream().sorted(Comparator.comparing(JobXML::getName))
+        projectXML.getJobXMLs().stream().sorted(Comparator.comparing(JobXML::getName))
                 .map(this::createJobTreeItem)
                 .forEach(root.getChildren()::add);
         return root;
