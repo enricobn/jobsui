@@ -2,6 +2,5 @@ build/
 .gradle
 .idea
 *.iml
-tgk/
-tgk_old/
+tgk*/
 classes/
