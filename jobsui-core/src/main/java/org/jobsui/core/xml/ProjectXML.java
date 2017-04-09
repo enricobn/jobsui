@@ -37,4 +37,5 @@ public interface ProjectXML extends ValidatingXML {
                 .collect(Collectors.toList()).toArray(new URL[0]);
     }
 
+    String getVersion();
 }

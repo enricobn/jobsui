@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 /**
  * Created by enrico on 10/11/16.
  */
-public class JobXMLImpl implements ValidatingXML, JobXML {
+public class JobXMLImpl implements JobXML {
     private final List<SimpleParameterXML> simpleParameterXMLs = new ArrayList<>();
     private final List<ExpressionXML> expressionXMLs = new ArrayList<>();
     private final List<CallXML> callXMLs = new ArrayList<>();
@@ -34,71 +34,6 @@ public class JobXMLImpl implements ValidatingXML, JobXML {
         this.name = name;
         this.id = id;
         this.version = version;
-    }
-
-    public void export(File file) throws Exception {
-        List<String> validate = validate();
-
-        if (!validate.isEmpty()) {
-            throw new Exception("Invalid job \"" + name + "\":\n" + validate.stream().collect(Collectors.joining("\n ")));
-        }
-
-        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-
-        // root elements
-        Document doc = docBuilder.newDocument();
-        Element rootElement = doc.createElement("Job");
-        doc.appendChild(rootElement);
-
-        XMLUtils.addAttr(rootElement, "name", name);
-
-        for (SimpleParameterXML parameter : simpleParameterXMLs) {
-            Element element = createParameterElement(doc, rootElement, parameter);
-
-            if (parameter.getOnInitScript() != null && !parameter.getOnInitScript().isEmpty()) {
-                XMLUtils.addTextElement(element, "OnInit", parameter.getOnInitScript());
-            }
-
-            if (!JobsUIUtils.isNullOrEmptyOrSpaces(parameter.getValidateScript())) {
-                XMLUtils.addTextElement(element, "Validate", parameter.getValidateScript());
-            }
-
-            for (String dependency : parameter.getDependencies()) {
-                Element dependencyComponent = doc.createElement("Dependency");
-                element.appendChild(dependencyComponent);
-                XMLUtils.addAttr(dependencyComponent, "key", dependency);
-            }
-
-            if (parameter.getOnDependenciesChangeScript() != null && !parameter.getOnDependenciesChangeScript().isEmpty()) {
-                XMLUtils.addTextElement(element, "OnDependenciesChange", parameter.getOnDependenciesChangeScript());
-            }
-        }
-
-        // TODO Expressions
-        // TODO Calls
-
-        if (!JobsUIUtils.isNullOrEmptyOrSpaces(validateScript)) {
-            XMLUtils.addTextElement(rootElement, "Validate", validateScript);
-        }
-
-        if (!JobsUIUtils.isNullOrEmptyOrSpaces(runScript)) {
-            XMLUtils.addTextElement(rootElement, "Run", getRunScript());
-        }
-
-        try {
-            XMLUtils.write(doc, file, getClass().getResource("/org/jobsui/job.xsd"));
-        } catch (Exception e) {
-            throw new Exception("Error exporting job \"" + getName() + "\".", e);
-        }
-    }
-
-    private Element createParameterElement(Document doc, Element rootElement, ParameterXML parameter) {
-        Element element = doc.createElement("Parameter");
-        rootElement.appendChild(element);
-        XMLUtils.addAttr(element, "key", parameter.getKey());
-        XMLUtils.addAttr(element, "name", parameter.getName());
-        return element;
     }
 
     public void setRunScript(String runScript) {
@@ -195,6 +130,11 @@ public class JobXMLImpl implements ValidatingXML, JobXML {
     @Override
     public ExpressionXML getExpression(String key) {
         return expressions.get(key);
+    }
+
+    @Override
+    public String getVersion() {
+        return version;
     }
 
     public void changeParameterKey(ParameterXML parameterXML, String newKey) {

@@ -18,6 +18,7 @@ class ProjectXMLImpl implements ProjectXML {
 //    private final Collection<File> groovyFiles = new ArrayList<>();
     private final String id;
     private String name;
+    private String version;
 
     ProjectXMLImpl(URL projectURL, String id, String name) {
         this.projectURL = projectURL;
@@ -125,5 +126,14 @@ class ProjectXMLImpl implements ProjectXML {
     @Override
     public List<String> getScriptsLocations() {
         return Collections.singletonList("groovy");
+    }
+
+    @Override
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

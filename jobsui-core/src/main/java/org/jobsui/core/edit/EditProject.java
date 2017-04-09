@@ -14,6 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.apache.commons.io.FileUtils;
 import org.fxmisc.richtext.CodeArea;
 import org.jobsui.core.xml.JobParserImpl;
 import org.jobsui.core.ui.javafx.JavaFXUI;
@@ -22,6 +23,7 @@ import org.jobsui.core.xml.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
@@ -39,6 +41,7 @@ public class EditProject extends Application {
     private VBox root;
     private Label status;
     private ProjectFSXML projectXML = null;
+    private List<JobXML> jobs = new ArrayList<>();
 
     public static void main(String... args) {
         launch(args);
@@ -51,39 +54,51 @@ public class EditProject extends Application {
         HBox buttons = new HBox(5);
         VBox.setVgrow(buttons, Priority.NEVER);
         buttons.setPadding(new Insets(5, 5, 5, 5));
-        Button openButton = new Button("Open");
-        openButton.setOnAction(event -> {
-            DirectoryChooser chooser = new DirectoryChooser();
-            chooser.setTitle("Open project");
+//        Button openButton = new Button("Open");
+//        openButton.setOnAction(event -> {
+//            DirectoryChooser chooser = new DirectoryChooser();
+//            chooser.setTitle("Open project");
+//
+//            File firstProject = configuration.getFirstRecentValidProject();
+//            if (firstProject != null) {
+//                chooser.setInitialDirectory(firstProject);
+//            }
+//
+//            File file = chooser.showDialog(stage);
+//
+//            if (file != null) {
+//                Task runnable = new OpenProjectTask(file);
+//
+//                Thread thread = new Thread(runnable);
+//                thread.setDaemon(true);
+//                thread.start();
+//            }
+//        });
+//        buttons.getChildren().add(openButton);
 
-            File firstProject = configuration.getFirstRecentValidProject();
-            if (firstProject != null) {
-                chooser.setInitialDirectory(firstProject);
-            }
-
-            File file = chooser.showDialog(stage);
-
-            if (file != null) {
-                Task runnable = new OpenProjectTask(file);
-
-                Thread thread = new Thread(runnable);
-                thread.setDaemon(true);
-                thread.start();
-            }
-        });
-        buttons.getChildren().add(openButton);
-
-        Button export = new Button("Export");
-        export.setOnAction(event -> {
+        Button save = new Button("Save");
+        save.setOnAction(event -> {
             try {
-                ProjectXMLExporter exporter = new ProjectXMLExporter();
-                // TODO
-//                exporter.export(projectXML, folder);
+                DirectoryChooser chooser = new DirectoryChooser();
+                chooser.setTitle("Save project");
+                chooser.setInitialDirectory(projectXML.getFolder());
+
+                File file = chooser.showDialog(stage);
+
+                if (file != null) {
+                    if (file.exists()) {
+                        FileUtils.deleteDirectory(file);
+                    }
+                    file.mkdir();
+
+                    ProjectXMLExporter exporter = new ProjectXMLExporter();
+                    exporter.export(projectXML, file, jobs);
+                }
             } catch (Exception e) {
                 JavaFXUI.showErrorStatic("Error exporting project.", e);
             }
         });
-        buttons.getChildren().add(export);
+        buttons.getChildren().add(save);
 
         root.getChildren().add(buttons);
 
@@ -176,16 +191,16 @@ public class EditProject extends Application {
                     .forEach(treeItem -> locationItem.getChildren().add(treeItem));
         }
 
-        JobParser jobParser = new JobParserImpl();
-
-        projectXML.getJobs().stream()
+        this.jobs = projectXML.getJobs().stream()
                 .map(job -> {
                     try {
                         return JobParserImpl.parse(projectXML, job);
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
-                }).sorted(Comparator.comparing(JobXML::getName))
+                }).collect(Collectors.toList());
+
+        jobs.stream().sorted(Comparator.comparing(JobXML::getName))
                 .map(this::createJobTreeItem)
                 .forEach(root.getChildren()::add);
         return root;
@@ -290,6 +305,7 @@ public class EditProject extends Application {
             ProjectFSXML project = (ProjectFSXML) payload;
 
             addTextProperty("Name:", project::getName, project::setName);
+            addTextProperty("Version:", project::getVersion, project::setVersion);
         }
 
         private void setJobDetail() {

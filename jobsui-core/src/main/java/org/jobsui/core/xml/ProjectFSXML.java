@@ -10,5 +10,9 @@ public interface ProjectFSXML extends ProjectXML {
 
     Collection<File> getScriptFiles(String root);
 
-    void setName(String s);
+    void setName(String name);
+
+    File getFolder();
+
+    void setVersion(String version);
 }

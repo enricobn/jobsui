@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
  */
 public class ProjectXMLExporter {
 
-    public void export(ProjectXML projectXML, File folder) throws Exception {
+    public void export(ProjectFSXML projectXML, File folder, List<JobXML> jobs) throws Exception {
         List<String> validate = projectXML.validate();
 
         if (!validate.isEmpty()) {
@@ -28,7 +28,9 @@ public class ProjectXMLExporter {
         // root elements
         Document doc = docBuilder.newDocument();
         Element rootElement = doc.createElement("Project");
+        XMLUtils.addAttr(rootElement, "id", projectXML.getId());
         XMLUtils.addAttr(rootElement, "name", projectXML.getName());
+        XMLUtils.addAttr(rootElement, "version", projectXML.getVersion());
         doc.appendChild(rootElement);
 
         for (String library : projectXML.getLibraries()) {
@@ -41,12 +43,18 @@ public class ProjectXMLExporter {
             XMLUtils.addAttr(element, "name", entry.getKey());
         }
 
-//        XMLUtils.write(doc, new File(projectFolder, JobParser.PROJECT_FILE_NAME),
-//                getClass().getResource("/org/jobsui/project.xsd"));
-//
-//        for (JobXML jobXML : jobs.values()) {
-//            jobXML.export(new File(projectFolder, jobXML.getId() + ".xml"));
-//        }
+        for (String job : projectXML.getJobs()) {
+            XMLUtils.addTextElement(rootElement, "Job", job);
+        }
+
+        XMLUtils.write(doc, new File(folder, ProjectParserImpl.PROJECT_FILE_NAME),
+                getClass().getResource("/org/jobsui/project.xsd"));
+
+        JobXMLExporter jobXMLExporter = new JobXMLExporter();
+
+        for (JobXML job : jobs) {
+            jobXMLExporter.export(job, new File(folder, job.getId() + ".xml"));
+        }
 
     }
 

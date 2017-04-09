@@ -32,4 +32,9 @@ class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
         return Collections.emptyList();
     }
 
+    @Override
+    public File getFolder() {
+        return folder;
+    }
+
 }

@@ -25,8 +25,8 @@ import static org.jobsui.core.xml.XMLUtils.getMandatoryAttribute;
  * Created by enrico on 5/4/16.
  */
 public class ProjectParserImpl implements ProjectParser {
+    public static final String PROJECT_FILE_NAME = "project.xml";
     private static final Logger LOGGER = Logger.getLogger(ProjectParserImpl.class.getName());
-    private static final String PROJECT_FILE_NAME = "project.xml";
     private static final Validator projectValidator;
 
     static {
@@ -91,6 +91,9 @@ public class ProjectParserImpl implements ProjectParser {
             String projectName = getMandatoryAttribute((Element) projects.item(0), "name", subject);
 
             projectXML = supplier.apply(projectId, projectName);
+
+            String projectVersion = getMandatoryAttribute((Element) projects.item(0), "version", subject);
+            projectXML.setVersion(projectVersion);
 
             parseProject(doc, projectXML);
         }
