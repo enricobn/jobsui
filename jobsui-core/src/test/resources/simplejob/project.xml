@@ -6,4 +6,5 @@
     <Job>simpleWithExpression.xml</Job>
     <Job>simpleWithExternalCall.xml</Job>
     <Job>simpleWithInternalCall.xml</Job>
+    <Job>simpleWithParameterDependency.xml</Job>
 </Project>

@@ -45,10 +45,9 @@ public class JobXMLExporter {
                 XMLUtils.addTextElement(element, "Validate", parameter.getValidateScript());
             }
 
-            for (String dependency : parameter.getDependencies()) {
-                Element dependencyComponent = doc.createElement("Dependency");
-                element.appendChild(dependencyComponent);
-                XMLUtils.addAttr(dependencyComponent, "key", dependency);
+            if (!parameter.getDependencies().isEmpty()) {
+                String dependencies = parameter.getDependencies().stream().collect(Collectors.joining(","));
+                XMLUtils.addAttr(element, "dependsOn", dependencies);
             }
 
             if (parameter.getOnDependenciesChangeScript() != null && !parameter.getOnDependenciesChangeScript().isEmpty()) {

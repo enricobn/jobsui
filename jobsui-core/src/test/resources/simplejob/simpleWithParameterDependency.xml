@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<Job name="Simple" version="1.0.0">
+
+    <Parameter key="name" name="Name"/>
+
+    <Parameter key="dependent" name="Dependent" dependsOn="name"/>
+
+    <Run>
+        <![CDATA[
+            return dependent
+        ]]>
+    </Run>
+
+</Job>
