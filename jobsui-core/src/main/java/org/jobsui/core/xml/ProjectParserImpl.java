@@ -1,5 +1,6 @@
 package org.jobsui.core.xml;
 
+import org.apache.commons.io.FileUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -15,6 +16,7 @@ import javax.xml.validation.Validator;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.function.BiFunction;
 import java.util.logging.Logger;
 
@@ -56,7 +58,19 @@ public class ProjectParserImpl implements ProjectParser {
             }
         });
 
-        projectFSXML.afterLoad();
+        Charset utf8 = Charset.forName("UTF-8");
+
+        for (String root : projectFSXML.getScriptsLocations()) {
+            File rootFolder = new File(folder, root);
+            if (rootFolder.exists()) {
+                File[] files = rootFolder.listFiles(File::isFile);
+                if (files != null) {
+                    for (File file : files) {
+                        projectFSXML.addScriptFile(root, file.getName(), FileUtils.readFileToString(file, utf8));
+                    }
+                }
+            }
+        }
 
         return projectFSXML;
     }

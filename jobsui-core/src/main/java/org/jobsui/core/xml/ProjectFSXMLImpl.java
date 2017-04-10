@@ -1,12 +1,11 @@
 package org.jobsui.core.xml;
 
-import org.apache.commons.io.FileUtils;
-
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by enrico on 4/5/17.
@@ -21,26 +20,11 @@ class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
 
     }
 
-    public void afterLoad() throws Exception {
-        Charset utf8 = Charset.forName("UTF-8");
-
-        for (String root : getScriptsLocations()) {
-            File rootFolder = new File(folder, root);
-            Map<String,String> scripts = new HashMap<>();
-            scriptFiles.put(root, scripts);
-            if (rootFolder.exists()) {
-                File[] files = rootFolder.listFiles(File::isFile);
-                if (files != null) {
-                    for (File file : files) {
-                        scripts.put(file.getName(), FileUtils.readFileToString(file, utf8));
-                    }
-                }
-            }
-        }
-    }
-
     @Override
     public Map<String, String> getScriptFiles(String root) {
+        if (!scriptFiles.containsKey(root)) {
+            return Collections.emptyMap();
+        }
         return scriptFiles.get(root);
     }
 
@@ -54,4 +38,8 @@ class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
         this.folder = folder;
     }
 
+    public void addScriptFile(String root, String name, String content) {
+        Map<String, String> map = scriptFiles.computeIfAbsent(root, key -> new HashMap());
+        map.put(name, content);
+    }
 }
