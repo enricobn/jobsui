@@ -13,9 +13,7 @@ class ProjectXMLImpl implements ProjectXML {
     private final URL projectURL;
     private final Set<String> libraries = new HashSet<>();
     private final Map<String, String> imports = new HashMap<>();
-//    private final Map<String, JobXML> jobs = new HashMap<>();
-    private final Set<String> jobs = new HashSet<>();
-//    private final Collection<File> groovyFiles = new ArrayList<>();
+    private final Map<String, JobXML> jobXMLs = new HashMap<>();
     private final String id;
     private String name;
     private String version;
@@ -60,10 +58,11 @@ class ProjectXMLImpl implements ProjectXML {
         imports.put(name, uri);
     }
 
-    public void addJob(String job) {
-        if (!jobs.add(job)) {
+    public void addJob(String job, JobXML jobXML) {
+        if (jobXMLs.containsKey(job)) {
             throw new IllegalArgumentException("Job \"" + job + "\" already added.");
         }
+        jobXMLs.put(job, jobXML);
     }
 
     @Override
@@ -95,7 +94,12 @@ class ProjectXMLImpl implements ProjectXML {
 
 
     public Collection<String> getJobs() {
-        return jobs;
+        return jobXMLs.keySet();
+    }
+
+    @Override
+    public JobXML getJobXML(String job) {
+        return jobXMLs.get(job);
     }
 
     public void setName(String name) {

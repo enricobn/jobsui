@@ -138,7 +138,7 @@ public class ProjectParserImpl implements ProjectParser {
                 throw new Exception(jobFile + " is not a valid job file name: it must end with .xml.");
             }
 
-            projectXML.addJob(jobFile);
+            projectXML.addJob(jobFile, JobParserImpl.parse(projectXML, jobFile));
         }
     }
 

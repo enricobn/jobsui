@@ -14,7 +14,6 @@ import java.util.*;
 class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
     private File folder;
     private Map<String,Map<String,String>> scriptFiles = new HashMap<>();
-    private Map<String, JobXML> jobXMLs;
 
     ProjectFSXMLImpl(File folder, String id, String name) throws MalformedURLException, URISyntaxException {
         super(folder.toURI().toURL(), id, name);
@@ -38,7 +37,6 @@ class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
                 }
             }
         }
-        jobXMLs = super.getJobXMLs();
     }
 
     @Override
@@ -56,8 +54,4 @@ class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
         this.folder = folder;
     }
 
-    @Override
-    public Map<String, JobXML> getJobXMLs() {
-        return jobXMLs;
-    }
 }

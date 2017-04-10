@@ -37,16 +37,7 @@ public interface ProjectXML extends ValidatingXML {
                 .collect(Collectors.toList()).toArray(new URL[0]);
     }
 
-    default Map<String, JobXML> getJobXMLs() {
-        return getJobs().stream()
-            .map(job -> {
-                try {
-                    return JobParserImpl.parse(this, job);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
-            }).collect(Collectors.toMap(jobXML -> jobXML.getId() + ".xml", jobXML -> jobXML));
-    }
+    JobXML getJobXML(String job);
 
     String getVersion();
 }

@@ -64,8 +64,8 @@ public class ProjectXMLExporter {
 
         JobXMLExporter jobXMLExporter = new JobXMLExporter();
 
-        for (Map.Entry<String,JobXML> job : projectXML.getJobXMLs().entrySet()) {
-            jobXMLExporter.export(job.getValue(), new File(folder, job.getKey()));
+        for (String job : projectXML.getJobs()) {
+            jobXMLExporter.export(projectXML.getJobXML(job), new File(folder, job));
         }
 
     }

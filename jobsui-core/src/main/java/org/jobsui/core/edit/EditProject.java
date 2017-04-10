@@ -223,7 +223,9 @@ public class EditProject extends Application {
                     .forEach(treeItem -> locationItem.getChildren().add(treeItem));
         }
 
-        projectXML.getJobXMLs().values().stream().sorted(Comparator.comparing(JobXML::getName))
+        projectXML.getJobs().stream()
+                .map(projectXML::getJobXML)
+                .sorted(Comparator.comparing(JobXML::getName))
                 .map(this::createJobTreeItem)
                 .forEach(root.getChildren()::add);
         return root;
