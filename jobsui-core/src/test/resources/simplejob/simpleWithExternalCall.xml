@@ -7,18 +7,9 @@
             component.setDefaultValue("Enrico");
         </OnInit>
 
-        <Validate>
-            return new NotEmptyStringValidator().validate(values, value);
-        </Validate>
-
     </Parameter>
 
-    <Parameter key="surname" name="Surname">
-        <Validate>
-            return new NotEmptyStringValidator().validate(values, value);
-        </Validate>
-
-    </Parameter>
+    <Parameter key="surname" name="Surname"/>
 
     <Call key="inv" name="Inv" project="ext" job="concat">
         <Map in="name" out="first"/>
@@ -28,7 +19,5 @@
     <Run>
         return inv
     </Run>
-    <!--Validate>
-        return new NotEmptyStringValidator().validate(values, value);
-    </Validate-->
+
 </Job>

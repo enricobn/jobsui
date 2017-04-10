@@ -255,7 +255,7 @@ public class JobRunnerTest {
 
         final List<String> messages2 = captor.getAllValues().get(1);
         assertThat(messages2.size(), is(1));
-        assertThat(messages2.get(0), containsString("is null"));
+        assertThat(messages2.get(0), is("Value is mandatory."));
     }
 
     @Test public void verify_that_validation_does_NOT_occur_if_dependencies_are_NOT_valid() throws Exception {

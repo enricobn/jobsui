@@ -5,18 +5,9 @@
         <OnInit>
             component.setDefaultValue("Enrico");
         </OnInit>
-
-        <Validate>
-            return new NotEmptyStringValidator().validate(values, value);
-        </Validate>
-
     </Parameter>
 
-    <Parameter key="surname" name="Surname">
-        <Validate>
-            return new NotEmptyStringValidator().validate(values, value);
-        </Validate>
-    </Parameter>
+    <Parameter key="surname" name="Surname"/>
 
     <Expression key="completeName" name="Complete name" dependsOn="name,surname">
         return name + ' ' + surname;
@@ -25,7 +16,5 @@
     <Run>
         return 'Mr. ' + completeName;
     </Run>
-    <!--Validate>
-        return new NotEmptyStringValidator().validate(values, value);
-    </Validate-->
+
 </Job>
