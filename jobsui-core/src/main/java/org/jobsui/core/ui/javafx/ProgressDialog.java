@@ -73,7 +73,7 @@ class ProgressDialog {
 
         Scene scene = new Scene(hb);
         dialogStage.setScene(scene);
-        dialogStage.setWidth(150);
+        dialogStage.setWidth(200);
     }
 
 //        public void activateProgressBar(final Task<?> task)  {
