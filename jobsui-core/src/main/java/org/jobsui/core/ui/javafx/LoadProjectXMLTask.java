@@ -11,9 +11,9 @@ import java.net.URL;
  * Created by enrico on 3/30/17.
  */
 class LoadProjectXMLTask extends Task<ProjectFSXML> {
-    private final String projectFolder;
+    private final File projectFolder;
 
-    LoadProjectXMLTask(String projectFolder) {
+    LoadProjectXMLTask(File projectFolder) {
         this.projectFolder = projectFolder;
     }
 
@@ -21,7 +21,7 @@ class LoadProjectXMLTask extends Task<ProjectFSXML> {
     protected ProjectFSXML call() throws Exception {
         ProjectFSXML projectXML;
         try {
-            projectXML = new ProjectParserImpl().parse(new File(projectFolder));
+            projectXML = new ProjectParserImpl().parse(projectFolder);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

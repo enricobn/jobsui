@@ -7,4 +7,5 @@
     <Job>simpleWithExternalCall.xml</Job>
     <Job>simpleWithInternalCall.xml</Job>
     <Job>simpleWithParameterDependency.xml</Job>
+    <Job>simpleWithChoice.xml</Job>
 </Project>

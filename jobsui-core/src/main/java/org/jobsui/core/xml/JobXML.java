@@ -23,6 +23,8 @@ public interface JobXML extends ValidatingXML{
 
     ParameterXML getParameter(String key);
 
+//    SimpleParameterXML getSimpleParameter(String key);
+
     ExpressionXML getExpression(String key);
 
     String getVersion();

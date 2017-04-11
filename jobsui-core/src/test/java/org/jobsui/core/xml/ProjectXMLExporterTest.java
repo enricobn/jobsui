@@ -6,9 +6,11 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -73,5 +75,66 @@ public class ProjectXMLExporterTest {
 //            }
         }
 
+        for (String job : exported.getJobs()) {
+            JobXML exportedJobXML = exported.getJobXML(job);
+            JobXML originalJobXML = original.getJobXML(job);
+
+            check(originalJobXML, exportedJobXML);
+        }
+
+    }
+
+    private void check(JobXML originalJobXML, JobXML exportedJobXML) {
+        List<String> exportedSimpleParametersKeys = getKeys(exportedJobXML.getSimpleParameterXMLs());
+        List<String> originalSimpleParametersKeys = getKeys(originalJobXML.getSimpleParameterXMLs());
+        assertThat(exportedSimpleParametersKeys, is(originalSimpleParametersKeys));
+
+        for (String parameterKey : exportedSimpleParametersKeys) {
+            ParameterXML originalParameter = originalJobXML.getParameter(parameterKey);
+            ParameterXML exportedParameter = exportedJobXML.getParameter(parameterKey);
+            check(originalParameter, exportedParameter);
+        }
+
+        List<String> exportedExpressionsKeys = getKeys(exportedJobXML.getExpressionXMLs());
+        List<String> originalExpressionsKeys = getKeys(originalJobXML.getExpressionXMLs());
+        assertThat(exportedExpressionsKeys, is(originalExpressionsKeys));
+
+        for (String expressionKey : exportedExpressionsKeys) {
+            ExpressionXML originalExpression = originalJobXML.getExpression(expressionKey);
+            ExpressionXML exportedExpression = exportedJobXML.getExpression(expressionKey);
+            check(originalExpression, exportedExpression);
+            checkExpression(originalExpression, exportedExpression);
+        }
+    }
+
+    private void check(ParameterXML originalParameter, ParameterXML exportedParameter) {
+        assertThat(exportedParameter, instanceOf(originalParameter.getClass()));
+        assertThat(exportedParameter.getKey(), is(originalParameter.getKey()));
+        assertThat(exportedParameter.getName(), is(originalParameter.getName()));
+        assertThat(exportedParameter.getDependencies(), is(originalParameter.getDependencies()));
+        assertThat(exportedParameter.getOrder(), is(originalParameter.getOrder()));
+
+        if (originalParameter instanceof SimpleParameterXML) {
+            SimpleParameterXML originalSimpleParameter = (SimpleParameterXML) originalParameter;
+            SimpleParameterXML exportedSimpleParameter = (SimpleParameterXML) exportedParameter;
+            checkSimpleParameter(originalSimpleParameter, exportedSimpleParameter);
+        }
+    }
+
+    private void checkSimpleParameter(SimpleParameterXML originalSimpleParameter, SimpleParameterXML exportedSimpleParameter) {
+        assertThat(exportedSimpleParameter.getOnDependenciesChangeScript(), is(originalSimpleParameter.getOnDependenciesChangeScript()));
+        assertThat(exportedSimpleParameter.getOnInitScript(), is(originalSimpleParameter.getOnInitScript()));
+        assertThat(exportedSimpleParameter.getValidateScript(), is(originalSimpleParameter.getValidateScript()));
+        assertThat(exportedSimpleParameter.getComponent(), is(originalSimpleParameter.getComponent()));
+    }
+
+    private void checkExpression(ExpressionXML originalExpression, ExpressionXML exportedExpression) {
+        assertThat(exportedExpression.getEvaluateScript(), is(originalExpression.getEvaluateScript()));
+    }
+
+    private static List<String> getKeys(Collection<? extends ParameterXML> params) {
+        return params.stream()
+                .map(ParameterXML::getKey)
+                .collect(Collectors.toList());
     }
 }

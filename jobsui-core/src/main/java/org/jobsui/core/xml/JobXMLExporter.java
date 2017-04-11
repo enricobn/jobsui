@@ -1,5 +1,6 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.ui.UIComponentType;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -35,7 +36,11 @@ public class JobXMLExporter {
         XMLUtils.addAttr(rootElement, "version", jobXML.getVersion());
 
         for (SimpleParameterXML parameter : jobXML.getSimpleParameterXMLs()) {
-            Element element = createParameterElement(doc, rootElement, parameter);
+            Element element = createParameterElement(doc, rootElement, parameter, "Parameter");
+
+            if (!parameter.getComponent().equals(UIComponentType.Value)) {
+                XMLUtils.addAttr(element, "component", parameter.getComponent().name());
+            }
 
             if (parameter.getOnInitScript() != null && !parameter.getOnInitScript().isEmpty()) {
                 XMLUtils.addTextElement(element, "OnInit", parameter.getOnInitScript());
@@ -45,17 +50,19 @@ public class JobXMLExporter {
                 XMLUtils.addTextElement(element, "Validate", parameter.getValidateScript());
             }
 
-            if (!parameter.getDependencies().isEmpty()) {
-                String dependencies = parameter.getDependencies().stream().collect(Collectors.joining(","));
-                XMLUtils.addAttr(element, "dependsOn", dependencies);
-            }
-
             if (parameter.getOnDependenciesChangeScript() != null && !parameter.getOnDependenciesChangeScript().isEmpty()) {
                 XMLUtils.addTextElement(element, "OnDependenciesChange", parameter.getOnDependenciesChangeScript());
             }
         }
 
-        // TODO Expressions
+        for (ExpressionXML expressionXML : jobXML.getExpressionXMLs()) {
+            Element element = createParameterElement(doc, rootElement, expressionXML, "Expression");
+
+            if (expressionXML.getEvaluateScript() != null && !expressionXML.getEvaluateScript().isEmpty()) {
+                element.appendChild(doc.createTextNode(expressionXML.getEvaluateScript()));
+            }
+        }
+
         // TODO Calls
 
         if (!JobsUIUtils.isNullOrEmptyOrSpaces(jobXML.getValidateScript())) {
@@ -73,11 +80,17 @@ public class JobXMLExporter {
         }
     }
 
-    private Element createParameterElement(Document doc, Element rootElement, ParameterXML parameter) {
-        Element element = doc.createElement("Parameter");
+    private Element createParameterElement(Document doc, Element rootElement, ParameterXML parameter, String elementName) {
+        Element element = doc.createElement(elementName);
         rootElement.appendChild(element);
         XMLUtils.addAttr(element, "key", parameter.getKey());
         XMLUtils.addAttr(element, "name", parameter.getName());
+
+        if (!parameter.getDependencies().isEmpty()) {
+            String dependencies = parameter.getDependencies().stream().collect(Collectors.joining(","));
+            XMLUtils.addAttr(element, "dependsOn", dependencies);
+        }
+
         return element;
     }
 

@@ -4,17 +4,17 @@ package org.jobsui.core;
  * Created by enrico on 3/29/17.
  */
 public class OpenedItem {
-    public final String project;
-    public final String job;
+    public final String url;
+    public final String name;
 
-    public OpenedItem(String project, String job) {
-        this.project = project;
-        this.job = job;
+    public OpenedItem(String url, String name) {
+        this.url = url;
+        this.name = name;
     }
 
     @Override
     public String toString() {
-        return project + '/' + job;
+        return name + " (" + url + ")";
     }
 
 }

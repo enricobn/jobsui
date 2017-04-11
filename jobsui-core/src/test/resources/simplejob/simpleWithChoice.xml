@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<Job name="Simple with choice" version="1.0.0">
+
+    <Parameter key="name" name="Name" component="Choice"/>
+
+    <Run>
+        return 'OK'
+    </Run>
+
+</Job>

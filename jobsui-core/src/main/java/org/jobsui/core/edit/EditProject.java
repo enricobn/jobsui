@@ -264,7 +264,13 @@ public class EditProject extends Application {
         TreeItem<Item> dependencies = new TreeItem<>(new Item(ItemType.Dependencies, () -> "dependencies", parameterDef));
         parameterTI.getChildren().add(dependencies);
         parameterDef.getDependencies().stream()
-                .map(jobXML::getParameter)
+                .map(depKey -> {
+                    ParameterXML dep = jobXML.getParameter(depKey);
+                    if (dep == null) {
+                        throw new RuntimeException("Cannot find parameter for dependency '" + depKey + "'.");
+                    }
+                    return dep;
+                })
                 .map(dep -> new Item(ItemType.Dependency, dep::getName, dep.getKey()))
                 .map(TreeItem::new)
                 .forEach(dependencies.getChildren()::add);

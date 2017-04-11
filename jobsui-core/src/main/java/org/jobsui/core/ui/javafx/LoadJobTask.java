@@ -10,16 +10,17 @@ import org.jobsui.core.xml.ProjectXML;
 
 import java.io.File;
 import java.io.Serializable;
+import java.net.URL;
 
 /**
  * Created by enrico on 3/30/17.
  */
 class LoadJobTask extends Task<Job<Serializable>> {
-    private final String projectFolder;
+    private final URL url;
     private final String jobId;
 
-    LoadJobTask(String projectFolder, String jobId) {
-        this.projectFolder = projectFolder;
+    LoadJobTask(URL url, String jobId) {
+        this.url = url;
         this.jobId = jobId;
     }
 
@@ -28,7 +29,7 @@ class LoadJobTask extends Task<Job<Serializable>> {
         ProjectParser projectParser = new ProjectParserImpl();
         ProjectXML projectXML;
         try {
-            projectXML = projectParser.parse(new File(projectFolder).toURI().toURL());
+            projectXML = projectParser.parse(url);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -43,7 +44,7 @@ class LoadJobTask extends Task<Job<Serializable>> {
 
         if (job == null) {
             throw new RuntimeException("Cannot find job with id \"" + jobId + "\" in folder " +
-                    projectFolder + " .");
+                    url + " .");
         }
         return job;
     }

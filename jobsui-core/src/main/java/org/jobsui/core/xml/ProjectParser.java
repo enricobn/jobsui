@@ -12,4 +12,5 @@ public interface ProjectParser {
 
     ProjectXML parse(URL url) throws Exception;
 
+    ProjectXML parseSimple(URL url) throws Exception;
 }

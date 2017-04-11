@@ -1,5 +1,6 @@
 package org.jobsui.core;
 
+import java.net.URL;
 import java.util.List;
 
 /**
@@ -9,6 +10,6 @@ public interface JobsUIPreferences {
 
     List<OpenedItem> getLastOpenedItems();
 
-    void registerOpenedProject(OpenedItem item);
+    void registerOpenedProject(URL url, String name) throws Exception;
 
 }

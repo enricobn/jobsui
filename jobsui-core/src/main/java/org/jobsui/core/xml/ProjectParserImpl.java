@@ -56,7 +56,7 @@ public class ProjectParserImpl implements ProjectParser {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        });
+        }, false);
 
         Charset utf8 = Charset.forName("UTF-8");
 
@@ -77,10 +77,15 @@ public class ProjectParserImpl implements ProjectParser {
 
     @Override
     public ProjectXML parse(URL url) throws Exception {
-        return parse(url, (id,name) -> new ProjectXMLImpl(url, id, name));
+        return parse(url, (id,name) -> new ProjectXMLImpl(url, id, name), false);
     }
 
-    private static  <T extends ProjectXMLImpl> T parse(URL url, BiFunction<String,String,T> supplier) throws Exception {
+    @Override
+    public ProjectXML parseSimple(URL url) throws Exception {
+        return parse(url, (id,name) -> new ProjectXMLImpl(url, id, name), true);
+    }
+
+    private static  <T extends ProjectXMLImpl> T parse(URL url, BiFunction<String,String,T> supplier, boolean simple) throws Exception {
         LOGGER.info("Parsing " + url);
         URL projectURL = new URL(url + "/" + PROJECT_FILE_NAME);
 
@@ -113,7 +118,7 @@ public class ProjectParserImpl implements ProjectParser {
             String projectVersion = getMandatoryAttribute((Element) projects.item(0), "version", subject);
             projectXML.setVersion(projectVersion);
 
-            parseProject(doc, projectXML);
+            parseProject(doc, projectXML, simple);
         }
 
         LOGGER.info("Parsed " + url);
@@ -121,7 +126,7 @@ public class ProjectParserImpl implements ProjectParser {
 
     }
 
-    private static void parseProject(Document doc, ProjectXMLImpl projectXML) throws Exception {
+    private static void parseProject(Document doc, ProjectXMLImpl projectXML, boolean simple) throws Exception {
         String subject;
         NodeList libraries = doc.getElementsByTagName("Library");
 
@@ -152,7 +157,11 @@ public class ProjectParserImpl implements ProjectParser {
                 throw new Exception(jobFile + " is not a valid job file name: it must end with .xml.");
             }
 
-            projectXML.addJob(jobFile, JobParserImpl.parse(projectXML, jobFile));
+            if (simple) {
+                projectXML.addJob(jobFile, null);
+            } else {
+                projectXML.addJob(jobFile, JobParserImpl.parse(projectXML, jobFile));
+            }
         }
     }
 

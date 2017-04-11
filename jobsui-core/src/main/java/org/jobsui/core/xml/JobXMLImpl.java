@@ -127,6 +127,11 @@ public class JobXMLImpl implements JobXML {
         return parameters.get(key);
     }
 
+//    @Override
+//    public SimpleParameterXML getSimpleParameter(String key) {
+//        return parameters.get(key);
+//    }
+
     @Override
     public ExpressionXML getExpression(String key) {
         return expressions.get(key);
