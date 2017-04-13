@@ -72,6 +72,7 @@ class ProgressDialog {
         hb.getChildren().add(pb);
 
         Scene scene = new Scene(hb);
+
         dialogStage.setScene(scene);
         dialogStage.setWidth(200);
     }

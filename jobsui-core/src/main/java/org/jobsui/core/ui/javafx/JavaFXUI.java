@@ -88,7 +88,10 @@ public class JavaFXUI implements UI<Node> {
             Parent root = loader.load();
             ((ErrorController)loader.getController()).setMessageText(message);
             ((ErrorController)loader.getController()).setErrorText(errorMessage);
-            dialog.setScene(new Scene(root, 600, 600));
+
+            Scene scene = new Scene(root, 600, 600);
+
+            dialog.setScene(scene);
             dialog.setTitle("JobsUI");
             return dialog;
         } catch (IOException exc) {

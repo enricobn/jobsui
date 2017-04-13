@@ -16,13 +16,11 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.fxmisc.richtext.CodeArea;
-import org.jobsui.core.xml.JobParserImpl;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.xml.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -45,6 +43,7 @@ public class EditProject extends Application {
     private List<String> originalScriptLocations = null;
     private Button saveButton;
     private Button saveAsButton;
+    private Stage stage;
 
     public static void main(String... args) {
         launch(args);
@@ -182,9 +181,9 @@ public class EditProject extends Application {
         Scene scene = new Scene(root, 800, 600);
         scene.getStylesheets().add(EditProject.class.getResource("groovy-keywords.css").toExternalForm());
 
-        stage.setTitle("Edit JobsUI");
         stage.setScene(scene);
         stage.show();
+        this.stage = stage;
     }
 
 //    private static void showError(String title, Throwable e) {
@@ -295,6 +294,7 @@ public class EditProject extends Application {
         this.projectXML = projectXML;
         this.originalJobs = new ArrayList<>(projectXML.getJobs());
         this.originalScriptLocations = new ArrayList<>(projectXML.getScriptsLocations());
+        stage.setTitle(projectXML.getName());
     }
 
     private enum ItemType {

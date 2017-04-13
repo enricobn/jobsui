@@ -1,9 +1,7 @@
 package org.jobsui.core.ui.javafx;
 
-import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -79,60 +77,59 @@ class JavaFXUIWindow implements UIWindow<Node> {
         return root;
     }
 
-    public static class JavaFXApplication extends Application {
-        private Scene scene;
-        private VBox root;
-//        private static Button okButton;
-//        private static boolean valid = false;
-
-        @Override
-        public void start(Stage stage) throws Exception {
-            Thread.setDefaultUncaughtExceptionHandler(JavaFXUI::uncaughtException);
-
-            root = new VBox(5);
-            root.setPadding(new Insets(5, 5, 5, 5));
-
-//            callback.run();
-
-//            for (NodeUIWidget widget : components) {
-//                Node node = widget.getNodeComponent();
-//                node.managedProperty().bind(node.visibleProperty());
-//                root.getChildren().add(node);
-//            }
-
-//            HBox okCancel = new HBox(5);
+//    public static class JavaFXApplication extends Application {
+//        private Scene scene;
+//        private VBox root;
+////        private static Button okButton;
+////        private static boolean valid = false;
 //
-//            okButton = new Button("OK");
-//            okButton.setDisable(!valid);
-//            okButton.setOnAction(event -> {
-//                ok = true;
-//            });
-//            okCancel.getChildren().add(okButton);
+//        @Override
+//        public void start(Stage stage) throws Exception {
+//            Thread.setDefaultUncaughtExceptionHandler(JavaFXUI::uncaughtException);
 //
-//            Button cancelButton = new Button("Cancel");
-//            cancelButton.setOnAction(event -> {
-//                ok = false;
-//            });
-//            okCancel.getChildren().add(cancelButton);
+//            root = new VBox(5);
+//            root.setPadding(new Insets(5, 5, 5, 5));
 //
-//            root.getChildren().add(okCancel);
-
-            scene = new Scene(root, 600, 800);
-
-            stage.setTitle("JobsUI");
-            stage.setScene(scene);
-            stage.show();
-
-        }
-
-//        static void setValid(boolean valid) {
-//            if (okButton == null) {
-//                JavaFXApplication.valid = valid;
-//            } else {
-//                okButton.setDisable(!valid);
-//            }
+////            callback.run();
+//
+////            for (NodeUIWidget widget : components) {
+////                Node node = widget.getNodeComponent();
+////                node.managedProperty().bind(node.visibleProperty());
+////                root.getChildren().add(node);
+////            }
+//
+////            HBox okCancel = new HBox(5);
+////
+////            okButton = new Button("OK");
+////            okButton.setDisable(!valid);
+////            okButton.setOnAction(event -> {
+////                ok = true;
+////            });
+////            okCancel.getChildren().add(okButton);
+////
+////            Button cancelButton = new Button("Cancel");
+////            cancelButton.setOnAction(event -> {
+////                ok = false;
+////            });
+////            okCancel.getChildren().add(cancelButton);
+////
+////            root.getChildren().add(okCancel);
+//
+//            scene = new Scene(root, 600, 800);
+//
+//            stage.setTitle("JobsUI");
+//            stage.setScene(scene);
+//            stage.show();
 //        }
-    }
+//
+////        static void setValid(boolean valid) {
+////            if (okButton == null) {
+////                JavaFXApplication.valid = valid;
+////            } else {
+////                okButton.setDisable(!valid);
+////            }
+////        }
+//    }
 
     private static class NodeUIWidget implements UIWidget<Node> {
         private final String title;

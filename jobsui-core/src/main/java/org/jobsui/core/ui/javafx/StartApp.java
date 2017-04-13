@@ -31,6 +31,7 @@
 */
 package org.jobsui.core.ui.javafx;
 
+import com.sun.javafx.css.StyleManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
@@ -45,6 +46,7 @@ import org.jobsui.core.runner.JobUIRunner;
 import org.jobsui.core.xml.ProjectFSXML;
 
 import java.io.Serializable;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -55,20 +57,16 @@ import java.util.stream.Collectors;
 public class StartApp extends Application {
     private static StartApp instance;
     private JobsUIMainParameters parameters;
-    private Stage primaryStage;
     private Stage stage;
 
     public StartApp() {
         instance = this;
     }
 
-    public static StartApp getInstance() {
+    static StartApp getInstance() {
         return instance;
     }
 
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
         launch(args);
     }
@@ -90,20 +88,52 @@ public class StartApp extends Application {
                 });
 
         try {
-            this.primaryStage = primaryStage;
-            try {
-                replaceSceneContent(primaryStage, "Start.fxml");
-            } catch (Exception ex) {
-                Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            replaceSceneContent(primaryStage, StartApp.class.getResource("Start.fxml"));
+            primaryStage.setTitle("JobsUI");
             primaryStage.show();
-        } catch (Exception ex) {
-            Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
+            // after primaryStage.show() due to a reported bug (https://bugs.openjdk.java.net/browse/JDK-8132900).
+            addStylesheet();
+        } catch (Exception e) {
+            Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, e);
+            throw new RuntimeException(e);
         }
     }
 
+    public JobsUIMainParameters getJobsUIParameters() {
+        return parameters;
+    }
 
-    public void gotoRun(Job<Serializable> job) {
+//    private static void setStylesheet() {
+//        URL stylesheet = StartApp.class.getResource("/com/sun/javafx/scene/control/skin/modena/modena.css");
+//
+//        try(InputStream inputStream = stylesheet.openStream()) {
+//            File tmpCss = File.createTempFile("jobsui", ".css");
+//            try {
+//                String modenaCSS = ""; //IOUtils.toString(inputStream, Charset.forName("UTF-8"));
+//                modenaCSS += "\n.root {\n" +
+//                        "    -fx-base: rgb(50, 50, 50);\n" +
+//                        "    -fx-background: rgb(50, 50, 50);\n" +
+//                        "    -fx-control-inner-background:  rgb(50, 50, 50);\n" +
+//                        "}";
+//                FileUtils.write(tmpCss, modenaCSS, Charset.forName("UTF-8"));
+//
+////                PlatformImpl.setDefaultPlatformUserAgentStylesheet();
+////                Application.setUserAgentStylesheet(null);
+//                StyleManager.getInstance().addUserAgentStylesheet(tmpCss.toURI().toURL().toExternalForm());
+//
+////                Application.setUserAgentStylesheet(tmpCss.toURI().toURL().toExternalForm());
+////                StyleManager.getInstance().addUserAgentStylesheet(tmpCss.toURI().toURL().toExternalForm());
+//
+////                setUserAgentStylesheet(tmpCss.toURI().toURL().toExternalForm());
+//            } finally {
+////                tmpCss.delete();
+//            }
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+
+    void gotoRun(Job<Serializable> job) {
         JobUIRunner<Node> runner = new JobUIRunner<>(new JavaFXUI());
         try {
             runner.run(job);
@@ -112,7 +142,7 @@ public class StartApp extends Application {
         }
     }
 
-    public void gotoEdit(ProjectFSXML projectXML) {
+    void gotoEdit(ProjectFSXML projectXML) {
         EditProject editProject = new EditProject();
         stage = new Stage();
         try {
@@ -123,22 +153,27 @@ public class StartApp extends Application {
         }
     }
 
-    public void gotoStart() {
-        if (stage != null) {
-            stage.close();
-        }
-        primaryStage.show();
-//        try {
-//            replaceSceneContent("Start.fxml");
-//        } catch (Exception ex) {
-//            Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
+//    public void gotoStart() {
+//        if (stage != null) {
+//            stage.close();
 //        }
-//        stage.setWidth(200);
-//        stage.setHeight(100);
+//        primaryStage.show();
+////        try {
+////            replaceSceneContent("Start.fxml");
+////        } catch (Exception ex) {
+////            Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
+////        }
+////        stage.setWidth(200);
+////        stage.setHeight(100);
+//    }
+
+    private static void addStylesheet() {
+        String url = StartApp.class.getResource("dark.css").toExternalForm();
+        StyleManager.getInstance().addUserAgentStylesheet(url);
     }
 
-    private void replaceSceneContent(Stage stage, String fxml) throws Exception {
-        Parent page = FXMLLoader.load(StartApp.class.getResource(fxml), null, new JavaFXBuilderFactory());
+    private void replaceSceneContent(Stage stage, URL fxml) throws Exception {
+        Parent page = FXMLLoader.load(fxml, null, new JavaFXBuilderFactory());
         replaceSceneContent(stage, page);
     }
 
@@ -146,7 +181,6 @@ public class StartApp extends Application {
         Scene scene = stage.getScene();
         if (scene == null) {
             scene = new Scene(page, 700, 450);
-//            scene.getStylesheets().add(LoginApp.class.getResource("demo.css").toExternalForm());
             stage.setScene(scene);
         } else {
             stage.getScene().setRoot(page);
@@ -154,7 +188,7 @@ public class StartApp extends Application {
         stage.sizeToScene();
     }
 
-    public Stage replaceSceneContent(Parent page) throws Exception {
+    Stage replaceSceneContent(Parent page) throws Exception {
         Stage stage = new Stage();
         replaceSceneContent(stage, page);
 //        Scene scene = stage.getScene();
@@ -170,11 +204,7 @@ public class StartApp extends Application {
         return stage;
     }
 
-    public Stage getStage() {
+    Stage getStage() {
         return stage;
-    }
-
-    public JobsUIMainParameters getJobsUIParameters() {
-        return parameters;
     }
 }
