@@ -34,7 +34,9 @@ public class JobRunnerContext<T extends Serializable, C> {
         widgets = new WidgetsMap<>();
 
         for (final JobParameterDef jobParameterDef : job.getParameterDefs()) {
-            widgets.add(createWidget(ui, window, jobParameterDef));
+            ParameterAndWidget<C> widget = createWidget(ui, window, jobParameterDef);
+            widget.getWidget().getComponent().setEnabled(jobParameterDef.getDependencies().isEmpty());
+            widgets.add(widget);
         }
 
         sortedJobDependencies = job.getSortedDependencies();
@@ -95,6 +97,7 @@ public class JobRunnerContext<T extends Serializable, C> {
                             JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
                             final UIWidget widget = widgets.get(jobParameterDef);
                             widget.getComponent().setEnabled(true);
+                            reEnableDependants(validValues, jobDependency);
                             try {
                                 jobParameterDef.onDependenciesChange(widget, objects);
                             } catch (Exception e) {
@@ -102,19 +105,59 @@ public class JobRunnerContext<T extends Serializable, C> {
                                 widget.setValidationMessages(Collections.singletonList(e.getMessage()));
                                 widget.getComponent().setValue(null);
                                 widget.getComponent().setEnabled(false);
+                                disableDependants(jobDependency);
                             }
                         } else if (jobDependency instanceof JobExpression) {
                             JobExpression jobExpression = (JobExpression) jobDependency;
                             //jobExpression.onDependenciesChange(objects);
                             Serializable value = jobExpression.evaluate(objects);
                             jobExpression.notifySubscribers(value);
+                            reEnableDependants(validValues, jobDependency);
                         } else {
                             throw new IllegalStateException("Unknown type " + jobDependency.getClass());
                         }
+                    } else {
+                        if (jobDependency instanceof JobParameterDef) {
+                            JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
+                            final UIWidget widget = widgets.get(jobParameterDef);
+                            widget.getComponent().setEnabled(false);
+                        }
+                        disableDependants(jobDependency);
                     }
                 });
             }
         }
+    }
+
+    private void disableDependants(JobDependency jobDependency) {
+        for (JobDependency dependant : getDependants(jobDependency)) {
+            if (dependant instanceof JobParameterDef) {
+                widgets.get(((JobParameterDef) dependant)).getComponent().setEnabled(false);
+            }
+            disableDependants(dependant);
+        }
+    }
+
+    private void reEnableDependants(Map<String,Serializable> validValues, JobDependency jobDependency) {
+        for (JobDependency dependant : getDependants(jobDependency)) {
+            Map<String, Serializable> dependenciesValues = getDependenciesValues(validValues, dependant);
+            if (dependenciesValues.size() == dependant.getDependencies().size()) {
+                if (dependant instanceof JobParameterDef) {
+                    widgets.get(((JobParameterDef) dependant)).getComponent().setEnabled(true);
+                }
+                reEnableDependants(validValues, dependant);
+            }
+        }
+    }
+
+    private Collection<JobDependency> getDependants(JobDependency jobDependency) {
+        Collection<JobDependency> result = new ArrayList<>();
+        for (JobDependency dependency : sortedJobDependencies) {
+            if (dependency.getDependencies().contains(jobDependency.getKey())) {
+                result.add(dependency);
+            }
+        }
+        return result;
     }
 
     /**

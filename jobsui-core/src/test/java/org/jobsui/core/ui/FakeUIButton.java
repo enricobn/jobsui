@@ -9,11 +9,6 @@ import java.io.Serializable;
  */
 public class FakeUIButton extends FakeUIComponent implements UIButton<FakeComponent> {
 
-    @Override
-    public void setEnabled(boolean enabled) {
-
-    }
-
     public void click() {
         for (Action1<Serializable> action : actions) {
             action.call(null);

@@ -17,11 +17,6 @@ public class FakeUIChoice extends FakeUIComponent implements UIChoice<FakeCompon
     private Serializable selectedItem;
 
     @Override
-    public void setEnabled(boolean enable) {
-
-    }
-
-    @Override
     public Serializable getValue() {
         return selectedItem;
     }

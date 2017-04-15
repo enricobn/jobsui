@@ -1,6 +1,7 @@
 package org.jobsui.core;
 
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
+import org.jobsui.core.ui.swing.SwingUIChoice;
 import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.job.*;
 import org.jobsui.core.runner.JobResult;
@@ -283,7 +284,7 @@ public class JobRunnerTest {
         verify(invParameter, never()).validate(anyMapOf(String.class, Serializable.class), isNotNull(Serializable.class));
     }
 
-    @Test public void verify_that_onDepependencyChange_occurs_if_dependencies_are_valid() throws Exception {
+    @Test public void verify_that_onDependencyChange_occurs_if_dependencies_are_valid() throws Exception {
         MockedJobBuilder<String> builder = new MockedJobBuilder<>();
 
         UIValue nameComponent = builder.addParameter("name", UIValue.class).build();
@@ -513,6 +514,74 @@ public class JobRunnerTest {
         assertThat(runner.isValid(), is(true));
 
         assertThat(result, is("home/config"));
+    }
+
+    @Test public void assert_that_when_dependencies_are_NOT_valid_then_component_is_not_enabled() throws Exception {
+        MockedJobBuilder<String> builder = new MockedJobBuilder<>();
+
+        UIValue nameComponent = builder.addParameter("name", UIValue.class).build();
+        UIChoice invComponent = builder.addParameter("inv", UIChoice.class)
+                .dependsOn("name")
+                .build();
+
+        final Job<String> job = builder.build();
+
+        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+                () -> {
+                    nameComponent.setValue("Hello");
+                    nameComponent.setValue(null);
+                });
+
+        jobRunnerWrapper.run(job);
+
+        assertThat(((FakeUIChoice) invComponent).isEnabled(), is(false));
+    }
+
+    @Test public void assert_that_when_dependencies_are_changed_then_component_is_enabled_or_disabled_on_dependencies_valid_status() throws Exception {
+        MockedJobBuilder<String> builder = new MockedJobBuilder<>();
+
+        UIValue nameComponent = builder.addParameter("name", UIValue.class).build();
+        builder.addExpression("props", values -> "props", "name");
+        UIValue surnameComponent = builder.addParameter("surname", UIValue.class)
+                .dependsOn("props")
+                .build();
+        UIChoice invComponent = builder.addParameter("inv", UIChoice.class)
+                .dependsOn("surname")
+                .build();
+
+        final Job<String> job = builder.build();
+
+        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+                () -> {
+                    assertThat(((FakeUIChoice) invComponent).isEnabled(), is(false));
+                    nameComponent.setValue("Hello");
+                    assertThat(((FakeUIChoice) invComponent).isEnabled(), is(false));
+                    surnameComponent.setValue("World");
+                    assertThat(((FakeUIChoice) invComponent).isEnabled(), is(true));
+                    nameComponent.setValue(null);
+                    assertThat(((FakeUIChoice) invComponent).isEnabled(), is(false));
+                    nameComponent.setValue("world");
+                    assertThat(((FakeUIChoice) invComponent).isEnabled(), is(true));
+                });
+
+        jobRunnerWrapper.run(job);
+
+    }
+
+
+    @Test public void verify_that_when_no_dependencies_then_component_is_enabled() throws Exception {
+        MockedJobBuilder<String> builder = new MockedJobBuilder<>();
+
+        UIValue nameComponent = builder.addParameter("name", UIValue.class).build();
+
+        final Job<String> job = builder.build();
+
+        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+                () -> {});
+
+        jobRunnerWrapper.run(job);
+
+        assertThat(((FakeUiValue) nameComponent).isEnabled(), is(true));
     }
 
     private MockSettings printInvocation(String name, final CharSequence methodName) {
