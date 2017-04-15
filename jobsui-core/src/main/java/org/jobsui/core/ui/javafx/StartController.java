@@ -32,7 +32,8 @@ public class StartController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        preferences = JobsUIPreferencesImpl.get();
+        // TODO I don't like it
+        preferences = StartApp.getInstance().getPreferences();
         projects.getItems().addAll(preferences.getLastOpenedItems());
         projects.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         projects.setCellFactory(new CellFactory());

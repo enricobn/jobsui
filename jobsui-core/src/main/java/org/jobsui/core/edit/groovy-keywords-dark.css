@@ -1,0 +1,53 @@
+.styled-text-area .text {
+    -fx-fill: lightgray;
+}
+
+.styled-text-area .keyword {
+    -fx-fill: darkorange;
+    //-fx-font-weight: bold;
+}
+.styled-text-area .semicolon {
+    -fx-fill: darkorange;
+}
+.styled-text-area .paren {
+    -fx-fill: white;
+}
+.styled-text-area .bracket {
+    -fx-fill: white;
+}
+.styled-text-area .brace {
+    -fx-fill: white;
+}
+.styled-text-area .string {
+    -fx-fill: darkolivegreen;
+}
+
+.styled-text-area .comment {
+	-fx-fill: dimgray;
+}
+
+.styled-text-area .paragraph-box:has-caret {
+    -fx-background-color: #f2f9fc;
+}
+
+.styled-text-area .text {
+    /* the color of the text's background color*/
+    -rtfx-background-color: rgb(50, 50, 50);
+}
+
+.styled-text-area .paragraph-box .paragraph-text {
+/* the color of the paragraph's background color*/
+    -fx-background-color: rgb(50, 50, 50);
+}
+
+.caret {
+    -fx-stroke: white;
+}
+
+.lineno {
+    -fx-background-color: rgb(50, 50, 50);
+}
+
+.lineno .text {
+    -fx-fill: dimgray;
+}

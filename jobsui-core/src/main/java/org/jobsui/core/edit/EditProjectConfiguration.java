@@ -11,7 +11,10 @@ import java.util.stream.Collectors;
 /**
  * Created by enrico on 10/14/16.
  */
-// TODO test on windows!!!
+/**
+ * use JobsUIPreferences
+ */
+@Deprecated
 class EditProjectConfiguration {
     private static final Preferences preferences = Preferences.userNodeForPackage(EditProjectConfiguration.class);
     private static final String RECENT_PROJECTS = "recentProjects";

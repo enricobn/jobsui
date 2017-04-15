@@ -1,5 +1,7 @@
 package org.jobsui.core;
 
+import org.jobsui.core.ui.javafx.JobsUITheme;
+
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,36 +13,14 @@ import java.util.prefs.Preferences;
  */
 public class JobsUIPreferencesImpl implements JobsUIPreferences {
     private final Preferences lastOpenedProjectsNode;
+    private final Preferences othersNode;
     private final List<OpenedItem> lastOpenedProjects = new ArrayList<>();
+    private JobsUITheme theme;
 
     private JobsUIPreferencesImpl() {
         Preferences prefs = Preferences.userNodeForPackage(JobsUIPreferencesImpl.class);
         lastOpenedProjectsNode = prefs.node("lastOpenedProjects");
-    }
-
-    private void load() {
-        int length = lastOpenedProjectsNode.getInt("size", 0);
-        for (int i = 0; i < length; i++) {
-            String openedProjectPath = lastOpenedProjectsNode.get("path_" + i, null);
-            String openedProjectName = lastOpenedProjectsNode.get("name_" + i, null);
-            if (openedProjectPath != null) {
-                lastOpenedProjects.add(new OpenedItem(openedProjectPath, openedProjectName));
-            }
-        }
-    }
-
-    private void save() throws Exception {
-        lastOpenedProjectsNode.clear();
-
-        lastOpenedProjectsNode.putInt("size", lastOpenedProjects.size());
-
-        for (int i = 0; i < lastOpenedProjects.size(); i++) {
-            OpenedItem openedItem = lastOpenedProjects.get(i);
-            lastOpenedProjectsNode.put("path_" + i, openedItem.url);
-            lastOpenedProjectsNode.put("name_" + i, openedItem.name);
-        }
-
-        lastOpenedProjectsNode.flush();
+        othersNode = prefs.node("others");
     }
 
     public static JobsUIPreferences get() {
@@ -63,4 +43,54 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
         lastOpenedProjects.add(openedItem);
         save();
     }
+
+    @Override
+    public JobsUITheme getTheme() {
+        return theme;
+    }
+
+    @Override
+    public void setTheme(JobsUITheme theme) {
+        this.theme = theme;
+        save();
+    }
+
+    private void load() {
+        int length = lastOpenedProjectsNode.getInt("size", 0);
+        for (int i = 0; i < length; i++) {
+            String openedProjectPath = lastOpenedProjectsNode.get("path_" + i, null);
+            String openedProjectName = lastOpenedProjectsNode.get("name_" + i, null);
+            if (openedProjectPath != null) {
+                lastOpenedProjects.add(new OpenedItem(openedProjectPath, openedProjectName));
+            }
+        }
+        String theme = othersNode.get("theme", JobsUITheme.Dark.name());
+        this.theme = JobsUITheme.valueOf(theme);
+    }
+
+    private void save() {
+        try {
+            saveTH();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void saveTH() throws Exception {
+        lastOpenedProjectsNode.clear();
+
+        lastOpenedProjectsNode.putInt("size", lastOpenedProjects.size());
+
+        for (int i = 0; i < lastOpenedProjects.size(); i++) {
+            OpenedItem openedItem = lastOpenedProjects.get(i);
+            lastOpenedProjectsNode.put("path_" + i, openedItem.url);
+            lastOpenedProjectsNode.put("name_" + i, openedItem.name);
+        }
+
+        lastOpenedProjectsNode.flush();
+
+        othersNode.clear();
+        othersNode.put("theme", theme.name());
+    }
+
 }

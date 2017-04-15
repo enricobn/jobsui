@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.jobsui.core.JobsUIPreferencesImpl;
 import org.jobsui.core.ui.*;
 
 import java.io.IOException;
@@ -63,7 +64,7 @@ public class JavaFXUI implements UI<Node> {
 
     @Override
     public void start(String[] args) {
-        StartApp.main(args);
+        StartApp.main(JobsUIPreferencesImpl.get(), args);
     }
 
     public static void uncaughtException(Thread t, Throwable e) {

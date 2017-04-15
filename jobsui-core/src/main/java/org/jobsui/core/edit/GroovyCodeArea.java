@@ -1,9 +1,15 @@
 package org.jobsui.core.edit;
 
+import javafx.geometry.Insets;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.paint.Color;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
+import org.jobsui.core.ui.javafx.JobsUITheme;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -32,6 +38,7 @@ public class GroovyCodeArea {
     private static final String BRACKET_PATTERN = "\\[|]";
     private static final String SEMICOLON_PATTERN = ";";
     private static final String STRING_PATTERN = "\"([^\"\\\\]|\\\\.)*\"";
+    private static final String STRING1_PATTERN = "'([^'\\\\]|\\\\.)*'";
     private static final String COMMENT_PATTERN = "//[^\n]*" + "|" + "/\\*(.|\\R)*?\\*/";
 
     private static final Pattern PATTERN = Pattern.compile(
@@ -41,10 +48,11 @@ public class GroovyCodeArea {
                     + "|(?<BRACKET>" + BRACKET_PATTERN + ")"
                     + "|(?<SEMICOLON>" + SEMICOLON_PATTERN + ")"
                     + "|(?<STRING>" + STRING_PATTERN + ")"
+                    + "|(?<STRING1>" + STRING1_PATTERN + ")"
                     + "|(?<COMMENT>" + COMMENT_PATTERN + ")"
     );
 
-    static CodeArea getCodeArea(boolean showLineNumbers) {
+    static CodeArea getCodeArea(boolean showLineNumbers, JobsUITheme theme) {
         CodeArea codeArea = new CodeArea();
         if (showLineNumbers) {
             codeArea.setParagraphGraphicFactory(LineNumberFactory.get(codeArea));
@@ -53,6 +61,14 @@ public class GroovyCodeArea {
         codeArea.richChanges()
                 .filter(ch -> !ch.getInserted().equals(ch.getRemoved()))
                 .subscribe(change -> codeArea.setStyleSpans(0, computeHighlighting(codeArea.getText())));
+
+        if (theme == JobsUITheme.Dark) {
+            codeArea.setBackground(new Background(new BackgroundFill(new Color(50f / 256, 50f / 255, 50f / 255, 0),
+                    CornerRadii.EMPTY, Insets.EMPTY)));
+            codeArea.getStylesheets().add(EditProject.class.getResource("groovy-keywords-dark.css").toExternalForm());
+        } else {
+            codeArea.getStylesheets().add(EditProject.class.getResource("groovy-keywords.css").toExternalForm());
+        }
 
         return codeArea;
     }
@@ -78,6 +94,7 @@ public class GroovyCodeArea {
                 matcher.group("BRACKET") != null ? "bracket" :
                 matcher.group("SEMICOLON") != null ? "semicolon" :
                 matcher.group("STRING") != null ? "string" :
+                matcher.group("STRING1") != null ? "string" :
                 matcher.group("COMMENT") != null ? "comment" :
                 null;
             /* never happens */ assert styleClass != null;

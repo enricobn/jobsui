@@ -40,6 +40,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.jobsui.core.JobsUIMainParameters;
+import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.edit.EditProject;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.runner.JobUIRunner;
@@ -56,6 +57,7 @@ import java.util.stream.Collectors;
  */
 public class StartApp extends Application {
     private static StartApp instance;
+    private static JobsUIPreferences preferences;
     private JobsUIMainParameters parameters;
     private Stage stage;
 
@@ -63,11 +65,12 @@ public class StartApp extends Application {
         instance = this;
     }
 
-    static StartApp getInstance() {
+    public static StartApp getInstance() {
         return instance;
     }
 
-    public static void main(String[] args) {
+    public static void main(JobsUIPreferences preferences, String[] args) {
+        StartApp.preferences = preferences;
         launch(args);
     }
 
@@ -101,6 +104,10 @@ public class StartApp extends Application {
 
     public JobsUIMainParameters getJobsUIParameters() {
         return parameters;
+    }
+
+    public JobsUIPreferences getPreferences() {
+        return preferences;
     }
 
 //    private static void setStylesheet() {
@@ -168,8 +175,10 @@ public class StartApp extends Application {
 //    }
 
     private static void addStylesheet() {
-        String url = StartApp.class.getResource("dark.css").toExternalForm();
-        StyleManager.getInstance().addUserAgentStylesheet(url);
+        if (preferences.getTheme() == JobsUITheme.Dark) {
+            String url = StartApp.class.getResource("dark.css").toExternalForm();
+            StyleManager.getInstance().addUserAgentStylesheet(url);
+        }
     }
 
     private void replaceSceneContent(Stage stage, URL fxml) throws Exception {

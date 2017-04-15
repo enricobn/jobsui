@@ -2,7 +2,6 @@ package org.jobsui.core.edit;
 
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -16,7 +15,9 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.fxmisc.richtext.CodeArea;
+import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.javafx.JavaFXUI;
+import org.jobsui.core.ui.javafx.StartApp;
 import org.jobsui.core.xml.*;
 
 import java.io.File;
@@ -33,7 +34,6 @@ import java.util.stream.Stream;
  * Created by enrico on 10/9/16.
  */
 public class EditProject extends Application {
-    private EditProjectConfiguration configuration;
     private TreeView<Item> itemsTree;
     private VBox itemDetail;
     private VBox root;
@@ -44,6 +44,7 @@ public class EditProject extends Application {
     private Button saveButton;
     private Button saveAsButton;
     private Stage stage;
+    private JobsUIPreferences preferences;
 
     public static void main(String... args) {
         launch(args);
@@ -51,7 +52,8 @@ public class EditProject extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        configuration = EditProjectConfiguration.load();
+        // TODO I don't like it
+        preferences = StartApp.getInstance().getPreferences();
         root = new VBox(5);
         HBox buttons = new HBox(5);
         VBox.setVgrow(buttons, Priority.NEVER);
@@ -179,7 +181,6 @@ public class EditProject extends Application {
         root.getChildren().add(status);
 
         Scene scene = new Scene(root, 800, 600);
-        scene.getStylesheets().add(EditProject.class.getResource("groovy-keywords.css").toExternalForm());
 
         stage.setScene(scene);
         stage.show();
@@ -371,7 +372,7 @@ public class EditProject extends Application {
 //                String content = new String(Files.readAllBytes(file.toPath()));
                 itemDetail.getChildren().add(new Label("Content:"));
 
-                CodeArea codeArea = GroovyCodeArea.getCodeArea(true);
+                CodeArea codeArea = GroovyCodeArea.getCodeArea(true, preferences.getTheme());
                 GroovyCodeArea.setText(codeArea, content);
                 GroovyCodeArea.resetCaret(codeArea);
 
@@ -433,7 +434,7 @@ public class EditProject extends Application {
 
         private void addTextAreaProperty(String title, Supplier<String> get, Consumer<String> set, boolean showLineNumbers) {
             itemDetail.getChildren().add(new Label(title));
-            CodeArea codeArea = GroovyCodeArea.getCodeArea(showLineNumbers);
+            CodeArea codeArea = GroovyCodeArea.getCodeArea(true, preferences.getTheme());
 
             String content = get.get();
             if (content != null) {
@@ -607,42 +608,42 @@ public class EditProject extends Application {
                 .map(ParameterXML::getKey).collect(Collectors.toList());
     }
 
-    private class OpenProjectTask extends Task {
-        private final File file;
-
-        OpenProjectTask(File file) {
-            this.file = file;
-        }
-
-        @Override
-        protected Void call() throws Exception {
-            Platform.runLater(() -> {
-                root.setDisable(true);
-                itemDetail.getChildren().clear();
-                itemsTree.setRoot(null);
-                status.setText("Loading project ...");
-            });
-            try {
-                TreeItem<Item> root = loadProject(file);
-
-                configuration.addRecentProject(file);
-                EditProjectConfiguration.save(configuration);
-
-                Platform.runLater(() -> {
-                    itemsTree.setRoot(root);
-                    root.setExpanded(true);
-                });
-            } catch (Exception e) {
-                JavaFXUI.showErrorStatic("Error loading project.", e);
-            } finally {
-                Platform.runLater(() -> {
-                    status.setText("");
-                    root.setDisable(false);
-                });
-            }
-            return null;
-        }
-    }
+//    private class OpenProjectTask extends Task {
+//        private final File file;
+//
+//        OpenProjectTask(File file) {
+//            this.file = file;
+//        }
+//
+//        @Override
+//        protected Void call() throws Exception {
+//            Platform.runLater(() -> {
+//                root.setDisable(true);
+//                itemDetail.getChildren().clear();
+//                itemsTree.setRoot(null);
+//                status.setText("Loading project ...");
+//            });
+//            try {
+//                TreeItem<Item> root = loadProject(file);
+//
+//                configuration.addRecentProject(file);
+//                EditProjectConfiguration.save(configuration);
+//
+//                Platform.runLater(() -> {
+//                    itemsTree.setRoot(root);
+//                    root.setExpanded(true);
+//                });
+//            } catch (Exception e) {
+//                JavaFXUI.showErrorStatic("Error loading project.", e);
+//            } finally {
+//                Platform.runLater(() -> {
+//                    status.setText("");
+//                    root.setDisable(false);
+//                });
+//            }
+//            return null;
+//        }
+//    }
 
     private TreeItem<Item> findItem(TreeItem<Item> root, Item item) {
         if (root.getValue() == item) {
