@@ -37,7 +37,7 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void assertThatDefaultValueForThemeIsDark() throws Exception {
+    public void assert_that_default_value_for_theme_is_dark() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
@@ -46,7 +46,7 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void assertThatWhenStandardThemeIsSpecifiedThenThatThemeIsReturned() throws Exception {
+    public void assert_that_when_standard_theme_is_specified_then_that_theme_is_returned() throws Exception {
         when(others.get(eq("theme"), anyString())).thenReturn(JobsUITheme.Standard.name());
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
@@ -55,7 +55,7 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void verifyThatWhenTheSameThemeIsSetThenFlushIsNotCalled() throws Exception {
+    public void verify_that_when_the_same_theme_is_set_then_flush_is_not_called() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
@@ -66,7 +66,7 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void verifyThatWhenDifferentThemeIsSetThenFlushIsCalled() throws Exception {
+    public void verify_that_when_different_theme_is_set_then_flush_is_called() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
@@ -77,7 +77,7 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void verifyThatWhenLastOpenedProjectsSizeIs2Then2PathsAnd2NameAreRequested() throws Exception {
+    public void verify_that_when_last_opened_projects_size_ss_2_then_2_paths_and_2_name_are_requested() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
         when(lastOpenedProjects.getInt(eq("size"), anyInt())).thenReturn(2);
 
@@ -95,7 +95,7 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void assertThatWhen() throws Exception {
+    public void assert_that_opened_projects_are_memorized_in_insertion_order() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
         when(lastOpenedProjects.getInt(eq("size"), anyInt())).thenReturn(2);
 
@@ -119,7 +119,7 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void verifyThatWhenOpenedProjectIsRegisterdThenFlushIsCalled() throws Exception {
+    public void verify_that_when_opened_project_is_registered_then_flush_is_called() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
         when(lastOpenedProjects.getInt(eq("size"), anyInt())).thenReturn(2);
 
@@ -131,7 +131,7 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void assertThatWhenOpenedProjectsAreRegisteredThenTheLastBecomesTheFirst() throws Exception {
+    public void assert_that_when_opened_projects_are_registered_then_the_last_becomes_the_first() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
         when(lastOpenedProjects.getInt(eq("size"), anyInt())).thenReturn(2);
 

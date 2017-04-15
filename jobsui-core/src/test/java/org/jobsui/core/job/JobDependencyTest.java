@@ -21,14 +21,14 @@ import static org.mockito.Mockito.when;
 public class JobDependencyTest {
 
     @Test
-    public void check_that_given_empty_dependencies_retuens_empty_keys() throws Exception {
+    public void assert_that_when_there_are_no_dependencies_then_there_keys_is_empty() throws Exception {
         Collection<? extends JobDependency> jobDependencies = Collections.emptyList();
         List<String> keys = JobDependency.getSortedDependenciesKeys(jobDependencies);
         assertThat(keys.isEmpty(), is(true));
     }
 
     @Test
-    public void check_that_dependencies_keys_are_sorted() throws Exception {
+    public void assert_that_dependencies_keys_are_sorted() throws Exception {
         JobDependency name = mockDependency("name", Collections.emptyList());
         JobDependency surname = mockDependency("surname", Collections.singletonList("name"));
 
@@ -39,7 +39,7 @@ public class JobDependencyTest {
     }
 
     @Test
-    public void check_that_dependencies_are_sorted() throws Exception {
+    public void assert_that_dependencies_are_sorted() throws Exception {
         JobDependency name = mockDependency("name", Collections.emptyList());
         JobDependency surname = mockDependency("surname", Collections.singletonList("name"));
 
@@ -49,7 +49,7 @@ public class JobDependencyTest {
     }
 
     @Test
-    public void check_that_sorting_dependencies_will_not_change_dependencies() throws Exception {
+    public void assert_that_sorting_dependencies_will_not_change_dependencies() throws Exception {
         JobDependency name = mockDependency("name", Collections.emptyList());
         JobDependency surname = mockDependency("surname", Collections.singletonList("name"));
 
@@ -59,7 +59,7 @@ public class JobDependencyTest {
     }
 
     @Test(expected = Exception.class)
-    public void check_that_if_dependencies_have_loops_sorting_will_throw_an_exception() throws Exception {
+    public void assert_that_when_dependencies_have_loops_then_sorting_will_throw_an_exception() throws Exception {
         JobDependency name = mockDependency("name", Collections.singletonList("surname"));
         JobDependency surname = mockDependency("surname", Collections.singletonList("name"));
 
@@ -68,7 +68,7 @@ public class JobDependencyTest {
     }
 
     @Test(expected = Exception.class)
-    public void check_that_if_dependencies_have_loops_sorting_keys_will_throw_an_exception() throws Exception {
+    public void assert_that_when_dependencies_have_loops_then_sorting_keys_will_throw_an_exception() throws Exception {
         JobDependency name = mockDependency("name", Collections.singletonList("surname"));
         JobDependency surname = mockDependency("surname", Collections.singletonList("name"));
 
