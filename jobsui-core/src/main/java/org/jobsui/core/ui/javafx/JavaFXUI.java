@@ -9,11 +9,13 @@ import javafx.scene.control.Alert;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jobsui.core.JobsUIPreferencesImpl;
+import org.jobsui.core.Main;
 import org.jobsui.core.ui.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.prefs.Preferences;
 
 /**
  * Created by enrico on 10/7/16.
@@ -64,7 +66,7 @@ public class JavaFXUI implements UI<Node> {
 
     @Override
     public void start(String[] args) {
-        StartApp.main(JobsUIPreferencesImpl.get(), args);
+        StartApp.main(JobsUIPreferencesImpl.get(Preferences.userNodeForPackage(Main.class)), args);
     }
 
     public static void uncaughtException(Thread t, Throwable e) {

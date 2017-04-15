@@ -17,16 +17,15 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     private final List<OpenedItem> lastOpenedProjects = new ArrayList<>();
     private JobsUITheme theme;
 
-    private JobsUIPreferencesImpl() {
-        Preferences prefs = Preferences.userNodeForPackage(JobsUIPreferencesImpl.class);
-        lastOpenedProjectsNode = prefs.node("lastOpenedProjects");
-        othersNode = prefs.node("others");
+    private JobsUIPreferencesImpl(Preferences preferences) {
+        lastOpenedProjectsNode = preferences.node("lastOpenedProjects");
+        othersNode = preferences.node("others");
     }
 
-    public static JobsUIPreferences get() {
-        JobsUIPreferencesImpl preferences = new JobsUIPreferencesImpl();
-        preferences.load();
-        return preferences;
+    public static JobsUIPreferencesImpl get(Preferences preferences) {
+        JobsUIPreferencesImpl jobsUIPreferences = new JobsUIPreferencesImpl(preferences);
+        jobsUIPreferences.load();
+        return jobsUIPreferences;
     }
 
     @Override
@@ -51,8 +50,10 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
 
     @Override
     public void setTheme(JobsUITheme theme) {
-        this.theme = theme;
-        save();
+        if (theme != this.theme) {
+            this.theme = theme;
+            save();
+        }
     }
 
     private void load() {
@@ -91,6 +92,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
 
         othersNode.clear();
         othersNode.put("theme", theme.name());
+        othersNode.flush();
     }
 
 }
