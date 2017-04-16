@@ -12,10 +12,14 @@ import java.util.Map;
  * Created by enrico on 3/6/17.
  */
 public class Bookmark {
+    private final String projectId;
+    private final String jobId;
     private final String name;
     private final Map<String, Serializable> values = new HashMap<>();
 
-    public Bookmark(Job<?> job, String name, JobValues values) {
+    public Bookmark(Project project, Job<?> job, String name, JobValues values) {
+        this.projectId = project.getId();
+        this.jobId = job.getId();
         this.name = name;
         for (JobParameterDef parameterDef : job.getParameterDefs()) {
             if (!parameterDef.isCalculated()) {
@@ -30,5 +34,13 @@ public class Bookmark {
 
     public Map<String, Serializable> getValues() {
         return values;
+    }
+
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public String getJobId() {
+        return jobId;
     }
 }

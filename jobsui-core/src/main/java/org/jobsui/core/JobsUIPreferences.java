@@ -18,4 +18,8 @@ public interface JobsUIPreferences {
 
     void setTheme(JobsUITheme theme);
 
+    List<Bookmark> getBookmarks(String projectId, String jobId);
+
+    void saveBookmark(Bookmark bookmark);
+
 }

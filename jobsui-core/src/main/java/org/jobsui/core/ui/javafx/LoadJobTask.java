@@ -3,6 +3,7 @@ package org.jobsui.core.ui.javafx;
 import javafx.concurrent.Task;
 import org.jobsui.core.Project;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
+import org.jobsui.core.utils.Tuple2;
 import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.xml.ProjectParser;
@@ -15,7 +16,7 @@ import java.net.URL;
 /**
  * Created by enrico on 3/30/17.
  */
-class LoadJobTask extends Task<Job<Serializable>> {
+class LoadJobTask extends Task<Tuple2<Project,Job<Serializable>>> {
     private final URL url;
     private final String jobId;
 
@@ -25,7 +26,7 @@ class LoadJobTask extends Task<Job<Serializable>> {
     }
 
     @Override
-    protected Job<Serializable> call() throws Exception {
+    protected Tuple2<Project,Job<Serializable>> call() throws Exception {
         ProjectParser projectParser = new ProjectParserImpl();
         ProjectXML projectXML;
         try {
@@ -46,6 +47,6 @@ class LoadJobTask extends Task<Job<Serializable>> {
             throw new RuntimeException("Cannot find job with id \"" + jobId + "\" in folder " +
                     url + " .");
         }
-        return job;
+        return new Tuple2<>(project, job);
     }
 }

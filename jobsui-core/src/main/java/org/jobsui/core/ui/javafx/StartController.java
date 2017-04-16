@@ -11,7 +11,9 @@ import javafx.util.Callback;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.JobsUIPreferencesImpl;
 import org.jobsui.core.OpenedItem;
+import org.jobsui.core.Project;
 import org.jobsui.core.job.Job;
+import org.jobsui.core.utils.Tuple2;
 import org.jobsui.core.xml.JobXML;
 import org.jobsui.core.xml.ProjectFSXML;
 import org.jobsui.core.xml.ProjectParserImpl;
@@ -131,8 +133,8 @@ public class StartController implements Initializable {
 
         if (projectXML.getJobs().size() == 1) {
             String jobFile = projectXML.getJobs().iterator().next();
-            Task<Job<Serializable>> task = new LoadJobTask(url, projectXML.getJobId(jobFile));
-            ProgressDialog.run(task, "Opening job", job -> StartApp.getInstance().gotoRun(job));
+            Task<Tuple2<Project,Job<Serializable>>> task = new LoadJobTask(url, projectXML.getJobId(jobFile));
+            ProgressDialog.run(task, "Opening job", tuple -> StartApp.getInstance().gotoRun(tuple.first, tuple.second));
             preferences.registerOpenedProject(url, projectXML.getName());
             projects.getItems().clear();
             projects.getItems().addAll(preferences.getLastOpenedItems());

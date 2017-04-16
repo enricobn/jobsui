@@ -41,6 +41,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
+import org.jobsui.core.Project;
 import org.jobsui.core.edit.EditProject;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.runner.JobUIRunner;
@@ -140,10 +141,10 @@ public class StartApp extends Application {
 //        }
 //    }
 
-    void gotoRun(Job<Serializable> job) {
+    void gotoRun(Project project, Job<Serializable> job) {
         JobUIRunner<Node> runner = new JobUIRunner<>(new JavaFXUI());
         try {
-            runner.run(job);
+            runner.run(project, job);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

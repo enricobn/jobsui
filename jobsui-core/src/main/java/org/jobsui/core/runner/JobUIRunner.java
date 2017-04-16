@@ -2,6 +2,7 @@ package org.jobsui.core.runner;
 
 import com.thoughtworks.xstream.XStream;
 import org.jobsui.core.Bookmark;
+import org.jobsui.core.Project;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.ui.UI;
@@ -31,7 +32,7 @@ public class JobUIRunner<C> implements JobRunner {
     }
 
     @Override
-    public <T extends Serializable> T run(final Job<T> job) throws Exception {
+    public <T extends Serializable> T run(Project project, final Job<T> job) throws Exception {
         valid = false;
 
         final UIWindow<C> window = ui.createWindow(job.getName());
@@ -94,7 +95,7 @@ public class JobUIRunner<C> implements JobRunner {
 
             saveBookmarkButton.getObservable().subscribe(serializableVoid -> {
                 try {
-                    Bookmark bookmark = new Bookmark(job, "Test", values);
+                    Bookmark bookmark = new Bookmark(project, job, "Test", values);
                     FileWriter fileWriter = new FileWriter("bookmark.xml");
                     xstream.toXML(bookmark, fileWriter);
                 } catch (Exception e) {

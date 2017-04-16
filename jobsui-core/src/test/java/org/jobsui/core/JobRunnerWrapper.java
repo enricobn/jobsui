@@ -4,6 +4,7 @@ import org.jobsui.core.job.Job;
 import org.jobsui.core.runner.JobUIRunner;
 import org.jobsui.core.ui.FakeUIButton;
 import org.jobsui.core.ui.FakeUIWindow;
+import org.jobsui.core.utils.Tuple2;
 
 import java.io.Serializable;
 import java.util.concurrent.ExecutorService;
@@ -31,8 +32,12 @@ public class JobRunnerWrapper<T extends Serializable, C> {
         this.interaction = interaction;
     }
 
-    public boolean interactAndValidate(Job<T> job) {
-        runJob(job);
+    public boolean interactAndValidate(Tuple2<Project,Job<T>> projectJob) {
+        return interactAndValidate(projectJob.first, projectJob.second);
+    }
+
+    public boolean interactAndValidate(Project project, Job<T> job) {
+        runJob(project, job);
 
         window.waitUntilStarted();
 
@@ -44,9 +49,13 @@ public class JobRunnerWrapper<T extends Serializable, C> {
         return runner.isValid();
     }
 
-    T run(Job<T> job) throws Exception {
+    T run(Tuple2<Project,Job<T>> projectJob) throws Exception {
+        return run(projectJob.first, projectJob.second);
+    }
 
-        final Future<T> future = runJob(job);
+    T run(Project project, Job<T> job) throws Exception {
+
+        final Future<T> future = runJob(project, job);
 
         window.waitUntilStarted();
 
@@ -59,10 +68,10 @@ public class JobRunnerWrapper<T extends Serializable, C> {
         return future.get();
     }
 
-    private Future<T> runJob(final Job<T> job) {
+    private Future<T> runJob(Project project, final Job<T> job) {
         return pool.submit(() -> {
             try {
-                return runner.run(job);
+                return runner.run(project, job);
 //                return job.run(values);
 //                return runner.run(ui, job);
             } catch (Exception e) {

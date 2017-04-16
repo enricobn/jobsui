@@ -3,9 +3,7 @@ package org.jobsui.core;
 import org.jobsui.core.ui.javafx.JobsUITheme;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.prefs.Preferences;
 
 /**
@@ -15,6 +13,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     private final Preferences lastOpenedProjectsNode;
     private final Preferences othersNode;
     private final List<OpenedItem> lastOpenedProjects = new ArrayList<>();
+    private final Map<String,Map<String,List<Bookmark>>> bookmarks = new HashMap<>();
     private JobsUITheme theme;
 
     private JobsUIPreferencesImpl(Preferences preferences) {
@@ -53,6 +52,37 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
         if (theme != this.theme) {
             this.theme = theme;
             save();
+        }
+    }
+
+    @Override
+    public List<Bookmark> getBookmarks(String projectId, String jobId) {
+        Map<String, List<Bookmark>> projectBookmarks = bookmarks.get(projectId);
+        if (projectBookmarks == null) {
+            return Collections.emptyList();
+        }
+        List<Bookmark> jobBookmarks = projectBookmarks.get(jobId);
+        if (jobBookmarks == null) {
+            return Collections.emptyList();
+        }
+        return jobBookmarks;
+    }
+
+    @Override
+    public void saveBookmark(Bookmark bookmark) {
+        Map<String, List<Bookmark>> projectBookmarks = bookmarks.computeIfAbsent(bookmark.getProjectId(), key -> new HashMap<>());
+        List<Bookmark> bookmarks = projectBookmarks.computeIfAbsent(bookmark.getJobId(), key -> new ArrayList<>());
+        boolean found = false;
+        for (int i = 0; !found && i < bookmarks.size(); i++) {
+            Bookmark foundBookmark = bookmarks.get(i);
+            if (foundBookmark.getName().equals(bookmark.getName())) {
+                bookmarks.set(i, bookmark);
+                found = true;
+            }
+        }
+
+        if (!found) {
+            bookmarks.add(bookmark);
         }
     }
 

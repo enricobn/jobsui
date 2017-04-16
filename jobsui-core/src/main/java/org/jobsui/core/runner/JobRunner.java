@@ -1,5 +1,6 @@
 package org.jobsui.core.runner;
 
+import org.jobsui.core.Project;
 import org.jobsui.core.job.Job;
 
 import java.io.Serializable;
@@ -9,6 +10,6 @@ import java.io.Serializable;
  */
 public interface JobRunner {
 
-    <T extends Serializable> T run(Job<T> job) throws Exception;
+    <T extends Serializable> T run(Project project, Job<T> job) throws Exception;
 
 }

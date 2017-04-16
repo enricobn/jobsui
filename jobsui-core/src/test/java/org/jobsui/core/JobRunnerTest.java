@@ -1,13 +1,13 @@
 package org.jobsui.core;
 
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
-import org.jobsui.core.ui.swing.SwingUIChoice;
-import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.job.*;
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobUIRunner;
 import org.jobsui.core.ui.*;
+import org.jobsui.core.utils.Tuple2;
 import org.jobsui.core.xml.ProjectParser;
+import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.xml.ProjectXML;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
@@ -19,11 +19,11 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -39,14 +39,14 @@ public class JobRunnerTest {
     private FakeUIButton bookmarkButton;
 
     private static class CachedJob {
-        private final Supplier<Job<String>> supplier;
-        private Job<String> job = null;
+        private final Supplier<Tuple2<Project,Job<String>>> supplier;
+        private Tuple2<Project, Job<String>> job = null;
 
-        private CachedJob(Supplier<Job<String>> supplier) {
+        private CachedJob(Supplier<Tuple2<Project,Job<String>>> supplier) {
             this.supplier = supplier;
         }
 
-        public Job<String> get() {
+        public Tuple2<Project,Job<String>> get() {
             if (job == null) {
                 job = supplier.get();
             }
@@ -69,8 +69,14 @@ public class JobRunnerTest {
         jobs.put(JobType.simpleWithInternalCallFSJob, new CachedJob(() -> getJob("/simplejob", "simpleWithInternalCall")));
         jobs.put(JobType.simpleFSJob, new CachedJob(() -> getJob("/simplejob", "simple")));
         jobs.put(JobType.simpleJobWithExpression, new CachedJob(() -> getJob("/simplejob", "simpleWithExpression")));
-        jobs.put(JobType.simpleJob, new CachedJob(JobRunnerTest::createSimpleJob));
-        jobs.put(JobType.complexJob, new CachedJob(JobRunnerTest::createComplexJob));
+        jobs.put(JobType.simpleJob, new CachedJob(() -> {
+            Job<String> simpleJob = createSimpleJob();
+            return new Tuple2<>(createSingleJobProject(simpleJob), simpleJob);
+        }));
+        jobs.put(JobType.complexJob, new CachedJob(() -> {
+            Job<String> complexJob = createComplexJob();
+            return new Tuple2<>(createSingleJobProject(complexJob), complexJob);
+        }));
     }
 
     @AfterClass
@@ -277,7 +283,7 @@ public class JobRunnerTest {
                     surnameComponent.setValue(null);
                 });
 
-        jobRunnerWrapper.run(job);
+        jobRunnerWrapper.run(createSingleJobProject(job), job);
 
         final JobParameterDef invParameter = job.getParameter("inv");
         verify(invParameter, never()).validate(anyMapOf(String.class, Serializable.class), isNull(Serializable.class));
@@ -301,7 +307,7 @@ public class JobRunnerTest {
                     surnameComponent.setValue("Doe");
                 });
 
-        jobRunnerWrapper.run(job);
+        jobRunnerWrapper.run(createSingleJobProject(job), job);
 
         final JobParameterDef invParameter = job.getParameter("inv");
         verify(invParameter).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
@@ -331,7 +337,7 @@ public class JobRunnerTest {
                     surnameComponent.setValue("Doe");
                 });
 
-        jobRunnerWrapper.run(job);
+        jobRunnerWrapper.run(createSingleJobProject(job), job);
 
         assertEquals(Collections.singletonList("Error"), window.getValidationMessages());
     }
@@ -347,9 +353,7 @@ public class JobRunnerTest {
                     uiValueSecond.setValue(" Doe");
                 });
 
-        final Job<String> job = getJob("/external", "concat");
-
-        String result = jobRunnerWrapper.run(job);
+        String result = jobRunnerWrapper.run(getJob("/external", "concat"));
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -404,9 +408,9 @@ public class JobRunnerTest {
                     uiValueSecond.setValue("Doe");
                 });
 
-        final Job<String> job = jobs.get(JobType.simpleJobWithExpression).get();
+        final Tuple2<Project, Job<String>> pojectJob = jobs.get(JobType.simpleJobWithExpression).get();
 
-        String result = jobRunnerWrapper.run(job);
+        String result = jobRunnerWrapper.run(pojectJob.first, pojectJob.second);
 
         assertThat(result, equalTo("Mr. John Doe"));
     }
@@ -431,7 +435,7 @@ public class JobRunnerTest {
                     surnameComponent.setValue(null);
                 });
 
-        jobRunnerWrapper.run(job);
+        jobRunnerWrapper.run(createSingleJobProject(job), job);
 
         final JobParameterDef inv = job.getParameter("inv");
         verify(inv, never()).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
@@ -450,7 +454,7 @@ public class JobRunnerTest {
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> nameComponent.setValue("Jones"));
 
-        assertThat(jobRunnerWrapper.run(job), is("Mr. Jones"));
+        assertThat(jobRunnerWrapper.run(createSingleJobProject(job), job), is("Mr. Jones"));
     }
 
     /**
@@ -478,7 +482,7 @@ public class JobRunnerTest {
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> pathComponent.setValue("home"));
-        assertThat(jobRunnerWrapper.interactAndValidate(job), is(false));
+        assertThat(jobRunnerWrapper.interactAndValidate(createSingleJobProject(job), job), is(false));
 
     }
 
@@ -509,7 +513,7 @@ public class JobRunnerTest {
                 }
         );
 
-        String result = jobRunnerWrapper.run(job);
+        String result = jobRunnerWrapper.run(createSingleJobProject(job), job);
 
         assertThat(runner.isValid(), is(true));
 
@@ -532,7 +536,7 @@ public class JobRunnerTest {
                     nameComponent.setValue(null);
                 });
 
-        jobRunnerWrapper.run(job);
+        jobRunnerWrapper.run(createSingleJobProject(job), job);
 
         assertThat(((FakeUIChoice) invComponent).isEnabled(), is(false));
     }
@@ -564,10 +568,9 @@ public class JobRunnerTest {
                     assertThat(((FakeUIChoice) invComponent).isEnabled(), is(true));
                 });
 
-        jobRunnerWrapper.run(job);
+        jobRunnerWrapper.run(createSingleJobProject(job), job);
 
     }
-
 
     @Test public void verify_that_when_no_dependencies_then_component_is_enabled() throws Exception {
         MockedJobBuilder<String> builder = new MockedJobBuilder<>();
@@ -579,9 +582,19 @@ public class JobRunnerTest {
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {});
 
-        jobRunnerWrapper.run(job);
+        jobRunnerWrapper.run(createSingleJobProject(job), job);
 
         assertThat(((FakeUiValue) nameComponent).isEnabled(), is(true));
+    }
+
+    private static Project createSingleJobProject(Job job) {
+        Project project = mock(Project.class);
+        String id = job.getId();
+        when(project.getJobsIds()).thenReturn(Collections.singleton(id));
+        when(project.getJob(id)).thenReturn(job);
+        when(project.getId()).thenReturn("singleJobProject");
+        when(project.getName()).thenReturn("Single JobProject for job " + id);
+        return project;
     }
 
     private MockSettings printInvocation(String name, final CharSequence methodName) {
@@ -592,24 +605,25 @@ public class JobRunnerTest {
         });
     }
 
-    private static <T> Job<T> getJob(String file, String job) {
-        Job<T> result;
+    private static <T> Tuple2<Project,Job<T>> getJob(String file, String jobId) {
+        Project project;
+        Job<T> job;
         try {
-            Project project = projects.get(file);
+            project = projects.get(file);
             if (project == null) {
                 ProjectParser parser = new ProjectParserImpl();
                 ProjectXML projectXML = parser.parse(JobRunnerTest.class.getResource(file));
                 project = new ProjectGroovyBuilder().build(projectXML);
                 projects.put(file, project);
             }
-            result = project.getJob(job);
-            if (result == null) {
-                throw new Exception("Cannot find job with id \"" + job + "\".");
+            job = project.getJob(jobId);
+            if (job == null) {
+                throw new Exception("Cannot find job with id \"" + jobId + "\".");
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return result;
+        return new Tuple2<>(project, job);
     }
 
     private static Job<String> createSimpleJob() {

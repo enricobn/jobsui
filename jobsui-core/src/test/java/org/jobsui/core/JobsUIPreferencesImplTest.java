@@ -1,17 +1,22 @@
 package org.jobsui.core;
 
+import org.hamcrest.CoreMatchers;
+import org.jobsui.core.job.Job;
+import org.jobsui.core.runner.JobValues;
 import org.jobsui.core.ui.javafx.JobsUITheme;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.net.URL;
+import java.util.List;
 import java.util.prefs.Preferences;
 
-import static org.hamcrest.CoreMatchers.any;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
@@ -145,4 +150,85 @@ public class JobsUIPreferencesImplTest {
         assertThat(openedItem.url, is("file:2"));
         assertThat(openedItem.name, is("file2"));
     }
+
+    @Test
+    public void assert_that_when_a_bookmark_is_added_then_it_can_be_retrieved() throws Exception {
+        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+
+        String projectId = "projectId";
+        String jobId = "jobId";
+        String bookmarkName = "test";
+
+        Bookmark bookmark = createBookmark(projectId, jobId, bookmarkName);
+
+        sut.saveBookmark(bookmark);
+
+        List<Bookmark> bookmarks = sut.getBookmarks(projectId, jobId);
+
+        assertThat(bookmarks.get(0).getName(), is(bookmarkName));
+    }
+
+    @Test
+    public void assert_that_when_a_bookmark_whch_is_already_present_is_added_then_it_is_replaced() throws Exception {
+        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+
+        String projectId = "projectId";
+        String jobId = "jobId";
+        String bookmarkName = "test";
+
+        Bookmark bookmark1 = createBookmark(projectId, jobId, bookmarkName);
+
+        sut.saveBookmark(bookmark1);
+
+        Bookmark bookmark2 = createBookmark(projectId, jobId, bookmarkName);
+
+        sut.saveBookmark(bookmark2);
+
+        List<Bookmark> bookmarks = sut.getBookmarks(projectId, jobId);
+
+        assertThat(bookmarks.size(), is(1));
+    }
+
+    @Test
+    public void assert_that_when_a_project_has_no_bookmarks_then_empy_list_is_returned() throws Exception {
+        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+
+        String projectId = "projectId";
+        String jobId = "jobId";
+        String bookmarkName = "test";
+
+        Bookmark bookmark1 = createBookmark(projectId, jobId, bookmarkName);
+
+        sut.saveBookmark(bookmark1);
+
+        assertThat(sut.getBookmarks("projectId", "jobsId1").isEmpty(), is(true));
+    }
+
+    @Test
+    public void assert_that_when_a_job_has_no_bookmarks_then_empy_list_is_returned() throws Exception {
+        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+
+        assertThat(sut.getBookmarks("projectId", "jobsId").isEmpty(), is(true));
+    }
+
+    private Bookmark createBookmark(String projectId, String jobId, String bookmarkName) {
+        Project project = mock(Project.class);
+        when(project.getId()).thenReturn(projectId);
+
+        Job<?> job = mock(Job.class);
+        when(job.getId()).thenReturn(jobId);
+
+        JobValues values = mock(JobValues.class);
+
+        return new Bookmark(project, job, bookmarkName, values);
+    }
+
 }
