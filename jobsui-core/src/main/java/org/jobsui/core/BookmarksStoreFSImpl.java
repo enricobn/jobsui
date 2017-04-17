@@ -21,7 +21,7 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
         File userRootDir =
                 new File(System.getProperty("java.util.prefs.userRoot",
                         System.getProperty("user.home")));
-        return new BookmarksStoreFSImpl(userRootDir);
+        return new BookmarksStoreFSImpl(new File(userRootDir, ".jobsui"));
     }
 
     public BookmarksStoreFSImpl(File root) {

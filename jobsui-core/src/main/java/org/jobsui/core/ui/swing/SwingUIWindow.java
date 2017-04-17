@@ -1,9 +1,8 @@
 package org.jobsui.core.ui.swing;
 
-import org.jobsui.core.ui.UIComponent;
-import org.jobsui.core.ui.UIContainer;
-import org.jobsui.core.ui.UIWidget;
-import org.jobsui.core.ui.UIWindow;
+import org.jobsui.core.Project;
+import org.jobsui.core.job.Job;
+import org.jobsui.core.ui.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -103,7 +102,7 @@ public class SwingUIWindow implements UIWindow<JComponent> {
 
 
     @Override
-    public void show(Runnable callback) {
+    public void show(Project project, Job job, Runnable callback) {
         container.addFiller();
 
         callback.run();
@@ -127,6 +126,12 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     @Override
     public void showValidationMessage(String message) {
         new SwingUI().showMessage(message);
+    }
+
+    @Override
+    public void addButton(UIButton<JComponent> button) {
+        // TODO
+        add(button);
     }
 
     @Override

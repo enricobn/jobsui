@@ -9,6 +9,7 @@ import org.jobsui.core.ui.UI;
 import org.jobsui.core.ui.UIButton;
 import org.jobsui.core.ui.UIWindow;
 import org.jobsui.core.ui.UnsupportedComponentException;
+import org.jobsui.core.ui.javafx.StartApp;
 import rx.Observable;
 
 import java.io.FileNotFoundException;
@@ -43,7 +44,7 @@ public class JobUIRunner<C> implements JobRunner {
 
         AtomicReference<T> atomicResult = new AtomicReference<>(null);
 
-        window.show(() -> {
+        window.show(project, job, () -> {
 
             JobRunnerContext<T,C> context;
 
@@ -96,8 +97,7 @@ public class JobUIRunner<C> implements JobRunner {
             saveBookmarkButton.getObservable().subscribe(serializableVoid -> {
                 try {
                     Bookmark bookmark = new Bookmark(project, job, "Test", values);
-                    FileWriter fileWriter = new FileWriter("bookmark.xml");
-                    xstream.toXML(bookmark, fileWriter);
+                    StartApp.getInstance().getPreferences().saveBookmark(project, job, bookmark);
                 } catch (Exception e) {
                     ui.showError("Error saving bookmark.", e);
                 }
@@ -130,8 +130,8 @@ public class JobUIRunner<C> implements JobRunner {
 
             context.notifyInitialValue();
 
-            window.add(runButton);
-            window.add(saveBookmarkButton);
+            window.addButton(runButton);
+            window.addButton(saveBookmarkButton);
 //            window.add(closeButton);
         });
 

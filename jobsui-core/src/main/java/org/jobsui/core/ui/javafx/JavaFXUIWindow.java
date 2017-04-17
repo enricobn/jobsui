@@ -3,12 +3,14 @@ package org.jobsui.core.ui.javafx;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.jobsui.core.ui.UIComponent;
-import org.jobsui.core.ui.UIContainer;
-import org.jobsui.core.ui.UIWidget;
-import org.jobsui.core.ui.UIWindow;
+import org.jobsui.core.Bookmark;
+import org.jobsui.core.Project;
+import org.jobsui.core.job.Job;
+import org.jobsui.core.ui.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,15 +20,33 @@ import java.util.stream.Collectors;
  */
 class JavaFXUIWindow implements UIWindow<Node> {
     private VBox root;
+    private HBox buttonsPanel;
+    private HBox mainPanel;
+    private ListView<Bookmark> bookmarkListView;
+    private VBox componentsRoot;
 //    private static final List<NodeUIWidget> components = new ArrayList<>();
 
 //    private static boolean ok = false;
 //    private static Runnable callback;
 
     @Override
-    public void show(Runnable callback) {
+    public void show(Project project, Job job, Runnable callback) {
         root = new VBox(5);
-        root.setPadding(new Insets(5, 5, 5, 5));
+        buttonsPanel = new HBox(5);
+        root.getChildren().add(buttonsPanel);
+
+        mainPanel = new HBox(5);
+        root.getChildren().add(mainPanel);
+        bookmarkListView = new ListView<>();
+        bookmarkListView.setMinWidth(200);
+        mainPanel.getChildren().add(bookmarkListView);
+
+        List<Bookmark> bookmarks = StartApp.getInstance().getPreferences().getBookmarks(project, job);
+        bookmarkListView.getItems().addAll(bookmarks);
+        componentsRoot = new VBox(5);
+        componentsRoot.setPadding(new Insets(5, 5, 5, 5));
+
+        mainPanel.getChildren().add(componentsRoot);
 
         callback.run();
 
@@ -56,13 +76,21 @@ class JavaFXUIWindow implements UIWindow<Node> {
         NodeUIWidget widget = new NodeUIWidget(title, component);
         Node node = widget.getNodeComponent();
         node.managedProperty().bind(node.visibleProperty());
-        root.getChildren().add(node);
+        componentsRoot.getChildren().add(node);
         return widget;
     }
 
     @Override
     public UIWidget<Node> add(UIComponent<Node> component) {
         return add(null, component);
+    }
+
+    @Override
+    public void addButton(UIButton<Node> button) {
+        NodeUIWidget widget = new NodeUIWidget(null, button);
+        Node node = widget.getNodeComponent();
+        node.managedProperty().bind(node.visibleProperty());
+        buttonsPanel.getChildren().add(node);
     }
 
     @Override
@@ -74,7 +102,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
     @Override
     public Node getComponent() {
 //        return JavaFXApplication.root;
-        return root;
+        return componentsRoot;
     }
 
 //    public static class JavaFXApplication extends Application {

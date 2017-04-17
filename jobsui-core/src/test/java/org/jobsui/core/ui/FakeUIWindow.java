@@ -1,5 +1,8 @@
 package org.jobsui.core.ui;
 
+import org.jobsui.core.Project;
+import org.jobsui.core.job.Job;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,7 +27,7 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
     private List<String> validationMessages = new ArrayList<>();
 
     @Override
-    public void show(Runnable callback) {
+    public void show(Project project, Job job, Runnable callback) {
         callback.run();
 
         long start = System.currentTimeMillis();

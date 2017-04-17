@@ -43,4 +43,9 @@ public class Bookmark {
     public String getJobId() {
         return jobId;
     }
+
+    @Override
+    public String toString() {
+        return getName();
+    }
 }
