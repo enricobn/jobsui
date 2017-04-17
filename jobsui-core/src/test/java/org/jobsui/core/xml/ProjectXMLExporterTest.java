@@ -1,6 +1,7 @@
 package org.jobsui.core.xml;
 
 import org.apache.commons.io.FileUtils;
+import org.jobsui.core.utils.JobsUIUtils;
 import org.junit.Test;
 
 import java.io.File;
@@ -37,11 +38,9 @@ public class ProjectXMLExporterTest {
 
         ProjectXMLExporter projectXMLExporter = new ProjectXMLExporter();
 
-        File folder = File.createTempFile("test", "export");
-        assertThat(folder.delete(), is(true));
+        File folder = JobsUIUtils.createTempDir("test", "export");
 
         try {
-            assertThat(folder.mkdir(), is(true));
             projectXMLExporter.export(projectFSXML, folder);
 
             ProjectFSXML exportedProjectFSXML = new ProjectParserImpl().parse(folder);

@@ -1,5 +1,7 @@
 package org.jobsui.core.utils;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -35,5 +37,14 @@ public interface JobsUIUtils {
             return "";
         }
         return new String(new char[count]).replace("\0", " ");
+    }
+
+    static File createTempDir(String prefix, String suffix) throws IOException {
+        File folder = File.createTempFile(prefix, suffix);
+        folder.deleteOnExit();
+        assert(folder.delete());
+
+        assert(folder.mkdir());
+        return folder;
     }
 }

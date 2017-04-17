@@ -3,6 +3,7 @@ package org.jobsui.core;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.ui.javafx.JobsUITheme;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.prefs.Preferences;
@@ -13,18 +14,20 @@ import java.util.prefs.Preferences;
 public class JobsUIPreferencesImpl implements JobsUIPreferences {
     private final Preferences lastOpenedProjectsNode;
     private final Preferences othersNode;
+    private final BookmarksStore bookmarksStore;
     private final List<OpenedItem> lastOpenedProjects = new ArrayList<>();
     // projectId/jobId/bookmarks
     private final Map<String,Map<String,List<Bookmark>>> bookmarks = new HashMap<>();
     private JobsUITheme theme;
 
-    private JobsUIPreferencesImpl(Preferences preferences) {
+    private JobsUIPreferencesImpl(Preferences preferences, BookmarksStore bookmarksStore) {
         lastOpenedProjectsNode = preferences.node("lastOpenedProjects");
         othersNode = preferences.node("others");
+        this.bookmarksStore = bookmarksStore;
     }
 
-    public static JobsUIPreferencesImpl get(Preferences preferences) {
-        JobsUIPreferencesImpl jobsUIPreferences = new JobsUIPreferencesImpl(preferences);
+    public static JobsUIPreferencesImpl get(Preferences preferences, BookmarksStore bookmarkStore) {
+        JobsUIPreferencesImpl jobsUIPreferences = new JobsUIPreferencesImpl(preferences, bookmarkStore);
         jobsUIPreferences.load();
         return jobsUIPreferences;
     }
@@ -59,21 +62,21 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
 
     @Override
     public List<Bookmark> getBookmarks(Project project, Job job) {
-        Map<String, List<Bookmark>> projectBookmarks = bookmarks.get(project.getId());
-        if (projectBookmarks == null) {
-            return Collections.emptyList();
-        }
+        Map<String, List<Bookmark>> projectBookmarks = bookmarks.computeIfAbsent(project.getId(), k -> new HashMap<>());
+
         List<Bookmark> jobBookmarks = projectBookmarks.get(job.getId());
         if (jobBookmarks == null) {
-            return Collections.emptyList();
+            jobBookmarks = new ArrayList<>(bookmarksStore.getBookmarks(project, job));
+            projectBookmarks.put(job.getId(), jobBookmarks);
         }
         return jobBookmarks;
     }
 
     @Override
-    public void saveBookmark(Bookmark bookmark) {
-        Map<String, List<Bookmark>> projectBookmarks = bookmarks.computeIfAbsent(bookmark.getProjectId(), key -> new HashMap<>());
-        List<Bookmark> bookmarks = projectBookmarks.computeIfAbsent(bookmark.getJobId(), key -> new ArrayList<>());
+    public void saveBookmark(Project project, Job job, Bookmark bookmark) {
+        List<Bookmark> bookmarks = getBookmarks(project, job);
+//        Map<String, List<Bookmark>> projectBookmarks = bookmarks.computeIfAbsent(bookmark.getProjectId(), key -> new HashMap<>());
+//        List<Bookmark> bookmarks = projectBookmarks.computeIfAbsent(bookmark.getJobId(), key -> new ArrayList<>());
         boolean found = false;
         for (int i = 0; !found && i < bookmarks.size(); i++) {
             Bookmark foundBookmark = bookmarks.get(i);
@@ -85,6 +88,13 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
 
         if (!found) {
             bookmarks.add(bookmark);
+        }
+
+        try {
+            bookmarksStore.saveBookmark(project, job, bookmark);
+            bookmarks.sort(Comparator.comparing(Bookmark::getName));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

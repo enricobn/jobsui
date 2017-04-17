@@ -21,6 +21,6 @@ public interface JobsUIPreferences {
 
     List<Bookmark> getBookmarks(Project project, Job job);
 
-    void saveBookmark(Bookmark bookmark);
+    void saveBookmark(Project project, Job job, Bookmark bookmark);
 
 }

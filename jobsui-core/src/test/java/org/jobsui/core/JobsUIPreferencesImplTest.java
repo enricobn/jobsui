@@ -10,10 +10,14 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.prefs.Preferences;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.jobsui.core.TestUtils.createJob;
+import static org.jobsui.core.TestUtils.createProject;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Matchers.anyInt;
@@ -32,6 +36,8 @@ public class JobsUIPreferencesImplTest {
     private Preferences lastOpenedProjects;
     @Mock
     private Preferences others;
+    @Mock
+    private BookmarksStore bookmarkStore;
 
     @Before
     public void setUp() throws Exception {
@@ -43,7 +49,7 @@ public class JobsUIPreferencesImplTest {
     public void assert_that_default_value_for_theme_is_dark() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         assertThat(sut.getTheme(), is(JobsUITheme.Dark));
     }
@@ -52,7 +58,7 @@ public class JobsUIPreferencesImplTest {
     public void assert_that_when_standard_theme_is_specified_then_that_theme_is_returned() throws Exception {
         when(others.get(eq("theme"), anyString())).thenReturn(JobsUITheme.Standard.name());
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         assertThat(sut.getTheme(), is(JobsUITheme.Standard));
     }
@@ -61,7 +67,7 @@ public class JobsUIPreferencesImplTest {
     public void verify_that_when_the_same_theme_is_set_then_flush_is_not_called() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         sut.setTheme(JobsUITheme.Dark);
 
@@ -72,7 +78,7 @@ public class JobsUIPreferencesImplTest {
     public void verify_that_when_different_theme_is_set_then_flush_is_called() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         sut.setTheme(JobsUITheme.Standard);
 
@@ -84,7 +90,7 @@ public class JobsUIPreferencesImplTest {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
         when(lastOpenedProjects.getInt(eq("size"), anyInt())).thenReturn(2);
 
-        JobsUIPreferencesImpl.get(preferences);
+        JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         verify(lastOpenedProjects).getInt(eq("size"), anyInt());
 
@@ -108,7 +114,7 @@ public class JobsUIPreferencesImplTest {
         when(lastOpenedProjects.get(eq("name_0"), anyString())).thenReturn("file1");
         when(lastOpenedProjects.get(eq("name_1"), anyString())).thenReturn("file2");
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         OpenedItem lastOpenedItem = sut.getLastOpenedItems().get(0);
 
@@ -126,7 +132,7 @@ public class JobsUIPreferencesImplTest {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
         when(lastOpenedProjects.getInt(eq("size"), anyInt())).thenReturn(2);
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         sut.registerOpenedProject(new URL("file:1"), "file1");
 
@@ -138,7 +144,7 @@ public class JobsUIPreferencesImplTest {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
         when(lastOpenedProjects.getInt(eq("size"), anyInt())).thenReturn(2);
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         sut.registerOpenedProject(new URL("file:1"), "file1");
         sut.registerOpenedProject(new URL("file:2"), "file2");
@@ -153,7 +159,7 @@ public class JobsUIPreferencesImplTest {
     public void assert_that_when_a_bookmark_is_added_then_it_can_be_retrieved() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         String bookmarkName = "test";
 
@@ -162,7 +168,7 @@ public class JobsUIPreferencesImplTest {
 
         Bookmark bookmark = createBookmark(bookmarkName, project, job);
 
-        sut.saveBookmark(bookmark);
+        sut.saveBookmark(project, job, bookmark);
 
         List<Bookmark> bookmarks = sut.getBookmarks(project, job);
 
@@ -173,7 +179,7 @@ public class JobsUIPreferencesImplTest {
     public void assert_that_when_a_bookmark_whch_is_already_present_is_added_then_it_is_replaced() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         Project project = createProject("projectId");
         Job<?> job = createJob("jobId");
@@ -181,11 +187,11 @@ public class JobsUIPreferencesImplTest {
         String bookmarkName = "test";
         Bookmark bookmark1 = createBookmark(bookmarkName, project, job);
 
-        sut.saveBookmark(bookmark1);
+        sut.saveBookmark(project, job, bookmark1);
 
         Bookmark bookmark2 = createBookmark(bookmarkName, project, job);
 
-        sut.saveBookmark(bookmark2);
+        sut.saveBookmark(project, job, bookmark2);
 
         List<Bookmark> bookmarks = sut.getBookmarks(project, job);
 
@@ -196,7 +202,7 @@ public class JobsUIPreferencesImplTest {
     public void assert_that_when_a_project_has_no_bookmarks_then_empy_list_is_returned() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         Project project = createProject("projectId");
         Job<?> job = createJob("jobId");
@@ -208,7 +214,7 @@ public class JobsUIPreferencesImplTest {
     public void assert_that_when_a_job_has_no_bookmarks_then_empy_list_is_returned() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         Project project = createProject("projectId");
         Job<?> job = createJob("jobId");
@@ -216,23 +222,53 @@ public class JobsUIPreferencesImplTest {
         assertThat(sut.getBookmarks(project, job).isEmpty(), is(true));
     }
 
+    @Test
+    public void verify_that_when_asking_for_bookmarks_for_the_first_time_then_bookmarkstore_is_called() throws Exception {
+        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+
+        Project project = createProject("projectId");
+        Job<?> job = createJob("jobId");
+
+        sut.getBookmarks(project, job);
+
+        verify(bookmarkStore).getBookmarks(project, job);
+    }
+
+    @Test
+    public void assert_that_when_bookmarks_are_already_present_in_the_store_then_adding_a_new_bookmark_is_added_to_them_and_are_sorted() throws Exception {
+        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+
+        Project project = createProject("projectId");
+        Job<?> job = createJob("jobId");
+
+        Bookmark alreadypresentBookmark = createBookmark("bookmark2", project, job);
+
+        // I cannot use Collections.singletonList since JobsUIPreferencesImpl adds elements
+        List<Bookmark> alreadyPresentBookmarks = new ArrayList<>();
+        alreadyPresentBookmarks.add(alreadypresentBookmark);
+
+        when(bookmarkStore.getBookmarks(project, job)).thenReturn(alreadyPresentBookmarks);
+
+        Bookmark bookmark = createBookmark("bookmark1", project, job);
+
+        sut.saveBookmark(project, job, bookmark);
+
+        List<Bookmark> bookmarks = sut.getBookmarks(project, job);
+
+        assertThat(bookmarks.size(), is(2));
+
+        assertThat(bookmarks.get(0).getName(), is("bookmark1"));
+        assertThat(bookmarks.get(1).getName(), is("bookmark2"));
+    }
+
     private Bookmark createBookmark(String bookmarkName, Project project, Job<?> job) {
-
         JobValues values = mock(JobValues.class);
-
         return new Bookmark(project, job, bookmarkName, values);
     }
 
-    private Job<?> createJob(String jobId) {
-        Job<?> job = mock(Job.class);
-        when(job.getId()).thenReturn(jobId);
-        return job;
-    }
-
-    private Project createProject(String projectId) {
-        Project project = mock(Project.class);
-        when(project.getId()).thenReturn(projectId);
-        return project;
-    }
 
 }

@@ -8,6 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.jobsui.core.BookmarksStoreFSImpl;
 import org.jobsui.core.JobsUIPreferencesImpl;
 import org.jobsui.core.Main;
 import org.jobsui.core.ui.*;
@@ -66,7 +67,7 @@ public class JavaFXUI implements UI<Node> {
 
     @Override
     public void start(String[] args) {
-        StartApp.main(JobsUIPreferencesImpl.get(Preferences.userNodeForPackage(Main.class)), args);
+        StartApp.main(JobsUIPreferencesImpl.get(Preferences.userNodeForPackage(Main.class), BookmarksStoreFSImpl.getUser()), args);
     }
 
     public static void uncaughtException(Thread t, Throwable e) {
