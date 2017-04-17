@@ -1,5 +1,6 @@
 package org.jobsui.core;
 
+import org.jobsui.core.job.Job;
 import org.jobsui.core.ui.javafx.JobsUITheme;
 
 import java.net.URL;
@@ -18,7 +19,7 @@ public interface JobsUIPreferences {
 
     void setTheme(JobsUITheme theme);
 
-    List<Bookmark> getBookmarks(String projectId, String jobId);
+    List<Bookmark> getBookmarks(Project project, Job job);
 
     void saveBookmark(Bookmark bookmark);
 

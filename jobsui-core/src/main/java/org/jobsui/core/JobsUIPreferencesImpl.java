@@ -1,5 +1,6 @@
 package org.jobsui.core;
 
+import org.jobsui.core.job.Job;
 import org.jobsui.core.ui.javafx.JobsUITheme;
 
 import java.net.URL;
@@ -13,6 +14,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     private final Preferences lastOpenedProjectsNode;
     private final Preferences othersNode;
     private final List<OpenedItem> lastOpenedProjects = new ArrayList<>();
+    // projectId/jobId/bookmarks
     private final Map<String,Map<String,List<Bookmark>>> bookmarks = new HashMap<>();
     private JobsUITheme theme;
 
@@ -56,12 +58,12 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     }
 
     @Override
-    public List<Bookmark> getBookmarks(String projectId, String jobId) {
-        Map<String, List<Bookmark>> projectBookmarks = bookmarks.get(projectId);
+    public List<Bookmark> getBookmarks(Project project, Job job) {
+        Map<String, List<Bookmark>> projectBookmarks = bookmarks.get(project.getId());
         if (projectBookmarks == null) {
             return Collections.emptyList();
         }
-        List<Bookmark> jobBookmarks = projectBookmarks.get(jobId);
+        List<Bookmark> jobBookmarks = projectBookmarks.get(job.getId());
         if (jobBookmarks == null) {
             return Collections.emptyList();
         }

@@ -1,13 +1,11 @@
 package org.jobsui.core;
 
-import org.hamcrest.CoreMatchers;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.runner.JobValues;
 import org.jobsui.core.ui.javafx.JobsUITheme;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -157,15 +155,16 @@ public class JobsUIPreferencesImplTest {
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
 
-        String projectId = "projectId";
-        String jobId = "jobId";
         String bookmarkName = "test";
 
-        Bookmark bookmark = createBookmark(projectId, jobId, bookmarkName);
+        Project project = createProject("projectId");
+        Job<?> job = createJob("jobId");
+
+        Bookmark bookmark = createBookmark(bookmarkName, project, job);
 
         sut.saveBookmark(bookmark);
 
-        List<Bookmark> bookmarks = sut.getBookmarks(projectId, jobId);
+        List<Bookmark> bookmarks = sut.getBookmarks(project, job);
 
         assertThat(bookmarks.get(0).getName(), is(bookmarkName));
     }
@@ -176,19 +175,19 @@ public class JobsUIPreferencesImplTest {
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
 
-        String projectId = "projectId";
-        String jobId = "jobId";
-        String bookmarkName = "test";
+        Project project = createProject("projectId");
+        Job<?> job = createJob("jobId");
 
-        Bookmark bookmark1 = createBookmark(projectId, jobId, bookmarkName);
+        String bookmarkName = "test";
+        Bookmark bookmark1 = createBookmark(bookmarkName, project, job);
 
         sut.saveBookmark(bookmark1);
 
-        Bookmark bookmark2 = createBookmark(projectId, jobId, bookmarkName);
+        Bookmark bookmark2 = createBookmark(bookmarkName, project, job);
 
         sut.saveBookmark(bookmark2);
 
-        List<Bookmark> bookmarks = sut.getBookmarks(projectId, jobId);
+        List<Bookmark> bookmarks = sut.getBookmarks(project, job);
 
         assertThat(bookmarks.size(), is(1));
     }
@@ -199,15 +198,10 @@ public class JobsUIPreferencesImplTest {
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
 
-        String projectId = "projectId";
-        String jobId = "jobId";
-        String bookmarkName = "test";
+        Project project = createProject("projectId");
+        Job<?> job = createJob("jobId");
 
-        Bookmark bookmark1 = createBookmark(projectId, jobId, bookmarkName);
-
-        sut.saveBookmark(bookmark1);
-
-        assertThat(sut.getBookmarks("projectId", "jobsId1").isEmpty(), is(true));
+        assertThat(sut.getBookmarks(project, job).isEmpty(), is(true));
     }
 
     @Test
@@ -216,19 +210,29 @@ public class JobsUIPreferencesImplTest {
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences);
 
-        assertThat(sut.getBookmarks("projectId", "jobsId").isEmpty(), is(true));
+        Project project = createProject("projectId");
+        Job<?> job = createJob("jobId");
+
+        assertThat(sut.getBookmarks(project, job).isEmpty(), is(true));
     }
 
-    private Bookmark createBookmark(String projectId, String jobId, String bookmarkName) {
-        Project project = mock(Project.class);
-        when(project.getId()).thenReturn(projectId);
-
-        Job<?> job = mock(Job.class);
-        when(job.getId()).thenReturn(jobId);
+    private Bookmark createBookmark(String bookmarkName, Project project, Job<?> job) {
 
         JobValues values = mock(JobValues.class);
 
         return new Bookmark(project, job, bookmarkName, values);
+    }
+
+    private Job<?> createJob(String jobId) {
+        Job<?> job = mock(Job.class);
+        when(job.getId()).thenReturn(jobId);
+        return job;
+    }
+
+    private Project createProject(String projectId) {
+        Project project = mock(Project.class);
+        when(project.getId()).thenReturn(projectId);
+        return project;
     }
 
 }
