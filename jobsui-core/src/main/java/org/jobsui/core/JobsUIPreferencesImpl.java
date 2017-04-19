@@ -16,8 +16,6 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     private final Preferences othersNode;
     private final BookmarksStore bookmarksStore;
     private final List<OpenedItem> lastOpenedProjects = new ArrayList<>();
-    // projectId/jobId/bookmarks
-    private final Map<String,Map<String,List<Bookmark>>> bookmarks = new HashMap<>();
     private JobsUITheme theme;
 
     private JobsUIPreferencesImpl(Preferences preferences, BookmarksStore bookmarksStore) {
@@ -62,40 +60,21 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
 
     @Override
     public List<Bookmark> getBookmarks(Project project, Job job) {
-        Map<String, List<Bookmark>> projectBookmarks = bookmarks.computeIfAbsent(project.getId(), k -> new HashMap<>());
-
-        List<Bookmark> jobBookmarks = projectBookmarks.get(job.getId());
-        if (jobBookmarks == null) {
-            jobBookmarks = new ArrayList<>(bookmarksStore.getBookmarks(project, job));
-            projectBookmarks.put(job.getId(), jobBookmarks);
-        }
-        return jobBookmarks;
+        // I cannot cache bookmarks since it depends on job's classloader
+        return Collections.unmodifiableList(bookmarksStore.getBookmarks(project, job));
     }
 
     @Override
     public void saveBookmark(Project project, Job job, Bookmark bookmark) {
-        List<Bookmark> bookmarks = getBookmarks(project, job);
-//        Map<String, List<Bookmark>> projectBookmarks = bookmarks.computeIfAbsent(bookmark.getProjectId(), key -> new HashMap<>());
-//        List<Bookmark> bookmarks = projectBookmarks.computeIfAbsent(bookmark.getJobId(), key -> new ArrayList<>());
-        boolean found = false;
-        for (int i = 0; !found && i < bookmarks.size(); i++) {
-            Bookmark foundBookmark = bookmarks.get(i);
-            if (foundBookmark.getName().equals(bookmark.getName())) {
-                bookmarks.set(i, bookmark);
-                found = true;
-            }
-        }
-
-        if (!found) {
-            bookmarks.add(bookmark);
-        }
-
+        // I cannot cache bookmarks since it depends on job's classloader
         try {
             bookmarksStore.saveBookmark(project, job, bookmark);
-            bookmarks.sort(Comparator.comparing(Bookmark::getName));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        List<Bookmark> bookmarks = new ArrayList<>(getBookmarks(project, job));
+        bookmarks.sort(Comparator.comparing(Bookmark::getName));
     }
 
     private void load() {

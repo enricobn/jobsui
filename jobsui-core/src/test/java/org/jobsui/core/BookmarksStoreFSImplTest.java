@@ -51,7 +51,7 @@ public class BookmarksStoreFSImplTest {
     }
 
     @Test
-    public void assert_that_bookmarks_are_ordered_ba_name() throws Exception {
+    public void assert_that_bookmarks_are_ordered_by_name() throws Exception {
         Project project = createProject("projectId");
         Job<?> job = createJob("jobId");
 
@@ -66,5 +66,28 @@ public class BookmarksStoreFSImplTest {
 
         assertThat(savedBookmarks.get(0).getName(), is(bookmark1.getName()));
         assertThat(savedBookmarks.get(1).getName(), is(bookmark2.getName()));
+    }
+
+    @Test
+    public void assert_that_when_you_save_a_bookmark_with_the_sam_name_then_the_old_bookmark_is_replaced_with_the_new() throws Exception {
+        Project project = createProject("projectId");
+        Job<?> job = createJob("jobId");
+
+        JobValues values = mock(JobValues.class);
+        Bookmark bookmark = new Bookmark(project, job, "bookmark", values);
+        sut.saveBookmark(project, job, bookmark);
+
+        bookmark = new Bookmark(project, job, "bookmark", values);
+        sut.saveBookmark(project, job, bookmark);
+
+        List<Bookmark> bookmarks = sut.getBookmarks(project, job);
+
+        assertThat(bookmarks.size(), is(1));
+
+        Bookmark savedBookmark = bookmarks.get(0);
+
+        assertThat(savedBookmark.getProjectId(), is(project.getId()));
+        assertThat(savedBookmark.getJobId(), is(job.getId()));
+        assertThat(savedBookmark.getName(), is(bookmark.getName()));
     }
 }

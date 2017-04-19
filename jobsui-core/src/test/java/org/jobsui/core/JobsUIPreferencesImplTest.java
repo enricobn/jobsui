@@ -156,49 +156,6 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void assert_that_when_a_bookmark_is_added_then_it_can_be_retrieved() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
-
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
-
-        String bookmarkName = "test";
-
-        Project project = createProject("projectId");
-        Job<?> job = createJob("jobId");
-
-        Bookmark bookmark = createBookmark(bookmarkName, project, job);
-
-        sut.saveBookmark(project, job, bookmark);
-
-        List<Bookmark> bookmarks = sut.getBookmarks(project, job);
-
-        assertThat(bookmarks.get(0).getName(), is(bookmarkName));
-    }
-
-    @Test
-    public void assert_that_when_a_bookmark_whch_is_already_present_is_added_then_it_is_replaced() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
-
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
-
-        Project project = createProject("projectId");
-        Job<?> job = createJob("jobId");
-
-        String bookmarkName = "test";
-        Bookmark bookmark1 = createBookmark(bookmarkName, project, job);
-
-        sut.saveBookmark(project, job, bookmark1);
-
-        Bookmark bookmark2 = createBookmark(bookmarkName, project, job);
-
-        sut.saveBookmark(project, job, bookmark2);
-
-        List<Bookmark> bookmarks = sut.getBookmarks(project, job);
-
-        assertThat(bookmarks.size(), is(1));
-    }
-
-    @Test
     public void assert_that_when_a_project_has_no_bookmarks_then_empy_list_is_returned() throws Exception {
         when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
@@ -234,35 +191,6 @@ public class JobsUIPreferencesImplTest {
         sut.getBookmarks(project, job);
 
         verify(bookmarkStore).getBookmarks(project, job);
-    }
-
-    @Test
-    public void assert_that_when_bookmarks_are_already_present_in_the_store_then_adding_a_new_bookmark_is_added_to_them_and_are_sorted() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
-
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
-
-        Project project = createProject("projectId");
-        Job<?> job = createJob("jobId");
-
-        Bookmark alreadypresentBookmark = createBookmark("bookmark2", project, job);
-
-        // I cannot use Collections.singletonList since JobsUIPreferencesImpl adds elements
-        List<Bookmark> alreadyPresentBookmarks = new ArrayList<>();
-        alreadyPresentBookmarks.add(alreadypresentBookmark);
-
-        when(bookmarkStore.getBookmarks(project, job)).thenReturn(alreadyPresentBookmarks);
-
-        Bookmark bookmark = createBookmark("bookmark1", project, job);
-
-        sut.saveBookmark(project, job, bookmark);
-
-        List<Bookmark> bookmarks = sut.getBookmarks(project, job);
-
-        assertThat(bookmarks.size(), is(2));
-
-        assertThat(bookmarks.get(0).getName(), is("bookmark1"));
-        assertThat(bookmarks.get(1).getName(), is("bookmark2"));
     }
 
     private Bookmark createBookmark(String bookmarkName, Project project, Job<?> job) {

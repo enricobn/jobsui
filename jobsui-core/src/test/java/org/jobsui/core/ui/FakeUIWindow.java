@@ -1,5 +1,6 @@
 package org.jobsui.core.ui;
 
+import org.jobsui.core.Bookmark;
 import org.jobsui.core.Project;
 import org.jobsui.core.job.Job;
 
@@ -9,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -59,6 +61,11 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
     @Override
     public void addButton(UIButton<T> button) {
         add(button);
+    }
+
+    @Override
+    public void setOnOpenBookmark(Consumer<Bookmark> onOpenBookmark) {
+        // TODO
     }
 
     @Override

@@ -366,6 +366,10 @@ public class JobRunnerContext<T extends Serializable, C> {
         }
     }
 
+    public UIWidget<C> getWidget(JobParameterDef jobParameterDef) {
+        return widgets.get(jobParameterDef);
+    }
+
 //    private List<Observable<Serializable>> getObservables() {
 //        List<Observable<Serializable>> result = new ArrayList<>();
 //        for (JobDependency jobDependency : sortedJobDependencies) {

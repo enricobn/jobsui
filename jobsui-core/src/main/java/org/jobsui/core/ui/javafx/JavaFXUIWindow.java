@@ -1,18 +1,27 @@
 package org.jobsui.core.ui.javafx;
 
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import org.jobsui.core.Bookmark;
+import org.jobsui.core.OpenedItem;
 import org.jobsui.core.Project;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.ui.*;
+import org.jobsui.core.xml.ProjectFSXML;
 
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -24,6 +33,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
     private HBox mainPanel;
     private ListView<Bookmark> bookmarkListView;
     private VBox componentsRoot;
+    private Consumer<Bookmark> onOpenBookmark;
 //    private static final List<NodeUIWidget> components = new ArrayList<>();
 
 //    private static boolean ok = false;
@@ -40,6 +50,8 @@ class JavaFXUIWindow implements UIWindow<Node> {
         bookmarkListView = new ListView<>();
         bookmarkListView.setMinWidth(200);
         mainPanel.getChildren().add(bookmarkListView);
+        bookmarkListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        bookmarkListView.setCellFactory(new CellFactory());
 
         List<Bookmark> bookmarks = StartApp.getInstance().getPreferences().getBookmarks(project, job);
         bookmarkListView.getItems().addAll(bookmarks);
@@ -159,6 +171,12 @@ class JavaFXUIWindow implements UIWindow<Node> {
 ////        }
 //    }
 
+
+    @Override
+    public void setOnOpenBookmark(Consumer<Bookmark> onOpenBookmark) {
+        this.onOpenBookmark = onOpenBookmark;
+    }
+
     private static class NodeUIWidget implements UIWidget<Node> {
         private final String title;
         private final UIComponent<Node> component;
@@ -200,6 +218,72 @@ class JavaFXUIWindow implements UIWindow<Node> {
             return nodeComponent;
         }
     }
+
+    private class CellFactory implements Callback<ListView<Bookmark>, ListCell<Bookmark>> {
+        @Override
+        public ListCell<Bookmark> call(ListView<Bookmark> lv) {
+            ListCell<Bookmark> cell = new ListCell<Bookmark>() {
+                @Override
+                public void updateItem(Bookmark item, boolean empty) {
+                    super.updateItem(item, empty);
+                    if (empty) {
+                        setText(null);
+                    } else {
+                        setText(item.toString());
+                    }
+                }
+            };
+
+            cell.setOnMouseEntered(e -> {
+                bookmarkListView.setCursor(Cursor.HAND);
+                bookmarkListView.getSelectionModel().select(cell.getItem());
+            });
+
+            cell.setOnMouseExited(e -> {
+                bookmarkListView.setCursor(Cursor.DEFAULT);
+                bookmarkListView.getSelectionModel().clearSelection();
+            });
+
+            cell.setOnMouseClicked(e -> {
+                Bookmark item = cell.getItem();
+                if (item != null && e.getButton() == MouseButton.PRIMARY) {
+                    try {
+                        if (onOpenBookmark != null) {
+                            onOpenBookmark.accept(item);
+                        }
+                    } catch (Exception e1) {
+                        // TODO message
+                        throw new RuntimeException(e1);
+                    }
+                }
+            });
+
+//            ContextMenu menu = new ContextMenu();
+//
+//            MenuItem editMenuItem = new MenuItem("Edit");
+//            editMenuItem.setOnAction(event -> {
+//                // TODO I don't want to add the edit menu for "not file"
+//                if (cell.getItem() != null && cell.getItem().url.startsWith("file:/")) {
+//                    URL url;
+//                    try {
+//                        url = new URL(cell.getItem().url);
+//                    } catch (MalformedURLException e1) {
+//                        // TODO message
+//                        throw new RuntimeException(e1);
+//                    }
+//
+//                    Task<ProjectFSXML> task = new LoadProjectXMLTask(new File(url.getPath()));
+//                    ProgressDialog.run(task, "Opening project", project -> StartApp.getInstance().gotoEdit(project));
+//                }
+//            });
+//            menu.getItems().add(editMenuItem);
+//
+//            cell.setContextMenu(menu);
+
+            return cell;
+        }
+    }
+
 
 }
 

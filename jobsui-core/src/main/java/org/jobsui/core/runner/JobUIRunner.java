@@ -5,6 +5,7 @@ import org.jobsui.core.Bookmark;
 import org.jobsui.core.Project;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobDependency;
+import org.jobsui.core.job.JobParameterDef;
 import org.jobsui.core.ui.UI;
 import org.jobsui.core.ui.UIButton;
 import org.jobsui.core.ui.UIWindow;
@@ -132,6 +133,29 @@ public class JobUIRunner<C> implements JobRunner {
 
             window.addButton(runButton);
             window.addButton(saveBookmarkButton);
+            window.setOnOpenBookmark(bookmark -> {
+                try {
+                    for (JobDependency jobDependency : job.getSortedDependencies()) {
+                        if (jobDependency instanceof JobParameterDef) {
+                            JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
+                            Serializable value = bookmark.getValues().get(jobParameterDef.getKey());
+
+                            List<String> validate = jobParameterDef.validate(bookmark.getValues(), value);
+
+                            if (validate.isEmpty()) {
+                                context.getWidget(jobParameterDef).getComponent().setValue(value);
+                            } else {
+                                ui.showMessage(String.format("Value '%s' for parameter '%s' is not valid:\n%s",
+                                        value, jobParameterDef.getName(), String.join(",", validate)));
+                                break;
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                System.out.println(bookmark);
+            });
 //            window.add(closeButton);
         });
 
@@ -139,10 +163,6 @@ public class JobUIRunner<C> implements JobRunner {
             throw exceptions.get(0);
         }
         return atomicResult.get();
-    }
-
-    private Bookmark loadBookmark(XStream xstream, String fileName) throws FileNotFoundException {
-        return (Bookmark) xstream.fromXML(new FileReader(fileName));
     }
 
     private static void setValue(JobValues values, Map<String, Serializable> map, JobDependency jobDependency) {

@@ -1,11 +1,13 @@
 package org.jobsui.core.ui.swing;
 
+import org.jobsui.core.Bookmark;
 import org.jobsui.core.Project;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.ui.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.function.Consumer;
 
 /**
  * Created by enrico on 2/14/16.
@@ -132,6 +134,11 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     public void addButton(UIButton<JComponent> button) {
         // TODO
         add(button);
+    }
+
+    @Override
+    public void setOnOpenBookmark(Consumer<Bookmark> onOpenBookmark) {
+        // TODO
     }
 
     @Override

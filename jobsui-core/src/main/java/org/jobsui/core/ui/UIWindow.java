@@ -1,8 +1,11 @@
 package org.jobsui.core.ui;
 
 import javafx.scene.Node;
+import org.jobsui.core.Bookmark;
 import org.jobsui.core.Project;
 import org.jobsui.core.job.Job;
+
+import java.util.function.Consumer;
 
 /**
  * Created by enrico on 2/24/16.
@@ -23,6 +26,8 @@ public interface UIWindow<T> extends UIContainer<T> {
     void showValidationMessage(String message);
 
     void addButton(UIButton<T> button);
+
+    void setOnOpenBookmark(Consumer<Bookmark> onOpenBookmark);
 
 //    UIContainer<T> addContainer();
 
