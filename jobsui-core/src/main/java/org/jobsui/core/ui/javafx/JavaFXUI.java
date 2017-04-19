@@ -8,7 +8,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.jobsui.core.BookmarksStoreFSImpl;
+import org.jobsui.core.bookmark.BookmarksStoreFSImpl;
 import org.jobsui.core.JobsUIPreferencesImpl;
 import org.jobsui.core.Main;
 import org.jobsui.core.ui.*;

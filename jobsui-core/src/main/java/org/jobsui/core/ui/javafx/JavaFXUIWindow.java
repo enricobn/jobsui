@@ -1,6 +1,5 @@
 package org.jobsui.core.ui.javafx;
 
-import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -10,16 +9,11 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
-import org.jobsui.core.Bookmark;
-import org.jobsui.core.OpenedItem;
+import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.Project;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.ui.*;
-import org.jobsui.core.xml.ProjectFSXML;
 
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;

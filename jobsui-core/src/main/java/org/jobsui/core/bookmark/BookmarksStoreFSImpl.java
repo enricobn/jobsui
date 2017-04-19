@@ -1,6 +1,7 @@
-package org.jobsui.core;
+package org.jobsui.core.bookmark;
 
 import com.thoughtworks.xstream.XStream;
+import org.jobsui.core.Project;
 import org.jobsui.core.job.Job;
 
 import java.io.File;

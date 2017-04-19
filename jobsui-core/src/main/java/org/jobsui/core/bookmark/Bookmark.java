@@ -1,5 +1,6 @@
-package org.jobsui.core;
+package org.jobsui.core.bookmark;
 
+import org.jobsui.core.Project;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobParameterDef;
 import org.jobsui.core.runner.JobValues;

@@ -1,7 +1,7 @@
 package org.jobsui.core.runner;
 
 import com.thoughtworks.xstream.XStream;
-import org.jobsui.core.Bookmark;
+import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.Project;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobDependency;
@@ -13,9 +13,6 @@ import org.jobsui.core.ui.UnsupportedComponentException;
 import org.jobsui.core.ui.javafx.StartApp;
 import rx.Observable;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;

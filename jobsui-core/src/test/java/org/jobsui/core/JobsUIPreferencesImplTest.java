@@ -1,5 +1,7 @@
 package org.jobsui.core;
 
+import org.jobsui.core.bookmark.Bookmark;
+import org.jobsui.core.bookmark.BookmarksStore;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.runner.JobValues;
 import org.jobsui.core.ui.javafx.JobsUITheme;
@@ -10,9 +12,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.prefs.Preferences;
 
 import static org.hamcrest.CoreMatchers.is;

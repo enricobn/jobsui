@@ -1,5 +1,8 @@
-package org.jobsui.core;
+package org.jobsui.core.bookmark;
 
+import org.jobsui.core.Project;
+import org.jobsui.core.bookmark.Bookmark;
+import org.jobsui.core.bookmark.BookmarksStoreFSImpl;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.runner.JobValues;
 import org.jobsui.core.utils.JobsUIUtils;
