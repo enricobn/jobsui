@@ -2,7 +2,7 @@ package org.jobsui.core.runner;
 
 import com.thoughtworks.xstream.XStream;
 import org.jobsui.core.bookmark.Bookmark;
-import org.jobsui.core.Project;
+import org.jobsui.core.job.Project;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.JobParameterDef;

@@ -41,7 +41,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
-import org.jobsui.core.Project;
+import org.jobsui.core.job.Project;
 import org.jobsui.core.edit.EditProject;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.runner.JobUIRunner;

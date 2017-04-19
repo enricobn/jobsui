@@ -1,4 +1,6 @@
-package org.jobsui.core;
+package org.jobsui.core.job;
+
+import org.jobsui.core.job.ParameterValidator;
 
 import java.io.Serializable;
 import java.util.Collections;

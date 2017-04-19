@@ -1,7 +1,6 @@
 package org.jobsui.core.job;
 
 import org.jobsui.core.ParameterDefUI;
-import org.jobsui.core.ParameterValidator;
 
 import java.io.Serializable;
 

@@ -1,4 +1,4 @@
-package org.jobsui.core;
+package org.jobsui.core.job;
 
 import org.jobsui.core.job.Job;
 

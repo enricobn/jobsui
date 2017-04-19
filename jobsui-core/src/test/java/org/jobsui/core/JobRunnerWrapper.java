@@ -1,6 +1,7 @@
 package org.jobsui.core;
 
 import org.jobsui.core.job.Job;
+import org.jobsui.core.job.Project;
 import org.jobsui.core.runner.JobUIRunner;
 import org.jobsui.core.ui.FakeUIButton;
 import org.jobsui.core.ui.FakeUIWindow;

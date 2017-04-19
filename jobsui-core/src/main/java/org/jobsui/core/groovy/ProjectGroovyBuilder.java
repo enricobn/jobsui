@@ -5,7 +5,7 @@ import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import org.jobsui.core.Project;
+import org.jobsui.core.job.Project;
 import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.xml.*;
 
@@ -154,7 +154,7 @@ public class ProjectGroovyBuilder {
         }
 
         ImportCustomizer importCustomizer = new ImportCustomizer();
-        importCustomizer.addStarImports("org.jobsui.core", "org.jobsui.core.ui");
+//        importCustomizer.addStarImports("org.jobsui.core", "org.jobsui.core.ui");
 
         CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
         compilerConfiguration.addCompilationCustomizers(importCustomizer);

@@ -1,7 +1,7 @@
 package org.jobsui.core.bookmark;
 
 import com.thoughtworks.xstream.XStream;
-import org.jobsui.core.Project;
+import org.jobsui.core.job.Project;
 import org.jobsui.core.job.Job;
 
 import java.io.File;
@@ -11,11 +11,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Created by enrico on 4/17/17.
  */
 public class BookmarksStoreFSImpl implements BookmarksStore {
+    private static final Logger LOGGER = Logger.getLogger(BookmarksStoreFSImpl.class.getName());
     private final File root;
 
     public static BookmarksStoreFSImpl getUser() {
@@ -68,7 +71,11 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
 
         for (String fileName : list) {
             File file = new File(jobRoot, fileName);
-            result.add((Bookmark) xstream.fromXML(file));
+            try {
+                result.add((Bookmark) xstream.fromXML(file));
+            } catch (Exception e) {
+                LOGGER.log(Level.SEVERE, "Error loading bookmark from " + file, e);
+            }
         }
 
         result.sort(Comparator.comparing(Bookmark::getName));

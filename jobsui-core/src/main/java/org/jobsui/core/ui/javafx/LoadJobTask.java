@@ -1,7 +1,7 @@
 package org.jobsui.core.ui.javafx;
 
 import javafx.concurrent.Task;
-import org.jobsui.core.Project;
+import org.jobsui.core.job.Project;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.utils.Tuple2;
 import org.jobsui.core.xml.ProjectParserImpl;
@@ -9,7 +9,6 @@ import org.jobsui.core.job.Job;
 import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.xml.ProjectXML;
 
-import java.io.File;
 import java.io.Serializable;
 import java.net.URL;
 

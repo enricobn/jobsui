@@ -1,6 +1,6 @@
 package org.jobsui.core.runner;
 
-import org.jobsui.core.ParameterValidator;
+import org.jobsui.core.job.ParameterValidator;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.JobExpression;
