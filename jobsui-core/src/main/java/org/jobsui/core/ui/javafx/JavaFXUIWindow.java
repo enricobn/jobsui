@@ -1,12 +1,15 @@
 package org.jobsui.core.ui.javafx;
 
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.jobsui.core.JobsUIPreferences;
@@ -18,6 +21,8 @@ import org.jobsui.core.ui.*;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import static org.jobsui.core.ui.javafx.JobsUIFXStyles.ERROR_TEXT;
 
 /**
  * Created by enrico on 10/7/16.
@@ -112,18 +117,21 @@ class JavaFXUIWindow implements UIWindow<Node> {
     private static class NodeUIWidget implements UIWidget<Node> {
         private final String title;
         private final UIComponent<Node> component;
-        private final VBox nodeComponent;
-        private final Label messagesLabel;
+        private final HBox nodeComponent;
+        private final Label label;
 
         NodeUIWidget(String title, UIComponent<Node> component) {
             this.title = title;
             this.component = component;
-            nodeComponent = new VBox(2);
-            Label label = new Label(title);
+            nodeComponent = new HBox(2);
+            label = new Label(title == null || title.isEmpty() ? null : title + ":");
+            if (title != null && !title.isEmpty() ) {
+                label.setMinWidth(100);
+            }
+            label.setAlignment(Pos.BOTTOM_RIGHT);
             nodeComponent.getChildren().add(label);
             nodeComponent.getChildren().add(component.getComponent());
-            messagesLabel = new Label();
-            nodeComponent.getChildren().add(messagesLabel);
+            component.getComponent().setTranslateY(-5);
         }
 
         @Override
@@ -138,8 +146,15 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
         @Override
         public void setValidationMessages(List<String> messages) {
-            String text = messages.stream().collect(Collectors.joining(","));
-            messagesLabel.setText(text);
+            if (messages.isEmpty()) {
+                label.getStyleClass().clear();
+                label.getStyleClass().add("label");
+                label.setTooltip(null);
+            } else {
+                String text = messages.stream().collect(Collectors.joining(","));
+                label.setTooltip(new Tooltip(text));
+                label.getStyleClass().add(ERROR_TEXT);
+            }
         }
 
         public String getTitle() {

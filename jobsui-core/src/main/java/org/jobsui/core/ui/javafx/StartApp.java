@@ -176,10 +176,17 @@ public class StartApp extends Application {
 //    }
 
     private static void addStylesheet() {
-        if (preferences.getTheme() == JobsUITheme.Dark) {
-            String url = StartApp.class.getResource("dark.css").toExternalForm();
-            StyleManager.getInstance().addUserAgentStylesheet(url);
+        String resource;
+        switch (preferences.getTheme()) {
+            case Dark:
+                resource = "dark.css";
+                break;
+            default:
+                resource = "standard.css";
+                break;
         }
+        String url = StartApp.class.getResource(resource).toExternalForm();
+        StyleManager.getInstance().addUserAgentStylesheet(url);
     }
 
     private void replaceSceneContent(Stage stage, URL fxml) throws Exception {
