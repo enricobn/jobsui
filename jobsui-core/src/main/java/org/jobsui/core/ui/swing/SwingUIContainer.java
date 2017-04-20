@@ -63,6 +63,11 @@ public class SwingUIContainer implements UIContainer<JComponent> {
             }
 
             @Override
+            public void setDisable(boolean value) {
+                getComponent().setEnabled(!value);
+            }
+
+            @Override
             public UIComponent<JComponent> getComponent() {
                 return component;
             }
@@ -165,6 +170,11 @@ public class SwingUIContainer implements UIContainer<JComponent> {
             public void setVisible(boolean visible) {
                 component.setVisible(visible);
                 jlabel.setVisible(visible);
+            }
+
+            @Override
+            public void setDisable(boolean value) {
+                getComponent().setEnabled(!value);
             }
 
             @Override

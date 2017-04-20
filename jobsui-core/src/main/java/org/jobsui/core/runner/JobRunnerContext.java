@@ -34,7 +34,7 @@ public class JobRunnerContext<T extends Serializable, C> {
 
         for (final JobParameterDef jobParameterDef : job.getParameterDefs()) {
             UIWidget<C> widget = createWidget(ui, window, jobParameterDef);
-            widget.getComponent().setEnabled(jobParameterDef.getDependencies().isEmpty());
+            widget.setDisable(!jobParameterDef.getDependencies().isEmpty());
             widgets.put(jobParameterDef.getKey(), widget);
         }
 
@@ -95,7 +95,7 @@ public class JobRunnerContext<T extends Serializable, C> {
                         if (jobDependency instanceof JobParameterDef) {
                             JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
                             final UIWidget widget = getWidget(jobParameterDef);
-                            widget.getComponent().setEnabled(true);
+                            widget.setDisable(false);
                             reEnableDependants(validValues, jobDependency);
                             try {
                                 jobParameterDef.onDependenciesChange(widget, objects);
@@ -103,7 +103,7 @@ public class JobRunnerContext<T extends Serializable, C> {
                                 JavaFXUI.showErrorStatic("Error on onDependenciesChange for parameter " + jobParameterDef.getName(), e);
                                 widget.setValidationMessages(Collections.singletonList(e.getMessage()));
                                 widget.getComponent().setValue(null);
-                                widget.getComponent().setEnabled(false);
+                                widget.setDisable(true);
                                 disableDependants(jobDependency);
                             }
                         } else if (jobDependency instanceof JobExpression) {
@@ -119,7 +119,7 @@ public class JobRunnerContext<T extends Serializable, C> {
                         if (jobDependency instanceof JobParameterDef) {
                             JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
                             final UIWidget widget = getWidget(jobParameterDef);
-                            widget.getComponent().setEnabled(false);
+                            widget.setDisable(true);
                         }
                         disableDependants(jobDependency);
                     }
@@ -131,7 +131,7 @@ public class JobRunnerContext<T extends Serializable, C> {
     private void disableDependants(JobDependency jobDependency) {
         for (JobDependency dependant : getDependants(jobDependency)) {
             if (dependant instanceof JobParameterDef) {
-                getWidget((JobParameterDef) dependant).getComponent().setEnabled(false);
+                getWidget((JobParameterDef) dependant).setDisable(true);
             }
             disableDependants(dependant);
         }
@@ -142,7 +142,7 @@ public class JobRunnerContext<T extends Serializable, C> {
             Map<String, Serializable> dependenciesValues = getDependenciesValues(validValues, dependant);
             if (dependenciesValues.size() == dependant.getDependencies().size()) {
                 if (dependant instanceof JobParameterDef) {
-                    getWidget((JobParameterDef) dependant).getComponent().setEnabled(true);
+                    getWidget((JobParameterDef) dependant).setDisable(false);
                 }
                 reEnableDependants(validValues, dependant);
             }

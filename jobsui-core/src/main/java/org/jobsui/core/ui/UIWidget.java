@@ -9,6 +9,8 @@ public interface UIWidget<C> {
 
     void setVisible(boolean visible);
 
+    void setDisable(boolean value);
+
     UIComponent<C> getComponent();
 
     void setValidationMessages(List<String> messages);

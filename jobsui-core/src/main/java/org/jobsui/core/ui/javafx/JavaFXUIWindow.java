@@ -2,14 +2,15 @@ package org.jobsui.core.ui.javafx;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.effect.Effect;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.jobsui.core.JobsUIPreferences;
@@ -30,29 +31,27 @@ import static org.jobsui.core.ui.javafx.JobsUIFXStyles.ERROR_TEXT;
 class JavaFXUIWindow implements UIWindow<Node> {
     private HBox buttonsPanel;
     private ListView<Bookmark> bookmarkListView;
-    private VBox componentsRoot;
+    private VBox componentspanel;
     private Consumer<Bookmark> onOpenBookmark;
 
     @Override
     public void show(Project project, Job job, Runnable callback) {
-        VBox root = new VBox(5);
+        HBox root = new HBox(5);
+
         buttonsPanel = new HBox(5);
-        root.getChildren().add(buttonsPanel);
+        buttonsPanel.setPadding(new Insets(10, 5, 5, 5));
 
-        HBox mainPanel = new HBox(5);
+        componentspanel = new VBox(10);
+        componentspanel.setPadding(new Insets(5, 5, 5, 5));
+
+        VBox mainPanel = createMainPanel(buttonsPanel, componentspanel);
+
+        bookmarkListView = createBookmarkListView(project, job);
+
+        VBox bookmarksPanel = createBookmarksPanel(bookmarkListView);
+
+        root.getChildren().add(bookmarksPanel);
         root.getChildren().add(mainPanel);
-        bookmarkListView = new ListView<>();
-        bookmarkListView.setMinWidth(200);
-        mainPanel.getChildren().add(bookmarkListView);
-        bookmarkListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        bookmarkListView.setCellFactory(new CellFactory(project, job));
-
-        List<Bookmark> bookmarks = StartApp.getInstance().getPreferences().getBookmarks(project, job);
-        bookmarkListView.getItems().addAll(bookmarks);
-        componentsRoot = new VBox(5);
-        componentsRoot.setPadding(new Insets(5, 5, 5, 5));
-
-        mainPanel.getChildren().add(componentsRoot);
 
         callback.run();
 
@@ -62,6 +61,38 @@ class JavaFXUIWindow implements UIWindow<Node> {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static VBox createMainPanel(HBox buttonsPanel, VBox componentspanel) {
+        VBox mainPanel = new VBox(5);
+        mainPanel.getChildren().add(buttonsPanel);
+        mainPanel.getChildren().add(componentspanel);
+        return mainPanel;
+    }
+
+    private static VBox createBookmarksPanel(ListView<Bookmark> bookmarkListView) {
+        VBox bookmarksPanel = new VBox(5);
+        Label bookmarksLabel = new Label("Bookmarks");
+        bookmarksLabel.setPadding(new Insets(5, 5, 5, 5));
+        bookmarksPanel.getChildren().add(bookmarksLabel);
+        bookmarksPanel.getChildren().add(bookmarkListView);
+        return bookmarksPanel;
+    }
+
+    private HBox createMainPanel(Project project, Job job, ListView<Bookmark> bookmarkListView) {
+        HBox mainPanel = new HBox(5);
+        mainPanel.getChildren().add(bookmarkListView);
+        return mainPanel;
+    }
+
+    private ListView<Bookmark> createBookmarkListView(Project project, Job job) {
+        ListView<Bookmark> bookmarkListView = new ListView<>();
+        bookmarkListView.setMinWidth(200);
+        bookmarkListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        bookmarkListView.setCellFactory(new CellFactory(project, job));
+        List<Bookmark> bookmarks = StartApp.getInstance().getPreferences().getBookmarks(project, job);
+        bookmarkListView.getItems().addAll(bookmarks);
+        return bookmarkListView;
     }
 
     @Override
@@ -74,7 +105,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
         NodeUIWidget widget = new NodeUIWidget(title, component);
         Node node = widget.getNodeComponent();
         node.managedProperty().bind(node.visibleProperty());
-        componentsRoot.getChildren().add(node);
+        componentspanel.getChildren().add(node);
         return widget;
     }
 
@@ -99,7 +130,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
     @Override
     public Node getComponent() {
-        return componentsRoot;
+        return componentspanel;
     }
 
     @Override
@@ -117,26 +148,32 @@ class JavaFXUIWindow implements UIWindow<Node> {
     private static class NodeUIWidget implements UIWidget<Node> {
         private final String title;
         private final UIComponent<Node> component;
-        private final HBox nodeComponent;
+        private final GridPane nodeComponent;
         private final Label label;
 
         NodeUIWidget(String title, UIComponent<Node> component) {
             this.title = title;
             this.component = component;
-            nodeComponent = new HBox(2);
+            nodeComponent = new GridPane();
             label = new Label(title == null || title.isEmpty() ? null : title + ":");
             if (title != null && !title.isEmpty() ) {
                 label.setMinWidth(100);
             }
             label.setAlignment(Pos.BOTTOM_RIGHT);
-            nodeComponent.getChildren().add(label);
-            nodeComponent.getChildren().add(component.getComponent());
-            component.getComponent().setTranslateY(-5);
+            nodeComponent.add(label, 0, 0);
+            GridPane.setValignment(label, VPos.BOTTOM);
+            GridPane.setMargin(label, new Insets(0, 5, 0, 0));
+            nodeComponent.add(component.getComponent(), 1, 0);
         }
 
         @Override
         public void setVisible(boolean visible) {
             nodeComponent.setVisible(visible);
+        }
+
+        @Override
+        public void setDisable(boolean value) {
+            nodeComponent.setDisable(value);
         }
 
         @Override
