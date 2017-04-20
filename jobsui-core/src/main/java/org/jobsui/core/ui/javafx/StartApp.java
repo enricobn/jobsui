@@ -198,9 +198,10 @@ public class StartApp extends Application {
         stage.sizeToScene();
     }
 
-    Stage replaceSceneContent(Parent page) throws Exception {
+    Stage replaceSceneContent(Parent page, String title) throws Exception {
         Stage stage = new Stage();
         replaceSceneContent(stage, page);
+        stage.setTitle(title);
 //        Scene scene = stage.getScene();
 //        if (scene == null) {
 //            scene = new Scene(page, 700, 450);

@@ -23,24 +23,18 @@ import java.util.stream.Collectors;
  * Created by enrico on 10/7/16.
  */
 class JavaFXUIWindow implements UIWindow<Node> {
-    private VBox root;
     private HBox buttonsPanel;
-    private HBox mainPanel;
     private ListView<Bookmark> bookmarkListView;
     private VBox componentsRoot;
     private Consumer<Bookmark> onOpenBookmark;
-//    private static final List<NodeUIWidget> components = new ArrayList<>();
-
-//    private static boolean ok = false;
-//    private static Runnable callback;
 
     @Override
     public void show(Project project, Job job, Runnable callback) {
-        root = new VBox(5);
+        VBox root = new VBox(5);
         buttonsPanel = new HBox(5);
         root.getChildren().add(buttonsPanel);
 
-        mainPanel = new HBox(5);
+        HBox mainPanel = new HBox(5);
         root.getChildren().add(mainPanel);
         bookmarkListView = new ListView<>();
         bookmarkListView.setMinWidth(200);
@@ -58,20 +52,12 @@ class JavaFXUIWindow implements UIWindow<Node> {
         callback.run();
 
         try {
-            Stage stage = StartApp.getInstance().replaceSceneContent(root);
+            Stage stage = StartApp.getInstance().replaceSceneContent(root, project.getName() + " / " + job.getName());
             stage.showAndWait();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-//        JavaFXUIWindow.callback = callback;
-
-//        Application.launch(JavaFXUIWindow.JavaFXApplication.class);
     }
-
-//    @Override
-//    public void setValid(boolean valid) {
-//        JavaFXApplication.setValid(valid);
-//    }
 
     @Override
     public void showValidationMessage(String message) {
@@ -108,64 +94,8 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
     @Override
     public Node getComponent() {
-//        return JavaFXApplication.root;
         return componentsRoot;
     }
-
-//    public static class JavaFXApplication extends Application {
-//        private Scene scene;
-//        private VBox root;
-////        private static Button okButton;
-////        private static boolean valid = false;
-//
-//        @Override
-//        public void start(Stage stage) throws Exception {
-//            Thread.setDefaultUncaughtExceptionHandler(JavaFXUI::uncaughtException);
-//
-//            root = new VBox(5);
-//            root.setPadding(new Insets(5, 5, 5, 5));
-//
-////            callback.run();
-//
-////            for (NodeUIWidget widget : components) {
-////                Node node = widget.getNodeComponent();
-////                node.managedProperty().bind(node.visibleProperty());
-////                root.getChildren().add(node);
-////            }
-//
-////            HBox okCancel = new HBox(5);
-////
-////            okButton = new Button("OK");
-////            okButton.setDisable(!valid);
-////            okButton.setOnAction(event -> {
-////                ok = true;
-////            });
-////            okCancel.getChildren().add(okButton);
-////
-////            Button cancelButton = new Button("Cancel");
-////            cancelButton.setOnAction(event -> {
-////                ok = false;
-////            });
-////            okCancel.getChildren().add(cancelButton);
-////
-////            root.getChildren().add(okCancel);
-//
-//            scene = new Scene(root, 600, 800);
-//
-//            stage.setTitle("JobsUI");
-//            stage.setScene(scene);
-//            stage.show();
-//        }
-//
-////        static void setValid(boolean valid) {
-////            if (okButton == null) {
-////                JavaFXApplication.valid = valid;
-////            } else {
-////                okButton.setDisable(!valid);
-////            }
-////        }
-//    }
-
 
     @Override
     public void setOnOpenBookmark(Consumer<Bookmark> onOpenBookmark) {
@@ -225,7 +155,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
         private final Project project;
         private final Job job;
 
-        public CellFactory(Project project, Job job) {
+        CellFactory(Project project, Job job) {
             this.project = project;
             this.job = job;
         }
@@ -288,7 +218,6 @@ class JavaFXUIWindow implements UIWindow<Node> {
             return cell;
         }
     }
-
 
 }
 

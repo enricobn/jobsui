@@ -89,7 +89,7 @@ public class JobUIRunner<C> implements JobRunner {
             saveBookmarkButton.setTitle("Bookmark");
 
             saveBookmarkButton.getObservable().subscribe(serializableVoid -> {
-                Optional<String> name = ui.askString("Name");
+                Optional<String> name = ui.askString("Bookmark's name");
                 name.ifPresent(n -> {
                     JobsUIPreferences preferences = StartApp.getInstance().getPreferences();
 
@@ -160,7 +160,6 @@ public class JobUIRunner<C> implements JobRunner {
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
-                System.out.println(bookmark);
             });
 //            window.add(closeButton);
         });
