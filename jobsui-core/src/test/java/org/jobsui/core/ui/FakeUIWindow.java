@@ -69,6 +69,11 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
     }
 
     @Override
+    public void refreshBookmarks(Project project, Job job) {
+        // TODO
+    }
+
+    @Override
     public UIWidget<T> add(String title, final UIComponent<T> component) {
         final UIWidget widget = mock(UIWidget.class);
         when(widget.getComponent()).thenReturn(component);

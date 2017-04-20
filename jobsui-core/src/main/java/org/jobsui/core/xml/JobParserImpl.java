@@ -37,7 +37,7 @@ public class JobParserImpl implements JobParser {
         jobValidator = jobSchema.newValidator();
     }
 
-    public static JobXML parse(ProjectXML projectXML, String jobResource) throws Exception {
+    public static JobXML parse(SimpleProjectXML projectXML, String jobResource) throws Exception {
         JobParserImpl jobParser = new JobParserImpl();
 
         try (InputStream inputStream = projectXML.getRelativeURL(jobResource).openStream()) {

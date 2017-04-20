@@ -13,15 +13,17 @@ import org.jobsui.core.OpenedItem;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.utils.Tuple2;
-import org.jobsui.core.xml.ProjectFSXML;
-import org.jobsui.core.xml.ProjectParserImpl;
-import org.jobsui.core.xml.ProjectXML;
+import org.jobsui.core.xml.*;
 
 import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 3/29/17.
@@ -53,7 +55,7 @@ public class StartController implements Initializable {
     }
 
     public void onNew(ActionEvent actionEvent) {
-
+        // TODO
     }
 
     private class CellFactory implements Callback<ListView<OpenedItem>, ListCell<OpenedItem>> {
@@ -120,25 +122,63 @@ public class StartController implements Initializable {
         }
     }
 
-    private ProjectXML openProject(URL url) throws Exception {
+    private SimpleProjectXML openProject(URL url) throws Exception {
         ProjectParserImpl projectParser = new ProjectParserImpl();
-        ProjectXML projectXML;
+        SimpleProjectXML simpleProjectXML;
         try {
-            projectXML = projectParser.parseSimple(url);
+            simpleProjectXML = projectParser.parseSimple(url);
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }
 
-        if (projectXML.getJobs().size() == 1) {
-            String jobFile = projectXML.getJobs().iterator().next();
-            Task<Tuple2<Project,Job<Serializable>>> task = new LoadJobTask(url, projectXML.getJobId(jobFile));
-            ProgressDialog.run(task, "Opening job", tuple -> StartApp.getInstance().gotoRun(tuple.first, tuple.second));
-            preferences.registerOpenedProject(url, projectXML.getName());
-            projects.getItems().clear();
-            projects.getItems().addAll(preferences.getLastOpenedItems());
+        if (simpleProjectXML.getJobs().size() == 1) {
+            String jobFile = simpleProjectXML.getJobs().iterator().next();
+
+            openJob(url, simpleProjectXML.getJobId(jobFile), simpleProjectXML);
         } else {
-            JavaFXUI.showMessageStatic("TODO: only one job is supported!");
+            ProjectXML projectXML = projectParser.parse(url);
+            List<JobWrapper> jobWrappers = simpleProjectXML.getJobs().stream()
+                    .map(job -> new JobWrapper(projectXML.getJobXML(job)))
+                    .collect(Collectors.toList());
+
+            Optional<JobWrapper> jobWrapperO = JavaFXUI.chooseStatic("Choose job", jobWrappers);
+
+            jobWrapperO.ifPresent(jobWrapper -> {
+                try {
+                    openJob(url, jobWrapper.getJobId(), simpleProjectXML);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
-        return projectXML;
+        return simpleProjectXML;
+    }
+
+    private void openJob(URL url, String jobId, SimpleProjectXML simpleProjectXML) throws Exception {
+        Task<Tuple2<Project,Job<Serializable>>> task = new LoadJobTask(url, jobId);
+        ProgressDialog.run(task, "Opening job", tuple ->
+                StartApp.getInstance().gotoRun(tuple.first, tuple.second));
+        preferences.registerOpenedProject(url, simpleProjectXML.getName());
+        projects.getItems().clear();
+        projects.getItems().addAll(preferences.getLastOpenedItems());
+    }
+
+    private static class JobWrapper {
+        private final JobXML jobXML;
+
+        private JobWrapper(JobXML jobXML) {
+            Objects.requireNonNull(jobXML);
+            this.jobXML = jobXML;
+        }
+
+        public String getJobId() {
+            return jobXML.getId();
+        }
+
+        @Override
+        public String toString() {
+            return jobXML.getName();
+        }
+
     }
 }

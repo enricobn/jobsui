@@ -81,11 +81,11 @@ public class ProjectParserImpl implements ProjectParser {
     }
 
     @Override
-    public ProjectXML parseSimple(URL url) throws Exception {
-        return parse(url, (id,name) -> new ProjectXMLImpl(url, id, name), true);
+    public SimpleProjectXML parseSimple(URL url) throws Exception {
+        return parse(url, (id,name) -> new SimpleProjectXMLImpl(url, id, name), true);
     }
 
-    private static  <T extends ProjectXMLImpl> T parse(URL url, BiFunction<String,String,T> supplier, boolean simple) throws Exception {
+    private static  <T extends SimpleProjectXMLImpl> T parse(URL url, BiFunction<String,String,T> supplier, boolean simple) throws Exception {
         LOGGER.info("Parsing " + url);
         URL projectURL = new URL(url + "/" + PROJECT_FILE_NAME);
 
@@ -126,7 +126,7 @@ public class ProjectParserImpl implements ProjectParser {
 
     }
 
-    private static void parseProject(Document doc, ProjectXMLImpl projectXML, boolean simple) throws Exception {
+    private static void parseProject(Document doc, SimpleProjectXMLImpl projectXML, boolean simple) throws Exception {
         String subject;
         NodeList libraries = doc.getElementsByTagName("Library");
 
@@ -158,9 +158,9 @@ public class ProjectParserImpl implements ProjectParser {
             }
 
             if (simple) {
-                projectXML.addJob(jobFile, null);
+                projectXML.addJob(jobFile);
             } else {
-                projectXML.addJob(jobFile, JobParserImpl.parse(projectXML, jobFile));
+                ((ProjectXMLImpl) projectXML).addJob(jobFile, JobParserImpl.parse(projectXML, jobFile));
             }
         }
     }
