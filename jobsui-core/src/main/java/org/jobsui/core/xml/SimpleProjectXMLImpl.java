@@ -10,11 +10,11 @@ import java.util.*;
  * Created by enrico on 4/20/17.
  */
 public class SimpleProjectXMLImpl implements SimpleProjectXML {
-    protected final URL projectURL;
-    protected final String id;
+    private final URL projectURL;
+    private final String id;
     private final Set<String> libraries = new HashSet<>();
     private final Map<String, String> imports = new HashMap<>();
-    protected String name;
+    private String name;
     private String version;
     private List<String> jobs = new ArrayList<>();
 
@@ -31,12 +31,7 @@ public class SimpleProjectXMLImpl implements SimpleProjectXML {
         } else {
             url = projectURL + "/" + relativePath;
         }
-//        final File path = new File(projectURL, relativePath);
-//        try {
-//            return path.toURI().toURL();
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
+
         try {
             return new URL(url);
         } catch (MalformedURLException e) {
