@@ -1,5 +1,7 @@
 package org.jobsui.core.ui;
 
+import java.util.Optional;
+
 /**
  * Created by enrico on 11/2/15.
  */
@@ -21,4 +23,7 @@ public interface UI<T> {
 
     void start(String[] args);
 
+    Optional<String> askString(String message);
+
+    boolean askOKCancel(String message);
 }

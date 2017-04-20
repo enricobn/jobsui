@@ -34,7 +34,7 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
 
     @Override
     public void saveBookmark(Project project, Job job, Bookmark bookmark) throws IOException {
-        File jobRoot = new File(new File(root, bookmark.getProjectId()), bookmark.getJobId());
+        File jobRoot = getJobRoot(project, job);
         if (!jobRoot.exists()) {
             jobRoot.mkdirs();
         }
@@ -52,7 +52,7 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
 
     @Override
     public List<Bookmark> getBookmarks(Project project, Job job) {
-        File jobRoot = new File(new File(root, project.getId()), job.getId());
+        File jobRoot = getJobRoot(project, job);
         if (!jobRoot.exists()) {
             return Collections.emptyList();
         }
@@ -81,5 +81,25 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
         result.sort(Comparator.comparing(Bookmark::getName));
 
         return result;
+    }
+
+    private File getJobRoot(Project project, Job job) {
+        return new File(new File(root, project.getId()), job.getId());
+    }
+
+    @Override
+    public boolean existsBookmark(Project project, Job job, String name) {
+        File jobRoot = getJobRoot(project, job);
+        return new File(jobRoot, name + ".xml").exists();
+    }
+
+    @Override
+    public boolean deleteBookmark(Project project, Job job, String name) {
+        File jobRoot = getJobRoot(project, job);
+        File file = new File(jobRoot, name + ".xml");
+        if (!file.exists()) {
+            return false;
+        }
+        return file.delete();
     }
 }

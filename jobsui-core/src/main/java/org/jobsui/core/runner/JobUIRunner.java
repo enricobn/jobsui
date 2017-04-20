@@ -1,11 +1,11 @@
 package org.jobsui.core.runner;
 
-import com.thoughtworks.xstream.XStream;
+import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.bookmark.Bookmark;
-import org.jobsui.core.job.Project;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.JobParameterDef;
+import org.jobsui.core.job.Project;
 import org.jobsui.core.ui.UI;
 import org.jobsui.core.ui.UIButton;
 import org.jobsui.core.ui.UIWindow;
@@ -17,6 +17,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -87,18 +88,26 @@ public class JobUIRunner<C> implements JobRunner {
             saveBookmarkButton.setEnabled(false);
             saveBookmarkButton.setTitle("Bookmark");
 
-            XStream xstream = new XStream();
-            if (job.getClassLoader() != null) {
-                xstream.setClassLoader(job.getClassLoader());
-            }
-
             saveBookmarkButton.getObservable().subscribe(serializableVoid -> {
-                try {
-                    Bookmark bookmark = new Bookmark(project, job, "Test", values);
-                    StartApp.getInstance().getPreferences().saveBookmark(project, job, bookmark);
-                } catch (Exception e) {
-                    ui.showError("Error saving bookmark.", e);
-                }
+                Optional<String> name = ui.askString("Name");
+                name.ifPresent(n -> {
+                    JobsUIPreferences preferences = StartApp.getInstance().getPreferences();
+
+                    boolean ok = true;
+                    if (preferences.existsBookmark(project, job, n)) {
+                        ok = ui.askOKCancel("A bookmark with the same name exists. Do you want to override it?");
+                    }
+
+                    if (ok) {
+                        try {
+                            Bookmark bookmark = new Bookmark(project, job, n, values);
+                            preferences.saveBookmark(project, job, bookmark);
+                            window.refreshBookmarks(project, job);
+                        } catch (Exception e) {
+                            ui.showError("Error saving bookmark.", e);
+                        }
+                    }
+                });
             });
 
 //            closeButton.setTitle("Close");

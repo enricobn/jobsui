@@ -142,6 +142,11 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     }
 
     @Override
+    public void refreshBookmarks(Project project, Job job) {
+        // todo
+    }
+
+    @Override
     public UIWidget<JComponent> add(String title, UIComponent<JComponent> component) {
         return container.add(title, component);
     }

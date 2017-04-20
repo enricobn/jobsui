@@ -5,6 +5,7 @@ import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.ui.javafx.JobsUITheme;
 
+import java.io.Serializable;
 import java.net.URL;
 import java.util.List;
 
@@ -25,4 +26,7 @@ public interface JobsUIPreferences {
 
     void saveBookmark(Project project, Job job, Bookmark bookmark);
 
+    boolean existsBookmark(Project project, Job job, String name);
+
+    boolean deleteBookmark(Project project, Job job, String name);
 }

@@ -91,4 +91,47 @@ public class BookmarksStoreFSImplTest {
         assertThat(savedBookmark.getJobId(), is(job.getId()));
         assertThat(savedBookmark.getName(), is(bookmark.getName()));
     }
+
+    @Test
+    public void assert_that_when_no_bookmarks_are_registered_for_a_job_then_existsBookmark_retuns_false() throws Exception {
+        Project project = createProject("projectId");
+        Job<?> job = createJob("jobId");
+
+        assertThat(sut.existsBookmark(project, job, "test"), is(false));
+    }
+
+    @Test
+    public void assert_that_when_you_save_a_bookmark_then_existsBookmark_returns_true() throws Exception {
+        Project project = createProject("projectId");
+        Job<?> job = createJob("jobId");
+
+        JobValues values = mock(JobValues.class);
+        Bookmark bookmark = new Bookmark(project, job, "bookmark", values);
+        sut.saveBookmark(project, job, bookmark);
+
+        assertThat(sut.existsBookmark(project, job, bookmark.getName()), is(true));
+    }
+
+    @Test
+    public void assert_that_when_no_bookmarks_are_registered_for_a_job_then_deleteBookmark_retuns_false() throws Exception {
+        Project project = createProject("projectId");
+        Job<?> job = createJob("jobId");
+
+        assertThat(sut.deleteBookmark(project, job, "test"), is(false));
+    }
+
+    @Test
+    public void assert_that_when_you_save_a_bookmark_then_deleteBookmark_returns_true() throws Exception {
+        Project project = createProject("projectId");
+        Job<?> job = createJob("jobId");
+
+        JobValues values = mock(JobValues.class);
+        Bookmark bookmark = new Bookmark(project, job, "bookmark", values);
+        sut.saveBookmark(project, job, bookmark);
+
+        assertThat(sut.deleteBookmark(project, job, bookmark.getName()), is(true));
+        assertThat(sut.getBookmarks(project, job).isEmpty(), is(true));
+    }
+
+
 }

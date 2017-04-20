@@ -15,4 +15,7 @@ public interface BookmarksStore {
 
     List<Bookmark> getBookmarks(Project project, Job job);
 
+    boolean existsBookmark(Project project, Job job, String name);
+
+    boolean deleteBookmark(Project project, Job job, String name);
 }

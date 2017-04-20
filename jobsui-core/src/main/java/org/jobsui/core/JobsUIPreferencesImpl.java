@@ -80,6 +80,16 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
         bookmarks.sort(Comparator.comparing(Bookmark::getName));
     }
 
+    @Override
+    public boolean existsBookmark(Project project, Job job, String name) {
+        return bookmarksStore.existsBookmark(project, job, name);
+    }
+
+    @Override
+    public boolean deleteBookmark(Project project, Job job, String name) {
+        return bookmarksStore.deleteBookmark(project, job, name);
+    }
+
     private void load() {
         int length = lastOpenedProjectsNode.getInt("size", 0);
         for (int i = 0; i < length; i++) {

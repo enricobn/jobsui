@@ -6,6 +6,8 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.TextInputDialog;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.jobsui.core.bookmark.BookmarksStoreFSImpl;
@@ -16,6 +18,7 @@ import org.jobsui.core.ui.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Optional;
 import java.util.prefs.Preferences;
 
 /**
@@ -68,6 +71,26 @@ public class JavaFXUI implements UI<Node> {
     @Override
     public void start(String[] args) {
         StartApp.main(JobsUIPreferencesImpl.get(Preferences.userNodeForPackage(Main.class), BookmarksStoreFSImpl.getUser()), args);
+    }
+
+    @Override
+    public Optional<String> askString(String message) {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("JobsUI");
+        dialog.setHeaderText(message);
+        return dialog.showAndWait();
+    }
+
+    @Override
+    public boolean askOKCancel(String message) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("JobUI");
+        alert.setHeaderText(message);
+//        alert.setContentText("Are you ok with this?");
+
+        Optional<ButtonType> resultO = alert.showAndWait();
+        ButtonType result = resultO.orElse(ButtonType.CANCEL);
+        return result == ButtonType.OK;
     }
 
     public static void uncaughtException(Thread t, Throwable e) {

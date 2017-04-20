@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Optional;
 
 /**
  * Created by enrico on 11/2/15.
@@ -64,6 +65,18 @@ public class SwingUI implements UI<JComponent> {
     @Override
     public void start(String[] args) {
         // TODO
+    }
+
+    @Override
+    public Optional<String> askString(String message) {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public boolean askOKCancel(String message) {
+        // TODO
+        return false;
     }
 
 }

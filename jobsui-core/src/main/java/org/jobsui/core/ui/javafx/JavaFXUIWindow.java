@@ -9,6 +9,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
+import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.job.Job;
@@ -45,7 +46,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
         bookmarkListView.setMinWidth(200);
         mainPanel.getChildren().add(bookmarkListView);
         bookmarkListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        bookmarkListView.setCellFactory(new CellFactory());
+        bookmarkListView.setCellFactory(new CellFactory(project, job));
 
         List<Bookmark> bookmarks = StartApp.getInstance().getPreferences().getBookmarks(project, job);
         bookmarkListView.getItems().addAll(bookmarks);
@@ -171,6 +172,13 @@ class JavaFXUIWindow implements UIWindow<Node> {
         this.onOpenBookmark = onOpenBookmark;
     }
 
+    @Override
+    public void refreshBookmarks(Project project, Job job) {
+        bookmarkListView.getItems().clear();
+        JobsUIPreferences preferences = StartApp.getInstance().getPreferences();
+        bookmarkListView.getItems().addAll(preferences.getBookmarks(project, job));
+    }
+
     private static class NodeUIWidget implements UIWidget<Node> {
         private final String title;
         private final UIComponent<Node> component;
@@ -214,6 +222,14 @@ class JavaFXUIWindow implements UIWindow<Node> {
     }
 
     private class CellFactory implements Callback<ListView<Bookmark>, ListCell<Bookmark>> {
+        private final Project project;
+        private final Job job;
+
+        public CellFactory(Project project, Job job) {
+            this.project = project;
+            this.job = job;
+        }
+
         @Override
         public ListCell<Bookmark> call(ListView<Bookmark> lv) {
             ListCell<Bookmark> cell = new ListCell<Bookmark>() {
@@ -252,27 +268,22 @@ class JavaFXUIWindow implements UIWindow<Node> {
                 }
             });
 
-//            ContextMenu menu = new ContextMenu();
-//
-//            MenuItem editMenuItem = new MenuItem("Edit");
-//            editMenuItem.setOnAction(event -> {
-//                // TODO I don't want to add the edit menu for "not file"
-//                if (cell.getItem() != null && cell.getItem().url.startsWith("file:/")) {
-//                    URL url;
-//                    try {
-//                        url = new URL(cell.getItem().url);
-//                    } catch (MalformedURLException e1) {
-//                        // TODO message
-//                        throw new RuntimeException(e1);
-//                    }
-//
-//                    Task<ProjectFSXML> task = new LoadProjectXMLTask(new File(url.getPath()));
-//                    ProgressDialog.run(task, "Opening project", project -> StartApp.getInstance().gotoEdit(project));
-//                }
-//            });
-//            menu.getItems().add(editMenuItem);
-//
-//            cell.setContextMenu(menu);
+            ContextMenu menu = new ContextMenu();
+
+            MenuItem editMenuItem = new MenuItem("Delete");
+            editMenuItem.setOnAction(event -> {
+                // TODO I don't want to add the edit menu for "not file"
+                Bookmark bookmark = cell.getItem();
+                if (bookmark != null) {
+                    JobsUIPreferences preferences = StartApp.getInstance().getPreferences();
+                    if (preferences.deleteBookmark(project, job, bookmark.getName())) {
+                        refreshBookmarks(project, job);
+                    }
+                }
+            });
+            menu.getItems().add(editMenuItem);
+
+            cell.setContextMenu(menu);
 
             return cell;
         }
