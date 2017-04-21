@@ -20,15 +20,17 @@ import java.util.Objects;
  * Created by enrico on 10/7/16.
  */
 class JavaFXUIChoice implements UIChoice<Node> {
-    private final FlowPane component = new FlowPane();
+//    private final FlowPane component = new FlowPane();
+    private final Node component;
     private final ComboBox<Serializable> combo = new ComboBox<>();
-    private final Button button = new Button("...");
+//    private final Button button = new Button("...");
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
     private final Observable<Serializable> observable;
-    private String title;
+//    private String title;
     private boolean disableListener = false;
 
     JavaFXUIChoice() {
+        component = combo;
         observable = Observable.create(subscriber -> {
             subscriber.onStart();
             subscribers.add(subscriber);
@@ -75,12 +77,12 @@ class JavaFXUIChoice implements UIChoice<Node> {
         if (found) {
             combo.getSelectionModel().select(selectedItem);
             combo.setDisable(false);
-            button.setDisable(false);
+//            button.setDisable(false);
         } else {
             if (items.size() == 1) {
                 combo.getSelectionModel().select(items.get(0));
                 combo.setDisable(true);
-                button.setDisable(true);
+//                button.setDisable(true);
             } else {
                 // when no items are set, I want to be sure that subscribers are notified,
                 // even if the value was already null, but I want to do it only once
@@ -90,7 +92,7 @@ class JavaFXUIChoice implements UIChoice<Node> {
                 disableListener = false;
                 notifySubscribers();
                 combo.setDisable(false);
-                button.setDisable(false);
+//                button.setDisable(false);
             }
         }
     }
@@ -101,7 +103,7 @@ class JavaFXUIChoice implements UIChoice<Node> {
     }
 
     private void initialize() {
-        component.setHgap(5);
+//        component.setHgap(5);
 
         combo.setOnAction(new EventHandler<ActionEvent>() {
             private Serializable selectedItem = null;
@@ -115,18 +117,18 @@ class JavaFXUIChoice implements UIChoice<Node> {
             }
         });
 
-        component.getChildren().add(combo);
+//        component.getChildren().add(combo);
 
-        button.setOnAction(event -> {
-            final SwingFilteredList<Serializable> filteredList = new SwingFilteredList<>(title, combo.getItems(),
-                    combo.getSelectionModel().getSelectedItem());
-            filteredList.show();
-            if (filteredList.isOk()) {
-                setValue(filteredList.getSelectedItem());
-            }
-        });
-
-        component.getChildren().add(button);
+//        button.setOnAction(event -> {
+//            final SwingFilteredList<Serializable> filteredList = new SwingFilteredList<>(title, combo.getItems(),
+//                    combo.getSelectionModel().getSelectedItem());
+//            filteredList.show();
+//            if (filteredList.isOk()) {
+//                setValue(filteredList.getSelectedItem());
+//            }
+//        });
+//
+//        component.getChildren().add(button);
     }
 
     @Override
@@ -158,7 +160,7 @@ class JavaFXUIChoice implements UIChoice<Node> {
 
     @Override
     public void setTitle(String label) {
-        this.title = label;
+//        this.title = label;
     }
 
 }
