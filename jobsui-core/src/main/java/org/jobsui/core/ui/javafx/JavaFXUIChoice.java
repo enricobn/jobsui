@@ -62,9 +62,9 @@ class JavaFXUIChoice implements UIChoice<Node> {
         combo.getItems().clear();
         disableListener = false;
 
-        if (items.size() > 1) {
-            combo.getItems().add(null);
-        }
+//        if (items.size() > 1) {
+//            combo.getItems().add(null);
+//        }
 
         boolean found = false;
         for (Serializable v : items) {
@@ -151,7 +151,11 @@ class JavaFXUIChoice implements UIChoice<Node> {
             }
         }
 
-        combo.getSelectionModel().select(value);
+        if (value == null) {
+            combo.getSelectionModel().clearSelection();
+        } else {
+            combo.getSelectionModel().select(value);
+        }
 
         if (!combo.isVisible()) {
             notifySubscribers();
