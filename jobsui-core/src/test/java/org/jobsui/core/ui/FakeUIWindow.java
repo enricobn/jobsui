@@ -3,15 +3,20 @@ package org.jobsui.core.ui;
 import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.job.Job;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -75,8 +80,18 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
 
     @Override
     public UIWidget<T> add(String title, final UIComponent<T> component) {
+        AtomicBoolean disabled = new AtomicBoolean();
+
         final UIWidget widget = mock(UIWidget.class);
+
         when(widget.getComponent()).thenReturn(component);
+        doAnswer(invocation -> {
+            Boolean disabledValue = (Boolean) invocation.getArguments()[0];
+            disabled.set(disabledValue);
+            return null;
+        }).when(widget).setDisable(anyBoolean());
+        when(widget.isEnabled()).thenAnswer(invocation -> !disabled.get());
+
         widgets.put(title, widget);
         return widget;
     }

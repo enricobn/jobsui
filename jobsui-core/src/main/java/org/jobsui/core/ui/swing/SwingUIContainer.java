@@ -57,6 +57,7 @@ public class SwingUIContainer implements UIContainer<JComponent> {
         }
 
         return new UIWidget<JComponent>() {
+            private boolean enabled = false;
             @Override
             public void setVisible(boolean visible) {
                 getComponent().setVisible(visible);
@@ -64,6 +65,7 @@ public class SwingUIContainer implements UIContainer<JComponent> {
 
             @Override
             public void setDisable(boolean value) {
+                enabled = !value;
                 getComponent().setEnabled(!value);
             }
 
@@ -80,6 +82,11 @@ public class SwingUIContainer implements UIContainer<JComponent> {
                     jMessages.setVisible(true);
                     jMessages.setText(JobsUIUtils.getMessagesAsString(messages));
                 }
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return enabled;
             }
         };
     }
@@ -166,6 +173,8 @@ public class SwingUIContainer implements UIContainer<JComponent> {
         }
 
         return new UIWidget<JComponent>() {
+            private boolean enabled = false;
+
             @Override
             public void setVisible(boolean visible) {
                 component.setVisible(visible);
@@ -174,6 +183,7 @@ public class SwingUIContainer implements UIContainer<JComponent> {
 
             @Override
             public void setDisable(boolean value) {
+                enabled = !value;
                 getComponent().setEnabled(!value);
             }
 
@@ -190,6 +200,11 @@ public class SwingUIContainer implements UIContainer<JComponent> {
                     jMessages.setVisible(true);
                     jMessages.setText(JobsUIUtils.getMessagesAsString(messages));
                 }
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return enabled;
             }
         };
 

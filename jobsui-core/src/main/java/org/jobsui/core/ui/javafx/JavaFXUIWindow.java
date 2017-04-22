@@ -194,6 +194,11 @@ class JavaFXUIWindow implements UIWindow<Node> {
             }
         }
 
+        @Override
+        public boolean isEnabled() {
+            return !nodeComponent.isDisabled();
+        }
+
         public String getTitle() {
             return title;
         }

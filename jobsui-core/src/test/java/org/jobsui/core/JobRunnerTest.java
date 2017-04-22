@@ -524,7 +524,7 @@ public class JobRunnerTest {
         MockedJobBuilder<String> builder = new MockedJobBuilder<>();
 
         UIValue nameComponent = builder.addParameter("name", UIValue.class).build();
-        UIChoice invComponent = builder.addParameter("inv", UIChoice.class)
+        builder.addParameter("inv", UIChoice.class)
                 .dependsOn("name")
                 .build();
 
@@ -538,7 +538,7 @@ public class JobRunnerTest {
 
         jobRunnerWrapper.run(createSingleJobProject(job), job);
 
-        assertThat(((FakeUIChoice) invComponent).isEnabled(), is(false));
+        assertThat(window.getWidget("inv").isEnabled(), is(false));
     }
 
     @Test public void assert_that_when_dependencies_are_changed_then_component_is_enabled_or_disabled_on_dependencies_valid_status() throws Exception {
@@ -549,7 +549,7 @@ public class JobRunnerTest {
         UIValue surnameComponent = builder.addParameter("surname", UIValue.class)
                 .dependsOn("props")
                 .build();
-        UIChoice invComponent = builder.addParameter("inv", UIChoice.class)
+        builder.addParameter("inv", UIChoice.class)
                 .dependsOn("surname")
                 .build();
 
@@ -557,15 +557,17 @@ public class JobRunnerTest {
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
-                    assertThat(((FakeUIChoice) invComponent).isEnabled(), is(false));
+                    UIWidget inv = window.getWidget("inv");
+
+                    assertThat(inv.isEnabled(), is(false));
                     nameComponent.setValue("Hello");
-                    assertThat(((FakeUIChoice) invComponent).isEnabled(), is(false));
+                    assertThat(inv.isEnabled(), is(false));
                     surnameComponent.setValue("World");
-                    assertThat(((FakeUIChoice) invComponent).isEnabled(), is(true));
+                    assertThat(inv.isEnabled(), is(true));
                     nameComponent.setValue(null);
-                    assertThat(((FakeUIChoice) invComponent).isEnabled(), is(false));
+                    assertThat(inv.isEnabled(), is(false));
                     nameComponent.setValue("world");
-                    assertThat(((FakeUIChoice) invComponent).isEnabled(), is(true));
+                    assertThat(inv.isEnabled(), is(true));
                 });
 
         jobRunnerWrapper.run(createSingleJobProject(job), job);

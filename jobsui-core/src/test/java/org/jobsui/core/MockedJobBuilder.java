@@ -40,6 +40,7 @@ public class MockedJobBuilder<T> {
         adding = true;
         final JobParameterDef jobParameterDef = mock(JobParameterDef.class, key);
         when(jobParameterDef.getKey()).thenReturn(key);
+        when(jobParameterDef.getName()).thenReturn(key);
         parameters.put(key, jobParameterDef);
         return new MockedParameter<>(componentTYpe, jobParameterDef);
     }

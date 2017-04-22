@@ -15,4 +15,6 @@ public interface UIWidget<C> {
 
     void setValidationMessages(List<String> messages);
 
+    boolean isEnabled();
+
 }
