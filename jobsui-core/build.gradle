@@ -8,5 +8,10 @@ dependencies {
     compile group: 'org.apache.ivy', name: 'ivy', version: '2.4.0'
     compile group: 'com.thoughtworks.xstream', name: 'xstream', version:'1.4.9'
     compile 'commons-io:commons-io:2.5'
+
+    testCompile "org.testfx:testfx-core:4.0.+"
+    testCompile "org.testfx:testfx-junit:4.0.+", {
+        exclude group: "junit", module: "junit"
+    }
 }
 

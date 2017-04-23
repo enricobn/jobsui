@@ -57,14 +57,10 @@ import java.util.stream.Collectors;
  * Main Application. This class handles navigation
  */
 public class StartApp extends Application {
-    private static StartApp instance;
+    private static StartApp instance = new StartApp();
     private static JobsUIPreferences preferences;
     private JobsUIMainParameters parameters;
     private Stage stage;
-
-    public StartApp() {
-        instance = this;
-    }
 
     public static StartApp getInstance() {
         return instance;
@@ -73,6 +69,10 @@ public class StartApp extends Application {
     public static void main(JobsUIPreferences preferences, String[] args) {
         StartApp.preferences = preferences;
         launch(args);
+    }
+
+    public static void initForTest(JobsUIPreferences preferences) {
+        StartApp.preferences = preferences;
     }
 
     @Override public void start(Stage primaryStage) {
@@ -209,6 +209,7 @@ public class StartApp extends Application {
         Stage stage = new Stage();
         replaceSceneContent(stage, page);
         stage.setTitle(title);
+        stage.getProperties().put("title", title);
 //        Scene scene = stage.getScene();
 //        if (scene == null) {
 //            scene = new Scene(page, 700, 450);

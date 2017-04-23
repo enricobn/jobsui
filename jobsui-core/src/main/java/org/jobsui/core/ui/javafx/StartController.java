@@ -67,8 +67,10 @@ public class StartController implements Initializable {
                     super.updateItem(item, empty);
                     if (empty) {
                         setText(null);
+                        setId("openedItem_");
                     } else {
                         setText(item.toString());
+                        setId("openedItem_" + getIndex());
                     }
                 }
             };
