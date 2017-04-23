@@ -1,14 +1,29 @@
-version = '1.0.0-SNAPSHOT'
+plugins {
+    id 'java'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '1.2.4'
+}
+
+sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+mainClassName = 'org.jobsui.core.Main'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+dependencies {
+    runtime subprojects
+}
 
 subprojects {
     apply plugin: 'java'
 
-    apply plugin: 'application'
-
-    mainClassName = 'org.jobsui.core.Main'
-
+    version = '1.0.0-SNAPSHOT'
     group = 'org.jobsui'
-    
+
     sourceCompatibility = '1.8'
     targetCompatibility = '1.8'
 

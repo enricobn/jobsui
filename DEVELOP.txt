@@ -1,4 +1,3 @@
 TASKS
 ------
-- distZip or distTar: Bundles the project as a JVM application with libs and OS specific scripts in
-  jobsui-core/build/distributions/
+- shadowJar creates a fat jar (build/libs/jobsui-all.jar). You can execute it with java -jar jobsui-all.jar .
