@@ -7,16 +7,16 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.fxmisc.richtext.CodeArea;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.javafx.JavaFXUI;
+import org.jobsui.core.ui.javafx.JobsUITheme;
 import org.jobsui.core.ui.javafx.StartApp;
 import org.jobsui.core.xml.*;
 
@@ -34,6 +34,10 @@ import java.util.stream.Stream;
  * Created by enrico on 10/9/16.
  */
 public class EditProject extends Application {
+    private static final Border CODE_AREA_FOCUSED_BORDER =
+            new Border(new BorderStroke(Paint.valueOf("039ED3"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
+    private static final Border CODE_AREA_NOT_FOCUSED_BORDER =
+            new Border(new BorderStroke(Paint.valueOf("black"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
     private TreeView<Item> itemsTree;
     private VBox itemDetail;
     private VBox root;
@@ -434,6 +438,7 @@ public class EditProject extends Application {
 
         private void addTextAreaProperty(String title, Supplier<String> get, Consumer<String> set, boolean showLineNumbers) {
             itemDetail.getChildren().add(new Label(title));
+            VBox parent = new VBox();
             CodeArea codeArea = GroovyCodeArea.getCodeArea(true, preferences.getTheme());
 
             String content = get.get();
@@ -447,9 +452,21 @@ public class EditProject extends Application {
                 updateSelectedItem();
             });
 
-            itemDetail.getChildren().add(codeArea);
+            itemDetail.getChildren().add(parent);
 
-            VBox.setVgrow(codeArea, Priority.ALWAYS);
+            parent.getChildren().add(codeArea);
+            if (preferences.getTheme().equals(JobsUITheme.Dark)) {
+                parent.setBorder(CODE_AREA_NOT_FOCUSED_BORDER);
+                codeArea.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                    if (newValue) {
+                        parent.setBorder(CODE_AREA_FOCUSED_BORDER);
+                    } else {
+                        parent.setBorder(CODE_AREA_NOT_FOCUSED_BORDER);
+                    }
+                });
+            }
+
+            VBox.setVgrow(parent, Priority.ALWAYS);
         }
 
         private void addTextProperty(String title, Supplier<String> get, Consumer<String> set) {
