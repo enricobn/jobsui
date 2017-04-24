@@ -1,3 +1,5 @@
 rootProject.name = 'jobsui'
 include 'jobsui-core'
+include 'jobsui-ui'
+include 'jobsui-edit'
 

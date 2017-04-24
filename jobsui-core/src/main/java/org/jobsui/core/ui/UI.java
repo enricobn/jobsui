@@ -1,5 +1,7 @@
 package org.jobsui.core.ui;
 
+import org.jobsui.core.JobsUIPreferences;
+
 import java.util.Optional;
 
 /**
@@ -26,4 +28,6 @@ public interface UI<T> {
     Optional<String> askString(String message);
 
     boolean askOKCancel(String message);
+
+    JobsUIPreferences getPreferences();
 }

@@ -7,7 +7,7 @@ plugins {
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
-mainClassName = 'org.jobsui.core.Main'
+mainClassName = 'org.jobsui.ui.Main'
 
 repositories {
     mavenCentral()

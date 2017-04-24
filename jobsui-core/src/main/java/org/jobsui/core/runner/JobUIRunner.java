@@ -4,8 +4,6 @@ import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.job.*;
 import org.jobsui.core.ui.*;
-import org.jobsui.core.ui.javafx.JavaFXUI;
-import org.jobsui.core.ui.javafx.StartApp;
 import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
 
@@ -48,7 +46,7 @@ public class JobUIRunner<C> implements JobRunner {
 //                return;
             }
 
-            observeDependencies(context);
+            observeDependencies(ui, context);
 
             UIButton<C> runButton;
             UIButton<C> saveBookmarkButton;
@@ -84,7 +82,7 @@ public class JobUIRunner<C> implements JobRunner {
             saveBookmarkButton.getObservable().subscribe(serializableVoid -> {
                 Optional<String> name = ui.askString("Bookmark's name");
                 name.ifPresent(n -> {
-                    JobsUIPreferences preferences = StartApp.getInstance().getPreferences();
+                    JobsUIPreferences preferences = ui.getPreferences();
 
                     boolean ok = true;
                     if (preferences.existsBookmark(project, job, n)) {
@@ -203,7 +201,7 @@ public class JobUIRunner<C> implements JobRunner {
         }
     }
 
-    private static <T extends Serializable, C> void observeDependencies(JobUIRunnerContext<T, C> context) {
+    private static <T extends Serializable, C> void observeDependencies(UI<C> ui, JobUIRunnerContext<T, C> context) {
         Map<String, Serializable> validValues = new HashMap<>();
 
         context.valueChangeObserver().subscribe(changedValue -> {
@@ -230,7 +228,7 @@ public class JobUIRunner<C> implements JobRunner {
                             try {
                                 jobParameterDef.onDependenciesChange(widget, objects);
                             } catch (Exception e) {
-                                JavaFXUI.showErrorStatic("Error on onDependenciesChange for parameter " + jobParameterDef.getName(), e);
+                                ui.showError("Error on onDependenciesChange for parameter " + jobParameterDef.getName(), e);
                                 widget.setValidationMessages(Collections.singletonList(e.getMessage()));
                                 widget.getComponent().setValue(null);
                                 widget.setDisable(true);

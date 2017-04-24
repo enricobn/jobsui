@@ -6,7 +6,6 @@ import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.JobExpression;
 import org.jobsui.core.job.JobParameterDef;
 import org.jobsui.core.ui.*;
-import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
 import rx.Subscriber;
 

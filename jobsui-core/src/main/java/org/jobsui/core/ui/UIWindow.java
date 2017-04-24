@@ -4,7 +4,6 @@ import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.job.Job;
 
-import java.io.Serializable;
 import java.util.function.Consumer;
 
 /**
