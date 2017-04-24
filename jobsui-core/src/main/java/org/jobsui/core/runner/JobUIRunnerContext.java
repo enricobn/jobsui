@@ -6,7 +6,6 @@ import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.JobExpression;
 import org.jobsui.core.job.JobParameterDef;
 import org.jobsui.core.ui.*;
-import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
 import rx.Subscriber;
@@ -285,35 +284,6 @@ public class JobUIRunnerContext<T extends Serializable, C> {
         return mapObservable;
     }
 
-    public void setComponentValidationMessage() {
-        Map<String, Observable<Serializable>> observables = dependenciesObservables.getMap();
-
-        Map<String, Serializable> validValues = new HashMap<>();
-
-        for (Map.Entry<String, Observable<Serializable>> entry : observables.entrySet()) {
-            entry.getValue().subscribe(value -> {
-                JobDependency jobDependency = job.getJobDependency(entry.getKey());
-                if (jobDependency instanceof JobParameterDef) {
-                    JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
-                    UIWidget<C> widget = getWidget(jobParameterDef);
-
-                    // I set the validation message only if all dependencies are valid
-                    if (getDependenciesValues(validValues, jobParameterDef).size() == jobParameterDef.getDependencies().size()) {
-                        List<String> validate = jobParameterDef.validate(validValues, value);
-                        if (validate.isEmpty()) {
-                            validValues.put(jobDependency.getKey(), value);
-                        } else {
-                            validValues.remove(jobDependency.getKey());
-                        }
-                        setValidationMessage(validate, jobParameterDef, widget, ui);
-                    } else {
-                        setValidationMessage(Collections.emptyList(), jobParameterDef, widget, ui);
-                    }
-                }
-            });
-        }
-    }
-
     public UIWidget<C> getWidget(JobParameterDef jobParameterDef) {
         return widgets.get(jobParameterDef.getKey());
     }
@@ -355,21 +325,6 @@ public class JobUIRunnerContext<T extends Serializable, C> {
 //            }
 //        });
 //    }
-
-    public static class ChangedValue {
-        public final JobDependency jobDependency;
-        public final Map<String, Serializable> values;
-        public final Map<String, Serializable> validValues;
-        private final List<String> validation;
-
-        public ChangedValue(JobDependency jobDependency, Map<String, Serializable> values, Map<String, Serializable> validValues,
-                             List<String> validation) {
-            this.jobDependency = jobDependency;
-            this.values = values;
-            this.validValues = validValues;
-            this.validation = validation;
-        }
-    }
 
     public DependenciesObservables getDependenciesObservables(List<String> dependencies) {
         return getDependenciesObservables(job, widgets, dependencies);
@@ -450,8 +405,7 @@ public class JobUIRunnerContext<T extends Serializable, C> {
     }
 
 
-    private static void setValidationMessage(List<String> validate, JobParameterDef jobParameterDef,
-                                                                      UIWidget<?> widget, UI<?> ui) {
+    public static void setValidationMessage(List<String> validate, JobParameterDef jobParameterDef, UIWidget<?> widget, UI<?> ui) {
         if (!jobParameterDef.isVisible()) {
             if (!validate.isEmpty()) {
                 ui.showMessage(jobParameterDef.getName() + ": " + JobsUIUtils.getMessagesAsString(validate));

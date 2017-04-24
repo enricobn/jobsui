@@ -125,7 +125,7 @@ public class JobUIRunner<C> implements JobRunner {
                 }
             });
 
-            context.setComponentValidationMessage();
+            setComponentValidationMessage(context);
 
             notifyInitialValue(context);
 
@@ -162,30 +162,59 @@ public class JobUIRunner<C> implements JobRunner {
         return atomicResult.get();
     }
 
-    private static <T extends Serializable, C> void observeDependencies(JobUIRunnerContext<T, C> jobUIRunnerContext) {
+    private static <T extends Serializable, C> void setComponentValidationMessage(JobUIRunnerContext<T, C> context) {
+        Map<String, Observable<Serializable>> observables = context.getDependenciesObservables().getMap();
+
         Map<String, Serializable> validValues = new HashMap<>();
 
-        jobUIRunnerContext.valueChangeObserver().subscribe(changedValue -> {
+        for (Map.Entry<String, Observable<Serializable>> entry : observables.entrySet()) {
+            entry.getValue().subscribe(value -> {
+                JobDependency jobDependency = context.getJob().getJobDependency(entry.getKey());
+                if (jobDependency instanceof JobParameterDef) {
+                    JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
+                    UIWidget<C> widget = context.getWidget(jobParameterDef);
+
+                    // I set the validation message only if all dependencies are valid
+                    if (JobUIRunnerContext.getDependenciesValues(validValues, jobParameterDef).size() == jobParameterDef.getDependencies().size()) {
+                        List<String> validate = jobParameterDef.validate(validValues, value);
+                        if (validate.isEmpty()) {
+                            validValues.put(jobDependency.getKey(), value);
+                        } else {
+                            validValues.remove(jobDependency.getKey());
+                        }
+                        JobUIRunnerContext.setValidationMessage(validate, jobParameterDef, widget, context.getUi());
+                    } else {
+                        JobUIRunnerContext.setValidationMessage(Collections.emptyList(), jobParameterDef, widget, context.getUi());
+                    }
+                }
+            });
+        }
+    }
+
+    private static <T extends Serializable, C> void observeDependencies(JobUIRunnerContext<T, C> context) {
+        Map<String, Serializable> validValues = new HashMap<>();
+
+        context.valueChangeObserver().subscribe(changedValue -> {
             validValues.clear();
             validValues.putAll(changedValue.validValues);
         });
 
-        for (final JobDependency jobDependency : jobUIRunnerContext.getSortedJobDependencies()) {
+        for (final JobDependency jobDependency : context.getSortedJobDependencies()) {
             final List<String> dependencies = jobDependency.getDependencies();
             if (!dependencies.isEmpty()) {
-                List<Observable<Serializable>> observables = jobUIRunnerContext.getDependenciesObservables(dependencies).getList();
+                List<Observable<Serializable>> observables = context.getDependenciesObservables(dependencies).getList();
 
                 final Observable<Map<String, Serializable>> observable =
-                        jobUIRunnerContext.combineDependenciesObservables(dependencies, observables, validValues);
+                        context.combineDependenciesObservables(dependencies, observables, validValues);
 
                 observable.subscribe(objects -> {
                     // all dependencies are valid
                     if (objects.size() == dependencies.size()) {
                         if (jobDependency instanceof JobParameterDef) {
                             JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
-                            final UIWidget widget = jobUIRunnerContext.getWidget(jobParameterDef);
+                            final UIWidget widget = context.getWidget(jobParameterDef);
                             widget.setDisable(false);
-                            jobUIRunnerContext.reEnableDependants(validValues, jobDependency);
+                            context.reEnableDependants(validValues, jobDependency);
                             try {
                                 jobParameterDef.onDependenciesChange(widget, objects);
                             } catch (Exception e) {
@@ -193,33 +222,33 @@ public class JobUIRunner<C> implements JobRunner {
                                 widget.setValidationMessages(Collections.singletonList(e.getMessage()));
                                 widget.getComponent().setValue(null);
                                 widget.setDisable(true);
-                                jobUIRunnerContext.disableDependants(jobDependency);
+                                context.disableDependants(jobDependency);
                             }
                         } else if (jobDependency instanceof JobExpression) {
                             JobExpression jobExpression = (JobExpression) jobDependency;
                             //jobExpression.onDependenciesChange(objects);
                             Serializable value = jobExpression.evaluate(objects);
                             jobExpression.notifySubscribers(value);
-                            jobUIRunnerContext.reEnableDependants(validValues, jobDependency);
+                            context.reEnableDependants(validValues, jobDependency);
                         } else {
                             throw new IllegalStateException("Unknown type " + jobDependency.getClass());
                         }
                     } else {
                         if (jobDependency instanceof JobParameterDef) {
                             JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
-                            final UIWidget widget = jobUIRunnerContext.getWidget(jobParameterDef);
+                            final UIWidget widget = context.getWidget(jobParameterDef);
                             widget.setDisable(true);
                         }
-                        jobUIRunnerContext.disableDependants(jobDependency);
+                        context.disableDependants(jobDependency);
                     }
                 });
             }
         }
     }
 
-    private static <T extends Serializable, C> void notifyInitialValue(JobUIRunnerContext<T, C> jobUIRunnerContext) {
+    private static <T extends Serializable, C> void notifyInitialValue(JobUIRunnerContext<T, C> context) {
         Map<String,Serializable> values = new HashMap<>();
-        for (JobDependency jobDependency : jobUIRunnerContext.getSortedJobDependencies()) {
+        for (JobDependency jobDependency : context.getSortedJobDependencies()) {
             if (jobDependency instanceof JobExpression) {
                 JobExpression jobExpression = (JobExpression) jobDependency;
                 if (jobExpression.getDependencies().isEmpty()) {
@@ -229,7 +258,7 @@ public class JobUIRunner<C> implements JobRunner {
                 }
             } else if (jobDependency instanceof JobParameterDef) {
                 JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
-                UIComponent<C> component = jobUIRunnerContext.getWidget(jobParameterDef).getComponent();
+                UIComponent<C> component = context.getWidget(jobParameterDef).getComponent();
                 Serializable value = component.getValue();
                 if (JobUIRunnerContext.isValid(jobParameterDef, values, value)) {
 //                    component.setValue(value);
