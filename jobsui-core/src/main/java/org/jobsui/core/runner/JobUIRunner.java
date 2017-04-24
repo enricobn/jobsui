@@ -2,22 +2,14 @@ package org.jobsui.core.runner;
 
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.bookmark.Bookmark;
-import org.jobsui.core.job.Job;
-import org.jobsui.core.job.JobDependency;
-import org.jobsui.core.job.JobParameterDef;
-import org.jobsui.core.job.Project;
-import org.jobsui.core.ui.UI;
-import org.jobsui.core.ui.UIButton;
-import org.jobsui.core.ui.UIWindow;
-import org.jobsui.core.ui.UnsupportedComponentException;
+import org.jobsui.core.job.*;
+import org.jobsui.core.ui.*;
+import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.ui.javafx.StartApp;
 import rx.Observable;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -55,7 +47,7 @@ public class JobUIRunner<C> implements JobRunner {
 //                return;
             }
 
-            JobUIRunnerContext.observeDependencies(context);
+            observeDependencies(context);
 
             UIButton<C> runButton;
             UIButton<C> saveBookmarkButton;
@@ -135,7 +127,7 @@ public class JobUIRunner<C> implements JobRunner {
 
             context.setComponentValidationMessage();
 
-            JobUIRunnerContext.notifyInitialValue(context);
+            notifyInitialValue(context);
 
             window.addButton(runButton);
             window.addButton(saveBookmarkButton);
@@ -168,6 +160,86 @@ public class JobUIRunner<C> implements JobRunner {
             throw exceptions.get(0);
         }
         return atomicResult.get();
+    }
+
+    private static <T extends Serializable, C> void observeDependencies(JobUIRunnerContext<T, C> jobUIRunnerContext) {
+        Map<String, Serializable> validValues = new HashMap<>();
+
+        jobUIRunnerContext.valueChangeObserver().subscribe(changedValue -> {
+            validValues.clear();
+            validValues.putAll(changedValue.validValues);
+        });
+
+        for (final JobDependency jobDependency : jobUIRunnerContext.getSortedJobDependencies()) {
+            final List<String> dependencies = jobDependency.getDependencies();
+            if (!dependencies.isEmpty()) {
+                List<Observable<Serializable>> observables = jobUIRunnerContext.getDependenciesObservables(dependencies).getList();
+
+                final Observable<Map<String, Serializable>> observable =
+                        jobUIRunnerContext.combineDependenciesObservables(dependencies, observables, validValues);
+
+                observable.subscribe(objects -> {
+                    // all dependencies are valid
+                    if (objects.size() == dependencies.size()) {
+                        if (jobDependency instanceof JobParameterDef) {
+                            JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
+                            final UIWidget widget = jobUIRunnerContext.getWidget(jobParameterDef);
+                            widget.setDisable(false);
+                            jobUIRunnerContext.reEnableDependants(validValues, jobDependency);
+                            try {
+                                jobParameterDef.onDependenciesChange(widget, objects);
+                            } catch (Exception e) {
+                                JavaFXUI.showErrorStatic("Error on onDependenciesChange for parameter " + jobParameterDef.getName(), e);
+                                widget.setValidationMessages(Collections.singletonList(e.getMessage()));
+                                widget.getComponent().setValue(null);
+                                widget.setDisable(true);
+                                jobUIRunnerContext.disableDependants(jobDependency);
+                            }
+                        } else if (jobDependency instanceof JobExpression) {
+                            JobExpression jobExpression = (JobExpression) jobDependency;
+                            //jobExpression.onDependenciesChange(objects);
+                            Serializable value = jobExpression.evaluate(objects);
+                            jobExpression.notifySubscribers(value);
+                            jobUIRunnerContext.reEnableDependants(validValues, jobDependency);
+                        } else {
+                            throw new IllegalStateException("Unknown type " + jobDependency.getClass());
+                        }
+                    } else {
+                        if (jobDependency instanceof JobParameterDef) {
+                            JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
+                            final UIWidget widget = jobUIRunnerContext.getWidget(jobParameterDef);
+                            widget.setDisable(true);
+                        }
+                        jobUIRunnerContext.disableDependants(jobDependency);
+                    }
+                });
+            }
+        }
+    }
+
+    private static <T extends Serializable, C> void notifyInitialValue(JobUIRunnerContext<T, C> jobUIRunnerContext) {
+        Map<String,Serializable> values = new HashMap<>();
+        for (JobDependency jobDependency : jobUIRunnerContext.getSortedJobDependencies()) {
+            if (jobDependency instanceof JobExpression) {
+                JobExpression jobExpression = (JobExpression) jobDependency;
+                if (jobExpression.getDependencies().isEmpty()) {
+                    Serializable value = jobExpression.evaluate(values);
+                    values.put(jobDependency.getKey(), value);
+                    jobExpression.notifySubscribers(value);
+                }
+            } else if (jobDependency instanceof JobParameterDef) {
+                JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
+                UIComponent<C> component = jobUIRunnerContext.getWidget(jobParameterDef).getComponent();
+                Serializable value = component.getValue();
+                if (JobUIRunnerContext.isValid(jobParameterDef, values, value)) {
+//                    component.setValue(value);
+                    values.put(jobDependency.getKey(), value);
+                    component.notifySubscribers();
+                }
+            } else {
+                throw new IllegalStateException("Unexpected type " + jobDependency.getClass());
+            }
+        }
     }
 
     private static void setValue(JobValues values, Map<String, Serializable> map, JobDependency jobDependency) {
