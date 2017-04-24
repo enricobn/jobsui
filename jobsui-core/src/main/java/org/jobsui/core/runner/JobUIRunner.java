@@ -45,17 +45,17 @@ public class JobUIRunner<C> implements JobRunner {
 
         window.show(project, job, () -> {
 
-            JobRunnerContext<T,C> context;
+            JobUIRunnerContext<T,C> context;
 
             try {
-                 context = new JobRunnerContext<>(job, ui, window);
+                 context = JobUIRunnerContext.of(job, ui, window);
             } catch (Exception e) {
                 throw new RuntimeException((e));
 //                exceptions.add(e);
 //                return;
             }
 
-            context.observeDependencies();
+            JobUIRunnerContext.observeDependencies(context);
 
             UIButton<C> runButton;
             UIButton<C> saveBookmarkButton;
@@ -135,7 +135,7 @@ public class JobUIRunner<C> implements JobRunner {
 
             context.setComponentValidationMessage();
 
-            context.notifyInitialValue();
+            JobUIRunnerContext.notifyInitialValue(context);
 
             window.addButton(runButton);
             window.addButton(saveBookmarkButton);
