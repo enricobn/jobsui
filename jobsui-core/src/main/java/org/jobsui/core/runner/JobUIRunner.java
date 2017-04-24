@@ -6,6 +6,7 @@ import org.jobsui.core.job.*;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.ui.javafx.JavaFXUI;
 import org.jobsui.core.ui.javafx.StartApp;
+import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
 
 import java.io.Serializable;
@@ -162,6 +163,17 @@ public class JobUIRunner<C> implements JobRunner {
         return atomicResult.get();
     }
 
+    private static void setValidationMessage(List<String> validate, JobParameterDef jobParameterDef, UIWidget<?> widget,
+                                             UI<?> ui) {
+        if (!jobParameterDef.isVisible()) {
+            if (!validate.isEmpty()) {
+                ui.showMessage(jobParameterDef.getName() + ": " + JobsUIUtils.getMessagesAsString(validate));
+            }
+        } else {
+            widget.setValidationMessages(validate);
+        }
+    }
+
     private static <T extends Serializable, C> void setComponentValidationMessage(JobUIRunnerContext<T, C> context) {
         Map<String, Observable<Serializable>> observables = context.getDependenciesObservables().getMap();
 
@@ -182,9 +194,9 @@ public class JobUIRunner<C> implements JobRunner {
                         } else {
                             validValues.remove(jobDependency.getKey());
                         }
-                        JobUIRunnerContext.setValidationMessage(validate, jobParameterDef, widget, context.getUi());
+                        setValidationMessage(validate, jobParameterDef, widget, context.getUi());
                     } else {
-                        JobUIRunnerContext.setValidationMessage(Collections.emptyList(), jobParameterDef, widget, context.getUi());
+                        setValidationMessage(Collections.emptyList(), jobParameterDef, widget, context.getUi());
                     }
                 }
             });

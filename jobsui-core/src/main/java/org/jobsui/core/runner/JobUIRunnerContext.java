@@ -193,28 +193,11 @@ public class JobUIRunnerContext<T extends Serializable, C> {
         return dependenciesValues;
     }
 
-
-//    private static <C> void notifyInitialValue(ParameterAndWidget<C> entry) {
-//        final Serializable value = entry.getWidget().getComponent().getValue();
-//        if (entry.getJobParameterDef().validate(, value).isEmpty()) {
-//            entry.getWidget().getComponent().notifySubscribers();
-//        }
-//    }
-
     public Observable<Map<String, Serializable>> combineDependenciesObservables(
             List<String> dependencies,
             Collection<Observable<Serializable>> observables,
             Map<String, Serializable> validValues)
     {
-        //            private boolean addValidatedValue(Map<String, Serializable> result, JobParameterDef dependency,
-//                                              Serializable arg) {
-//                final List<String> validate = dependency.validate(arg);
-//                if (!validate.isEmpty()) {
-//                    return true;
-//                }
-//                result.put(dependency.getKey(), arg);
-//                return false;
-//            }
         return Observable.combineLatest(observables, args -> {
             Map<String, Serializable> result = new HashMap<>();
 
@@ -287,44 +270,6 @@ public class JobUIRunnerContext<T extends Serializable, C> {
     public UIWidget<C> getWidget(JobParameterDef jobParameterDef) {
         return widgets.get(jobParameterDef.getKey());
     }
-
-//    private List<Observable<Serializable>> getObservables() {
-//        List<Observable<Serializable>> result = new ArrayList<>();
-//        for (JobDependency jobDependency : sortedJobDependencies) {
-//            if (jobDependency instanceof JobExpression) {
-//                JobExpression jobExpression = (JobExpression) jobDependency;
-//                result.add(jobExpression.getObservable());
-//            } else if (jobDependency instanceof JobParameterDef) {
-//                JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
-//                UIComponent<C> component = widgets.get(jobParameterDef).getComponent();
-//                result.add(component.getObservable());
-//            } else {
-//                throw new IllegalStateException("Unexpected type " + jobDependency.getClass());
-//            }
-//        }
-//        return result;
-//    }
-
-//    a try of using valueChangeObserver()
-//    public void setComponentValidationMessage() {
-//        Observable<ChangedValue> mapObservable = valueChangeObserver();
-//
-//        mapObservable.subscribe(changedValue -> {
-//            if (changedValue.jobDependency instanceof JobParameterDef) {
-//                JobParameterDef jobParameterDef = (JobParameterDef) changedValue.jobDependency;
-//                UIWidget<C> widget = widgets.get(jobParameterDef);
-//
-//                Map<String, Serializable> dependenciesValues = getDependenciesValues(changedValue.validValues, jobParameterDef);
-//
-//                // I set the validation message only if all dependencies are valid
-//                if (dependenciesValues.size() == jobParameterDef.getDependencies().size()) {
-//                    setValidationMessage(changedValue.validation, jobParameterDef, widget, ui);
-//                } else {
-//                    setValidationMessage(Collections.emptyList(), jobParameterDef, widget, ui);
-//                }
-//            }
-//        });
-//    }
 
     public DependenciesObservables getDependenciesObservables(List<String> dependencies) {
         return getDependenciesObservables(job, widgets, dependencies);
@@ -402,17 +347,6 @@ public class JobUIRunnerContext<T extends Serializable, C> {
 //
 //        observable.subscribe(o -> setValidationMessage(jobParameterDef.validate(, o), jobParameterDef, widget, ui));
         return widget;
-    }
-
-
-    public static void setValidationMessage(List<String> validate, JobParameterDef jobParameterDef, UIWidget<?> widget, UI<?> ui) {
-        if (!jobParameterDef.isVisible()) {
-            if (!validate.isEmpty()) {
-                ui.showMessage(jobParameterDef.getName() + ": " + JobsUIUtils.getMessagesAsString(validate));
-            }
-        } else {
-            widget.setValidationMessages(validate);
-        }
     }
 
 }
