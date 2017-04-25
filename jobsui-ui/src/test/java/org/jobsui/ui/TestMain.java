@@ -118,9 +118,9 @@ public class TestMain extends ApplicationTest {
     private Button waitUntilRunButtonIsPresent() {
         long time = System.currentTimeMillis();
         while (true) {
-//            if (System.currentTimeMillis() - time > 10_000) {
-//                fail("Timeout");
-//            }
+            if (System.currentTimeMillis() - time > 10_000) {
+                fail("Timeout");
+            }
             sleep(100);
             Button button = getButtonByText("Run");
             if (button != null) {
