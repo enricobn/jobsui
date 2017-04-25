@@ -65,7 +65,7 @@ public class SwingUI implements UI<JComponent> {
     }
 
     @Override
-    public void start(JobsUIMainParameters args, JobsUIPreferences preferences) {
+    public void start() {
         // TODO
     }
 

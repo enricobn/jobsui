@@ -23,6 +23,13 @@ import java.util.Optional;
  * Created by enrico on 10/7/16.
  */
 public class JavaFXUI implements UI<Node> {
+    private final JobsUIPreferences preferences;
+    private final JobsUIMainParameters parameters;
+
+    public JavaFXUI(JobsUIPreferences preferences, JobsUIMainParameters parameters) {
+        this.preferences = preferences;
+        this.parameters = parameters;
+    }
 
     @Override
     public void showMessage(String message) {
@@ -31,7 +38,7 @@ public class JavaFXUI implements UI<Node> {
 
     @Override
     public UIWindow<Node> createWindow(String title) {
-        return new JavaFXUIWindow();
+        return new JavaFXUIWindow(this);
     }
 
     @Override
@@ -67,8 +74,8 @@ public class JavaFXUI implements UI<Node> {
     }
 
     @Override
-    public void start(JobsUIMainParameters parameters, JobsUIPreferences preferences) {
-        StartApp.main(preferences, parameters);
+    public void start() {
+        StartApp.main(this);
     }
 
     @Override
@@ -93,7 +100,7 @@ public class JavaFXUI implements UI<Node> {
 
     @Override
     public JobsUIPreferences getPreferences() {
-        return StartApp.getInstance().getPreferences();
+        return preferences;
     }
 
     public static void uncaughtException(Thread t, Throwable e) {

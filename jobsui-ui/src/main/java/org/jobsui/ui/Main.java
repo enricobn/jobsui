@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-
         JobsUIMainParameters.parse(args,
                 Main::run,
                 errors -> JavaFXUI.showMessageStatic("Error starting application:\n" +
@@ -25,7 +24,7 @@ public class Main {
     private static void run(JobsUIMainParameters parameters) {
         JobsUIPreferences preferences =
                 JobsUIPreferencesImpl.get(Preferences.userNodeForPackage(Main.class), BookmarksStoreFSImpl.getUser());
-        new JavaFXUI().start(parameters, preferences);
+        new JavaFXUI(preferences, parameters).start();
     }
 
 }

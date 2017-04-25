@@ -10,6 +10,7 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import org.hamcrest.core.Is;
+import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.OpenedItem;
 import org.jobsui.core.UITest;
@@ -17,6 +18,7 @@ import org.jobsui.core.job.Job;
 import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.xml.ProjectXML;
+import org.jobsui.ui.javafx.JavaFXUI;
 import org.jobsui.ui.javafx.StartApp;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -41,6 +43,8 @@ import static org.mockito.Mockito.when;
 public class TestMain extends ApplicationTest {
     @Mock
     private JobsUIPreferences preferences;
+    @Mock
+    private JobsUIMainParameters parameters;
     private OpenedItem openedItem;
     private URL projectResource;
 
@@ -55,7 +59,9 @@ public class TestMain extends ApplicationTest {
     @Override
     public void start(Stage stage) throws Exception {
         setUpPreferences();
-        StartApp.initForTest(preferences);
+        JavaFXUI ui = new JavaFXUI(preferences, parameters);
+        StartApp.initForTest(ui);
+
         URL fxml = StartApp.class.getResource("Start.fxml");
         Parent page = FXMLLoader.load(fxml, null, new JavaFXBuilderFactory());
         Scene scene = new Scene(page, 800, 600);
@@ -112,9 +118,9 @@ public class TestMain extends ApplicationTest {
     private Button waitUntilRunButtonIsPresent() {
         long time = System.currentTimeMillis();
         while (true) {
-            if (System.currentTimeMillis() - time > 10_000) {
-                fail("Timeout");
-            }
+//            if (System.currentTimeMillis() - time > 10_000) {
+//                fail("Timeout");
+//            }
             sleep(100);
             Button button = getButtonByText("Run");
             if (button != null) {

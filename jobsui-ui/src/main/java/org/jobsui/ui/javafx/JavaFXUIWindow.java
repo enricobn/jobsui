@@ -28,10 +28,15 @@ import static org.jobsui.ui.javafx.JobsUIFXStyles.ERROR_TEXT;
  * Created by enrico on 10/7/16.
  */
 class JavaFXUIWindow implements UIWindow<Node> {
+    private final UI<Node> ui;
     private HBox buttonsPanel;
     private ListView<Bookmark> bookmarkListView;
     private VBox componentspanel;
     private Consumer<Bookmark> onOpenBookmark;
+
+    JavaFXUIWindow(UI<Node> ui) {
+        this.ui = ui;
+    }
 
     @Override
     public void show(Project project, Job job, Runnable callback) {
@@ -89,7 +94,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
         bookmarkListView.setMinWidth(200);
         bookmarkListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         bookmarkListView.setCellFactory(new CellFactory(project, job));
-        List<Bookmark> bookmarks = StartApp.getInstance().getPreferences().getBookmarks(project, job);
+        List<Bookmark> bookmarks = ui.getPreferences().getBookmarks(project, job);
         bookmarkListView.getItems().addAll(bookmarks);
         return bookmarkListView;
     }
@@ -140,8 +145,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
     @Override
     public void refreshBookmarks(Project project, Job job) {
         bookmarkListView.getItems().clear();
-        JobsUIPreferences preferences = StartApp.getInstance().getPreferences();
-        bookmarkListView.getItems().addAll(preferences.getBookmarks(project, job));
+        bookmarkListView.getItems().addAll(ui.getPreferences().getBookmarks(project, job));
     }
 
     private static class NodeUIWidget implements UIWidget<Node> {
@@ -261,7 +265,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
                 // TODO I don't want to add the edit menu for "not file"
                 Bookmark bookmark = cell.getItem();
                 if (bookmark != null) {
-                    JobsUIPreferences preferences = StartApp.getInstance().getPreferences();
+                    JobsUIPreferences preferences = ui.getPreferences();
                     if (preferences.deleteBookmark(project, job, bookmark.getName())) {
                         refreshBookmarks(project, job);
                     }

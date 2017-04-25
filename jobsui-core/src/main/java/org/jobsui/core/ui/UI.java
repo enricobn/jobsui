@@ -24,7 +24,7 @@ public interface UI<T> {
 
     void showError(String message, Throwable t);
 
-    void start(JobsUIMainParameters args, JobsUIPreferences preferences);
+    void start();
 
     Optional<String> askString(String message);
 

@@ -39,41 +39,38 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
-import org.jobsui.core.job.Project;
-import org.jobsui.edit.EditProject;
 import org.jobsui.core.job.Job;
+import org.jobsui.core.job.Project;
 import org.jobsui.core.runner.JobUIRunner;
+import org.jobsui.core.ui.UI;
 import org.jobsui.core.xml.ProjectFSXML;
+import org.jobsui.edit.EditProject;
 
 import java.io.Serializable;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * Main Application. This class handles navigation
  */
 public class StartApp extends Application {
     private static StartApp instance = new StartApp();
-    private static JobsUIPreferences preferences;
-    private static JobsUIMainParameters parameters;
+    private static UI<Node> ui;
     private Stage stage;
 
     public static StartApp getInstance() {
         return instance;
     }
 
-    public static void main(JobsUIPreferences preferences, JobsUIMainParameters parameters) {
-        StartApp.preferences = preferences;
-        StartApp.parameters = parameters;
+    public static void main(UI<Node> ui) {
+        StartApp.ui = ui;
         launch();
     }
 
-    public static void initForTest(JobsUIPreferences preferences) {
-        StartApp.preferences = preferences;
+    public static void initForTest(UI<Node> ui) {
+        StartApp.ui = ui;
     }
 
     @Override public void start(Stage primaryStage) {
@@ -91,12 +88,8 @@ public class StartApp extends Application {
         }
     }
 
-    public JobsUIMainParameters getJobsUIParameters() {
-        return parameters;
-    }
-
     public JobsUIPreferences getPreferences() {
-        return preferences;
+        return ui.getPreferences();
     }
 
 //    private static void setStylesheet() {
@@ -130,7 +123,7 @@ public class StartApp extends Application {
 //    }
 
     void gotoRun(Project project, Job<Serializable> job) {
-        JobUIRunner<Node> runner = new JobUIRunner<>(new JavaFXUI());
+        JobUIRunner<Node> runner = new JobUIRunner<>(ui);
         try {
             runner.run(project, job);
         } catch (Exception e) {
@@ -142,8 +135,6 @@ public class StartApp extends Application {
         EditProject editProject = new EditProject();
         stage = new Stage();
         try {
-            // TODO
-            JavaFXUI ui = new JavaFXUI();
             editProject.start(ui, stage);
             editProject.edit(projectXML, false);
         } catch (Exception e) {
@@ -167,7 +158,7 @@ public class StartApp extends Application {
 
     private static void addStylesheet() {
         String resource;
-        switch (preferences.getTheme()) {
+        switch (ui.getPreferences().getTheme()) {
             case Dark:
                 resource = "dark.css";
                 break;
