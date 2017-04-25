@@ -1,5 +1,6 @@
 package org.jobsui.ui.swing;
 
+import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.*;
 
@@ -64,7 +65,7 @@ public class SwingUI implements UI<JComponent> {
     }
 
     @Override
-    public void start(String[] args) {
+    public void start(JobsUIMainParameters args, JobsUIPreferences preferences) {
         // TODO
     }
 

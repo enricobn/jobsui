@@ -1,5 +1,6 @@
 package org.jobsui.core.ui;
 
+import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
 
 import java.util.Optional;
@@ -23,7 +24,7 @@ public interface UI<T> {
 
     void showError(String message, Throwable t);
 
-    void start(String[] args);
+    void start(JobsUIMainParameters args, JobsUIPreferences preferences);
 
     Optional<String> askString(String message);
 

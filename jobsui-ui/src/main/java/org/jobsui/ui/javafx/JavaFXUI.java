@@ -9,10 +9,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
-import org.jobsui.core.bookmark.BookmarksStoreFSImpl;
-import org.jobsui.core.JobsUIPreferencesImpl;
-import org.jobsui.ui.Main;
 import org.jobsui.core.ui.*;
 
 import java.io.IOException;
@@ -20,7 +18,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Optional;
-import java.util.prefs.Preferences;
 
 /**
  * Created by enrico on 10/7/16.
@@ -70,8 +67,8 @@ public class JavaFXUI implements UI<Node> {
     }
 
     @Override
-    public void start(String[] args) {
-        StartApp.main(JobsUIPreferencesImpl.get(Preferences.userNodeForPackage(Main.class), BookmarksStoreFSImpl.getUser()), args);
+    public void start(JobsUIMainParameters parameters, JobsUIPreferences preferences) {
+        StartApp.main(preferences, parameters);
     }
 
     @Override

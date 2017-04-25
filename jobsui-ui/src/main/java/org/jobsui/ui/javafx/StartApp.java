@@ -59,16 +59,17 @@ import java.util.stream.Collectors;
 public class StartApp extends Application {
     private static StartApp instance = new StartApp();
     private static JobsUIPreferences preferences;
-    private JobsUIMainParameters parameters;
+    private static JobsUIMainParameters parameters;
     private Stage stage;
 
     public static StartApp getInstance() {
         return instance;
     }
 
-    public static void main(JobsUIPreferences preferences, String[] args) {
+    public static void main(JobsUIPreferences preferences, JobsUIMainParameters parameters) {
         StartApp.preferences = preferences;
-        launch(args);
+        StartApp.parameters = parameters;
+        launch();
     }
 
     public static void initForTest(JobsUIPreferences preferences) {
@@ -77,19 +78,6 @@ public class StartApp extends Application {
 
     @Override public void start(Stage primaryStage) {
         Thread.setDefaultUncaughtExceptionHandler(JavaFXUI::uncaughtException);
-
-        String[] args = getParameters().getUnnamed().toArray(new String[0]);
-
-        JobsUIMainParameters.parse(args,
-                p -> this.parameters = p,
-                errors -> {
-                    Stage stage = JavaFXUI.getErrorStage("Error starting application",
-                        errors.stream().collect(Collectors.joining("\n")));
-                    if (stage != null) {
-                        stage.showAndWait();
-                        System.exit(1);
-                    }
-                });
 
         try {
             replaceSceneContent(primaryStage, StartApp.class.getResource("Start.fxml"));
