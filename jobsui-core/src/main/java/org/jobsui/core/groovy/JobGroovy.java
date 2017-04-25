@@ -97,8 +97,8 @@ public class JobGroovy<T> extends JobAbstract<T> {
     }
 
     public void init(ProjectGroovy project) {
-        for (JobParameterGroovy jobParameterDef : parameterDefsGroovy) {
-            jobParameterDef.init(project);
+        for (JobParameterGroovy jobParameter : parameterDefsGroovy) {
+            jobParameter.init(project);
         }
     }
 

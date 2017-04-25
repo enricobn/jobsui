@@ -344,7 +344,7 @@ public class JobUIRunnerContext<T extends Serializable, C> {
 
 //        final Observable<Serializable> observable = widget.getComponent().getObservable();
 //
-//        observable.subscribe(o -> setValidationMessage(jobParameterDef.validate(, o), jobParameterDef, widget, ui));
+//        observable.subscribe(o -> setValidationMessage(jobParameter.validate(, o), jobParameter, widget, ui));
         return widget;
     }
 
