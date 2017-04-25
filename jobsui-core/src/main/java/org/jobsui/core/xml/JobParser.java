@@ -1,12 +1,12 @@
 package org.jobsui.core.xml;
 
-import java.io.InputStream;
+import java.net.URL;
 
 /**
  * Created by enrico on 4/5/17.
  */
 public interface JobParser {
 
-    JobXML parse(String id, InputStream inputStream) throws Exception;
+    JobXML parse(String id, URL url) throws Exception;
 
 }

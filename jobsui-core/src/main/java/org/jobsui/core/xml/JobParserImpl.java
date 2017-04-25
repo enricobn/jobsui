@@ -15,6 +15,7 @@ import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.InputStream;
+import java.net.URL;
 
 import static org.jobsui.core.xml.XMLUtils.getElementContent;
 import static org.jobsui.core.xml.XMLUtils.getMandatoryAttribute;
@@ -39,55 +40,52 @@ public class JobParserImpl implements JobParser {
 
     public static JobXML parse(SimpleProjectXML projectXML, String jobResource) throws Exception {
         JobParserImpl jobParser = new JobParserImpl();
+        return jobParser.parse(projectXML.getJobId(jobResource), projectXML.getRelativeURL(jobResource));
+    }
 
-        try (InputStream inputStream = projectXML.getRelativeURL(jobResource).openStream()) {
+    @Override
+    public JobXML parse(String id, URL url) throws Exception {
+        try (InputStream inputStream = url.openStream()) {
             final StreamSource source = new StreamSource(inputStream);
             try {
                 jobValidator.validate(source);
             } catch (Exception e) {
-                throw new Exception("Cannot parse job \"" + jobResource + "\".");
+                throw new Exception("Cannot parse job \"" + url + "\".", e);
             }
         }
 
-        try (InputStream inputStream = projectXML.getRelativeURL(jobResource).openStream()) {
-            return jobParser.parse(projectXML.getJobId(jobResource), inputStream);
+        try (InputStream inputStream = url.openStream()) {
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            dbFactory.setValidating(false);
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+
+            Document doc = dBuilder.parse(inputStream);
+
+            //optional, but recommended
+            //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
+            doc.getDocumentElement().normalize();
+            String subject = "Job with id='" + id + "'";
+            String name = getMandatoryAttribute(doc.getDocumentElement(), "name", subject);
+            String version = getMandatoryAttribute(doc.getDocumentElement(), "version", subject);
+
+            JobXMLImpl jobXML = new JobXMLImpl(id, name, version);
+
+            String runScript = getElementContent(doc.getDocumentElement(), "Run", true, subject);
+
+            jobXML.setRunScript(runScript);
+
+            String validateScript = getElementContent(doc.getDocumentElement(), "Validate", false, subject);
+
+            jobXML.setValidateScript(validateScript);
+
+            parseParameters(doc, jobXML);
+
+            parseExpressions(doc, jobXML);
+
+            parseCalls(doc, jobXML);
+
+            return jobXML;
         }
-    }
-
-    @Override
-    public JobXML parse(String id, InputStream inputStream) throws Exception {
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        dbFactory.setValidating(false);
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-
-        Document doc = dBuilder.parse(inputStream);
-
-        //optional, but recommended
-        //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
-        doc.getDocumentElement().normalize();
-        String subject =  "Job with id='" + id + "'";
-        String name = getMandatoryAttribute(doc.getDocumentElement(), "name", subject);
-        String version = getMandatoryAttribute(doc.getDocumentElement(), "version", subject);
-
-        JobXMLImpl jobXML = new JobXMLImpl(id, name, version);
-
-        String runScript = getElementContent(doc.getDocumentElement(), "Run", true, subject);
-
-        jobXML.setRunScript(runScript);
-
-        String validateScript = getElementContent(doc.getDocumentElement(), "Validate", false, subject);
-
-        jobXML.setValidateScript(validateScript);
-
-        parseParameters(doc, jobXML);
-
-        parseExpressions(doc, jobXML);
-
-        parseCalls(doc, jobXML);
-
-        return jobXML;
-
-//        projectXML.addJob(jobXML);
     }
 
     private static void parseExpressions(Document doc, JobXMLImpl jobXML)

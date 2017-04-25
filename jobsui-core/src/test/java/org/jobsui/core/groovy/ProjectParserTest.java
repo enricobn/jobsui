@@ -49,10 +49,8 @@ public class ProjectParserTest {
     public void assert_that_is_visible_for_inv_expression_in_Simplejob_is_false() throws Exception {
         JobParser parser = new JobParserImpl();
         URL url = ProjectParserTest.class.getResource("/simplejob/simple.xml");
-        try (InputStream is = url.openStream()) {
-            final JobXML job = parser.parse("simple", is);
-            ExpressionXML inv = job.getExpression("inv");
-            assertThat(inv.isVisible(), is(false));
-        }
+        JobXML job = parser.parse("simple", url);
+        ExpressionXML inv = job.getExpression("inv");
+        assertThat(inv.isVisible(), is(false));
     }
 }
