@@ -9,4 +9,6 @@ dependencies {
         exclude group: "junit", module: "junit"
     }
 
+    // to include test resources from jobsui-core
+    testCompile project(':jobsui-core').sourceSets.test.output
 }

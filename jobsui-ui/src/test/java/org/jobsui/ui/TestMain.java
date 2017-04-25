@@ -13,7 +13,6 @@ import org.hamcrest.core.Is;
 import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.OpenedItem;
-import org.jobsui.core.UITest;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.xml.ProjectParserImpl;
