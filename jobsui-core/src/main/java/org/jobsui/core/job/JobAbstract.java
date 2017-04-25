@@ -6,8 +6,8 @@ package org.jobsui.core.job;
 public abstract class JobAbstract<T> implements Job<T> {
 
     @Override
-    public JobParameterDef getParameter(String key) {
-        for (JobParameterDef parameterDef : getParameterDefs()) {
+    public JobParameter getParameter(String key) {
+        for (JobParameter parameterDef : getParameterDefs()) {
             if (parameterDef.getKey().equals(key)) {
                 return parameterDef;
             }

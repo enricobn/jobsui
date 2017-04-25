@@ -72,7 +72,7 @@ public class ProjectGroovyBuilder {
     private static <T> JobGroovy<T> build(GroovyShell groovyShell, JobXML jobXML) throws Exception {
         Map<String, JobDependencyGroovy> jobDependencyXMLMap = new LinkedHashMap<>();
 
-        List<JobParameterDefGroovy> jobParameterDefs = new ArrayList<>();
+        List<JobParameterGroovy> jobParameterDefs = new ArrayList<>();
         List<JobExpressionGroovy> jobExpressions = new ArrayList<>();
 
         List<SimpleParameterXML> sortedSimpleParameterXML = jobXML.getSimpleParameterXMLs().stream()
@@ -80,7 +80,7 @@ public class ProjectGroovyBuilder {
                 .collect(Collectors.toList());
 
         for (SimpleParameterXML simpleParameterXML : sortedSimpleParameterXML) {
-            JobParameterDefGroovy parameterDef = new JobParameterDefGroovySimple(
+            JobParameterGroovy parameterDef = new JobParameterGroovySimple(
                     groovyShell,
                     simpleParameterXML.getKey(),
                     simpleParameterXML.getName(),
@@ -105,7 +105,7 @@ public class ProjectGroovyBuilder {
         }
 
         for (CallXML callXML : jobXML.getCallXMLs()) {
-            JobCallDefGroovy<Serializable> call = new JobCallDefGroovy<>(
+            JobCallGroovy<Serializable> call = new JobCallGroovy<>(
                     callXML.getKey(),
                     callXML.getName(),
                     callXML.getProject(),
@@ -119,7 +119,7 @@ public class ProjectGroovyBuilder {
         addDependencies(jobXML.getExpressionXMLs(), jobDependencyXMLMap);
         addDependencies(jobXML.getCallXMLs(), jobDependencyXMLMap);
 
-        List<JobParameterDefGroovy> sorteJobParameterDefs = JobDependency.sort(jobParameterDefs);
+        List<JobParameterGroovy> sorteJobParameterDefs = JobDependency.sort(jobParameterDefs);
 
         return new JobGroovy<>(groovyShell, jobXML.getId(), jobXML.getName(), sorteJobParameterDefs, jobExpressions,
                 jobXML.getRunScript(), jobXML.getValidateScript());
@@ -133,11 +133,12 @@ public class ProjectGroovyBuilder {
         };
     }
 
-    private static void addDependencies(List<? extends JobDependency> parameterXMLs, Map<String, JobDependencyGroovy> jobDependencyXMLMap) {
-        for (JobDependency parameterXML : parameterXMLs) {
-            JobDependencyGroovy jobDependencyXML = jobDependencyXMLMap.get(parameterXML.getKey());
-            for (String depKey : parameterXML.getDependencies()) {
-                jobDependencyXML.addDependency(depKey);
+    private static void addDependencies(List<? extends JobDependency> jobDependencies,
+                                        Map<String, JobDependencyGroovy> jobDependencyGroovyMap) {
+        for (JobDependency jobDependency : jobDependencies) {
+            JobDependencyGroovy jobDependencyGroovy = jobDependencyGroovyMap.get(jobDependency.getKey());
+            for (String depKey : jobDependency.getDependencies()) {
+                jobDependencyGroovy.addDependency(depKey);
             }
         }
     }

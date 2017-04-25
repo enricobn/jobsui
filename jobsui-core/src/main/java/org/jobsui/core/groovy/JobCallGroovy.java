@@ -2,7 +2,7 @@ package org.jobsui.core.groovy;
 
 import org.jobsui.core.job.Project;
 import org.jobsui.core.job.Job;
-import org.jobsui.core.job.JobParameterDefAbstract;
+import org.jobsui.core.job.JobParameterAbstract;
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.ui.*;
 
@@ -14,13 +14,13 @@ import java.util.Map;
 /**
  * Created by enrico on 5/4/16.
  */
-public class JobCallDefGroovy<T extends Serializable> extends JobParameterDefAbstract implements JobParameterDefGroovy {
+public class JobCallGroovy<T extends Serializable> extends JobParameterAbstract implements JobParameterGroovy {
     private final String projectRef;
     private final String jobRef;
     private final Map<String, String> mapArguments;
     private Job job = null;
 
-    public JobCallDefGroovy(String key, String name, String projectRef, String jobRef, Map<String, String> mapArguments) {
+    public JobCallGroovy(String key, String name, String projectRef, String jobRef, Map<String, String> mapArguments) {
         super(key, name, null, false, false);
         this.projectRef = projectRef;
         this.jobRef = jobRef;

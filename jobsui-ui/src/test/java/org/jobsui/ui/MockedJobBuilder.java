@@ -3,7 +3,7 @@ package org.jobsui.ui;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.JobExpression;
-import org.jobsui.core.job.JobParameterDef;
+import org.jobsui.core.job.JobParameter;
 import org.jobsui.core.runner.JobResultImpl;
 import org.jobsui.core.runner.JobValues;
 import org.jobsui.core.ui.*;
@@ -27,7 +27,7 @@ import static org.mockito.Mockito.*;
  * Created by enrico on 4/2/17.
  */
 public class MockedJobBuilder<T> {
-    private final Map<String, JobParameterDef> parameters = new LinkedHashMap<>();
+    private final Map<String, JobParameter> parameters = new LinkedHashMap<>();
     private final Map<String, JobExpression> expressions = new LinkedHashMap<>();
     private final Job<T> job = mock(Job.class);
     private boolean adding = false;
@@ -38,11 +38,11 @@ public class MockedJobBuilder<T> {
             throw new IllegalStateException("Cannot add another parameter before creating the previous. Forgotten a create()?.");
         }
         adding = true;
-        final JobParameterDef jobParameterDef = mock(JobParameterDef.class, key);
-        when(jobParameterDef.getKey()).thenReturn(key);
-        when(jobParameterDef.getName()).thenReturn(key);
-        parameters.put(key, jobParameterDef);
-        return new MockedParameter<>(componentTYpe, jobParameterDef);
+        final JobParameter jobParameter = mock(JobParameter.class, key);
+        when(jobParameter.getKey()).thenReturn(key);
+        when(jobParameter.getName()).thenReturn(key);
+        parameters.put(key, jobParameter);
+        return new MockedParameter<>(componentTYpe, jobParameter);
     }
 
     public void addExpression(String key, Function<Map<String,Serializable>, Serializable> evaluate, String... dependencies) {
@@ -145,23 +145,23 @@ public class MockedJobBuilder<T> {
 
     public class MockedParameter<COMP extends UIComponent> {
         private final Class<COMP> componentTYpe;
-        private final JobParameterDef jobParameterDef;
+        private final JobParameter jobParameter;
         private boolean visible = true;
         private BiConsumer<COMP,Map<String,Serializable>> onDependenciesChange;
         private Consumer<COMP> onInit;
 
-        public MockedParameter(Class<COMP> componentTYpe, JobParameterDef jobParameterDef) {
+        public MockedParameter(Class<COMP> componentTYpe, JobParameter jobParameter) {
             this.componentTYpe = componentTYpe;
-            this.jobParameterDef = jobParameterDef;
+            this.jobParameter = jobParameter;
         }
 
         public MockedParameter<COMP> withName(String name) {
-            when(jobParameterDef.getName()).thenReturn(name);
+            when(jobParameter.getName()).thenReturn(name);
             return this;
         }
 
         public MockedParameter<COMP> dependsOn(String... dependencies) {
-            when(jobParameterDef.getDependencies()).thenReturn(Arrays.asList(dependencies));
+            when(jobParameter.getDependencies()).thenReturn(Arrays.asList(dependencies));
             return this;
         }
 
@@ -192,14 +192,14 @@ public class MockedJobBuilder<T> {
             }
 
             try {
-                when(jobParameterDef.createComponent(any(UI.class))).thenReturn((UIComponent<Object>)uiComponent);
+                when(jobParameter.createComponent(any(UI.class))).thenReturn((UIComponent<Object>)uiComponent);
             } catch (UnsupportedComponentException e) {
                 throw new RuntimeException(e);
             }
 
-            when(jobParameterDef.isVisible()).thenReturn(visible);
-            when(jobParameterDef.validate(anyMapOf(String.class, Serializable.class), isNull(Serializable.class))).thenReturn(Collections.singletonList("Error"));
-            when(jobParameterDef.validate(anyMapOf(String.class, Serializable.class), isNotNull(Serializable.class))).thenReturn(Collections.emptyList());
+            when(jobParameter.isVisible()).thenReturn(visible);
+            when(jobParameter.validate(anyMapOf(String.class, Serializable.class), isNull(Serializable.class))).thenReturn(Collections.singletonList("Error"));
+            when(jobParameter.validate(anyMapOf(String.class, Serializable.class), isNotNull(Serializable.class))).thenReturn(Collections.emptyList());
 
             if (onInit != null) {
                 onInit.accept(uiComponent);
@@ -211,7 +211,7 @@ public class MockedJobBuilder<T> {
 //                    uiChoiceInv.setValue(values.get("name"));
                     onDependenciesChange.accept(uiComponent, values);
                     return null;
-                }).when(jobParameterDef).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
+                }).when(jobParameter).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
             }
 
             adding = false;

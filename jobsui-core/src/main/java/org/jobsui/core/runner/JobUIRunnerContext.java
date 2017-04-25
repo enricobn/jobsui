@@ -1,10 +1,10 @@
 package org.jobsui.core.runner;
 
-import org.jobsui.core.job.ParameterValidator;
+import org.jobsui.core.job.JobParameterValidator;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.JobExpression;
-import org.jobsui.core.job.JobParameterDef;
+import org.jobsui.core.job.JobParameter;
 import org.jobsui.core.ui.*;
 import rx.Observable;
 import rx.Subscriber;
@@ -39,10 +39,10 @@ public class JobUIRunnerContext<T extends Serializable, C> {
         LOGGER.fine("Creating Job runner context");
 
         Map<String,UIWidget<C>> widgets = new HashMap<>();
-        for (final JobParameterDef jobParameterDef : job.getParameterDefs()) {
-            UIWidget<C> widget = createWidget(ui, window, jobParameterDef);
-            widget.setDisable(!jobParameterDef.getDependencies().isEmpty());
-            widgets.put(jobParameterDef.getKey(), widget);
+        for (final JobParameter jobParameter : job.getParameterDefs()) {
+            UIWidget<C> widget = createWidget(ui, window, jobParameter);
+            widget.setDisable(!jobParameter.getDependencies().isEmpty());
+            widgets.put(jobParameter.getKey(), widget);
         }
 
         List<JobDependency> sortedDependencies = job.getSortedDependencies();
@@ -75,8 +75,8 @@ public class JobUIRunnerContext<T extends Serializable, C> {
 
     public void disableDependants(JobDependency jobDependency) {
         for (JobDependency dependant : getDependants(jobDependency)) {
-            if (dependant instanceof JobParameterDef) {
-                getWidget((JobParameterDef) dependant).setDisable(true);
+            if (dependant instanceof JobParameter) {
+                getWidget((JobParameter) dependant).setDisable(true);
             }
             disableDependants(dependant);
         }
@@ -86,8 +86,8 @@ public class JobUIRunnerContext<T extends Serializable, C> {
         for (JobDependency dependant : getDependants(jobDependency)) {
             Map<String, Serializable> dependenciesValues = getDependenciesValues(validValues, dependant);
             if (dependenciesValues.size() == dependant.getDependencies().size()) {
-                if (dependant instanceof JobParameterDef) {
-                    getWidget((JobParameterDef) dependant).setDisable(false);
+                if (dependant instanceof JobParameter) {
+                    getWidget((JobParameter) dependant).setDisable(false);
                 }
                 reEnableDependants(validValues, dependant);
             }
@@ -120,9 +120,9 @@ public class JobUIRunnerContext<T extends Serializable, C> {
 
             for (JobDependency jobDependency : sortedJobDependencies) {
                 Serializable value = (Serializable) args[i++];
-                if (jobDependency instanceof ParameterValidator) {
-                    ParameterValidator parameterValidator = (ParameterValidator) jobDependency;
-                    if (!isValid(parameterValidator, values, value)) {
+                if (jobDependency instanceof JobParameterValidator) {
+                    JobParameterValidator jobParameterValidator = (JobParameterValidator) jobDependency;
+                    if (!isValid(jobParameterValidator, values, value)) {
                         jobValidation.invalidate();
                         break;
                     }
@@ -160,13 +160,13 @@ public class JobUIRunnerContext<T extends Serializable, C> {
             }
 
             for (final Map.Entry<String,UIWidget<C>> entry : widgets.entrySet()) {
-                JobParameterDef jobParameterDef = job.getParameter(entry.getKey());
-                Serializable value = values.get(jobParameterDef.getKey());
+                JobParameter jobParameter = job.getParameter(entry.getKey());
+                Serializable value = values.get(jobParameter.getKey());
 
-                Map<String, Serializable> dependenciesValues = getDependenciesValues(values, jobParameterDef);
+                Map<String, Serializable> dependenciesValues = getDependenciesValues(values, jobParameter);
 
-                if (!isValid(jobParameterDef, dependenciesValues, value)) {
-                    values.remove(jobParameterDef.getKey());
+                if (!isValid(jobParameter, dependenciesValues, value)) {
+                    values.remove(jobParameter.getKey());
                 }
             }
 
@@ -174,8 +174,8 @@ public class JobUIRunnerContext<T extends Serializable, C> {
         });
     }
 
-    public static boolean isValid(ParameterValidator parameterValidator, Map<String,Serializable> dependenciesValues, Serializable value) {
-        final List<String> validate = parameterValidator.validate(dependenciesValues, value);
+    public static boolean isValid(JobParameterValidator jobParameterValidator, Map<String,Serializable> dependenciesValues, Serializable value) {
+        final List<String> validate = jobParameterValidator.validate(dependenciesValues, value);
 
         return validate.isEmpty();
     }
@@ -203,11 +203,11 @@ public class JobUIRunnerContext<T extends Serializable, C> {
             int i = 0;
             for (String dependency : dependencies) {
                 final Serializable arg = (Serializable) args[i++];
-                JobParameterDef jobParameterDef = job.getParameter(dependency);
-                if (jobParameterDef != null) {
-                    Map<String, Serializable> dependenciesValues = getDependenciesValues(validValues, jobParameterDef);
-                    if (dependenciesValues.size() == jobParameterDef.getDependencies().size() &&
-                            jobParameterDef.validate(dependenciesValues, arg).isEmpty()) {
+                JobParameter jobParameter = job.getParameter(dependency);
+                if (jobParameter != null) {
+                    Map<String, Serializable> dependenciesValues = getDependenciesValues(validValues, jobParameter);
+                    if (dependenciesValues.size() == jobParameter.getDependencies().size() &&
+                            jobParameter.validate(dependenciesValues, arg).isEmpty()) {
                         result.put(dependency, arg);
                     } else {
                         break;
@@ -240,11 +240,11 @@ public class JobUIRunnerContext<T extends Serializable, C> {
                 validValues.put(key, value);
 
                 List<String> validation;
-                if (jobDependency instanceof ParameterValidator) {
-                    ParameterValidator parameterValidator = (ParameterValidator) jobDependency;
+                if (jobDependency instanceof JobParameterValidator) {
+                    JobParameterValidator jobParameterValidator = (JobParameterValidator) jobDependency;
                     Map<String, Serializable> dependenciesValues = getDependenciesValues(validValues, jobDependency);
                     if (dependenciesValues.size() == jobDependency.getDependencies().size()) {
-                        validation = parameterValidator.validate(dependenciesValues, value);
+                        validation = jobParameterValidator.validate(dependenciesValues, value);
                         if (!validation.isEmpty()) {
                             validValues.remove(jobDependency.getKey());
                         }
@@ -266,8 +266,8 @@ public class JobUIRunnerContext<T extends Serializable, C> {
         return mapObservable;
     }
 
-    public UIWidget<C> getWidget(JobParameterDef jobParameterDef) {
-        return widgets.get(jobParameterDef.getKey());
+    public UIWidget<C> getWidget(JobParameter jobParameter) {
+        return widgets.get(jobParameter.getKey());
     }
 
     public DependenciesObservables getDependenciesObservables(List<String> dependencies) {
@@ -282,14 +282,14 @@ public class JobUIRunnerContext<T extends Serializable, C> {
         DependenciesObservablesImpl result = new DependenciesObservablesImpl();
 
         for (String dependency : dependencies) {
-            JobParameterDef jobParameterDef = job.getParameter(dependency);
-            if (jobParameterDef != null) {
-                final UIWidget widget = widgets.get(jobParameterDef.getKey());
+            JobParameter jobParameter = job.getParameter(dependency);
+            if (jobParameter != null) {
+                final UIWidget widget = widgets.get(jobParameter.getKey());
                 if (widget == null) {
                     throw new IllegalStateException("Cannot find widget for dependency with key \"" +
                             dependency + "\".");
                 }
-                result.add(jobParameterDef, widget.getComponent().getObservable());
+                result.add(jobParameter, widget.getComponent().getObservable());
             } else {
                 JobExpression jobExpression = job.getExpression(dependency);
                 result.add(jobExpression, jobExpression.getObservable());
@@ -326,21 +326,21 @@ public class JobUIRunnerContext<T extends Serializable, C> {
     }
 
     private static <C> UIWidget<C> createWidget(final UI<C> ui, UIWindow<C> window,
-                                                          final JobParameterDef jobParameterDef)
+                                                          final JobParameter jobParameter)
     throws UnsupportedComponentException {
-        final UIComponent<C> component = jobParameterDef.createComponent(ui);
+        final UIComponent<C> component = jobParameter.createComponent(ui);
         if (component == null) {
             throw new IllegalStateException("Cannot create component for parameter with key \""
-                    + jobParameterDef.getKey() + "\"");
+                    + jobParameter.getKey() + "\"");
         }
 
-        final UIWidget<C> widget = window.add(jobParameterDef.getName(), component);
+        final UIWidget<C> widget = window.add(jobParameter.getName(), component);
         if (widget == null) {
             throw new IllegalStateException("Cannot create widget for parameter with key \""
-                    + jobParameterDef.getKey() + "\"");
+                    + jobParameter.getKey() + "\"");
         }
 
-        widget.setVisible(jobParameterDef.isVisible());
+        widget.setVisible(jobParameter.isVisible());
 
 //        final Observable<Serializable> observable = widget.getComponent().getObservable();
 //

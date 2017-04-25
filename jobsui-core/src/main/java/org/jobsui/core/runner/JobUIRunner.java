@@ -133,17 +133,17 @@ public class JobUIRunner<C> implements JobRunner {
             window.setOnOpenBookmark(bookmark -> {
                 try {
                     for (JobDependency jobDependency : job.getSortedDependencies()) {
-                        if (jobDependency instanceof JobParameterDef) {
-                            JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
-                            Serializable value = bookmark.getValues().get(jobParameterDef.getKey());
+                        if (jobDependency instanceof JobParameter) {
+                            JobParameter jobParameter = (JobParameter) jobDependency;
+                            Serializable value = bookmark.getValues().get(jobParameter.getKey());
 
-                            List<String> validate = jobParameterDef.validate(bookmark.getValues(), value);
+                            List<String> validate = jobParameter.validate(bookmark.getValues(), value);
 
                             if (validate.isEmpty()) {
-                                context.getWidget(jobParameterDef).getComponent().setValue(value);
+                                context.getWidget(jobParameter).getComponent().setValue(value);
                             } else {
                                 ui.showMessage(String.format("Value '%s' for parameter '%s' is not valid:\n%s",
-                                        value, jobParameterDef.getName(), String.join(",", validate)));
+                                        value, jobParameter.getName(), String.join(",", validate)));
                                 break;
                             }
                         }
@@ -161,11 +161,11 @@ public class JobUIRunner<C> implements JobRunner {
         return atomicResult.get();
     }
 
-    private static void setValidationMessage(List<String> validate, JobParameterDef jobParameterDef, UIWidget<?> widget,
+    private static void setValidationMessage(List<String> validate, JobParameter jobParameter, UIWidget<?> widget,
                                              UI<?> ui) {
-        if (!jobParameterDef.isVisible()) {
+        if (!jobParameter.isVisible()) {
             if (!validate.isEmpty()) {
-                ui.showMessage(jobParameterDef.getName() + ": " + JobsUIUtils.getMessagesAsString(validate));
+                ui.showMessage(jobParameter.getName() + ": " + JobsUIUtils.getMessagesAsString(validate));
             }
         } else {
             widget.setValidationMessages(validate);
@@ -180,21 +180,21 @@ public class JobUIRunner<C> implements JobRunner {
         for (Map.Entry<String, Observable<Serializable>> entry : observables.entrySet()) {
             entry.getValue().subscribe(value -> {
                 JobDependency jobDependency = context.getJob().getJobDependency(entry.getKey());
-                if (jobDependency instanceof JobParameterDef) {
-                    JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
-                    UIWidget<C> widget = context.getWidget(jobParameterDef);
+                if (jobDependency instanceof JobParameter) {
+                    JobParameter jobParameter = (JobParameter) jobDependency;
+                    UIWidget<C> widget = context.getWidget(jobParameter);
 
                     // I set the validation message only if all dependencies are valid
-                    if (JobUIRunnerContext.getDependenciesValues(validValues, jobParameterDef).size() == jobParameterDef.getDependencies().size()) {
-                        List<String> validate = jobParameterDef.validate(validValues, value);
+                    if (JobUIRunnerContext.getDependenciesValues(validValues, jobParameter).size() == jobParameter.getDependencies().size()) {
+                        List<String> validate = jobParameter.validate(validValues, value);
                         if (validate.isEmpty()) {
                             validValues.put(jobDependency.getKey(), value);
                         } else {
                             validValues.remove(jobDependency.getKey());
                         }
-                        setValidationMessage(validate, jobParameterDef, widget, context.getUi());
+                        setValidationMessage(validate, jobParameter, widget, context.getUi());
                     } else {
-                        setValidationMessage(Collections.emptyList(), jobParameterDef, widget, context.getUi());
+                        setValidationMessage(Collections.emptyList(), jobParameter, widget, context.getUi());
                     }
                 }
             });
@@ -220,15 +220,15 @@ public class JobUIRunner<C> implements JobRunner {
                 observable.subscribe(objects -> {
                     // all dependencies are valid
                     if (objects.size() == dependencies.size()) {
-                        if (jobDependency instanceof JobParameterDef) {
-                            JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
-                            final UIWidget widget = context.getWidget(jobParameterDef);
+                        if (jobDependency instanceof JobParameter) {
+                            JobParameter jobParameter = (JobParameter) jobDependency;
+                            final UIWidget widget = context.getWidget(jobParameter);
                             widget.setDisable(false);
                             context.reEnableDependants(validValues, jobDependency);
                             try {
-                                jobParameterDef.onDependenciesChange(widget, objects);
+                                jobParameter.onDependenciesChange(widget, objects);
                             } catch (Exception e) {
-                                ui.showError("Error on onDependenciesChange for parameter " + jobParameterDef.getName(), e);
+                                ui.showError("Error on onDependenciesChange for parameter " + jobParameter.getName(), e);
                                 widget.setValidationMessages(Collections.singletonList(e.getMessage()));
                                 widget.getComponent().setValue(null);
                                 widget.setDisable(true);
@@ -244,9 +244,9 @@ public class JobUIRunner<C> implements JobRunner {
                             throw new IllegalStateException("Unknown type " + jobDependency.getClass());
                         }
                     } else {
-                        if (jobDependency instanceof JobParameterDef) {
-                            JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
-                            final UIWidget widget = context.getWidget(jobParameterDef);
+                        if (jobDependency instanceof JobParameter) {
+                            JobParameter jobParameter = (JobParameter) jobDependency;
+                            final UIWidget widget = context.getWidget(jobParameter);
                             widget.setDisable(true);
                         }
                         context.disableDependants(jobDependency);
@@ -266,11 +266,11 @@ public class JobUIRunner<C> implements JobRunner {
                     values.put(jobDependency.getKey(), value);
                     jobExpression.notifySubscribers(value);
                 }
-            } else if (jobDependency instanceof JobParameterDef) {
-                JobParameterDef jobParameterDef = (JobParameterDef) jobDependency;
-                UIComponent<C> component = context.getWidget(jobParameterDef).getComponent();
+            } else if (jobDependency instanceof JobParameter) {
+                JobParameter jobParameter = (JobParameter) jobDependency;
+                UIComponent<C> component = context.getWidget(jobParameter).getComponent();
                 Serializable value = component.getValue();
-                if (JobUIRunnerContext.isValid(jobParameterDef, values, value)) {
+                if (JobUIRunnerContext.isValid(jobParameter, values, value)) {
 //                    component.setValue(value);
                     values.put(jobDependency.getKey(), value);
                     component.notifySubscribers();

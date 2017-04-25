@@ -1,7 +1,7 @@
 package org.jobsui.core.bookmark;
 
 import org.jobsui.core.job.Job;
-import org.jobsui.core.job.JobParameterDef;
+import org.jobsui.core.job.JobParameter;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.runner.JobValues;
 import org.junit.Test;
@@ -29,12 +29,12 @@ public class BookmarkTest {
 
     @Test
     public void verify_that_only_not_calculated_values_are_stored() throws Exception {
-        JobParameterDef calculated = mock(JobParameterDef.class);
+        JobParameter calculated = mock(JobParameter.class);
         when(calculated.isCalculated()).thenReturn(true);
 
-        JobParameterDef notCalculated = mock(JobParameterDef.class);
+        JobParameter notCalculated = mock(JobParameter.class);
 
-        List<JobParameterDef> parameterDefs = Arrays.asList(calculated, notCalculated);
+        List<JobParameter> parameterDefs = Arrays.asList(calculated, notCalculated);
         when(job.getParameterDefs()).thenReturn(parameterDefs);
 
         new Bookmark(project, job, "Bookmark", values);

@@ -285,7 +285,7 @@ public class JobRunnerTest {
 
         jobRunnerWrapper.run(createSingleJobProject(job), job);
 
-        final JobParameterDef invParameter = job.getParameter("inv");
+        final JobParameter invParameter = job.getParameter("inv");
         verify(invParameter, never()).validate(anyMapOf(String.class, Serializable.class), isNull(Serializable.class));
         verify(invParameter, never()).validate(anyMapOf(String.class, Serializable.class), isNotNull(Serializable.class));
     }
@@ -309,7 +309,7 @@ public class JobRunnerTest {
 
         jobRunnerWrapper.run(createSingleJobProject(job), job);
 
-        final JobParameterDef invParameter = job.getParameter("inv");
+        final JobParameter invParameter = job.getParameter("inv");
         verify(invParameter).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
         verify(invParameter, atLeast(1)).validate(anyMapOf(String.class, Serializable.class),
                 isNull(Serializable.class));
@@ -437,7 +437,7 @@ public class JobRunnerTest {
 
         jobRunnerWrapper.run(createSingleJobProject(job), job);
 
-        final JobParameterDef inv = job.getParameter("inv");
+        final JobParameter inv = job.getParameter("inv");
         verify(inv, never()).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
     }
 
@@ -629,9 +629,9 @@ public class JobRunnerTest {
     }
 
     private static Job<String> createSimpleJob() {
-        final List<JobParameterDef> parameterDefs = new ArrayList<>();
+        final List<JobParameter> parameterDefs = new ArrayList<>();
 
-        final JobParameterDefAbstract name = new JobParameterDefAbstract(
+        final JobParameterAbstract name = new JobParameterAbstract(
                 "name",
                 "Name",
                 new NotEmptyStringValidator(), false, true) {
@@ -649,7 +649,7 @@ public class JobRunnerTest {
         };
         parameterDefs.add(name);
 
-        final JobParameterDefAbstract surname = new JobParameterDefAbstract(
+        final JobParameterAbstract surname = new JobParameterAbstract(
                 "surname",
                 "Surname",
                 new NotEmptyStringValidator(), false, true) {
@@ -680,7 +680,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public List<JobParameterDef> getParameterDefs() {
+            public List<JobParameter> getParameterDefs() {
                 return parameterDefs;
             }
 
@@ -718,9 +718,9 @@ public class JobRunnerTest {
     }
 
     private static Job<String> createComplexJob() {
-        final List<JobParameterDef> parameterDefs = new ArrayList<>();
+        final List<JobParameter> parameterDefs = new ArrayList<>();
 
-        final JobParameterDefAbstract version = new JobParameterDefAbstract(
+        final JobParameterAbstract version = new JobParameterAbstract(
                 "version",
                 "Version",
                 new NotEmptyStringValidator(),
@@ -737,7 +737,7 @@ public class JobRunnerTest {
         };
         parameterDefs.add(version);
 
-        final JobParameterDefAbstract db = new JobParameterDefAbstract(
+        final JobParameterAbstract db = new JobParameterAbstract(
                 "db",
                 "DB",
                 new NotEmptyStringValidator(),
@@ -763,7 +763,7 @@ public class JobRunnerTest {
         parameterDefs.add(db);
         db.addDependency(version.getKey());
 
-        final JobParameterDefAbstract user = new JobParameterDefAbstract(
+        final JobParameterAbstract user = new JobParameterAbstract(
                 "user",
                 "User",
                 new NotEmptyStringValidator(),
@@ -801,7 +801,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public List<JobParameterDef> getParameterDefs() {
+            public List<JobParameter> getParameterDefs() {
                 return parameterDefs;
             }
 

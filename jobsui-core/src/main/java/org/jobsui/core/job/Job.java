@@ -19,7 +19,7 @@ public interface Job<T> {
 
     String getName();
 
-    List<JobParameterDef> getParameterDefs();
+    List<JobParameter> getParameterDefs();
 
     List<JobExpression> getExpressions();
 
@@ -35,7 +35,7 @@ public interface Job<T> {
 
     List<String> validate(Map<String, Serializable> values);
 
-    JobParameterDef getParameter(String key);
+    JobParameter getParameter(String key);
 
     JobExpression getExpression(String key);
 

@@ -5,7 +5,7 @@ import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.jobsui.core.job.JobAbstract;
 import org.jobsui.core.job.JobExpression;
-import org.jobsui.core.job.JobParameterDef;
+import org.jobsui.core.job.JobParameter;
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobResultImpl;
 
@@ -21,15 +21,15 @@ import java.util.Map;
 public class JobGroovy<T> extends JobAbstract<T> {
     private final String key;
     private final String name;
-    private final List<JobParameterDefGroovy> parameterDefsGroovy;
+    private final List<JobParameterGroovy> parameterDefsGroovy;
     private final List<JobExpression> expressions;
-    private final List<JobParameterDef> parameterDefs;
+    private final List<JobParameter> parameterDefs;
     private final Script run;
     private final Script validate;
     private final Binding shellBinding;
     private final GroovyShell shell;
 
-    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterDefGroovy> parameterDefsGroovy,
+    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterGroovy> parameterDefsGroovy,
                      List<JobExpressionGroovy> expressions, String runScript, String validateScript) {
         this.shell = shell;
         this.key = key;
@@ -50,7 +50,7 @@ public class JobGroovy<T> extends JobAbstract<T> {
     }
 
     @Override
-    public List<JobParameterDef> getParameterDefs() {
+    public List<JobParameter> getParameterDefs() {
         return Collections.unmodifiableList(parameterDefs);
     }
 
@@ -97,7 +97,7 @@ public class JobGroovy<T> extends JobAbstract<T> {
     }
 
     public void init(ProjectGroovy project) {
-        for (JobParameterDefGroovy jobParameterDef : parameterDefsGroovy) {
+        for (JobParameterGroovy jobParameterDef : parameterDefsGroovy) {
             jobParameterDef.init(project);
         }
     }

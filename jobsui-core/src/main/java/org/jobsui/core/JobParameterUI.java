@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * Created by enrico on 2/18/17.
  */
-public interface ParameterDefUI {
+public interface JobParameterUI {
 
     <C> UIComponent<C> createComponent(UI<C> ui) throws UnsupportedComponentException;
 

@@ -6,16 +6,16 @@ import java.util.*;
 /**
  * Created by enrico on 4/30/16.
  */
-public abstract class JobParameterDefAbstract implements JobParameterDef {
+public abstract class JobParameterAbstract implements JobParameter {
     private final String key;
     private final String name;
 //    private final StringConverter<T> converter;
-    private final ParameterValidator validator;
+    private final JobParameterValidator validator;
     private final List<String> dependencies = new ArrayList<>();
     private final boolean optional;
     private final boolean visible;
 
-    public JobParameterDefAbstract(String key, String name, ParameterValidator validator, boolean optional, boolean visible) {
+    public JobParameterAbstract(String key, String name, JobParameterValidator validator, boolean optional, boolean visible) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(name);
         this.key = key;
@@ -84,7 +84,7 @@ public abstract class JobParameterDefAbstract implements JobParameterDef {
         if (this == o) return true;
         if (o == null) return false;
 
-        JobParameterDefAbstract that = (JobParameterDefAbstract) o;
+        JobParameterAbstract that = (JobParameterAbstract) o;
 
         return key.equals(that.key);
     }

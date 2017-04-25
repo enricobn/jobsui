@@ -3,7 +3,7 @@ package org.jobsui.core.groovy;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
-import org.jobsui.core.job.JobParameterDefAbstract;
+import org.jobsui.core.job.JobParameterAbstract;
 import org.jobsui.core.ui.*;
 
 import java.io.Serializable;
@@ -15,16 +15,16 @@ import java.util.Objects;
 /**
  * Created by enrico on 5/4/16.
  */
-public class JobParameterDefGroovySimple extends JobParameterDefAbstract implements JobParameterDefGroovy {
+public class JobParameterGroovySimple extends JobParameterAbstract implements JobParameterGroovy {
     private final Script onInit;
     private final Script onDependenciesChange;
     private final Script validate;
     private final Binding shellBinding;
     private final UIComponentType componentType;
 
-    public JobParameterDefGroovySimple(GroovyShell shell, String key, String name, UIComponentType componentType,
-                                       String onInitScript, String onDependenciesChangeScript,
-                                       String validateScript, boolean optional, boolean visible) {
+    public JobParameterGroovySimple(GroovyShell shell, String key, String name, UIComponentType componentType,
+                                    String onInitScript, String onDependenciesChangeScript,
+                                    String validateScript, boolean optional, boolean visible) {
         super(key, name, null, optional, visible);
         this.componentType = componentType;
         Objects.requireNonNull(componentType);
