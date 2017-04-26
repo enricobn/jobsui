@@ -204,18 +204,8 @@ public class StartApp extends Application {
                     break;
                 case Material:
                     JFXDecorator decorator = new JFXDecorator(stage, page);
-                    Label titleLabel = new Label();
-                    titleLabel.getStyleClass().add(JobsUIFXStyles.TITLE_TEXT);
+                    addTitleToDecorator(stage, decorator);
 
-                    // Aligning title to the left
-                    titleLabel.layoutXProperty().addListener((observable, oldValue, newValue) -> {
-                        titleLabel.setTranslateX(-titleLabel.getLayoutX() + 10);
-                    });
-
-                    // when the title of the stage is changed then the label changes accordingly
-                    titleLabel.textProperty().bind(stage.titleProperty());
-
-                    ((HBox) decorator.getChildren().get(0)).getChildren().add(0, titleLabel);
                     scene = new Scene(decorator, 700, 450);
                     scene.getStylesheets().addAll(
                             resourceToURL("/resources/css/jfoenix-fonts.css"),
@@ -234,6 +224,21 @@ public class StartApp extends Application {
         }
 //        page.setStyle("-fx-background-color:WHITE");
         stage.sizeToScene();
+    }
+
+    private static void addTitleToDecorator(Stage stage, JFXDecorator decorator) {
+        Label titleLabel = new Label();
+        titleLabel.getStyleClass().add(JobsUIFXStyles.TITLE_TEXT);
+
+        // Aligning title to the left
+        titleLabel.layoutXProperty().addListener((observable, oldValue, newValue) ->
+            titleLabel.setTranslateX(-titleLabel.getLayoutX() + 10)
+        );
+
+        // when the title of the stage is changed then the label changes accordingly
+        titleLabel.textProperty().bind(stage.titleProperty());
+
+        ((HBox) decorator.getChildren().get(0)).getChildren().add(0, titleLabel);
     }
 
     Stage replaceSceneContent(Parent page, String title) throws Exception {
