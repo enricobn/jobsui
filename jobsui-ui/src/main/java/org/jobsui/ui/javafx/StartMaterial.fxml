@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
+<?import com.jfoenix.controls.JFXButton?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
@@ -11,8 +11,8 @@
        <HBox fillHeight="false" layoutX="12.0" layoutY="14.0" prefWidth="178.0" VBox.vgrow="NEVER" spacing="5">
            <padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
            <children>
-               <Button mnemonicParsing="false" onAction="#onOpen" text="Open" />
-               <Button mnemonicParsing="false" onAction="#onNew" text="New" />
+               <JFXButton mnemonicParsing="false" onAction="#onOpen" text="Open" styleClass="button-raised" />
+               <JFXButton mnemonicParsing="false" onAction="#onNew" text="New" styleClass="button-raised" />
            </children>
          <VBox.margin>
             <Insets bottom="10.0" />

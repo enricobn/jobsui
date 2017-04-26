@@ -5,5 +5,6 @@ package org.jobsui.core.ui;
  */
 public enum JobsUITheme {
     Standard,
+    Material,
     Dark
 }

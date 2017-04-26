@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static org.jobsui.ui.javafx.JobsUIFXStyles.ERROR_TEXT;
+import static org.jobsui.ui.javafx.JobsUIFXStyles.VALIDATION_ERROR_TEXT;
 
 /**
  * Created by enrico on 10/7/16.
@@ -193,7 +193,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
             } else {
                 String text = messages.stream().collect(Collectors.joining(","));
                 label.setTooltip(new Tooltip(text));
-                label.getStyleClass().add(ERROR_TEXT);
+                label.getStyleClass().add(VALIDATION_ERROR_TEXT);
             }
         }
 

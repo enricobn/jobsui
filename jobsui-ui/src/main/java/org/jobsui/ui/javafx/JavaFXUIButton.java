@@ -14,11 +14,12 @@ import java.util.List;
  * Created by enrico on 5/31/16.
  */
 public class JavaFXUIButton implements UIButton<Node> {
-    private final Button component = new Button();
+    private final Button component;
     private final Observable<Serializable> observable;
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
 
-    public JavaFXUIButton() {
+    public JavaFXUIButton(JavaFXUI ui) {
+        component = ui.createButton();
         observable = Observable.create(subscriber -> {
             subscriber.onStart();
             subscribers.add(subscriber);

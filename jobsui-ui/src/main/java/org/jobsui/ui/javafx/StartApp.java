@@ -31,18 +31,24 @@
 */
 package org.jobsui.ui.javafx;
 
+import com.jfoenix.controls.JFXDecorator;
 import com.sun.javafx.css.StyleManager;
 import javafx.application.Application;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.runner.JobUIRunner;
+import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.ui.UI;
 import org.jobsui.core.xml.ProjectFSXML;
 import org.jobsui.edit.EditProject;
@@ -77,7 +83,11 @@ public class StartApp extends Application {
         Thread.setDefaultUncaughtExceptionHandler(JavaFXUI::uncaughtException);
 
         try {
-            replaceSceneContent(primaryStage, StartApp.class.getResource("Start.fxml"));
+            if (getPreferences().getTheme() == JobsUITheme.Material) {
+                replaceSceneContent(primaryStage, StartApp.class.getResource("StartMaterial.fxml"));
+            } else {
+                replaceSceneContent(primaryStage, StartApp.class.getResource("Start.fxml"));
+            }
             primaryStage.setTitle("JobsUI");
             primaryStage.show();
             // after primaryStage.show() due to a reported bug (https://bugs.openjdk.java.net/browse/JDK-8132900).
@@ -157,17 +167,26 @@ public class StartApp extends Application {
 //    }
 
     private static void addStylesheet() {
-        String resource;
         switch (ui.getPreferences().getTheme()) {
             case Dark:
-                resource = "dark.css";
+//                addStyleSheet("dark.css");
                 break;
             default:
-                resource = "standard.css";
+//                addStyleSheet("/resources/css/jfoenix-design.css");
+//                addStyleSheet("/resources/css/jfoenix-fonts.css");
+//                addStyleSheet("standard.css");
                 break;
         }
-        String url = StartApp.class.getResource(resource).toExternalForm();
-        StyleManager.getInstance().addUserAgentStylesheet(url);
+    }
+
+    private static void addStyleSheet(String resource) {
+        URL url = StartApp.class.getResource(resource);
+        StyleManager.getInstance().addUserAgentStylesheet(url.toExternalForm());
+    }
+
+    private static String resourceToURL(String resource) {
+        URL url = StartApp.class.getResource(resource);
+        return url.toExternalForm();
     }
 
     private void replaceSceneContent(Stage stage, URL fxml) throws Exception {
@@ -178,11 +197,42 @@ public class StartApp extends Application {
     private void replaceSceneContent(Stage stage, Parent page) throws Exception {
         Scene scene = stage.getScene();
         if (scene == null) {
-            scene = new Scene(page, 700, 450);
+            switch (ui.getPreferences().getTheme()) {
+                case Dark:
+                    scene = new Scene(page, 700, 450);
+                    scene.getStylesheets().add(resourceToURL("dark.css"));
+                    break;
+                case Material:
+                    JFXDecorator decorator = new JFXDecorator(stage, page);
+                    Label titleLabel = new Label();
+                    titleLabel.getStyleClass().add(JobsUIFXStyles.TITLE_TEXT);
+
+                    // Aligning title to the left
+                    titleLabel.layoutXProperty().addListener((observable, oldValue, newValue) -> {
+                        titleLabel.setTranslateX(-titleLabel.getLayoutX() + 10);
+                    });
+
+                    // when the title of the stage is changed then the label changes accordingly
+                    titleLabel.textProperty().bind(stage.titleProperty());
+
+                    ((HBox) decorator.getChildren().get(0)).getChildren().add(0, titleLabel);
+                    scene = new Scene(decorator, 700, 450);
+                    scene.getStylesheets().addAll(
+                            resourceToURL("/resources/css/jfoenix-fonts.css"),
+                            resourceToURL("/resources/css/jfoenix-design.css"),
+                            resourceToURL("material.css")
+                    );
+                    break;
+                default:
+                    scene = new Scene(page, 700, 450);
+                  scene.getStylesheets().add(resourceToURL("standard.css"));
+                  break;
+            }
             stage.setScene(scene);
         } else {
             stage.getScene().setRoot(page);
         }
+//        page.setStyle("-fx-background-color:WHITE");
         stage.sizeToScene();
     }
 

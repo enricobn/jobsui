@@ -1,5 +1,6 @@
 package org.jobsui.ui.javafx;
 
+import com.jfoenix.controls.JFXButton;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -59,7 +60,7 @@ public class JavaFXUI implements UI<Node> {
         } else if (componentType == UICheckBox.class) {
             return (COMP) new JavaFXUICheckBox();
         } else if (componentType == UIButton.class) {
-            return (COMP) new JavaFXUIButton();
+            return (COMP) new JavaFXUIButton(this);
         } else if (componentType == UIExpression.class) {
             return (COMP) new JavaFXUIExpression();
         } else if (componentType == UIValue.class) {
@@ -178,5 +179,16 @@ public class JavaFXUI implements UI<Node> {
 
         // Traditional way to get the response value.
         return dialog.showAndWait();
+    }
+
+    public Button createButton() {
+        Button button;
+        if (getPreferences().getTheme() == JobsUITheme.Material) {
+            button = new JFXButton();
+            button.getStyleClass().add("button-raised");
+        } else {
+            button = new Button();
+        }
+        return button;
     }
 }

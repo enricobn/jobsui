@@ -14,6 +14,7 @@ import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.OpenedItem;
 import org.jobsui.core.job.Job;
+import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.xml.ProjectXML;
@@ -53,6 +54,7 @@ public class TestMain extends ApplicationTest {
         openedItem = new OpenedItem(urlString, "SimpleJob");
         List<OpenedItem> openedItems = Collections.singletonList(openedItem);
         when(preferences.getLastOpenedItems()).thenReturn(openedItems);
+        when(preferences.getTheme()).thenReturn(JobsUITheme.Standard);
     }
 
     @Override

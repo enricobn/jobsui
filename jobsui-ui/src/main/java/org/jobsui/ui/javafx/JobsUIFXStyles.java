@@ -5,6 +5,7 @@ package org.jobsui.ui.javafx;
  */
 public interface JobsUIFXStyles {
 
-    String ERROR_TEXT = "errorText";
+    String VALIDATION_ERROR_TEXT = "errorText";
+    String TITLE_TEXT = "titleText";
 
 }
