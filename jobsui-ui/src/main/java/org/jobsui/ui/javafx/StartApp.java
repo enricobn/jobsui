@@ -203,7 +203,7 @@ public class StartApp extends Application {
                     scene.getStylesheets().add(resourceToURL("dark.css"));
                     break;
                 case Material:
-                    JFXDecorator decorator = new JFXDecorator(stage, page);
+                    JFXDecorator decorator = new JFXDecorator(stage, page, false, true, true);
                     addTitleToDecorator(stage, decorator);
 
                     scene = new Scene(decorator, 700, 450);
