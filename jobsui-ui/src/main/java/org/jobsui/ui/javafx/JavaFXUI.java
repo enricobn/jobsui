@@ -1,6 +1,7 @@
 package org.jobsui.ui.javafx;
 
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXComboBox;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -56,7 +57,7 @@ public class JavaFXUI implements UI<Node> {
     @SuppressWarnings("unchecked")
     public <COMP extends UIComponent> COMP create(Class<COMP> componentType) throws UnsupportedComponentException {
         if (componentType == UIChoice.class) {
-            return (COMP) new JavaFXUIChoice();
+            return (COMP) new JavaFXUIChoice(this);
         } else if (componentType == UICheckBox.class) {
             return (COMP) new JavaFXUICheckBox();
         } else if (componentType == UIButton.class) {
@@ -190,5 +191,15 @@ public class JavaFXUI implements UI<Node> {
             button = new Button();
         }
         return button;
+    }
+
+    public <T> ComboBox<T> createComboBox() {
+        ComboBox<T> comboBox;
+        if (getPreferences().getTheme() == JobsUITheme.Material) {
+            comboBox = new JFXComboBox<>();
+        } else {
+            comboBox = new ComboBox<>();
+        }
+        return comboBox;
     }
 }

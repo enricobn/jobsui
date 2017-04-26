@@ -19,14 +19,15 @@ import java.util.Objects;
 class JavaFXUIChoice implements UIChoice<Node> {
 //    private final FlowPane component = new FlowPane();
     private final Node component;
-    private final ComboBox<Serializable> combo = new ComboBox<>();
+    private final ComboBox<Serializable> combo;
 //    private final Button button = new Button("...");
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
     private final Observable<Serializable> observable;
 //    private String title;
     private boolean disableListener = false;
 
-    JavaFXUIChoice() {
+    JavaFXUIChoice(JavaFXUI ui) {
+        combo = ui.createComboBox();
         component = combo;
         observable = Observable.create(subscriber -> {
             subscriber.onStart();
