@@ -40,12 +40,15 @@ public class JobsUIPreferencesImplTest {
     private BookmarksStore bookmarkStore;
     @Mock
     private java.util.prefs.Preferences edit;
+    @Mock
+    private java.util.prefs.Preferences run;
 
     @Before
     public void setUp() throws Exception {
-        when(preferences.node(NODE_LAST_OPENED_PROJECTS)).thenReturn(lastOpenedProjects);
-        when(preferences.node(NODE_OTHERS)).thenReturn(others);
-        when(preferences.node(NODE_EDIT)).thenReturn(edit);
+        when(preferences.node(LAST_OPENED_PROJECTS_NODE)).thenReturn(lastOpenedProjects);
+        when(preferences.node(OTHERS_NODE)).thenReturn(others);
+        when(preferences.node(EDIT_NODE)).thenReturn(edit);
+        when(preferences.node(RUN_NODE)).thenReturn(run);
     }
 
     @Test
