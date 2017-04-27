@@ -64,8 +64,6 @@ public class JavaFXUI implements UI<Node> {
             return (COMP) new JavaFXUICheckBox(this);
         } else if (componentType == UIButton.class) {
             return (COMP) new JavaFXUIButton(this);
-        } else if (componentType == UIExpression.class) {
-            return (COMP) new JavaFXUIExpression();
         } else if (componentType == UIValue.class) {
             return (COMP) new JavaFXUIValue(this);
         }
