@@ -90,8 +90,6 @@ public class StartApp extends Application {
             }
             primaryStage.setTitle("JobsUI");
             primaryStage.show();
-            // after primaryStage.show() due to a reported bug (https://bugs.openjdk.java.net/browse/JDK-8132900).
-            addStylesheet();
         } catch (Exception e) {
             Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, e);
             throw new RuntimeException(e);
@@ -101,36 +99,6 @@ public class StartApp extends Application {
     public JobsUIPreferences getPreferences() {
         return ui.getPreferences();
     }
-
-//    private static void setStylesheet() {
-//        URL stylesheet = StartApp.class.getResource("/com/sun/javafx/scene/control/skin/modena/modena.css");
-//
-//        try(InputStream inputStream = stylesheet.openStream()) {
-//            File tmpCss = File.createTempFile("jobsui", ".css");
-//            try {
-//                String modenaCSS = ""; //IOUtils.toString(inputStream, Charset.forName("UTF-8"));
-//                modenaCSS += "\n.root {\n" +
-//                        "    -fx-base: rgb(50, 50, 50);\n" +
-//                        "    -fx-background: rgb(50, 50, 50);\n" +
-//                        "    -fx-control-inner-background:  rgb(50, 50, 50);\n" +
-//                        "}";
-//                FileUtils.write(tmpCss, modenaCSS, Charset.forName("UTF-8"));
-//
-////                PlatformImpl.setDefaultPlatformUserAgentStylesheet();
-////                Application.setUserAgentStylesheet(null);
-//                StyleManager.getInstance().addUserAgentStylesheet(tmpCss.toURI().toURL().toExternalForm());
-//
-////                Application.setUserAgentStylesheet(tmpCss.toURI().toURL().toExternalForm());
-////                StyleManager.getInstance().addUserAgentStylesheet(tmpCss.toURI().toURL().toExternalForm());
-//
-////                setUserAgentStylesheet(tmpCss.toURI().toURL().toExternalForm());
-//            } finally {
-////                tmpCss.delete();
-//            }
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 
     void gotoRun(Project project, Job<Serializable> job) {
         JobUIRunner<Node> runner = new JobUIRunner<>(ui);
@@ -145,43 +113,17 @@ public class StartApp extends Application {
         EditProject editProject = new EditProject();
         stage = new Stage();
         try {
-            editProject.start(ui, stage);
-            editProject.edit(projectXML, false);
+            try {
+                Parent root = editProject.getRoot(ui);
+                Stage stage = StartApp.getInstance().replaceSceneContent(root, projectXML.getName());
+                editProject.edit(projectXML, false);
+                stage.showAndWait();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-    }
-
-//    public void gotoStart() {
-//        if (stage != null) {
-//            stage.close();
-//        }
-//        primaryStage.show();
-////        try {
-////            replaceSceneContent("Start.fxml");
-////        } catch (Exception ex) {
-////            Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, ex);
-////        }
-////        stage.setWidth(200);
-////        stage.setHeight(100);
-//    }
-
-    private static void addStylesheet() {
-        switch (ui.getPreferences().getTheme()) {
-            case Dark:
-//                addStyleSheet("dark.css");
-                break;
-            default:
-//                addStyleSheet("/resources/css/jfoenix-design.css");
-//                addStyleSheet("/resources/css/jfoenix-fonts.css");
-//                addStyleSheet("standard.css");
-                break;
-        }
-    }
-
-    private static void addStyleSheet(String resource) {
-        URL url = StartApp.class.getResource(resource);
-        StyleManager.getInstance().addUserAgentStylesheet(url.toExternalForm());
     }
 
     private static String resourceToURL(String resource) {

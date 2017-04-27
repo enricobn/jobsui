@@ -2,6 +2,7 @@ package org.jobsui.edit;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
@@ -38,46 +39,21 @@ public class EditProject {
             new Border(new BorderStroke(Paint.valueOf("black"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
     private TreeView<Item> itemsTree;
     private VBox itemDetail;
-    private VBox root;
-    private Label status;
     private ProjectFSXML projectXML = null;
     private List<String> originalJobs = null;
     private List<String> originalScriptLocations = null;
     private Button saveButton;
-    private Button saveAsButton;
-    private Stage stage;
     private JobsUIPreferences preferences;
     private UI<?> ui;
 
-    public void start(UI<?> ui, Stage stage) throws Exception {
+    public Parent getRoot(UI<?> ui) throws Exception {
         // TODO I don't like it
         preferences = ui.getPreferences();
         this.ui = ui;
-        root = new VBox(5);
+        VBox root = new VBox(5);
         HBox buttons = new HBox(5);
         VBox.setVgrow(buttons, Priority.NEVER);
         buttons.setPadding(new Insets(5, 5, 5, 5));
-//        Button openButton = new Button("Open");
-//        openButton.setOnAction(event -> {
-//            DirectoryChooser chooser = new DirectoryChooser();
-//            chooser.setTitle("Open project");
-//
-//            File firstProject = configuration.getFirstRecentValidProject();
-//            if (firstProject != null) {
-//                chooser.setInitialDirectory(firstProject);
-//            }
-//
-//            File file = chooser.showDialog(stage);
-//
-//            if (file != null) {
-//                Task runnable = new OpenProjectTask(file);
-//
-//                Thread thread = new Thread(runnable);
-//                thread.setDaemon(true);
-//                thread.start();
-//            }
-//        });
-//        buttons.getChildren().add(openButton);
 
         saveButton = new Button("Save");
         saveButton.setOnAction(event -> {
@@ -102,14 +78,14 @@ public class EditProject {
         });
         buttons.getChildren().add(saveButton);
 
-        saveAsButton = new Button("Save as");
+        Button saveAsButton = new Button("Save as");
         saveAsButton.setOnAction(event -> {
             try {
                 DirectoryChooser chooser = new DirectoryChooser();
                 chooser.setTitle("Save project");
                 chooser.setInitialDirectory(projectXML.getFolder());
 
-                File file = chooser.showDialog(stage);
+                File file = chooser.showDialog(null);
 
                 if (file != null) {
                     if (file.exists()) {
@@ -176,14 +152,15 @@ public class EditProject {
         VBox.setVgrow(splitPane, Priority.ALWAYS);
         root.getChildren().add(splitPane);
 
-        status = new Label();
+        Label status = new Label();
         root.getChildren().add(status);
 
-        Scene scene = new Scene(root, 800, 600);
-
-        stage.setScene(scene);
-        stage.show();
-        this.stage = stage;
+        return root;
+//        Scene scene = new Scene(root, 800, 600);
+//
+//        stage.setScene(scene);
+//        stage.show();
+//        this.stage = stage;
     }
 
 //    private static void showError(String title, Throwable e) {
@@ -294,7 +271,7 @@ public class EditProject {
         this.projectXML = projectXML;
         this.originalJobs = new ArrayList<>(projectXML.getJobs());
         this.originalScriptLocations = new ArrayList<>(projectXML.getScriptsLocations());
-        stage.setTitle(projectXML.getName());
+//        stage.setTitle(projectXML.getName());
     }
 
     private enum ItemType {
