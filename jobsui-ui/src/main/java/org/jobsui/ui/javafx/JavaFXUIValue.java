@@ -16,12 +16,13 @@ import java.util.List;
  * Created by enrico on 3/30/17.
  */
 public class JavaFXUIValue implements UIValue<Node> {
-    private final TextField component = new TextField();
+    private final TextField component;
     private final Observable<Serializable> observable;
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
     private StringConverter<Serializable> converter = new StringConverterString();
 
-    public JavaFXUIValue() {
+    public JavaFXUIValue(JavaFXUI ui) {
+        component = ui.createTextField();
         observable = Observable.create(subscriber -> {
             subscriber.onStart();
             subscribers.add(subscriber);

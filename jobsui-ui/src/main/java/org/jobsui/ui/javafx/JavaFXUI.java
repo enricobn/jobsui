@@ -3,6 +3,7 @@ package org.jobsui.ui.javafx;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXComboBox;
+import com.jfoenix.controls.JFXTextField;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -66,7 +67,7 @@ public class JavaFXUI implements UI<Node> {
         } else if (componentType == UIExpression.class) {
             return (COMP) new JavaFXUIExpression();
         } else if (componentType == UIValue.class) {
-            return (COMP) new JavaFXUIValue();
+            return (COMP) new JavaFXUIValue(this);
         }
         throw new UnsupportedComponentException("JavaFX: cannot find component for " + componentType.getName());
     }
@@ -204,12 +205,22 @@ public class JavaFXUI implements UI<Node> {
         return result;
     }
 
-    public <T> CheckBox createCheckBox() {
+    public CheckBox createCheckBox() {
         CheckBox result;
         if (getPreferences().getTheme() == JobsUITheme.Material) {
             result = new JFXCheckBox();
         } else {
             result = new CheckBox();
+        }
+        return result;
+    }
+
+    public TextField createTextField() {
+        TextField result;
+        if (getPreferences().getTheme() == JobsUITheme.Material) {
+            result = new JFXTextField();
+        } else {
+            result = new TextField();
         }
         return result;
     }
