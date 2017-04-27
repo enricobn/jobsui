@@ -14,9 +14,9 @@ import org.apache.commons.io.FileUtils;
 import org.fxmisc.richtext.CodeArea;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.JobsUITheme;
-import org.jobsui.core.ui.UI;
 import org.jobsui.core.xml.*;
 import org.jobsui.ui.javafx.JavaFXUI;
+import org.jobsui.ui.javafx.JobsUIFXStyles;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,8 +34,13 @@ import java.util.stream.Stream;
 public class EditProject {
     private static final Border CODE_AREA_DARK_FOCUSED_BORDER =
             new Border(new BorderStroke(Paint.valueOf("039ED3"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
+    private static final Border CODE_AREA_FOCUSED_BORDER =
+            new Border(new BorderStroke(new Color(77d/256, 102d/256, 204d/256, 1), BorderStrokeStyle.SOLID, CornerRadii.EMPTY,
+                    new BorderWidths(2, 2, 2, 2, false, false, false, false)));
     private static final Border CODE_AREA_DARK_NOT_FOCUSED_BORDER =
             new Border(new BorderStroke(Paint.valueOf("black"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
+    private static final Border CODE_AREA_NOT_FOCUSED_BORDER =
+            new Border(new BorderStroke(Paint.valueOf("gray"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
     private TreeView<Item> itemsTree;
     private VBox itemDetail;
     private ProjectFSXML projectXML = null;
@@ -118,7 +123,7 @@ public class EditProject {
                 try {
                     newValue.getValue().onSelect();
                 } catch (Throwable e) {
-                    ui.showError("Error :", e);
+                    ui.showError("Error", e);
                 }
             }
         });
@@ -145,7 +150,7 @@ public class EditProject {
             }
         });
 
-        itemDetail = new VBox(5);
+        itemDetail = new VBox(0);
         itemDetail.setPadding(new Insets(5, 5, 5, 5));
 
         SplitPane splitPane = new SplitPane(itemsTree, itemDetail);
@@ -324,19 +329,19 @@ public class EditProject {
         private void setProjectDetail() {
             ProjectFSXML project = (ProjectFSXML) payload;
 
-            addTextProperty("Name:", project::getName, project::setName);
-            addTextProperty("Version:", project::getVersion, project::setVersion);
+            addTextProperty("Name", project::getName, project::setName);
+            addTextProperty("Version", project::getVersion, project::setVersion);
         }
 
         private void setJobDetail() {
             JobXMLImpl jobXML = (JobXMLImpl) payload;
 
             // TODO key (file name)
-            addTextProperty("Name:", jobXML::getName, jobXML::setName);
+            addTextProperty("Name", jobXML::getName, jobXML::setName);
 
-            addTextAreaProperty("Validate:", jobXML::getValidateScript, jobXML::setValidateScript,
+            addTextAreaProperty("Validate", jobXML::getValidateScript, jobXML::setValidateScript,
                     false);
-            addTextAreaProperty("Run:", jobXML::getRunScript, jobXML::setRunScript, false);
+            addTextAreaProperty("Run", jobXML::getRunScript, jobXML::setRunScript, false);
         }
 
         private void setGroovyFileDetail() throws IOException {
@@ -346,7 +351,7 @@ public class EditProject {
 //                    file.getName().endsWith(".properties") ||
 //                    file.getName().endsWith(".xml")) {
 //                String content = new String(Files.readAllBytes(file.toPath()));
-                itemDetail.getChildren().add(new Label("Content:"));
+                itemDetail.getChildren().add(new Label("Content"));
 
                 CodeArea codeArea = GroovyCodeArea.getCodeArea(true, preferences.getTheme());
                 GroovyCodeArea.setText(codeArea, content);
@@ -361,8 +366,8 @@ public class EditProject {
         private void setCallDetail() {
             CallXML parameter = (CallXML) payload;
 
-            addTextProperty("Key:", parameter::getKey, parameter::setKey);
-            addTextProperty("Name:", parameter::getName, parameter::setName);
+            addTextProperty("Key", parameter::getKey, parameter::setKey);
+            addTextProperty("Name", parameter::getName, parameter::setName);
 
             // TODO
         }
@@ -370,10 +375,10 @@ public class EditProject {
         private void setExpressionDetail() {
             ExpressionXML parameter = (ExpressionXML) payload;
 
-            addTextProperty("Key:", parameter::getKey, parameter::setKey);
-            addTextProperty("Name:", parameter::getName, parameter::setName);
+            addTextProperty("Key", parameter::getKey, parameter::setKey);
+            addTextProperty("Name", parameter::getName, parameter::setName);
 
-            addTextAreaProperty("Evaluate:", parameter::getEvaluateScript, parameter::setEvaluateScript,
+            addTextAreaProperty("Evaluate", parameter::getEvaluateScript, parameter::setEvaluateScript,
                     false);
         }
 
@@ -394,22 +399,23 @@ public class EditProject {
 
             SimpleParameterXML parameter = (SimpleParameterXML) payload;
 
-            addTextProperty("Key:", parameter::getKey, key -> jobXML.changeParameterKey(parameter, key));
+            addTextProperty("Key", parameter::getKey, key -> jobXML.changeParameterKey(parameter, key));
 
-            addTextProperty("Name:", parameter::getName, parameter::setName);
+            addTextProperty("Name", parameter::getName, parameter::setName);
 
-            addTextAreaProperty("On init:", parameter::getOnInitScript,
+            addTextAreaProperty("On init", parameter::getOnInitScript,
                     parameter::setOnInitScript, false);
 
-            addTextAreaProperty("On dependencies change:", parameter::getOnDependenciesChangeScript,
+            addTextAreaProperty("On dependencies change", parameter::getOnDependenciesChangeScript,
                     parameter::setOnDependenciesChangeScript, false);
 
-            addTextAreaProperty("Validate:", parameter::getValidateScript, parameter::setValidateScript,
+            addTextAreaProperty("Validate", parameter::getValidateScript, parameter::setValidateScript,
                     false);
         }
 
         private void addTextAreaProperty(String title, Supplier<String> get, Consumer<String> set, boolean showLineNumbers) {
-            itemDetail.getChildren().add(new Label(title));
+            addPropertyNameLabel(title);
+
             VBox parent = new VBox();
             CodeArea codeArea = GroovyCodeArea.getCodeArea(true, preferences.getTheme());
 
@@ -427,23 +433,36 @@ public class EditProject {
             itemDetail.getChildren().add(parent);
 
             parent.getChildren().add(codeArea);
+
+            Border focusedBorder;
+            Border notFocusedBorder;
             if (preferences.getTheme().equals(JobsUITheme.Dark)) {
-                parent.setBorder(CODE_AREA_DARK_NOT_FOCUSED_BORDER);
-                codeArea.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                    if (newValue) {
-                        parent.setBorder(CODE_AREA_DARK_FOCUSED_BORDER);
-                    } else {
-                        parent.setBorder(CODE_AREA_DARK_NOT_FOCUSED_BORDER);
-                    }
-                });
+                focusedBorder = CODE_AREA_DARK_FOCUSED_BORDER;
+                notFocusedBorder = CODE_AREA_DARK_NOT_FOCUSED_BORDER;
+            } else {
+                focusedBorder = CODE_AREA_FOCUSED_BORDER;
+                notFocusedBorder = CODE_AREA_NOT_FOCUSED_BORDER;
             }
+
+            parent.setBorder(notFocusedBorder);
+
+            codeArea.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue) {
+                    parent.setBorder(focusedBorder);
+                } else {
+                    parent.setBorder(notFocusedBorder);
+                }
+            });
 
             VBox.setVgrow(parent, Priority.ALWAYS);
         }
 
         private void addTextProperty(String title, Supplier<String> get, Consumer<String> set) {
-            itemDetail.getChildren().add(new Label(title));
-            TextField control = new TextField(get.get());
+            addPropertyNameLabel(title);
+
+            TextField control = ui.createTextField();
+            control.setPromptText(title);
+            control.setText(get.get());
 
             control.textProperty().addListener((observable, oldValue, newValue) -> {
                 set.accept(newValue);
@@ -456,6 +475,15 @@ public class EditProject {
         public String toString() {
             return title.get();
         }
+    }
+
+    private void addPropertyNameLabel(String text) {
+        Label label = new Label(text);
+        label.getStyleClass().add(JobsUIFXStyles.EDIT_PROPERTY_NAME_TEXT);
+        if (!itemDetail.getChildren().isEmpty()) {
+            label.setPadding(new Insets(20, 0, 0, 0));
+        }
+        itemDetail.getChildren().add(label);
     }
 
     private void updateSelectedItem() {

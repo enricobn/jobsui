@@ -8,11 +8,15 @@
     -fx-font-weight: BOLD;
 }
 
+.editPropertyNameText {
+    -fx-text-fill: rgb(77, 102, 204);
+    -fx-font-weight: BOLD;
+}
+
 /* Button */
 .button {
     -fx-padding: 0.7em 0.57em;
     -fx-font-size: 14px;
-
 }
 
 .button-raised {

@@ -7,5 +7,6 @@ public interface JobsUIFXStyles {
 
     String VALIDATION_ERROR_TEXT = "errorText";
     String TITLE_TEXT = "titleText";
+    String EDIT_PROPERTY_NAME_TEXT = "editPropertyNameText";
 
 }
