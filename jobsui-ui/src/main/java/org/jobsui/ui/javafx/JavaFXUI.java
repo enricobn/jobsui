@@ -1,6 +1,7 @@
 package org.jobsui.ui.javafx;
 
 import com.jfoenix.controls.JFXButton;
+import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXComboBox;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
@@ -59,7 +60,7 @@ public class JavaFXUI implements UI<Node> {
         if (componentType == UIChoice.class) {
             return (COMP) new JavaFXUIChoice(this);
         } else if (componentType == UICheckBox.class) {
-            return (COMP) new JavaFXUICheckBox();
+            return (COMP) new JavaFXUICheckBox(this);
         } else if (componentType == UIButton.class) {
             return (COMP) new JavaFXUIButton(this);
         } else if (componentType == UIExpression.class) {
@@ -183,23 +184,34 @@ public class JavaFXUI implements UI<Node> {
     }
 
     public Button createButton() {
-        Button button;
+        Button result;
         if (getPreferences().getTheme() == JobsUITheme.Material) {
-            button = new JFXButton();
-            button.getStyleClass().add("button-raised");
+            result = new JFXButton();
+            result.getStyleClass().add("button-raised");
         } else {
-            button = new Button();
+            result = new Button();
         }
-        return button;
+        return result;
     }
 
     public <T> ComboBox<T> createComboBox() {
-        ComboBox<T> comboBox;
+        ComboBox<T> result;
         if (getPreferences().getTheme() == JobsUITheme.Material) {
-            comboBox = new JFXComboBox<>();
+            result = new JFXComboBox<>();
         } else {
-            comboBox = new ComboBox<>();
+            result = new ComboBox<>();
         }
-        return comboBox;
+        return result;
     }
+
+    public <T> CheckBox createCheckBox() {
+        CheckBox result;
+        if (getPreferences().getTheme() == JobsUITheme.Material) {
+            result = new JFXCheckBox();
+        } else {
+            result = new CheckBox();
+        }
+        return result;
+    }
+
 }

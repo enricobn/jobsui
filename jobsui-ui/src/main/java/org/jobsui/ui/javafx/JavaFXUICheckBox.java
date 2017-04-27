@@ -14,11 +14,12 @@ import java.util.List;
  * Created by enrico on 5/31/16.
  */
 public class JavaFXUICheckBox implements UICheckBox<Node> {
-    private final CheckBox component = new CheckBox();
+    private final CheckBox component;
     private final Observable<Serializable> observable;
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
 
-    public JavaFXUICheckBox() {
+    public JavaFXUICheckBox(JavaFXUI ui) {
+        component = ui.createCheckBox();
         observable = Observable.create(subscriber -> {
             subscriber.onStart();
             subscribers.add(subscriber);
