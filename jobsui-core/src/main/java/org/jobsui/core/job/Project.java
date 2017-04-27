@@ -1,7 +1,5 @@
 package org.jobsui.core.job;
 
-import org.jobsui.core.job.Job;
-
 import java.util.Set;
 
 /**

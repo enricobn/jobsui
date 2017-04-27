@@ -5,8 +5,8 @@ import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
-import org.jobsui.core.job.Project;
 import org.jobsui.core.job.JobDependency;
+import org.jobsui.core.job.Project;
 import org.jobsui.core.xml.*;
 
 import java.io.File;

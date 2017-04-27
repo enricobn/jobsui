@@ -1,8 +1,8 @@
 package org.jobsui.core.bookmark;
 
-import org.jobsui.core.job.Project;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobParameter;
+import org.jobsui.core.job.Project;
 import org.jobsui.core.runner.JobValues;
 
 import java.io.Serializable;

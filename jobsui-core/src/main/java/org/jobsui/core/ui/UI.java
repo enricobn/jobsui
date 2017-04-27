@@ -1,6 +1,5 @@
 package org.jobsui.core.ui;
 
-import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
 
 import java.util.Optional;

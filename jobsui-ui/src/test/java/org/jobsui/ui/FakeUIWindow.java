@@ -1,8 +1,8 @@
 package org.jobsui.ui;
 
 import org.jobsui.core.bookmark.Bookmark;
-import org.jobsui.core.job.Project;
 import org.jobsui.core.job.Job;
+import org.jobsui.core.job.Project;
 import org.jobsui.core.ui.*;
 
 import java.io.Serializable;
@@ -15,9 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * Created by enrico on 5/8/16.

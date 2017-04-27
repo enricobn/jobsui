@@ -32,10 +32,7 @@
 package org.jobsui.ui.javafx;
 
 import com.jfoenix.controls.JFXDecorator;
-import com.sun.javafx.css.StyleManager;
 import javafx.application.Application;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Node;

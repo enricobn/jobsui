@@ -10,8 +10,8 @@ import javafx.stage.DirectoryChooser;
 import javafx.util.Callback;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.OpenedItem;
-import org.jobsui.core.job.Project;
 import org.jobsui.core.job.Job;
+import org.jobsui.core.job.Project;
 import org.jobsui.core.utils.Tuple2;
 import org.jobsui.core.xml.*;
 

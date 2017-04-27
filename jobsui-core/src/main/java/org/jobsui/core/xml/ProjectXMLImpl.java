@@ -1,7 +1,9 @@
 package org.jobsui.core.xml;
 
 import java.net.URL;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by enrico on 10/6/16.

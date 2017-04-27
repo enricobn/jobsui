@@ -3,8 +3,6 @@ package org.jobsui.core;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 

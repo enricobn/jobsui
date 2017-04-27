@@ -14,8 +14,8 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.bookmark.Bookmark;
-import org.jobsui.core.job.Project;
 import org.jobsui.core.job.Job;
+import org.jobsui.core.job.Project;
 import org.jobsui.core.ui.*;
 
 import java.util.List;

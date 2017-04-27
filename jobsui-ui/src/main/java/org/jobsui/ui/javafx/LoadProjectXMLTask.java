@@ -1,11 +1,10 @@
 package org.jobsui.ui.javafx;
 
 import javafx.concurrent.Task;
-import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.xml.ProjectFSXML;
+import org.jobsui.core.xml.ProjectParserImpl;
 
 import java.io.File;
-import java.net.URL;
 
 /**
  * Created by enrico on 3/30/17.

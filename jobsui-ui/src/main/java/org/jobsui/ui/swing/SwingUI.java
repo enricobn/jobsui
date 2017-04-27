@@ -1,6 +1,5 @@
 package org.jobsui.ui.swing;
 
-import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.*;
 

@@ -1,12 +1,7 @@
 package org.jobsui.core.xml;
 
 import org.jobsui.core.utils.JobsUIUtils;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
