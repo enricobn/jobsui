@@ -1,4 +1,4 @@
-package org.jobsui.edit;
+package org.jobsui.ui.javafx.edit;
 
 import javafx.geometry.Insets;
 import javafx.scene.layout.Background;

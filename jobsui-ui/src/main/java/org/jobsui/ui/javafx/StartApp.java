@@ -48,7 +48,7 @@ import org.jobsui.core.runner.JobUIRunner;
 import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.ui.UI;
 import org.jobsui.core.xml.ProjectFSXML;
-import org.jobsui.edit.EditProject;
+import org.jobsui.ui.javafx.edit.EditProject;
 
 import java.io.Serializable;
 import java.net.URL;
@@ -60,19 +60,19 @@ import java.util.logging.Logger;
  */
 public class StartApp extends Application {
     private static StartApp instance = new StartApp();
-    private static UI<Node> ui;
+    private static JavaFXUI ui;
     private Stage stage;
 
     public static StartApp getInstance() {
         return instance;
     }
 
-    public static void main(UI<Node> ui) {
+    public static void main(JavaFXUI ui) {
         StartApp.ui = ui;
         launch();
     }
 
-    public static void initForTest(UI<Node> ui) {
+    public static void initForTest(JavaFXUI ui) {
         StartApp.ui = ui;
     }
 

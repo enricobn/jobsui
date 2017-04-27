@@ -1,7 +1,0 @@
-description = 'JobsUI UI'
-
-dependencies {
-    compile project(':jobsui-core')
-    compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.7-M5'
-
-}

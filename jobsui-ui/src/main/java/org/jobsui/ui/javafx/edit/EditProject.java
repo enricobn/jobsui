@@ -1,4 +1,4 @@
-package org.jobsui.edit;
+package org.jobsui.ui.javafx.edit;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -16,6 +16,7 @@ import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.ui.UI;
 import org.jobsui.core.xml.*;
+import org.jobsui.ui.javafx.JavaFXUI;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,9 +32,9 @@ import java.util.stream.Stream;
  * Created by enrico on 10/9/16.
  */
 public class EditProject {
-    private static final Border CODE_AREA_FOCUSED_BORDER =
+    private static final Border CODE_AREA_DARK_FOCUSED_BORDER =
             new Border(new BorderStroke(Paint.valueOf("039ED3"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
-    private static final Border CODE_AREA_NOT_FOCUSED_BORDER =
+    private static final Border CODE_AREA_DARK_NOT_FOCUSED_BORDER =
             new Border(new BorderStroke(Paint.valueOf("black"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
     private TreeView<Item> itemsTree;
     private VBox itemDetail;
@@ -42,18 +43,18 @@ public class EditProject {
     private List<String> originalScriptLocations = null;
     private Button saveButton;
     private JobsUIPreferences preferences;
-    private UI<?> ui;
+    private JavaFXUI ui;
 
-    public Parent getRoot(UI<?> ui) throws Exception {
-        // TODO I don't like it
-        preferences = ui.getPreferences();
+    public Parent getRoot(JavaFXUI ui) throws Exception {
         this.ui = ui;
+        preferences = ui.getPreferences();
         VBox root = new VBox(5);
         HBox buttons = new HBox(5);
         VBox.setVgrow(buttons, Priority.NEVER);
         buttons.setPadding(new Insets(5, 5, 5, 5));
 
-        saveButton = new Button("Save");
+        saveButton = ui.createButton();
+        saveButton.setText("Save");
         saveButton.setOnAction(event -> {
             try {
                 for (String originalJob : originalJobs) {
@@ -76,7 +77,8 @@ public class EditProject {
         });
         buttons.getChildren().add(saveButton);
 
-        Button saveAsButton = new Button("Save as");
+        Button saveAsButton = ui.createButton();
+        saveAsButton.setText("Save as");
         saveAsButton.setOnAction(event -> {
             try {
                 DirectoryChooser chooser = new DirectoryChooser();
@@ -426,12 +428,12 @@ public class EditProject {
 
             parent.getChildren().add(codeArea);
             if (preferences.getTheme().equals(JobsUITheme.Dark)) {
-                parent.setBorder(CODE_AREA_NOT_FOCUSED_BORDER);
+                parent.setBorder(CODE_AREA_DARK_NOT_FOCUSED_BORDER);
                 codeArea.focusedProperty().addListener((observable, oldValue, newValue) -> {
                     if (newValue) {
-                        parent.setBorder(CODE_AREA_FOCUSED_BORDER);
+                        parent.setBorder(CODE_AREA_DARK_FOCUSED_BORDER);
                     } else {
-                        parent.setBorder(CODE_AREA_NOT_FOCUSED_BORDER);
+                        parent.setBorder(CODE_AREA_DARK_NOT_FOCUSED_BORDER);
                     }
                 });
             }
