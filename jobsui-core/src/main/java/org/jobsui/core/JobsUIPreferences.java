@@ -28,4 +28,16 @@ public interface JobsUIPreferences {
     boolean existsBookmark(Project project, Job job, String name);
 
     boolean deleteBookmark(Project project, Job job, String name);
+
+    void setEditDividerPosition(double position);
+
+    double getEditDividerPosition();
+
+    void setEditWidth(double width);
+
+    void setEditHeight(double height);
+
+    double getEditWidth();
+
+    double getEditHeight();
 }

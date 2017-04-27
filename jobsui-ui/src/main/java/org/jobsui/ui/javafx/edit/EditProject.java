@@ -10,6 +10,7 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.fxmisc.richtext.CodeArea;
 import org.jobsui.core.JobsUIPreferences;
@@ -49,11 +50,13 @@ public class EditProject {
     private Button saveButton;
     private JobsUIPreferences preferences;
     private JavaFXUI ui;
+    private SplitPane splitPane;
+    private VBox root;
 
     public Parent getRoot(JavaFXUI ui) throws Exception {
         this.ui = ui;
         preferences = ui.getPreferences();
-        VBox root = new VBox(5);
+        root = new VBox(5);
         HBox buttons = new HBox(5);
         VBox.setVgrow(buttons, Priority.NEVER);
         buttons.setPadding(new Insets(5, 5, 5, 5));
@@ -153,7 +156,8 @@ public class EditProject {
         itemDetail = new VBox(0);
         itemDetail.setPadding(new Insets(5, 5, 5, 5));
 
-        SplitPane splitPane = new SplitPane(itemsTree, itemDetail);
+        splitPane = new SplitPane(itemsTree, itemDetail);
+
         VBox.setVgrow(splitPane, Priority.ALWAYS);
         root.getChildren().add(splitPane);
 
@@ -277,6 +281,18 @@ public class EditProject {
         this.originalJobs = new ArrayList<>(projectXML.getJobs());
         this.originalScriptLocations = new ArrayList<>(projectXML.getScriptsLocations());
 //        stage.setTitle(projectXML.getName());
+    }
+
+    public void savePreferences(Stage stage) {
+        preferences.setEditDividerPosition(splitPane.getDividers().get(0).getPosition());
+        preferences.setEditWidth(stage.getWidth());
+        preferences.setEditHeight(stage.getHeight());
+    }
+
+    public void loadPreferences(Stage stage) {
+        splitPane.getDividers().get(0).setPosition(preferences.getEditDividerPosition());
+        stage.setWidth(preferences.getEditWidth());
+        stage.setHeight(preferences.getEditHeight());
     }
 
     private enum ItemType {

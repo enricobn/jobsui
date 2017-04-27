@@ -33,6 +33,7 @@ package org.jobsui.ui.javafx;
 
 import com.jfoenix.controls.JFXDecorator;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Node;
@@ -41,6 +42,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
@@ -114,6 +116,8 @@ public class StartApp extends Application {
                 Parent root = editProject.getRoot(ui);
                 Stage stage = StartApp.getInstance().replaceSceneContent(root, projectXML.getName());
                 editProject.edit(projectXML, false);
+                editProject.loadPreferences(stage);
+                stage.setOnHiding(event -> editProject.savePreferences(stage));
                 stage.showAndWait();
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -154,15 +158,15 @@ public class StartApp extends Application {
                     break;
                 default:
                     scene = new Scene(page, 700, 450);
-                  scene.getStylesheets().add(resourceToURL("standard.css"));
-                  break;
+                    scene.getStylesheets().add(resourceToURL("standard.css"));
+                    break;
             }
             stage.setScene(scene);
         } else {
             stage.getScene().setRoot(page);
         }
 //        page.setStyle("-fx-background-color:WHITE");
-        stage.sizeToScene();
+//        stage.sizeToScene();
     }
 
     private static void addTitleToDecorator(Stage stage, JFXDecorator decorator) {

@@ -23,6 +23,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
+import static org.jobsui.core.JobsUIPreferencesImpl.*;
 
 /**
  * Created by enrico on 4/15/17.
@@ -37,16 +38,19 @@ public class JobsUIPreferencesImplTest {
     private Preferences others;
     @Mock
     private BookmarksStore bookmarkStore;
+    @Mock
+    private java.util.prefs.Preferences edit;
 
     @Before
     public void setUp() throws Exception {
-        when(preferences.node("lastOpenedProjects")).thenReturn(lastOpenedProjects);
-        when(preferences.node("others")).thenReturn(others);
+        when(preferences.node(NODE_LAST_OPENED_PROJECTS)).thenReturn(lastOpenedProjects);
+        when(preferences.node(NODE_OTHERS)).thenReturn(others);
+        when(preferences.node(NODE_EDIT)).thenReturn(edit);
     }
 
     @Test
     public void assert_that_default_value_for_theme_is_dark() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
@@ -55,7 +59,7 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void assert_that_when_standard_theme_is_specified_then_that_theme_is_returned() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenReturn(JobsUITheme.Standard.name());
+        when(others.get(eq(THEME), anyString())).thenReturn(JobsUITheme.Standard.name());
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
@@ -64,7 +68,7 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void verify_that_when_the_same_theme_is_set_then_flush_is_not_called() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
@@ -75,7 +79,7 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void verify_that_when_different_theme_is_set_then_flush_is_called() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
@@ -86,32 +90,32 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void verify_that_when_last_opened_projects_size_ss_2_then_2_paths_and_2_name_are_requested() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
-        when(lastOpenedProjects.getInt(eq("size"), anyInt())).thenReturn(2);
+        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+        when(lastOpenedProjects.getInt(eq(SIZE), anyInt())).thenReturn(2);
 
         JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
-        verify(lastOpenedProjects).getInt(eq("size"), anyInt());
+        verify(lastOpenedProjects).getInt(eq(SIZE), anyInt());
 
-        verify(lastOpenedProjects).get(eq("path_0"), anyString());
-        verify(lastOpenedProjects).get(eq("path_1"), anyString());
+        verify(lastOpenedProjects).get(eq(OPENED_PROJECT_PATH_PREFIX + "0"), anyString());
+        verify(lastOpenedProjects).get(eq(OPENED_PROJECT_PATH_PREFIX + "1"), anyString());
 
-        verify(lastOpenedProjects).get(eq("name_0"), anyString());
-        verify(lastOpenedProjects).get(eq("name_1"), anyString());
+        verify(lastOpenedProjects).get(eq(OPENED_PROJECT_NAME_PREFIX + "0"), anyString());
+        verify(lastOpenedProjects).get(eq(OPENED_PROJECT_NAME_PREFIX + "1"), anyString());
 
         verifyNoMoreInteractions(lastOpenedProjects);
     }
 
     @Test
     public void assert_that_opened_projects_are_memorized_in_insertion_order() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
-        when(lastOpenedProjects.getInt(eq("size"), anyInt())).thenReturn(2);
+        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+        when(lastOpenedProjects.getInt(eq(SIZE), anyInt())).thenReturn(2);
 
-        when(lastOpenedProjects.get(eq("path_0"), anyString())).thenReturn("file:1");
-        when(lastOpenedProjects.get(eq("path_1"), anyString())).thenReturn("file:2");
+        when(lastOpenedProjects.get(eq(OPENED_PROJECT_PATH_PREFIX + "0"), anyString())).thenReturn("file:1");
+        when(lastOpenedProjects.get(eq(OPENED_PROJECT_PATH_PREFIX + "1"), anyString())).thenReturn("file:2");
 
-        when(lastOpenedProjects.get(eq("name_0"), anyString())).thenReturn("file1");
-        when(lastOpenedProjects.get(eq("name_1"), anyString())).thenReturn("file2");
+        when(lastOpenedProjects.get(eq(OPENED_PROJECT_NAME_PREFIX + "0"), anyString())).thenReturn("file1");
+        when(lastOpenedProjects.get(eq(OPENED_PROJECT_NAME_PREFIX + "1"), anyString())).thenReturn("file2");
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
@@ -128,8 +132,8 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void verify_that_when_opened_project_is_registered_then_flush_is_called() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
-        when(lastOpenedProjects.getInt(eq("size"), anyInt())).thenReturn(2);
+        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+        when(lastOpenedProjects.getInt(eq(SIZE), anyInt())).thenReturn(2);
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
@@ -140,8 +144,8 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void assert_that_when_opened_projects_are_registered_then_the_last_becomes_the_first() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
-        when(lastOpenedProjects.getInt(eq("size"), anyInt())).thenReturn(2);
+        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+        when(lastOpenedProjects.getInt(eq(SIZE), anyInt())).thenReturn(2);
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
@@ -156,7 +160,7 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void assert_that_when_a_project_has_no_bookmarks_then_empy_list_is_returned() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
@@ -168,7 +172,7 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void assert_that_when_a_job_has_no_bookmarks_then_empy_list_is_returned() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
@@ -180,7 +184,7 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void verify_that_when_asking_for_bookmarks_for_the_first_time_then_bookmarkstore_is_called() throws Exception {
-        when(others.get(eq("theme"), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 

@@ -18,15 +18,30 @@ import java.util.prefs.Preferences;
  * Created by enrico on 3/29/17.
  */
 public class JobsUIPreferencesImpl implements JobsUIPreferences {
+    static final String EDIT_DIVIDER_POSITION = "dividerPosition";
+    static final String THEME = "theme";
+    static final String SIZE = "size";
+    static final String EDIT_WIDTH = "editWidth";
+    static final String EDIT_HEIGHT = "editHeight";
+    static final String NODE_OTHERS = "others";
+    static final String NODE_EDIT = "edit";
+    static final String NODE_LAST_OPENED_PROJECTS = "lastOpenedProjects";
+    public static final String OPENED_PROJECT_PATH_PREFIX = "path_";
+    public static final String OPENED_PROJECT_NAME_PREFIX = "name_";
     private final Preferences lastOpenedProjectsNode;
     private final Preferences othersNode;
+    private final Preferences editNode;
     private final BookmarksStore bookmarksStore;
     private final List<OpenedItem> lastOpenedProjects = new ArrayList<>();
     private JobsUITheme theme;
+    private double editDividerPosition;
+    private double editWidth;
+    private double editHeight;
 
     private JobsUIPreferencesImpl(Preferences preferences, BookmarksStore bookmarksStore) {
-        lastOpenedProjectsNode = preferences.node("lastOpenedProjects");
-        othersNode = preferences.node("others");
+        lastOpenedProjectsNode = preferences.node(NODE_LAST_OPENED_PROJECTS);
+        othersNode = preferences.node(NODE_OTHERS);
+        editNode = preferences.node(NODE_EDIT);
         this.bookmarksStore = bookmarksStore;
     }
 
@@ -93,17 +108,53 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
         return bookmarksStore.deleteBookmark(project, job, name);
     }
 
+    @Override
+    public void setEditDividerPosition(double position) {
+        this.editDividerPosition = position;
+        save();
+    }
+
+    @Override
+    public double getEditDividerPosition() {
+        return editDividerPosition;
+    }
+
+    @Override
+    public void setEditWidth(double width) {
+        this.editWidth = width;
+        save();
+    }
+
+    @Override
+    public void setEditHeight(double height) {
+        this.editHeight = height;
+        save();
+    }
+
+    @Override
+    public double getEditWidth() {
+        return editWidth;
+    }
+
+    @Override
+    public double getEditHeight() {
+        return editHeight;
+    }
+
     private void load() {
-        int length = lastOpenedProjectsNode.getInt("size", 0);
+        int length = lastOpenedProjectsNode.getInt(SIZE, 0);
         for (int i = 0; i < length; i++) {
-            String openedProjectPath = lastOpenedProjectsNode.get("path_" + i, null);
-            String openedProjectName = lastOpenedProjectsNode.get("name_" + i, null);
+            String openedProjectPath = lastOpenedProjectsNode.get(OPENED_PROJECT_PATH_PREFIX + i, null);
+            String openedProjectName = lastOpenedProjectsNode.get(OPENED_PROJECT_NAME_PREFIX + i, null);
             if (openedProjectPath != null) {
                 lastOpenedProjects.add(new OpenedItem(openedProjectPath, openedProjectName));
             }
         }
-        String theme = othersNode.get("theme", JobsUITheme.Dark.name());
+        String theme = othersNode.get(THEME, JobsUITheme.Dark.name());
         this.theme = JobsUITheme.valueOf(theme);
+        this.editDividerPosition = editNode.getDouble(EDIT_DIVIDER_POSITION, 0.4);
+        this.editWidth = editNode.getDouble(EDIT_WIDTH, 800);
+        this.editHeight = editNode.getDouble(EDIT_HEIGHT, 800);
     }
 
     private void save() {
@@ -117,7 +168,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     private void saveTH() throws Exception {
         lastOpenedProjectsNode.clear();
 
-        lastOpenedProjectsNode.putInt("size", lastOpenedProjects.size());
+        lastOpenedProjectsNode.putInt(SIZE, lastOpenedProjects.size());
 
         for (int i = 0; i < lastOpenedProjects.size(); i++) {
             OpenedItem openedItem = lastOpenedProjects.get(i);
@@ -128,8 +179,14 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
         lastOpenedProjectsNode.flush();
 
         othersNode.clear();
-        othersNode.put("theme", theme.name());
+        othersNode.put(THEME, theme.name());
         othersNode.flush();
+
+        editNode.clear();
+        editNode.putDouble(EDIT_DIVIDER_POSITION, editDividerPosition);
+        editNode.putDouble(EDIT_WIDTH, editWidth);
+        editNode.putDouble(EDIT_HEIGHT, editHeight);
+        editNode.flush();
     }
 
 }
