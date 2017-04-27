@@ -55,6 +55,10 @@ public class TestMain extends ApplicationTest {
         List<OpenedItem> openedItems = Collections.singletonList(openedItem);
         when(preferences.getLastOpenedItems()).thenReturn(openedItems);
         when(preferences.getTheme()).thenReturn(JobsUITheme.Standard);
+        when(preferences.getRunWidth()).thenReturn(600d);
+        when(preferences.getRunHeight()).thenReturn(600d);
+        when(preferences.getEditWidth()).thenReturn(600d);
+        when(preferences.getEditHeight()).thenReturn(600d);
     }
 
     @Override

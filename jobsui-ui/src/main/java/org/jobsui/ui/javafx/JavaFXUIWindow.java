@@ -1,5 +1,6 @@
 package org.jobsui.ui.javafx;
 
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
@@ -11,6 +12,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.bookmark.Bookmark;
@@ -61,6 +63,12 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
         try {
             Stage stage = StartApp.getInstance().replaceSceneContent(root, project.getName() + " / " + job.getName());
+            stage.setWidth(ui.getPreferences().getRunWidth());
+            stage.setHeight(ui.getPreferences().getRunHeight());
+            stage.setOnHidden(event -> {
+                ui.getPreferences().setRunWidth(stage.getWidth());
+                ui.getPreferences().setRunHeight(stage.getHeight());
+            });
             stage.showAndWait();
         } catch (Exception e) {
             throw new RuntimeException(e);

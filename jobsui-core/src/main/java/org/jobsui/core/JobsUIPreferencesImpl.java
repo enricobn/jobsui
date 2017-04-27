@@ -23,11 +23,13 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     static final String SIZE = "size";
     static final String EDIT_WIDTH = "editWidth";
     static final String EDIT_HEIGHT = "editHeight";
+    static final String RUN_WIDTH = "runWidth";
+    static final String RUN_HEIGHT = "runHeight";
     static final String NODE_OTHERS = "others";
     static final String NODE_EDIT = "edit";
     static final String NODE_LAST_OPENED_PROJECTS = "lastOpenedProjects";
-    public static final String OPENED_PROJECT_PATH_PREFIX = "path_";
-    public static final String OPENED_PROJECT_NAME_PREFIX = "name_";
+    static final String OPENED_PROJECT_PATH_PREFIX = "path_";
+    static final String OPENED_PROJECT_NAME_PREFIX = "name_";
     private final Preferences lastOpenedProjectsNode;
     private final Preferences othersNode;
     private final Preferences editNode;
@@ -37,6 +39,8 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     private double editDividerPosition;
     private double editWidth;
     private double editHeight;
+    private double runWidth;
+    private double runHeight;
 
     private JobsUIPreferencesImpl(Preferences preferences, BookmarksStore bookmarksStore) {
         lastOpenedProjectsNode = preferences.node(NODE_LAST_OPENED_PROJECTS);
@@ -141,6 +145,28 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
         return editHeight;
     }
 
+    @Override
+    public double getRunWidth() {
+        return runWidth;
+    }
+
+    @Override
+    public void setRunWidth(double runWidth) {
+        this.runWidth = runWidth;
+        save();
+    }
+
+    @Override
+    public double getRunHeight() {
+        return runHeight;
+    }
+
+    @Override
+    public void setRunHeight(double runHeight) {
+        this.runHeight = runHeight;
+        save();
+    }
+
     private void load() {
         int length = lastOpenedProjectsNode.getInt(SIZE, 0);
         for (int i = 0; i < length; i++) {
@@ -155,6 +181,8 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
         this.editDividerPosition = editNode.getDouble(EDIT_DIVIDER_POSITION, 0.4);
         this.editWidth = editNode.getDouble(EDIT_WIDTH, 800);
         this.editHeight = editNode.getDouble(EDIT_HEIGHT, 800);
+        this.runWidth = editNode.getDouble(RUN_WIDTH, 800);
+        this.runHeight = editNode.getDouble(RUN_HEIGHT, 800);
     }
 
     private void save() {
@@ -186,6 +214,8 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
         editNode.putDouble(EDIT_DIVIDER_POSITION, editDividerPosition);
         editNode.putDouble(EDIT_WIDTH, editWidth);
         editNode.putDouble(EDIT_HEIGHT, editHeight);
+        editNode.putDouble(RUN_WIDTH, runWidth);
+        editNode.putDouble(RUN_HEIGHT, runHeight);
         editNode.flush();
     }
 

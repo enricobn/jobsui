@@ -40,4 +40,12 @@ public interface JobsUIPreferences {
     double getEditWidth();
 
     double getEditHeight();
+
+    double getRunWidth();
+
+    void setRunWidth(double runWidth);
+
+    double getRunHeight();
+
+    void setRunHeight(double runHeight);
 }
