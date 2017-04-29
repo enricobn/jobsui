@@ -93,22 +93,12 @@ class ItemDetail extends VBox {
     }
 
     private void setGroovyFileDetail(TreeItem<EditItem> treeItem) {
-        String content = (String) treeItem.getValue().payload;
-//            if (file.getName().endsWith(".groovy") ||
-//                    file.getName().endsWith(".txt") ||
-//                    file.getName().endsWith(".properties") ||
-//                    file.getName().endsWith(".xml")) {
-//                String content = new String(Files.readAllBytes(file.toPath()));
-        getChildren().add(new Label("Content"));
+        String scriptsRoot = EditProject.findAncestorPayload(treeItem, EditProject.ItemType.Scripts);
+        ProjectFSXML project = EditProject.findAncestorPayload(treeItem, EditProject.ItemType.Project);
+        String scriptName = (String) treeItem.getValue().payload;
 
-        CodeArea codeArea = GroovyCodeArea.getCodeArea(true, preferences.getTheme());
-        GroovyCodeArea.setText(codeArea, content);
-        GroovyCodeArea.resetCaret(codeArea);
-
-        VBox.setVgrow(codeArea, Priority.ALWAYS);
-
-        getChildren().add(codeArea);
-//            }
+        addTextAreaProperty(treeItem, "Content", () -> project.getScriptFiles(scriptsRoot).get(scriptName),
+                v -> project.getScriptFiles(scriptsRoot).put(scriptName, v), true);
     }
 
     private void setCallDetail(TreeItem<EditItem> treeItem) {
@@ -221,6 +211,8 @@ class ItemDetail extends VBox {
             set.accept(newValue);
             updateSelectedItem(treeItem);
         });
+
+        VBox.setVgrow(codeArea, Priority.ALWAYS);
 
         getChildren().add(parent);
 
