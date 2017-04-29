@@ -185,8 +185,8 @@ public class EditProject {
         for (String location : projectXML.getScriptsLocations()) {
             TreeItem<EditItem> locationItem = new TreeItem<>(new EditItem(ItemType.Scripts, () -> location, location));
             root.getChildren().add(locationItem);
-            projectXML.getScriptFiles(location).entrySet().stream()
-                    .map(e -> new EditItem(ItemType.ScriptFile, e::getKey, e.getKey()))
+            projectXML.getScriptFilesNames(location).stream()
+                    .map(fileName -> new EditItem(ItemType.ScriptFile, () -> fileName, fileName))
                     .map(TreeItem::new)
                     .forEach(treeItem -> locationItem.getChildren().add(treeItem));
         }

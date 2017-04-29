@@ -16,6 +16,7 @@ import org.jobsui.ui.javafx.JavaFXUI;
 import org.jobsui.ui.javafx.JobsUIFXStyles;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -94,11 +95,15 @@ class ItemDetail extends VBox {
 
     private void setGroovyFileDetail(TreeItem<EditItem> treeItem) {
         String scriptsRoot = EditProject.findAncestorPayload(treeItem, EditProject.ItemType.Scripts);
+        Objects.requireNonNull(scriptsRoot);
+
         ProjectFSXML project = EditProject.findAncestorPayload(treeItem, EditProject.ItemType.Project);
+        Objects.requireNonNull(project);
+
         String scriptName = (String) treeItem.getValue().payload;
 
-        addTextAreaProperty(treeItem, "Content", () -> project.getScriptFiles(scriptsRoot).get(scriptName),
-                v -> project.getScriptFiles(scriptsRoot).put(scriptName, v), true);
+        addTextAreaProperty(treeItem, "Content", () -> project.getScriptContent(scriptsRoot, scriptName),
+                content -> project.setScriptContent(scriptsRoot, scriptName, content), true);
     }
 
     private void setCallDetail(TreeItem<EditItem> treeItem) {

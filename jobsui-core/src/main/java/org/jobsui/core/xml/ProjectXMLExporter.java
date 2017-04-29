@@ -56,9 +56,9 @@ public class ProjectXMLExporter {
 
         for (String location : projectXML.getScriptsLocations()) {
             File locationRoot = new File(folder, location);
-            for (Map.Entry<String,String> entry: projectXML.getScriptFiles(location).entrySet()) {
-                File dest = new File(locationRoot, entry.getKey());
-                FileUtils.write(dest, entry.getValue(), utf8);
+            for (String fileName: projectXML.getScriptFilesNames(location)) {
+                File dest = new File(locationRoot, fileName);
+                FileUtils.write(dest, projectXML.getScriptContent(location, fileName), utf8);
             }
         }
 

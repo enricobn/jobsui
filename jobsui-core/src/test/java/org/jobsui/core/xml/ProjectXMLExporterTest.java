@@ -60,18 +60,11 @@ public class ProjectXMLExporterTest {
         assertThat(exported.getLibraries(), is(original.getLibraries()));
         assertThat(exported.getScriptsLocations(), is(original.getScriptsLocations()));
 
-//        Charset utf8 = Charset.forName("UTF-8");
-
         for (String location : exported.getScriptsLocations()) {
-            assertThat(exported.getScriptFiles(location), is(original.getScriptFiles(location)));
-//            File exportedRoot = new File(exported.getFolder(), location);
-//            Collection<File> scriptFiles = original.getScriptFiles(location);
-//            for (File scriptFile : scriptFiles) {
-//                File exportedScriptFile = new File(exportedRoot, scriptFile.getName());
-//                String originalFileContent = FileUtils.readFileToString(scriptFile, utf8);
-//                String exportedFileContent = FileUtils.readFileToString(exportedScriptFile, utf8);
-//                assertThat(scriptFile.getName(), originalFileContent, is(exportedFileContent));
-//            }
+            assertThat(exported.getScriptFilesNames(location), is(original.getScriptFilesNames(location)));
+            for (String fileName : exported.getScriptFilesNames(location)) {
+                assertThat(exported.getScriptContent(location, fileName), is(original.getScriptContent(location, fileName)));
+            }
         }
 
         for (String job : exported.getJobs()) {

@@ -4,7 +4,9 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 4/5/17.
@@ -20,11 +22,29 @@ class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
     }
 
     @Override
-    public Map<String, String> getScriptFiles(String root) {
+    public List<String> getScriptFilesNames(String root) {
         if (!scriptFiles.containsKey(root)) {
-            return Collections.emptyMap();
+            return Collections.emptyList();
         }
-        return scriptFiles.get(root);
+        return scriptFiles.get(root).keySet().stream().sorted().collect(Collectors.toList());
+    }
+
+    @Override
+    public String getScriptContent(String root, String name) {
+        if (!scriptFiles.containsKey(root)) {
+            return "";
+        }
+        String content = scriptFiles.get(root).get(name);
+        if (content == null) {
+            content = "";
+        }
+        return content;
+    }
+
+    @Override
+    public void setScriptContent(String root, String name, String content) {
+        Map<String, String> scripts = scriptFiles.computeIfAbsent(root, key -> new HashMap<>());
+        scripts.put(name, content);
     }
 
     @Override
