@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by enrico on 5/16/16.
  */
-public class SwingFilteredList<T> {
+class SwingFilteredList<T> {
     private final JDialog dialog;
     private final OKCancelHandler okCancelHandler;
 //    private T selectedItem;

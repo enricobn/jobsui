@@ -1,6 +1,5 @@
 package org.jobsui.core.xml;
 
-import org.jobsui.core.groovy.JobsUIParseException;
 import org.jobsui.core.ui.UIComponentType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -176,13 +175,13 @@ public class JobParserImpl implements JobParser {
         }
     }
 
-    private static void addDependencies(Element element, ParameterXML parameterXML) throws JobsUIParseException {
-        String dependesOn = element.getAttribute("dependsOn");
-        if (dependesOn == null || dependesOn.length() == 0) {
+    private static void addDependencies(Element element, ParameterXML parameterXML) {
+        String dependsOn = element.getAttribute("dependsOn");
+        if (dependsOn == null || dependsOn.length() == 0) {
             return;
         }
 
-        for (String dependency : dependesOn.split(",")) {
+        for (String dependency : dependsOn.split(",")) {
             parameterXML.addDependency(dependency);
         }
     }

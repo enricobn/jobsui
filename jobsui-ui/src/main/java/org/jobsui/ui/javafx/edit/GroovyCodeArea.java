@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 /**
  * Created by enrico on 2/16/17.
  */
-public class GroovyCodeArea {
+class GroovyCodeArea {
     private static final String[] KEYWORDS = new String[] {
             "abstract", "assert", "boolean", "break", "byte",
             "case", "catch", "char", "class", "const",

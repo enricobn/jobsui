@@ -24,7 +24,7 @@ public class Main {
     private static void run(JobsUIMainParameters parameters) {
         JobsUIPreferences preferences =
                 JobsUIPreferencesImpl.get(Preferences.userNodeForPackage(Main.class), BookmarksStoreFSImpl.getUser());
-        new JavaFXUI(preferences, parameters).start();
+        new JavaFXUI(preferences).start();
     }
 
 }

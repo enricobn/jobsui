@@ -18,14 +18,14 @@ import java.util.prefs.Preferences;
  * Created by enrico on 3/29/17.
  */
 public class JobsUIPreferencesImpl implements JobsUIPreferences {
-    static final String EDIT_DIVIDER_POSITION = "dividerPosition";
-    static final String RUN_DIVIDER_POSITION = "dividerPosition";
+    private static final String EDIT_DIVIDER_POSITION = "dividerPosition";
+    private static final String RUN_DIVIDER_POSITION = "dividerPosition";
     static final String THEME = "theme";
     static final String SIZE = "size";
-    static final String EDIT_WIDTH = "editWidth";
-    static final String EDIT_HEIGHT = "editHeight";
-    static final String RUN_WIDTH = "runWidth";
-    static final String RUN_HEIGHT = "runHeight";
+    private static final String EDIT_WIDTH = "editWidth";
+    private static final String EDIT_HEIGHT = "editHeight";
+    private static final String RUN_WIDTH = "runWidth";
+    private static final String RUN_HEIGHT = "runHeight";
     static final String OTHERS_NODE = "others";
     static final String EDIT_NODE = "edit";
     static final String RUN_NODE = "run";
@@ -68,7 +68,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     }
 
     @Override
-    public void registerOpenedProject(URL url, String name) throws Exception {
+    public void registerOpenedProject(URL url, String name) {
         OpenedItem openedItem = new OpenedItem(url.toString(), name);
         lastOpenedProjects.removeIf(item -> item.url.equals(openedItem.url));
         lastOpenedProjects.add(openedItem);

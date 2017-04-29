@@ -27,9 +27,7 @@ public class JavaFXUIValue implements UIValue<Node> {
             subscriber.onStart();
             subscribers.add(subscriber);
         });
-        component.textProperty().addListener((obs, oldValue, newValue) -> {
-            notifySubscribers();
-        });
+        component.textProperty().addListener((obs, oldValue, newValue) -> notifySubscribers());
     }
 
     @Override

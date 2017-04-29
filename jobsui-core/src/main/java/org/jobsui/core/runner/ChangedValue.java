@@ -9,9 +9,9 @@ import java.util.Map;
 /**
  * Created by enrico on 4/24/17.
  */
-public class ChangedValue {
-    public final JobDependency jobDependency;
-    public final Map<String, Serializable> values;
+class ChangedValue {
+    private final JobDependency jobDependency;
+    private final Map<String, Serializable> values;
     public final Map<String, Serializable> validValues;
     private final List<String> validation;
 

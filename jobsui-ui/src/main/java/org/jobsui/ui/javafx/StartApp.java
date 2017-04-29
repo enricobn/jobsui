@@ -33,7 +33,6 @@ package org.jobsui.ui.javafx;
 
 import com.jfoenix.controls.JFXDecorator;
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Node;
@@ -42,13 +41,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.runner.JobUIRunner;
 import org.jobsui.core.ui.JobsUITheme;
-import org.jobsui.core.ui.UI;
 import org.jobsui.core.xml.ProjectFSXML;
 import org.jobsui.ui.javafx.edit.EditProject;
 
@@ -61,7 +58,7 @@ import java.util.logging.Logger;
  * Main Application. This class handles navigation
  */
 public class StartApp extends Application {
-    private static StartApp instance = new StartApp();
+    private static final StartApp instance = new StartApp();
     private static JavaFXUI ui;
     private Stage stage;
 
@@ -137,7 +134,7 @@ public class StartApp extends Application {
         replaceSceneContent(stage, page);
     }
 
-    private void replaceSceneContent(Stage stage, Parent page) throws Exception {
+    private void replaceSceneContent(Stage stage, Parent page) {
         Scene scene = stage.getScene();
 
         if (scene == null) {
@@ -184,7 +181,7 @@ public class StartApp extends Application {
         ((HBox) decorator.getChildren().get(0)).getChildren().add(0, titleLabel);
     }
 
-    Stage replaceSceneContent(Parent page, String title) throws Exception {
+    Stage replaceSceneContent(Parent page, String title) {
         Stage stage = new Stage();
         replaceSceneContent(stage, page);
         stage.setTitle(title);

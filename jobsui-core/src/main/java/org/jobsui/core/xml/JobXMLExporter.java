@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * Created by enrico on 4/8/17.
  */
-public class JobXMLExporter {
+class JobXMLExporter {
 
     public void export(JobXML jobXML, File file) throws Exception {
         List<String> validate = jobXML.validate();

@@ -18,14 +18,12 @@ import java.util.function.Consumer;
  */
 class ProgressDialog {
     private final Stage dialogStage;
-    private final ProgressBar pb = new ProgressBar();
-    private final ProgressIndicator pin = new ProgressIndicator();
 
     public static <T> void run(Task<T> task, String title, Consumer<T> consumer) {
         run(task, title, consumer, ex -> {throw new RuntimeException(ex);});
     }
 
-    public static <T> void run(Task<T> task, String title, Consumer<T> consumer, Consumer<Throwable> exceptionHandler) {
+    private static <T> void run(Task<T> task, String title, Consumer<T> consumer, Consumer<Throwable> exceptionHandler) {
         ProgressDialog pForm = new ProgressDialog(title);
 
         task.setOnSucceeded(event -> {
@@ -44,9 +42,7 @@ class ProgressDialog {
 
         pForm.getDialogStage().show();
 
-        Platform.runLater(() -> {
-            pForm.getDialogStage().centerOnScreen();
-        });
+        Platform.runLater(() -> pForm.getDialogStage().centerOnScreen());
 
         new Thread(task).start();
     }
@@ -59,16 +55,15 @@ class ProgressDialog {
         dialogStage.initModality(Modality.APPLICATION_MODAL);
 
         // PROGRESS BAR
-//            final Label label = new Label();
-//            label.setText("alerto");
-
 //            pb.setProgress(-1F);
+        ProgressIndicator pin = new ProgressIndicator();
         pin.setProgress(-1F);
 
         final HBox hb = new HBox();
         hb.setSpacing(5);
         hb.setAlignment(Pos.CENTER);
 //            hb.getChildren().addAll(pb, pin);
+        ProgressBar pb = new ProgressBar();
         hb.getChildren().add(pb);
 
         Scene scene = new Scene(hb);
@@ -83,7 +78,7 @@ class ProgressDialog {
 //            dialogStage.show();
 //        }
 
-    public Stage getDialogStage() {
+    private Stage getDialogStage() {
         return dialogStage;
     }
 }

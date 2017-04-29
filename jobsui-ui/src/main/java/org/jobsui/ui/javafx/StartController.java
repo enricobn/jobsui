@@ -156,7 +156,7 @@ public class StartController implements Initializable {
         return simpleProjectXML;
     }
 
-    private void openJob(URL url, String jobId, SimpleProjectXML simpleProjectXML) throws Exception {
+    private void openJob(URL url, String jobId, SimpleProjectXML simpleProjectXML) {
         Task<Tuple2<Project,Job<Serializable>>> task = new LoadJobTask(url, jobId);
         ProgressDialog.run(task, "Opening job", tuple ->
                 StartApp.getInstance().gotoRun(tuple.first, tuple.second));

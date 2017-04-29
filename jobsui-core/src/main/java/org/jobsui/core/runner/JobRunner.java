@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * Created by enrico on 3/21/17.
  */
-public interface JobRunner {
+interface JobRunner {
 
     <T extends Serializable> T run(Project project, Job<T> job) throws Exception;
 

@@ -3,11 +3,11 @@ package org.jobsui.core.utils;
 /**
  * Created by enrico on 11/2/15.
  */
-public class Tuple4<F,S,T,FO> {
-    public final F first;
-    public final S second;
-    public final T third;
-    public final FO fourth;
+class Tuple4<F,S,T,FO> {
+    private final F first;
+    private final S second;
+    private final T third;
+    private final FO fourth;
 
     public Tuple4(F first, S second, T third, FO fourth) {
         this.first = first;

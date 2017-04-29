@@ -3,10 +3,10 @@ package org.jobsui.core.utils;
 /**
  * Created by enrico on 11/2/15.
  */
-public class Tuple3<F,S,T> {
-    public final F first;
-    public final S second;
-    public final T third;
+class Tuple3<F,S,T> {
+    private final F first;
+    private final S second;
+    private final T third;
 
     public Tuple3(F first, S second, T third) {
         this.first = first;

@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by enrico on 3/13/17.
  */
-public class JobValidation {
+class JobValidation {
     private boolean valid = true;
     private List<String> messages = new ArrayList<>();
 

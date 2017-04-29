@@ -20,12 +20,12 @@ import java.text.ParseException;
 /**
  * Created by enrico on 10/4/16.
  */
-public class IvyUtils {
+class IvyUtils {
     //creates clear ivy settings
     private static final IvySettings IVY_SETTINGS = getIvySettings();
     //creates an Ivy instance with settings
     private static final Ivy IVY = Ivy.newInstance(IVY_SETTINGS);
-    private static DefaultMessageLogger logger = new DefaultMessageLogger(Message.MSG_ERR);
+    private static final DefaultMessageLogger logger = new DefaultMessageLogger(Message.MSG_ERR);
     private static final String[] CONFS = new String[] {"default"};
     private static final ResolveOptions RESOLVE_OPTIONS = new ResolveOptions().setConfs(CONFS);
 

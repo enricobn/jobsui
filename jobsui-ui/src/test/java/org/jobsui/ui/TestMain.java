@@ -64,7 +64,7 @@ public class TestMain extends ApplicationTest {
     @Override
     public void start(Stage stage) throws Exception {
         setUpPreferences();
-        JavaFXUI ui = new JavaFXUI(preferences, parameters);
+        JavaFXUI ui = new JavaFXUI(preferences);
         StartApp.initForTest(ui);
 
         URL fxml = StartApp.class.getResource("Start.fxml");

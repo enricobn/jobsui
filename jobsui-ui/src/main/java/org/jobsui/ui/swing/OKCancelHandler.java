@@ -9,7 +9,7 @@ import java.awt.event.KeyEvent;
 /**
  * Created by enrico on 5/16/16.
  */
-public class OKCancelHandler {
+class OKCancelHandler {
     private final JButton okButton = new JButton("OK");
     private boolean ok;
 

@@ -4,20 +4,13 @@ import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.*;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
@@ -28,11 +21,9 @@ import java.util.Optional;
  */
 public class JavaFXUI implements UI<Node> {
     private final JobsUIPreferences preferences;
-    private final JobsUIMainParameters parameters;
 
-    public JavaFXUI(JobsUIPreferences preferences, JobsUIMainParameters parameters) {
+    public JavaFXUI(JobsUIPreferences preferences) {
         this.preferences = preferences;
-        this.parameters = parameters;
     }
 
     @Override
@@ -109,7 +100,7 @@ public class JavaFXUI implements UI<Node> {
         showErrorStatic("Error on thread " + t.getName(), e);
     }
 
-    public static void showErrorStatic(String message, Throwable e) {
+    private static void showErrorStatic(String message, Throwable e) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("JobsUI");
         alert.setHeaderText("Error");
@@ -142,26 +133,6 @@ public class JavaFXUI implements UI<Node> {
 
         alert.showAndWait();
         e.printStackTrace();
-    }
-
-    public static Stage getErrorStage(String message, String errorMessage) {
-        Stage dialog = new Stage();
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        FXMLLoader loader = new FXMLLoader(JavaFXUI.class.getResource("Error.fxml"));
-        try {
-            Parent root = loader.load();
-            ((ErrorController)loader.getController()).setMessageText(message);
-            ((ErrorController)loader.getController()).setErrorText(errorMessage);
-
-            Scene scene = new Scene(root, 600, 600);
-
-            dialog.setScene(scene);
-            dialog.setTitle("JobsUI");
-            return dialog;
-        } catch (IOException exc) {
-            exc.printStackTrace();
-            return null;
-        }
     }
 
     public static void showMessageStatic(String message) {

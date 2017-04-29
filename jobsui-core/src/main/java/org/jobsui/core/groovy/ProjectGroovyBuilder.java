@@ -119,15 +119,15 @@ public class ProjectGroovyBuilder {
         addDependencies(jobXML.getExpressionXMLs(), jobDependencyXMLMap);
         addDependencies(jobXML.getCallXMLs(), jobDependencyXMLMap);
 
-        List<JobParameterGroovy> sorteJobParameterDefs = JobDependency.sort(jobParameters);
+        List<JobParameterGroovy> sortedJobParameterDefs = JobDependency.sort(jobParameters);
 
-        return new JobGroovy<>(groovyShell, jobXML.getId(), jobXML.getName(), sorteJobParameterDefs, jobExpressions,
+        return new JobGroovy<>(groovyShell, jobXML.getId(), jobXML.getName(), sortedJobParameterDefs, jobExpressions,
                 jobXML.getRunScript(), jobXML.getValidateScript());
     }
 
     private static <T,R> Object toGroovyFunction(Function<T,R> function) {
         return new Object() {
-            public R call(T arg) throws Exception {
+            public R call(T arg) {
                 return function.apply(arg);
             }
         };

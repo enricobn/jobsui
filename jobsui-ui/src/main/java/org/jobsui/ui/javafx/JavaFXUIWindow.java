@@ -30,7 +30,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
     private final UI<Node> ui;
     private HBox buttonsPanel;
     private ListView<Bookmark> bookmarkListView;
-    private VBox componentspanel;
+    private VBox componentsPanel;
     private Consumer<Bookmark> onOpenBookmark;
 
     JavaFXUIWindow(UI<Node> ui) {
@@ -42,10 +42,10 @@ class JavaFXUIWindow implements UIWindow<Node> {
         buttonsPanel = new HBox(5);
         buttonsPanel.setPadding(new Insets(10, 5, 5, 5));
 
-        componentspanel = new VBox(10);
-        componentspanel.setPadding(new Insets(5, 5, 5, 5));
+        componentsPanel = new VBox(10);
+        componentsPanel.setPadding(new Insets(5, 5, 5, 5));
 
-        VBox mainPanel = createMainPanel(buttonsPanel, componentspanel);
+        VBox mainPanel = createMainPanel(buttonsPanel, componentsPanel);
 
         bookmarkListView = createBookmarkListView(project, job);
 
@@ -71,10 +71,10 @@ class JavaFXUIWindow implements UIWindow<Node> {
         }
     }
 
-    private static VBox createMainPanel(HBox buttonsPanel, VBox componentspanel) {
+    private static VBox createMainPanel(HBox buttonsPanel, VBox componentsPanel) {
         VBox mainPanel = new VBox(5);
         mainPanel.getChildren().add(buttonsPanel);
-        mainPanel.getChildren().add(componentspanel);
+        mainPanel.getChildren().add(componentsPanel);
         return mainPanel;
     }
 
@@ -115,7 +115,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
         NodeUIWidget widget = new NodeUIWidget(title, component);
         Node node = widget.getNodeComponent();
         node.managedProperty().bind(node.visibleProperty());
-        componentspanel.getChildren().add(node);
+        componentsPanel.getChildren().add(node);
         return widget;
     }
 
@@ -140,7 +140,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
     @Override
     public Node getComponent() {
-        return componentspanel;
+        return componentsPanel;
     }
 
     @Override

@@ -15,7 +15,7 @@ public interface JobsUIPreferences {
 
     List<OpenedItem> getLastOpenedItems();
 
-    void registerOpenedProject(URL url, String name) throws Exception;
+    void registerOpenedProject(URL url, String name);
 
     JobsUITheme getTheme();
 

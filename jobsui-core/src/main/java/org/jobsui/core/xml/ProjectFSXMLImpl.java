@@ -2,7 +2,6 @@ package org.jobsui.core.xml;
 
 import java.io.File;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -12,9 +11,9 @@ import java.util.Map;
  */
 class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
     private File folder;
-    private Map<String,Map<String,String>> scriptFiles = new HashMap<>();
+    private final Map<String,Map<String,String>> scriptFiles = new HashMap<>();
 
-    ProjectFSXMLImpl(File folder, String id, String name) throws MalformedURLException, URISyntaxException {
+    ProjectFSXMLImpl(File folder, String id, String name) throws MalformedURLException {
         super(folder.toURI().toURL(), id, name);
         this.folder = folder;
 

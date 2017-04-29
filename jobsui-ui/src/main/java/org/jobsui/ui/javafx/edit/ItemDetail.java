@@ -15,7 +15,6 @@ import org.jobsui.core.xml.*;
 import org.jobsui.ui.javafx.JavaFXUI;
 import org.jobsui.ui.javafx.JobsUIFXStyles;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -43,7 +42,7 @@ class ItemDetail extends VBox {
         this.preferences = ui.getPreferences();
     }
 
-    public void setSelectedItem(TreeItem<EditItem> treeItem) throws IOException {
+    public void setSelectedItem(TreeItem<EditItem> treeItem) {
         EditItem item = treeItem.getValue();
         getChildren().clear();
 
@@ -93,7 +92,7 @@ class ItemDetail extends VBox {
         addTextAreaProperty(treeItem, "Run", jobXML::getRunScript, jobXML::setRunScript, false);
     }
 
-    private void setGroovyFileDetail(TreeItem<EditItem> treeItem) throws IOException {
+    private void setGroovyFileDetail(TreeItem<EditItem> treeItem) {
         String content = (String) treeItem.getValue().payload;
 //            if (file.getName().endsWith(".groovy") ||
 //                    file.getName().endsWith(".txt") ||

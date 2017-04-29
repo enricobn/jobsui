@@ -34,12 +34,11 @@ public class EditProject {
     private JobsUIPreferences preferences;
     private JavaFXUI ui;
     private SplitPane splitPane;
-    private VBox root;
 
-    public Parent getRoot(JavaFXUI ui) throws Exception {
+    public Parent getRoot(JavaFXUI ui) {
         this.ui = ui;
         preferences = ui.getPreferences();
-        root = new VBox(5);
+        VBox root = new VBox(5);
         HBox buttons = new HBox(5);
         VBox.setVgrow(buttons, Priority.NEVER);
         buttons.setPadding(new Insets(5, 5, 5, 5));
@@ -92,7 +91,7 @@ public class EditProject {
                     exporter.export(projectXML, file);
                     saveButton.setDisable(false);
                     projectXML.setFolder(file);
-                    setprojectXML(projectXML);
+                    setProjectXML(projectXML);
                 }
             } catch (Exception e) {
                 ui.showError("Error saving project.", e);
@@ -200,7 +199,7 @@ public class EditProject {
         return root;
     }
 
-    private TreeItem<EditItem> loadProject(File file) throws Exception {
+    private TreeItem<EditItem> loadProject(File file) {
         //TODO
         return null;
 //        ProjectParser parser = ProjectParser.getParser(file.getAbsolutePath());
@@ -246,7 +245,7 @@ public class EditProject {
     }
 
     public void edit(ProjectFSXML projectXML, boolean isNew) {
-        setprojectXML(projectXML);
+        setProjectXML(projectXML);
 
         if (isNew) {
             saveButton.setDisable(true);
@@ -260,7 +259,7 @@ public class EditProject {
         });
     }
 
-    private void setprojectXML(ProjectFSXML projectXML) {
+    private void setProjectXML(ProjectFSXML projectXML) {
         this.projectXML = projectXML;
         this.originalJobs = new ArrayList<>(projectXML.getJobs());
         this.originalScriptLocations = new ArrayList<>(projectXML.getScriptsLocations());
@@ -377,7 +376,7 @@ public class EditProject {
                 .map(ParameterXML::getKey).collect(Collectors.toList());
     }
 
-    static TreeItem<EditItem> findItem(TreeItem<EditItem> root, EditItem item) {
+    private static TreeItem<EditItem> findItem(TreeItem<EditItem> root, EditItem item) {
         if (root.getValue() == item) {
             return root;
         }

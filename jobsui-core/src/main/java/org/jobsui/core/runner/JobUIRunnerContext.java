@@ -90,7 +90,7 @@ public class JobUIRunnerContext<T extends Serializable, C> {
         }
     }
 
-    public Collection<JobDependency> getDependants(JobDependency jobDependency) {
+    private Collection<JobDependency> getDependants(JobDependency jobDependency) {
         Collection<JobDependency> result = new ArrayList<>();
         for (JobDependency dependency : getSortedJobDependencies()) {
             if (dependency.getDependencies().contains(jobDependency.getKey())) {
