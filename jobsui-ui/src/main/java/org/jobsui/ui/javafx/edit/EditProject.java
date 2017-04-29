@@ -7,25 +7,17 @@ import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
-import org.fxmisc.richtext.CodeArea;
 import org.jobsui.core.JobsUIPreferences;
-import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.xml.*;
 import org.jobsui.ui.javafx.JavaFXUI;
-import org.jobsui.ui.javafx.JobsUIFXStyles;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -33,17 +25,8 @@ import java.util.stream.Stream;
  * Created by enrico on 10/9/16.
  */
 public class EditProject {
-    private static final Border CODE_AREA_DARK_FOCUSED_BORDER =
-            new Border(new BorderStroke(Paint.valueOf("039ED3"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
-    private static final Border CODE_AREA_FOCUSED_BORDER =
-            new Border(new BorderStroke(new Color(77d/256, 102d/256, 204d/256, 1), BorderStrokeStyle.SOLID, CornerRadii.EMPTY,
-                    new BorderWidths(2, 2, 2, 2, false, false, false, false)));
-    private static final Border CODE_AREA_DARK_NOT_FOCUSED_BORDER =
-            new Border(new BorderStroke(Paint.valueOf("black"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
-    private static final Border CODE_AREA_NOT_FOCUSED_BORDER =
-            new Border(new BorderStroke(Paint.valueOf("gray"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
-    private TreeView<Item> itemsTree;
-    private VBox itemDetail;
+    private TreeView<EditItem> itemsTree;
+    private ItemDetail itemDetail;
     private ProjectFSXML projectXML = null;
     private List<String> originalJobs = null;
     private List<String> originalScriptLocations = null;
@@ -124,7 +107,8 @@ public class EditProject {
         itemsTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 try {
-                    newValue.getValue().onSelect();
+                    itemDetail.setSelectedItem(newValue);
+//                    newValue.getValue().onSelect();
                 } catch (Throwable e) {
                     ui.showError("Error", e);
                 }
@@ -135,7 +119,7 @@ public class EditProject {
 
         itemsTree.addEventHandler(MouseEvent.MOUSE_RELEASED, e -> {
             if (e.getButton() == MouseButton.SECONDARY) {
-                TreeItem<Item> selected = itemsTree.getSelectionModel().getSelectedItem();
+                TreeItem<EditItem> selected = itemsTree.getSelectionModel().getSelectedItem();
 
                 //item is selected - this prevents fail when clicking on empty space
                 if (selected != null) {
@@ -153,7 +137,7 @@ public class EditProject {
             }
         });
 
-        itemDetail = new VBox(0);
+        itemDetail = new ItemDetail(ui);
         itemDetail.setPadding(new Insets(5, 5, 5, 5));
 
         splitPane = new SplitPane(itemsTree, itemDetail);
@@ -189,21 +173,21 @@ public class EditProject {
 //        alert.showAndWait();
 //    }
 
-    private TreeItem<Item> loadProject(ProjectFSXML projectXML) {
-        TreeItem<Item> root = new TreeItem<>(new Item(ItemType.Project, projectXML::getName, projectXML));
+    private TreeItem<EditItem> loadProject(ProjectFSXML projectXML) {
+        TreeItem<EditItem> root = new TreeItem<>(new EditItem(ItemType.Project, projectXML::getName, projectXML));
 
-        TreeItem<Item> libraries = new TreeItem<>(new Item(ItemType.Libraries, () -> "libraries", projectXML));
+        TreeItem<EditItem> libraries = new TreeItem<>(new EditItem(ItemType.Libraries, () -> "libraries", projectXML));
         root.getChildren().add(libraries);
         projectXML.getLibraries().stream()
-                .map(l -> new Item(ItemType.Library, () -> l, l))
+                .map(l -> new EditItem(ItemType.Library, () -> l, l))
                 .map(TreeItem::new)
                 .forEach(treeItem -> libraries.getChildren().add(treeItem));
 
         for (String location : projectXML.getScriptsLocations()) {
-            TreeItem<Item> locationItem = new TreeItem<>(new Item(ItemType.Scripts, () -> location, projectXML));
+            TreeItem<EditItem> locationItem = new TreeItem<>(new EditItem(ItemType.Scripts, () -> location, projectXML));
             root.getChildren().add(locationItem);
             projectXML.getScriptFiles(location).entrySet().stream()
-                    .map(e -> new Item(ItemType.ScriptFile, e::getKey, e))
+                    .map(e -> new EditItem(ItemType.ScriptFile, e::getKey, e))
                     .map(TreeItem::new)
                     .forEach(treeItem -> locationItem.getChildren().add(treeItem));
         }
@@ -216,15 +200,15 @@ public class EditProject {
         return root;
     }
 
-    private TreeItem<Item> loadProject(File file) throws Exception {
+    private TreeItem<EditItem> loadProject(File file) throws Exception {
         //TODO
         return null;
 //        ProjectParser parser = ProjectParser.getParser(file.getAbsolutePath());
 //        return loadProject(parser.parse());
     }
 
-    private TreeItem<Item> createJobTreeItem(JobXML job) {
-        TreeItem<Item> result = new TreeItem<>(new Item(ItemType.Job, job::getName, job));
+    private TreeItem<EditItem> createJobTreeItem(JobXML job) {
+        TreeItem<EditItem> result = new TreeItem<>(new EditItem(ItemType.Job, job::getName, job));
 
         addParameters(result, job, "parameters", ItemType.Parameter, job.getSimpleParameterXMLs());
         addParameters(result, job, "expressions", ItemType.Expression, job.getExpressionXMLs());
@@ -234,19 +218,19 @@ public class EditProject {
         return result;
     }
 
-    private void addParameters(TreeItem<Item> result, JobXML jobXML, String containerText, ItemType itemType,
+    private void addParameters(TreeItem<EditItem> result, JobXML jobXML, String containerText, ItemType itemType,
                                List<? extends ParameterXML> parametersList) {
-        TreeItem<Item> parameters = new TreeItem<>(new Item(ItemType.Parameters, () -> containerText, jobXML));
+        TreeItem<EditItem> parameters = new TreeItem<>(new EditItem(ItemType.Parameters, () -> containerText, jobXML));
         parameters.setExpanded(true);
         result.getChildren().add(parameters);
 
         parametersList.forEach(parameter -> addParameter(parameters, itemType, parameter, jobXML));
     }
 
-    private void addParameter(TreeItem<Item> parameters, ItemType itemType, ParameterXML parameterDef, JobXML jobXML) {
-        TreeItem<Item> parameterTI = new TreeItem<>(new Item(itemType, parameterDef::getName, parameterDef));
+    private void addParameter(TreeItem<EditItem> parameters, ItemType itemType, ParameterXML parameterDef, JobXML jobXML) {
+        TreeItem<EditItem> parameterTI = new TreeItem<>(new EditItem(itemType, parameterDef::getName, parameterDef));
         parameters.getChildren().add(parameterTI);
-        TreeItem<Item> dependencies = new TreeItem<>(new Item(ItemType.Dependencies, () -> "dependencies", parameterDef));
+        TreeItem<EditItem> dependencies = new TreeItem<>(new EditItem(ItemType.Dependencies, () -> "dependencies", parameterDef));
         parameterTI.getChildren().add(dependencies);
         parameterDef.getDependencies().stream()
                 .map(depKey -> {
@@ -256,7 +240,7 @@ public class EditProject {
                     }
                     return dep;
                 })
-                .map(dep -> new Item(ItemType.Dependency, dep::getName, dep.getKey()))
+                .map(dep -> new EditItem(ItemType.Dependency, dep::getName, dep.getKey()))
                 .map(TreeItem::new)
                 .forEach(dependencies.getChildren()::add);
     }
@@ -268,7 +252,7 @@ public class EditProject {
             saveButton.setDisable(true);
         }
 
-        TreeItem<Item> root = loadProject(projectXML);
+        TreeItem<EditItem> root = loadProject(projectXML);
 
         Platform.runLater(() -> {
             itemsTree.setRoot(root);
@@ -295,262 +279,14 @@ public class EditProject {
         stage.setHeight(preferences.getEditHeight());
     }
 
-    private enum ItemType {
-        Project, ScriptFile, Job, Parameter, Expression, Dependency, Dependencies, Parameters, Scripts, Libraries, Library, Call
+    enum ItemType {
+        Project, ScriptFile, Job, Parameter, Expression, Dependency, Dependencies, Parameters, Scripts, Libraries,
+        Library, Call
     }
 
-    private class Item {
-        private final ItemType itemType;
-        private final Supplier<String> title;
-        private final Object payload;
-
-        Item(ItemType itemType, Supplier<String> title, Object payload) {
-            this.itemType = itemType;
-            this.title = title;
-            this.payload = payload;
-        }
-
-        void onSelect() throws IOException {
-            itemDetail.getChildren().clear();
-
-            switch (itemType) {
-                case Project:
-                    setProjectDetail();
-                    break;
-
-                case ScriptFile:
-                    setGroovyFileDetail();
-                    break;
-
-                case Job:
-                    setJobDetail();
-                    break;
-
-                case Parameter:
-                    setParameterDetail();
-                    break;
-
-                case Expression: {
-                    setExpressionDetail();
-                    break;
-                }
-
-                case Call: {
-                    setCallDetail();
-                    break;
-                }
-            }
-        }
-
-        private void setProjectDetail() {
-            ProjectFSXML project = (ProjectFSXML) payload;
-
-            addTextProperty("Name", project::getName, project::setName);
-            addTextProperty("Version", project::getVersion, project::setVersion);
-        }
-
-        private void setJobDetail() {
-            JobXMLImpl jobXML = (JobXMLImpl) payload;
-
-            // TODO key (file name)
-            addTextProperty("Name", jobXML::getName, jobXML::setName);
-
-            addTextAreaProperty("Validate", jobXML::getValidateScript, jobXML::setValidateScript,
-                    false);
-            addTextAreaProperty("Run", jobXML::getRunScript, jobXML::setRunScript, false);
-        }
-
-        private void setGroovyFileDetail() throws IOException {
-            String content = (String) payload;
-//            if (file.getName().endsWith(".groovy") ||
-//                    file.getName().endsWith(".txt") ||
-//                    file.getName().endsWith(".properties") ||
-//                    file.getName().endsWith(".xml")) {
-//                String content = new String(Files.readAllBytes(file.toPath()));
-                itemDetail.getChildren().add(new Label("Content"));
-
-                CodeArea codeArea = GroovyCodeArea.getCodeArea(true, preferences.getTheme());
-                GroovyCodeArea.setText(codeArea, content);
-                GroovyCodeArea.resetCaret(codeArea);
-
-                VBox.setVgrow(codeArea, Priority.ALWAYS);
-
-                itemDetail.getChildren().add(codeArea);
-//            }
-        }
-
-        private void setCallDetail() {
-            CallXML parameter = (CallXML) payload;
-
-            addTextProperty("Key", parameter::getKey, parameter::setKey);
-            addTextProperty("Name", parameter::getName, parameter::setName);
-
-            // TODO
-        }
-
-        private void setExpressionDetail() {
-            ExpressionXML parameter = (ExpressionXML) payload;
-
-            addTextProperty("Key", parameter::getKey, parameter::setKey);
-            addTextProperty("Name", parameter::getName, parameter::setName);
-
-            addTextAreaProperty("Evaluate", parameter::getEvaluateScript, parameter::setEvaluateScript,
-                    false);
-        }
-
-        private void setParameterDetail() {
-            TreeItem<Item> treeItem = itemsTree.getSelectionModel().getSelectedItem();
-
-            if (treeItem == null) {
-                ui.showMessage("Cannot find item \"" + payload + "\".");
-                return;
-            }
-
-            JobXMLImpl jobXML = findAncestorPayload(treeItem, ItemType.Job);
-
-            if (jobXML == null) {
-                ui.showMessage("Cannot find job for item \"" + payload + "\".");
-                return;
-            }
-
-            SimpleParameterXML parameter = (SimpleParameterXML) payload;
-
-            addTextProperty("Key", parameter::getKey, key -> jobXML.changeParameterKey(parameter, key));
-
-            addTextProperty("Name", parameter::getName, parameter::setName);
-
-            addTextAreaProperty("On init", parameter::getOnInitScript,
-                    parameter::setOnInitScript, false);
-
-            addTextAreaProperty("On dependencies change", parameter::getOnDependenciesChangeScript,
-                    parameter::setOnDependenciesChangeScript, false);
-
-            addTextAreaProperty("Validate", parameter::getValidateScript, parameter::setValidateScript,
-                    false);
-        }
-
-        private void addTextAreaProperty(String title, Supplier<String> get, Consumer<String> set, boolean showLineNumbers) {
-            addPropertyNameLabel(title);
-
-            VBox parent = new VBox();
-            CodeArea codeArea = GroovyCodeArea.getCodeArea(true, preferences.getTheme());
-
-            String content = get.get();
-            if (content != null) {
-                GroovyCodeArea.setText(codeArea, content);
-                GroovyCodeArea.resetCaret(codeArea);
-            }
-
-            codeArea.textProperty().addListener((observable, oldValue, newValue) -> {
-                set.accept(newValue);
-                updateSelectedItem();
-            });
-
-            itemDetail.getChildren().add(parent);
-
-            parent.getChildren().add(codeArea);
-
-            Border focusedBorder;
-            Border notFocusedBorder;
-            if (preferences.getTheme().equals(JobsUITheme.Dark)) {
-                focusedBorder = CODE_AREA_DARK_FOCUSED_BORDER;
-                notFocusedBorder = CODE_AREA_DARK_NOT_FOCUSED_BORDER;
-            } else {
-                focusedBorder = CODE_AREA_FOCUSED_BORDER;
-                notFocusedBorder = CODE_AREA_NOT_FOCUSED_BORDER;
-            }
-
-            parent.setBorder(notFocusedBorder);
-
-            codeArea.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                if (newValue) {
-                    parent.setBorder(focusedBorder);
-                } else {
-                    parent.setBorder(notFocusedBorder);
-                }
-            });
-
-            VBox.setVgrow(parent, Priority.ALWAYS);
-        }
-
-        private void addTextProperty(String title, Supplier<String> get, Consumer<String> set) {
-            addPropertyNameLabel(title);
-
-            TextField control = ui.createTextField();
-            control.setPromptText(title);
-            control.setText(get.get());
-
-            control.textProperty().addListener((observable, oldValue, newValue) -> {
-                set.accept(newValue);
-                updateSelectedItem();
-            });
-            itemDetail.getChildren().add(control);
-        }
-
-        @Override
-        public String toString() {
-            return title.get();
-        }
-    }
-
-    private void addPropertyNameLabel(String text) {
-        Label label = new Label(text);
-        label.getStyleClass().add(JobsUIFXStyles.EDIT_PROPERTY_NAME_TEXT);
-        if (!itemDetail.getChildren().isEmpty()) {
-            label.setPadding(new Insets(20, 0, 0, 0));
-        }
-        itemDetail.getChildren().add(label);
-    }
-
-    private void updateSelectedItem() {
-        TreeItem<Item> selectedItem = itemsTree.getSelectionModel().getSelectedItem();
-
-        Object payload = selectedItem.getValue().payload;
-        if (payload instanceof  ValidatingXML) {
-            validate(selectedItem, (ValidatingXML) payload);
-        }
-
-        Item value = selectedItem.getValue();
-        selectedItem.setValue(null);
-        selectedItem.setValue(value);
-    }
-
-
-    private void validate(TreeItem<Item> treeItem, ValidatingXML validatingXML) {
-        List<String> validate = validatingXML.validate();
-        if (!validate.isEmpty()) {
-            Label label = new Label("?");
-            label.setTextFill(Color.RED);
-            label.setTooltip(new Tooltip(String.join(", ", validate)));
-            treeItem.setGraphic(label);
-        } else {
-            treeItem.setGraphic(null);
-        }
-    }
-
-    /*
-    private final class TextFieldTreeCellImpl extends TreeCell<Item> {
-
-        TextFieldTreeCellImpl() {
-        }
-
-        @Override
-        protected void updateItem(Item item, boolean empty) {
-            super.updateItem(item, empty);
-            if (empty) {
-                setText(null);
-                setGraphic(null);
-            } else if (item != null) {
-                setText(item.title.get());
-                setGraphic(getTreeItem().getGraphic());
-            }
-        }
-    }
-    */
-
-    private void populateContextMenu(ContextMenu contextMenu, TreeItem<Item> treeItem) {
+    private void populateContextMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         contextMenu.getItems().clear();
-        Item item = treeItem.getValue();
+        EditItem item = treeItem.getValue();
 
         if (item.itemType == ItemType.Parameters) {
             addParameterMenu(contextMenu, treeItem);
@@ -580,7 +316,7 @@ public class EditProject {
                     MenuItem dependencyMenuItem = new MenuItem(name);
                     dependencyMenuItem.setOnAction(e -> {
                         parameterXML.addDependency(dependency);
-                        TreeItem<Item> newDep = new TreeItem<>(EditProject.this.new Item(ItemType.Dependency,
+                        TreeItem<EditItem> newDep = new TreeItem<>(new EditItem(ItemType.Dependency,
                                 () -> name, dependency));
                         treeItem.getChildren().add(newDep);
                     });
@@ -600,7 +336,7 @@ public class EditProject {
         }
     }
 
-    private void addParameterMenu(ContextMenu contextMenu, TreeItem<Item> treeItem) {
+    private void addParameterMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         JobXMLImpl jobXML = findAncestorPayload(treeItem, ItemType.Job);
         if (jobXML == null) {
             return;
@@ -618,10 +354,10 @@ public class EditProject {
         });
     }
 
-    private <T> T findAncestorPayload(TreeItem<Item> treeItem, ItemType... itemTypes) {
-        TreeItem<Item> ancestor = treeItem.getParent();
+    static <T> T findAncestorPayload(TreeItem<EditItem> treeItem, ItemType... itemTypes) {
+        TreeItem<EditItem> ancestor = treeItem.getParent();
         while (ancestor != null) {
-            Item value = ancestor.getValue();
+            EditItem value = ancestor.getValue();
             if (value != null) {
                 for (ItemType itemType : itemTypes) {
                     if (value.itemType == itemType) {
@@ -641,49 +377,12 @@ public class EditProject {
                 .map(ParameterXML::getKey).collect(Collectors.toList());
     }
 
-//    private class OpenProjectTask extends Task {
-//        private final File file;
-//
-//        OpenProjectTask(File file) {
-//            this.file = file;
-//        }
-//
-//        @Override
-//        protected Void call() throws Exception {
-//            Platform.runLater(() -> {
-//                root.setDisable(true);
-//                itemDetail.getChildren().clear();
-//                itemsTree.setRoot(null);
-//                status.setText("Loading project ...");
-//            });
-//            try {
-//                TreeItem<Item> root = loadProject(file);
-//
-//                configuration.addRecentProject(file);
-//                EditProjectConfiguration.save(configuration);
-//
-//                Platform.runLater(() -> {
-//                    itemsTree.setRoot(root);
-//                    root.setExpanded(true);
-//                });
-//            } catch (Exception e) {
-//                JavaFXUI.showErrorStatic("Error loading project.", e);
-//            } finally {
-//                Platform.runLater(() -> {
-//                    status.setText("");
-//                    root.setDisable(false);
-//                });
-//            }
-//            return null;
-//        }
-//    }
-
-    private TreeItem<Item> findItem(TreeItem<Item> root, Item item) {
+    static TreeItem<EditItem> findItem(TreeItem<EditItem> root, EditItem item) {
         if (root.getValue() == item) {
             return root;
         }
-        for (TreeItem<Item> child : root.getChildren()) {
-            TreeItem<Item> found = findItem(child, item);
+        for (TreeItem<EditItem> child : root.getChildren()) {
+            TreeItem<EditItem> found = findItem(child, item);
             if (found != null) {
                 return found;
             }
