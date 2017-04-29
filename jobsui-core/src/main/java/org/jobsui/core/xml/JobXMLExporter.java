@@ -43,15 +43,15 @@ class JobXMLExporter {
             }
 
             if (parameter.getOnInitScript() != null && !parameter.getOnInitScript().isEmpty()) {
-                XMLUtils.addTextElement(element, "OnInit", parameter.getOnInitScript());
+                XMLUtils.addTextElement(element, "OnInit", parameter.getOnInitScript(), true);
             }
 
             if (!JobsUIUtils.isNullOrEmptyOrSpaces(parameter.getValidateScript())) {
-                XMLUtils.addTextElement(element, "Validate", parameter.getValidateScript());
+                XMLUtils.addTextElement(element, "Validate", parameter.getValidateScript(), true);
             }
 
             if (parameter.getOnDependenciesChangeScript() != null && !parameter.getOnDependenciesChangeScript().isEmpty()) {
-                XMLUtils.addTextElement(element, "OnDependenciesChange", parameter.getOnDependenciesChangeScript());
+                XMLUtils.addTextElement(element, "OnDependenciesChange", parameter.getOnDependenciesChangeScript(), true);
             }
         }
 
@@ -59,18 +59,18 @@ class JobXMLExporter {
             Element element = createParameterElement(doc, rootElement, expressionXML, "Expression");
 
             if (expressionXML.getEvaluateScript() != null && !expressionXML.getEvaluateScript().isEmpty()) {
-                element.appendChild(doc.createTextNode(expressionXML.getEvaluateScript()));
+                XMLUtils.addTextNode(element, expressionXML.getEvaluateScript(), true);
             }
         }
 
         // TODO Calls
 
         if (!JobsUIUtils.isNullOrEmptyOrSpaces(jobXML.getValidateScript())) {
-            XMLUtils.addTextElement(rootElement, "Validate", jobXML.getValidateScript());
+            XMLUtils.addTextElement(rootElement, "Validate", jobXML.getValidateScript(), true);
         }
 
         if (!JobsUIUtils.isNullOrEmptyOrSpaces(jobXML.getRunScript())) {
-            XMLUtils.addTextElement(rootElement, "Run", jobXML.getRunScript());
+            XMLUtils.addTextElement(rootElement, "Run", jobXML.getRunScript(), true);
         }
 
         try {

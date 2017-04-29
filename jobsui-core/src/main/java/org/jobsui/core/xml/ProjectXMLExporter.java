@@ -36,17 +36,17 @@ public class ProjectXMLExporter {
         doc.appendChild(rootElement);
 
         for (String library : projectXML.getLibraries()) {
-            XMLUtils.addTextElement(rootElement, "Library", library);
+            XMLUtils.addTextElement(rootElement, "Library", library, false);
         }
 
         for (Map.Entry<String, String> entry : projectXML.getImports().entrySet()) {
-            Element element = XMLUtils.addTextElement(rootElement, "Import", entry.getValue());
+            Element element = XMLUtils.addTextElement(rootElement, "Import", entry.getValue(), false);
             // TODO rename to id
             XMLUtils.addAttr(element, "name", entry.getKey());
         }
 
         for (String job : projectXML.getJobs()) {
-            XMLUtils.addTextElement(rootElement, "Job", job);
+            XMLUtils.addTextElement(rootElement, "Job", job, false);
         }
 
         XMLUtils.write(doc, new File(folder, ProjectParserImpl.PROJECT_FILE_NAME),

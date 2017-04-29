@@ -2,10 +2,7 @@ package org.jobsui.core.xml;
 
 import org.jobsui.core.groovy.JobsUIParseException;
 import org.jobsui.core.utils.JobsUIUtils;
-import org.w3c.dom.Attr;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
@@ -24,6 +21,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,6 +30,7 @@ import java.util.stream.Collectors;
  * Created by enrico on 10/12/16.
  */
 public interface XMLUtils {
+    int INDENT_SIZE = 4;
 
     static void write(Document doc, File file, URL schemaURL) throws Exception {
         // create a SchemaFactory capable of understanding WXS schemas
@@ -49,7 +49,7 @@ public interface XMLUtils {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         Transformer transformer = transformerFactory.newTransformer();
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+        transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.valueOf(INDENT_SIZE));
         DOMSource source = new DOMSource(doc);
         StreamResult result = new StreamResult(file);
 
@@ -66,12 +66,51 @@ public interface XMLUtils {
         element.setAttributeNode(attr);
     }
 
-    static Element addTextElement(Element parent, String name, String text) {
+    static Element addTextElement(Element parent, String name, String text, boolean indent) {
         Document doc = parent.getOwnerDocument();
         Element child = doc.createElement(name);
         parent.appendChild(child);
-        child.appendChild(doc.createTextNode(text));
+        addTextNode(child, text, indent);
         return child;
+    }
+
+//    static Element addTextElement(Element parent, String name, String text, boolean indent) {
+//        Document doc = parent.getOwnerDocument();
+//        Element child = doc.createElement(name);
+//        parent.appendChild(child);
+//        if (indent) {
+//            int parents = countParents(parent);
+//            String prefix = String.join("", Collections.nCopies((parents + 1) * INDENT_SIZE, " "));
+//            String suffix = String.join("", Collections.nCopies(parents * INDENT_SIZE, " "));
+//            text = scriptToEditForm(text);
+//            text = System.lineSeparator() + Arrays.stream(text.split(System.lineSeparator()))
+//                    .map(s -> prefix + s)
+//                    .collect(Collectors.joining(System.lineSeparator())) + System.lineSeparator() + suffix;
+//        }
+//        child.appendChild(doc.createTextNode(text));
+//        return child;
+//    }
+
+    static void addTextNode(Element parent, String text, boolean indent) {
+        Document doc = parent.getOwnerDocument();
+        if (indent) {
+            int parents = countParents(parent);
+            String prefix = String.join("", Collections.nCopies((parents) * INDENT_SIZE, " "));
+            String suffix = String.join("", Collections.nCopies((parents - 1) * INDENT_SIZE, " "));
+            text = scriptToEditForm(text);
+            text = System.lineSeparator() + Arrays.stream(text.split(System.lineSeparator()))
+                    .map(s -> prefix + s)
+                    .collect(Collectors.joining(System.lineSeparator())) + System.lineSeparator() + suffix;
+        }
+        parent.appendChild(doc.createTextNode(text));
+    }
+
+
+    static int countParents(Node element) {
+        if (element.getParentNode() != null) {
+            return 1 + countParents(element.getParentNode());
+        }
+        return 0;
     }
 
     static String scriptToEditForm(String script) {

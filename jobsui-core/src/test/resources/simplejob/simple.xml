@@ -14,9 +14,7 @@
     </Expression>
 
     <Run>
-        <![CDATA[
-            return inv
-        ]]>
+        return inv
     </Run>
 
 </Job>
