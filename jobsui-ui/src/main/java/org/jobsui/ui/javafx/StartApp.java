@@ -139,6 +139,7 @@ public class StartApp extends Application {
 
     private void replaceSceneContent(Stage stage, Parent page) throws Exception {
         Scene scene = stage.getScene();
+
         if (scene == null) {
             switch (ui.getPreferences().getTheme()) {
                 case Dark:
@@ -165,8 +166,7 @@ public class StartApp extends Application {
         } else {
             stage.getScene().setRoot(page);
         }
-//        page.setStyle("-fx-background-color:WHITE");
-//        stage.sizeToScene();
+        scene.getStylesheets().add(resourceToURL("shared.css"));
     }
 
     private static void addTitleToDecorator(Stage stage, JFXDecorator decorator) {

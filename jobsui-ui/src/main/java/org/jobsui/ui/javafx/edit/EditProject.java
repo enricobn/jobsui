@@ -268,13 +268,13 @@ public class EditProject {
     }
 
     public void savePreferences(Stage stage) {
-        preferences.setEditDividerPosition(splitPane.getDividers().get(0).getPosition());
+        preferences.setEditDividerPosition(splitPane.getDividerPositions()[0]);
         preferences.setEditWidth(stage.getWidth());
         preferences.setEditHeight(stage.getHeight());
     }
 
     public void loadPreferences(Stage stage) {
-        splitPane.getDividers().get(0).setPosition(preferences.getEditDividerPosition());
+        splitPane.setDividerPosition(0, preferences.getEditDividerPosition());
         stage.setWidth(preferences.getEditWidth());
         stage.setHeight(preferences.getEditHeight());
     }

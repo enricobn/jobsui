@@ -1,6 +1,6 @@
 package org.jobsui.ui.javafx;
 
-import javafx.event.EventHandler;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
@@ -8,11 +8,8 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 import javafx.util.Callback;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.bookmark.Bookmark;
@@ -42,8 +39,6 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
     @Override
     public void show(Project project, Job job, Runnable callback) {
-        HBox root = new HBox(5);
-
         buttonsPanel = new HBox(5);
         buttonsPanel.setPadding(new Insets(10, 5, 5, 5));
 
@@ -56,8 +51,8 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
         VBox bookmarksPanel = createBookmarksPanel(bookmarkListView);
 
-        root.getChildren().add(bookmarksPanel);
-        root.getChildren().add(mainPanel);
+        SplitPane root = new SplitPane(bookmarksPanel, mainPanel);
+        Platform.runLater(() -> root.setDividerPosition(0, ui.getPreferences().getRunDividerPosition()));
 
         callback.run();
 
@@ -68,6 +63,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
             stage.setOnHidden(event -> {
                 ui.getPreferences().setRunWidth(stage.getWidth());
                 ui.getPreferences().setRunHeight(stage.getHeight());
+                ui.getPreferences().setRunDividerPosition(root.getDividerPositions()[0]);
             });
             stage.showAndWait();
         } catch (Exception e) {
@@ -88,6 +84,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
         bookmarksLabel.setPadding(new Insets(5, 5, 5, 5));
         bookmarksPanel.getChildren().add(bookmarksLabel);
         bookmarksPanel.getChildren().add(bookmarkListView);
+        VBox.setVgrow(bookmarkListView, Priority.ALWAYS);
         return bookmarksPanel;
     }
 
@@ -99,11 +96,12 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
     private ListView<Bookmark> createBookmarkListView(Project project, Job job) {
         ListView<Bookmark> bookmarkListView = new ListView<>();
-        bookmarkListView.setMinWidth(200);
+//        bookmarkListView.setMinWidth(200);
         bookmarkListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
         bookmarkListView.setCellFactory(new CellFactory(project, job));
         List<Bookmark> bookmarks = ui.getPreferences().getBookmarks(project, job);
         bookmarkListView.getItems().addAll(bookmarks);
+        bookmarkListView.setBorder(Border.EMPTY);
         return bookmarkListView;
     }
 

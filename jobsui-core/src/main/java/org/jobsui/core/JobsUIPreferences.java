@@ -48,4 +48,8 @@ public interface JobsUIPreferences {
     double getRunHeight();
 
     void setRunHeight(double runHeight);
+
+    void setRunDividerPosition(double position);
+
+    double getRunDividerPosition();
 }
