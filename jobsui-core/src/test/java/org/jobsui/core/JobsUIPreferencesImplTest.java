@@ -52,12 +52,12 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void assert_that_default_value_for_theme_is_dark() throws Exception {
+    public void assert_that_default_value_for_theme_is_material() throws Exception {
         when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
-        assertThat(sut.getTheme(), is(JobsUITheme.Dark));
+        assertThat(sut.getTheme(), is(JobsUITheme.Material));
     }
 
     @Test
@@ -75,7 +75,7 @@ public class JobsUIPreferencesImplTest {
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
-        sut.setTheme(JobsUITheme.Dark);
+        sut.setTheme(sut.getTheme());
 
         verify(others, times(0)).flush();
     }

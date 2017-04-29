@@ -192,7 +192,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
                 lastOpenedProjects.add(new OpenedItem(openedProjectPath, openedProjectName));
             }
         }
-        String theme = othersNode.get(THEME, JobsUITheme.Dark.name());
+        String theme = othersNode.get(THEME, JobsUITheme.Material.name());
         this.theme = JobsUITheme.valueOf(theme);
         this.editDividerPosition = editNode.getDouble(EDIT_DIVIDER_POSITION, 0.4);
         this.editWidth = editNode.getDouble(EDIT_WIDTH, 800);
