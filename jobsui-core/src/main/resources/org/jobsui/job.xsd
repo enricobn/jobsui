@@ -7,6 +7,7 @@
             <xs:enumeration value="Choice" />
             <xs:enumeration value="List" />
             <xs:enumeration value="Value" />
+            <xs:enumeration value="Password" />
         </xs:restriction>
     </xs:simpleType>
     <xs:element name="Job">

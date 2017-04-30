@@ -8,5 +8,5 @@ public enum UIComponentType {
     CheckBox,
     Choice,
     List,
-    Value
+    Password, Value
 }

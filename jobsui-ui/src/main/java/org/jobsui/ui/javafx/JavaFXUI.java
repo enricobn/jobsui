@@ -1,9 +1,6 @@
 package org.jobsui.ui.javafx;
 
-import com.jfoenix.controls.JFXButton;
-import com.jfoenix.controls.JFXCheckBox;
-import com.jfoenix.controls.JFXComboBox;
-import com.jfoenix.controls.JFXTextField;
+import com.jfoenix.controls.*;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -57,6 +54,8 @@ public class JavaFXUI implements UI<Node> {
             return (COMP) new JavaFXUIButton(this);
         } else if (componentType == UIValue.class) {
             return (COMP) new JavaFXUIValue(this);
+        } else if (componentType == UIPassword.class) {
+            return (COMP) new JavaFXUIPassword(this);
         }
         throw new UnsupportedComponentException("JavaFX: cannot find component for " + componentType.getName());
     }
@@ -190,6 +189,16 @@ public class JavaFXUI implements UI<Node> {
             result = new JFXTextField();
         } else {
             result = new TextField();
+        }
+        return result;
+    }
+
+    public PasswordField createPasswordField() {
+        PasswordField result;
+        if (getPreferences().getTheme() == JobsUITheme.Material) {
+            result = new JFXPasswordField();
+        } else {
+            result = new PasswordField();
         }
         return result;
     }

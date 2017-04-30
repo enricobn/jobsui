@@ -52,6 +52,7 @@ public class JobParameterGroovySimple extends JobParameterAbstract implements Jo
 
         switch (componentType) {
             case Value: uiComponent = ui.create(UIValue.class); break;
+            case Password: uiComponent = ui.create(UIPassword.class); break;
             case Choice: uiComponent = ui.create(UIChoice.class); break;
             case CheckBox: uiComponent = ui.create(UICheckBox.class); break;
             case Button: uiComponent = ui.create(UIButton.class); break;
