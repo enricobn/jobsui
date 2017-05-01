@@ -3,19 +3,16 @@ package org.jobsui.ui;
 import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
-import org.jobsui.core.ui.*;
+import org.jobsui.core.ui.UIButton;
+import org.jobsui.core.ui.UIContainer;
+import org.jobsui.core.ui.UIWidget;
+import org.jobsui.core.ui.UIWindow;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Mockito.*;
 
 /**
  * Created by enrico on 5/8/16.

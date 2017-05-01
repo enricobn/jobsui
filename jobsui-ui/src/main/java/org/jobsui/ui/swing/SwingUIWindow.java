@@ -3,7 +3,10 @@ package org.jobsui.ui.swing;
 import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
-import org.jobsui.core.ui.*;
+import org.jobsui.core.ui.UIButton;
+import org.jobsui.core.ui.UIContainer;
+import org.jobsui.core.ui.UIWidget;
+import org.jobsui.core.ui.UIWindow;
 
 import javax.swing.*;
 import java.awt.*;
