@@ -1,5 +1,7 @@
 package org.jobsui.core.xml;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -30,4 +32,10 @@ public interface JobXML extends ValidatingXML{
     String getVersion();
 
     List<WizardStep> getWizardSteps();
+
+    default Collection<JobDependencyXML> getJobDependencyXmls() {
+        Collection<JobDependencyXML> result = new ArrayList<>(getSimpleParameterXMLs());
+        result.addAll(getExpressionXMLs());
+        return result;
+    }
 }

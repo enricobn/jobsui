@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * Created by enrico on 10/11/16.
  */
-public abstract class JobDependencyXML implements JobDependency {
+public abstract class JobDependencyXML implements ValidatingXML,JobDependency {
     private final List<String> dependencies = new ArrayList<>();
     private int order;
     private String key;

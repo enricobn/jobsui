@@ -2,10 +2,7 @@ package org.jobsui.core.xml;
 
 import org.jobsui.core.utils.JobsUIUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by enrico on 10/11/16.
@@ -162,20 +159,39 @@ public class JobXMLImpl implements JobXML {
             messages.add("Version is mandatory.");
         }
 
+        Set<String> dependencyNames = new HashSet<>();
+        Set<String> dependencyKeys = new HashSet<>();
 
-        for (ParameterXML parameterXML : parameters.values()) {
-            List<String> parameterMessages = parameterXML.validate();
-            if (!parameterMessages.isEmpty()) {
-                messages.add(parameterXML.getName() + ": " + String.join(" ", parameterMessages));
+        for (JobDependencyXML jobDependencyXML : getJobDependencyXmls()) {
+            List<String> jobDependencyXMLMessages = jobDependencyXML.validate();
+            if (!jobDependencyXMLMessages.isEmpty()) {
+                messages.add(jobDependencyXML.getName() + ": " + String.join(" ", jobDependencyXMLMessages));
+            }
+            if (!dependencyKeys.add(jobDependencyXML.getKey())) {
+                messages.add("Duplicate dependency key '" + jobDependencyXML.getKey() + "'.");
+            }
+
+            if (!dependencyNames.add(jobDependencyXML.getName())) {
+                messages.add("Duplicate dependency name '" + jobDependencyXML.getName() + "'.");
             }
         }
 
-        // TODO dependencies
+        Set<String> wizardStepName = new HashSet<>();
+
+        for (WizardStep wizardStep : getWizardSteps()) {
+            List<String> wizardStepMessages = wizardStep.validate();
+            if (!wizardStepMessages.isEmpty()) {
+                messages.add(wizardStep.getName() + ": " + String.join(" ", wizardStepMessages));
+            }
+
+            if (!wizardStepName.add(wizardStep.getName())) {
+                messages.add("Duplicate wizard name '" + wizardStep.getName() + "'.");
+            }
+        }
 
         if (JobsUIUtils.isNullOrEmptyOrSpaces(runScript)) {
             messages.add("Run script is mandatory.");
         }
-
 
         return messages;
     }

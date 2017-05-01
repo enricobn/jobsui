@@ -58,6 +58,8 @@ public interface JobDependency {
 
     String getKey();
 
+    String getName();
+
     List<String> getDependencies();
 
 }
