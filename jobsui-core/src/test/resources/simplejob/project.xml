@@ -8,4 +8,5 @@
     <Job>simpleWithInternalCall.xml</Job>
     <Job>simpleWithParameterDependency.xml</Job>
     <Job>simpleWithChoice.xml</Job>
+    <Job>simpleWithWizard.xml</Job>
 </Project>

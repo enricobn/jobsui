@@ -14,9 +14,9 @@ public class SimpleProjectXMLImpl implements SimpleProjectXML {
     private final String id;
     private final Set<String> libraries = new HashSet<>();
     private final Map<String, String> imports = new HashMap<>();
+    private final List<String> jobs = new ArrayList<>();
     private String name;
     private String version;
-    private final List<String> jobs = new ArrayList<>();
 
     public SimpleProjectXMLImpl(URL projectURL, String id, String name) {
         this.id = id;

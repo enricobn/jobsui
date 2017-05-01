@@ -28,4 +28,6 @@ public interface JobXML extends ValidatingXML{
     ExpressionXML getExpression(String key);
 
     String getVersion();
+
+    List<WizardStep> getWizardSteps();
 }

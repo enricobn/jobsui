@@ -30,8 +30,8 @@ public class ProjectXMLExporterTest {
         test("/external");
     }
 
-    private void test(String resource) throws Exception {
-        URL fileResource = getClass().getResource(resource);
+    private static void test(String resource) throws Exception {
+        URL fileResource = ProjectXMLExporterTest.class.getResource(resource);
         File file = new File(fileResource.getPath());
 
         ProjectFSXML projectFSXML = new ProjectParserImpl().parse(file);
@@ -52,7 +52,7 @@ public class ProjectXMLExporterTest {
         }
     }
 
-    private void check(ProjectFSXML original, ProjectFSXML exported) throws IOException {
+    private static void check(ProjectFSXML original, ProjectFSXML exported) throws IOException {
         assertThat(exported.getId(), is(original.getId()));
         assertThat(exported.getName(), is(original.getName()));
         assertThat(exported.getJobs(), is(original.getJobs()));
@@ -76,7 +76,7 @@ public class ProjectXMLExporterTest {
 
     }
 
-    private void check(JobXML originalJobXML, JobXML exportedJobXML) {
+    private static void check(JobXML originalJobXML, JobXML exportedJobXML) {
         List<String> exportedSimpleParametersKeys = getKeys(exportedJobXML.getSimpleParameterXMLs());
         List<String> originalSimpleParametersKeys = getKeys(originalJobXML.getSimpleParameterXMLs());
         assertThat(exportedSimpleParametersKeys, is(originalSimpleParametersKeys));
@@ -97,9 +97,11 @@ public class ProjectXMLExporterTest {
             check(originalExpression, exportedExpression);
             checkExpression(originalExpression, exportedExpression);
         }
+
+        assertThat(exportedJobXML.getWizardSteps(), is(originalJobXML.getWizardSteps()));
     }
 
-    private void check(ParameterXML originalParameter, ParameterXML exportedParameter) {
+    private static void check(ParameterXML originalParameter, ParameterXML exportedParameter) {
         assertThat(exportedParameter, instanceOf(originalParameter.getClass()));
         assertThat(exportedParameter.getKey(), is(originalParameter.getKey()));
         assertThat(exportedParameter.getName(), is(originalParameter.getName()));
@@ -113,14 +115,14 @@ public class ProjectXMLExporterTest {
         }
     }
 
-    private void checkSimpleParameter(SimpleParameterXML originalSimpleParameter, SimpleParameterXML exportedSimpleParameter) {
+    private static void checkSimpleParameter(SimpleParameterXML originalSimpleParameter, SimpleParameterXML exportedSimpleParameter) {
         assertThat(exportedSimpleParameter.getOnDependenciesChangeScript(), is(originalSimpleParameter.getOnDependenciesChangeScript()));
         assertThat(exportedSimpleParameter.getOnInitScript(), is(originalSimpleParameter.getOnInitScript()));
         assertThat(exportedSimpleParameter.getValidateScript(), is(originalSimpleParameter.getValidateScript()));
         assertThat(exportedSimpleParameter.getComponent(), is(originalSimpleParameter.getComponent()));
     }
 
-    private void checkExpression(ExpressionXML originalExpression, ExpressionXML exportedExpression) {
+    private static void checkExpression(ExpressionXML originalExpression, ExpressionXML exportedExpression) {
         assertThat(exportedExpression.getEvaluateScript(), is(originalExpression.getEvaluateScript()));
     }
 

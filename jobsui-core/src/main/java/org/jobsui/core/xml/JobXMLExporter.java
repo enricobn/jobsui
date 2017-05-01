@@ -65,6 +65,19 @@ class JobXMLExporter {
 
         // TODO Calls
 
+        for (WizardStep wizardStep : jobXML.getWizardSteps()) {
+            Element element = doc.createElement("WizardStep");
+            rootElement.appendChild(element);
+
+            XMLUtils.addAttr(element, "name", wizardStep.getName());
+            String dependsOn = wizardStep.getDependencies().stream().collect(Collectors.joining(","));
+            XMLUtils.addAttr(element, "dependsOn", dependsOn);
+
+            if (wizardStep.getValidateScript() != null && !wizardStep.getValidateScript().isEmpty()) {
+                XMLUtils.addTextElement(element, "Validate", wizardStep.getValidateScript(), true);
+            }
+        }
+
         if (!JobsUIUtils.isNullOrEmptyOrSpaces(jobXML.getValidateScript())) {
             XMLUtils.addTextElement(rootElement, "Validate", jobXML.getValidateScript(), true);
         }

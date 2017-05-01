@@ -1,5 +1,6 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.groovy.JobsUIParseException;
 import org.jobsui.core.ui.UIComponentType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -83,7 +84,30 @@ public class JobParserImpl implements JobParser {
 
             parseCalls(doc, jobXML);
 
+            parseWizardSteps(doc, jobXML);
+
             return jobXML;
+        }
+    }
+
+    private void parseWizardSteps(Document doc, JobXMLImpl jobXML) throws JobsUIParseException {
+        NodeList wizardStepList = doc.getElementsByTagName("WizardStep");
+        for (int i = 0; i < wizardStepList.getLength(); i++) {
+            Element element = (Element) wizardStepList.item(i);
+            WizardStepImpl wizardStep = new WizardStepImpl();
+            String name = getMandatoryAttribute(element, "name", "Wizard step");
+            wizardStep.setName(name);
+            String subject = "Wizard step '" + name + "'";
+            String dependsOn = getMandatoryAttribute(element, "dependsOn", subject);
+            for (String dependency : dependsOn.split(",")) {
+                wizardStep.addDependency(dependency);
+            }
+
+            String validateScript = getElementContent(element, "Validate", false, subject);
+            if (validateScript != null) {
+                wizardStep.setValidateScript(validateScript);
+            }
+            jobXML.add(wizardStep);
         }
     }
 

@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<Job name="Simple with wizard" version="1.0.0">
+
+    <Parameter key="name" name="Name"/>
+
+    <Parameter key="dependent" name="Dependent" dependsOn="name"/>
+
+    <WizardStep name="First" dependsOn="name" />
+
+    <WizardStep name="Second" dependsOn="dependent">
+        <Validate>
+            dependent != null
+        </Validate>
+    </WizardStep>
+
+    <Run>
+        return dependent
+    </Run>
+
+</Job>

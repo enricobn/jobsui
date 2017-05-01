@@ -17,6 +17,7 @@ public class JobXMLImpl implements JobXML {
     private final List<CallXML> callXMLs = new ArrayList<>();
     private final Map<String, ParameterXML> parameters = new HashMap<>();
     private final Map<String, ExpressionXML> expressions = new HashMap<>();
+    private final List<WizardStep> wizardSteps = new ArrayList<>();
 
     private final String id;
     private final String version;
@@ -182,5 +183,14 @@ public class JobXMLImpl implements JobXML {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void add(WizardStep wizardStep) {
+        wizardSteps.add(wizardStep);
+    }
+
+    @Override
+    public List<WizardStep> getWizardSteps() {
+        return wizardSteps;
     }
 }
