@@ -7,7 +7,6 @@ import org.jobsui.core.bookmark.BookmarksStoreFSImpl;
 import org.jobsui.ui.javafx.JavaFXUI;
 
 import java.util.prefs.Preferences;
-import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 5/5/16.
@@ -18,7 +17,7 @@ public class Main {
         JobsUIMainParameters.parse(args,
                 Main::run,
                 errors -> JavaFXUI.showMessageStatic("Error starting application:\n" +
-                        errors.stream().collect(Collectors.joining("\n"))));
+                        String.join("\n", errors)));
     }
 
     private static void run(JobsUIMainParameters parameters) {

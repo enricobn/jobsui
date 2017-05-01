@@ -9,7 +9,6 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 4/8/17.
@@ -21,7 +20,7 @@ class JobXMLExporter {
 
         if (!validate.isEmpty()) {
             throw new Exception("Invalid job \"" + jobXML.getName() + "\":\n" +
-                    validate.stream().collect(Collectors.joining("\n ")));
+                    String.join("\n ", validate));
         }
 
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
@@ -70,7 +69,7 @@ class JobXMLExporter {
             rootElement.appendChild(element);
 
             XMLUtils.addAttr(element, "name", wizardStep.getName());
-            String dependsOn = wizardStep.getDependencies().stream().collect(Collectors.joining(","));
+            String dependsOn = String.join(",", wizardStep.getDependencies());
             XMLUtils.addAttr(element, "dependsOn", dependsOn);
 
             if (wizardStep.getValidateScript() != null && !wizardStep.getValidateScript().isEmpty()) {
@@ -100,7 +99,7 @@ class JobXMLExporter {
         XMLUtils.addAttr(element, "name", parameter.getName());
 
         if (!parameter.getDependencies().isEmpty()) {
-            String dependencies = parameter.getDependencies().stream().collect(Collectors.joining(","));
+            String dependencies = String.join(",", parameter.getDependencies());
             XMLUtils.addAttr(element, "dependsOn", dependencies);
         }
 

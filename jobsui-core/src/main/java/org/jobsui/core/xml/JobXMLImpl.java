@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 10/11/16.
@@ -167,7 +166,7 @@ public class JobXMLImpl implements JobXML {
         for (ParameterXML parameterXML : parameters.values()) {
             List<String> parameterMessages = parameterXML.validate();
             if (!parameterMessages.isEmpty()) {
-                messages.add(parameterXML.getName() + ": " + parameterMessages.stream().collect(Collectors.joining(" ")));
+                messages.add(parameterXML.getName() + ": " + String.join(" ", parameterMessages));
             }
         }
 

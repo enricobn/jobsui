@@ -74,23 +74,6 @@ public interface XMLUtils {
         return child;
     }
 
-//    static Element addTextElement(Element parent, String name, String text, boolean indent) {
-//        Document doc = parent.getOwnerDocument();
-//        Element child = doc.createElement(name);
-//        parent.appendChild(child);
-//        if (indent) {
-//            int parents = countParents(parent);
-//            String prefix = String.join("", Collections.nCopies((parents + 1) * INDENT_SIZE, " "));
-//            String suffix = String.join("", Collections.nCopies(parents * INDENT_SIZE, " "));
-//            text = scriptToEditForm(text);
-//            text = System.lineSeparator() + Arrays.stream(text.split(System.lineSeparator()))
-//                    .map(s -> prefix + s)
-//                    .collect(Collectors.joining(System.lineSeparator())) + System.lineSeparator() + suffix;
-//        }
-//        child.appendChild(doc.createTextNode(text));
-//        return child;
-//    }
-
     static void addTextNode(Element parent, String text, boolean indent) {
         Document doc = parent.getOwnerDocument();
         if (indent) {

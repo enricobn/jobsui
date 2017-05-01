@@ -19,7 +19,6 @@ import org.jobsui.core.ui.*;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import static org.jobsui.ui.javafx.JobsUIFXStyles.VALIDATION_ERROR_TEXT;
 
@@ -197,7 +196,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
                 label.getStyleClass().add("label");
                 label.setTooltip(null);
             } else {
-                String text = messages.stream().collect(Collectors.joining(","));
+                String text = String.join(",", messages);
                 label.setTooltip(new Tooltip(text));
                 label.getStyleClass().add(VALIDATION_ERROR_TEXT);
             }

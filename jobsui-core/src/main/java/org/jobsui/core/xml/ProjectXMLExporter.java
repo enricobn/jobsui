@@ -10,7 +10,6 @@ import java.io.File;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 4/5/17.
@@ -21,7 +20,7 @@ public class ProjectXMLExporter {
         List<String> validate = projectXML.validate();
 
         if (!validate.isEmpty()) {
-            throw new Exception("Invalid project \"" + projectXML.getName() + "\":\n" + validate.stream().collect(Collectors.joining("\n ")));
+            throw new Exception("Invalid project \"" + projectXML.getName() + "\":\n" + String.join("\n ", validate));
         }
 
         DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();

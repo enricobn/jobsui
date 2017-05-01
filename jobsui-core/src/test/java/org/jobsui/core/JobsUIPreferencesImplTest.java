@@ -16,6 +16,7 @@ import java.net.URL;
 import java.util.prefs.Preferences;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.jobsui.core.JobsUIPreferencesImpl.*;
 import static org.jobsui.core.TestUtils.createJob;
 import static org.jobsui.core.TestUtils.createProject;
 import static org.junit.Assert.assertThat;
@@ -23,7 +24,6 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.jobsui.core.JobsUIPreferencesImpl.*;
 
 /**
  * Created by enrico on 4/15/17.
