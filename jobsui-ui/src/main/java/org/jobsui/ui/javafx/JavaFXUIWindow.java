@@ -2,8 +2,6 @@ package org.jobsui.ui.javafx;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -19,8 +17,6 @@ import org.jobsui.core.ui.*;
 
 import java.util.List;
 import java.util.function.Consumer;
-
-import static org.jobsui.ui.javafx.JobsUIFXStyles.VALIDATION_ERROR_TEXT;
 
 /**
  * Created by enrico on 10/7/16.
@@ -110,25 +106,15 @@ class JavaFXUIWindow implements UIWindow<Node> {
     }
 
     @Override
-    public UIWidget<Node> add(String title, final UIComponent<Node> component) {
-        NodeUIWidget widget = new NodeUIWidget(title, component);
-        Node node = widget.getNodeComponent();
-        node.managedProperty().bind(node.visibleProperty());
+    public void add(UIWidget<Node> widget) {
+        Node node = widget.getLayoutComponent();
         componentsPanel.getChildren().add(node);
-        return widget;
-    }
-
-    @Override
-    public UIWidget<Node> add(UIComponent<Node> component) {
-        return add(null, component);
     }
 
     @Override
     public void addButton(UIButton<Node> button) {
-        NodeUIWidget widget = new NodeUIWidget(null, button);
-        Node node = widget.getNodeComponent();
-        node.managedProperty().bind(node.visibleProperty());
-        buttonsPanel.getChildren().add(node);
+        UIWidget<Node> widget = ui.createWidget(null, button);
+        buttonsPanel.getChildren().add(widget.getLayoutComponent());
     }
 
     @Override
@@ -151,69 +137,6 @@ class JavaFXUIWindow implements UIWindow<Node> {
     public void refreshBookmarks(Project project, Job job) {
         bookmarkListView.getItems().clear();
         bookmarkListView.getItems().addAll(ui.getPreferences().getBookmarks(project, job));
-    }
-
-    private static class NodeUIWidget implements UIWidget<Node> {
-        private final String title;
-        private final UIComponent<Node> component;
-        private final GridPane nodeComponent;
-        private final Label label;
-
-        NodeUIWidget(String title, UIComponent<Node> component) {
-            this.title = title;
-            this.component = component;
-            nodeComponent = new GridPane();
-            label = new Label(title == null || title.isEmpty() ? null : title + ":");
-            if (title != null && !title.isEmpty() ) {
-                label.setMinWidth(100);
-            }
-            label.setAlignment(Pos.BOTTOM_RIGHT);
-            nodeComponent.add(label, 0, 0);
-            GridPane.setValignment(label, VPos.BOTTOM);
-            GridPane.setMargin(label, new Insets(0, 5, 0, 0));
-            nodeComponent.add(component.getComponent(), 1, 0);
-        }
-
-        @Override
-        public void setVisible(boolean visible) {
-            nodeComponent.setVisible(visible);
-        }
-
-        @Override
-        public void setDisable(boolean value) {
-            nodeComponent.setDisable(value);
-        }
-
-        @Override
-        public UIComponent<Node> getComponent() {
-            return component;
-        }
-
-        @Override
-        public void setValidationMessages(List<String> messages) {
-            if (messages.isEmpty()) {
-                label.getStyleClass().clear();
-                label.getStyleClass().add("label");
-                label.setTooltip(null);
-            } else {
-                String text = String.join(",", messages);
-                label.setTooltip(new Tooltip(text));
-                label.getStyleClass().add(VALIDATION_ERROR_TEXT);
-            }
-        }
-
-        @Override
-        public boolean isEnabled() {
-            return !nodeComponent.isDisabled();
-        }
-
-        public String getTitle() {
-            return title;
-        }
-
-        Node getNodeComponent() {
-            return nodeComponent;
-        }
     }
 
     private class CellFactory implements Callback<ListView<Bookmark>, ListCell<Bookmark>> {

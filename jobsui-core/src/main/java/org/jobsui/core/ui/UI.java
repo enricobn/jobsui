@@ -30,4 +30,7 @@ public interface UI<T> {
     boolean askOKCancel(String message);
 
     JobsUIPreferences getPreferences();
+
+    UIWidget<T> createWidget(String title, UIComponent<T> component);
+
 }

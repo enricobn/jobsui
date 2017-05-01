@@ -17,4 +17,7 @@ public interface UIWidget<C> {
 
     boolean isEnabled();
 
+    default C getLayoutComponent() {
+        return getComponent().getComponent();
+    }
 }

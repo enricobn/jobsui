@@ -1,6 +1,9 @@
 package org.jobsui.ui.javafx;
 
 import com.jfoenix.controls.*;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -12,6 +15,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Optional;
+
+import static org.jobsui.ui.javafx.JobsUIFXStyles.VALIDATION_ERROR_TEXT;
 
 /**
  * Created by enrico on 10/7/16.
@@ -93,6 +98,15 @@ public class JavaFXUI implements UI<Node> {
     @Override
     public JobsUIPreferences getPreferences() {
         return preferences;
+    }
+
+
+    @Override
+    public UIWidget<Node> createWidget(String title, final UIComponent<Node> component) {
+        NodeUIWidget widget = new NodeUIWidget(title, component);
+        Node node = widget.getLayoutComponent();
+        node.managedProperty().bind(node.visibleProperty());
+        return widget;
     }
 
     public static void uncaughtException(Thread t, Throwable e) {
@@ -202,5 +216,70 @@ public class JavaFXUI implements UI<Node> {
         }
         return result;
     }
+
+    private static class NodeUIWidget implements UIWidget<Node> {
+        private final String title;
+        private final UIComponent<Node> component;
+        private final GridPane nodeComponent;
+        private final Label label;
+
+        NodeUIWidget(String title, UIComponent<Node> component) {
+            this.title = title;
+            this.component = component;
+            nodeComponent = new GridPane();
+            label = new Label(title == null || title.isEmpty() ? null : title + ":");
+            if (title != null && !title.isEmpty() ) {
+                label.setMinWidth(100);
+            }
+            label.setAlignment(Pos.BOTTOM_RIGHT);
+            nodeComponent.add(label, 0, 0);
+            GridPane.setValignment(label, VPos.BOTTOM);
+            GridPane.setMargin(label, new Insets(0, 5, 0, 0));
+            nodeComponent.add(component.getComponent(), 1, 0);
+        }
+
+        @Override
+        public void setVisible(boolean visible) {
+            nodeComponent.setVisible(visible);
+        }
+
+        @Override
+        public void setDisable(boolean value) {
+            nodeComponent.setDisable(value);
+        }
+
+        @Override
+        public UIComponent<Node> getComponent() {
+            return component;
+        }
+
+        @Override
+        public void setValidationMessages(List<String> messages) {
+            if (messages.isEmpty()) {
+                label.getStyleClass().clear();
+                label.getStyleClass().add("label");
+                label.setTooltip(null);
+            } else {
+                String text = String.join(",", messages);
+                label.setTooltip(new Tooltip(text));
+                label.getStyleClass().add(VALIDATION_ERROR_TEXT);
+            }
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return !nodeComponent.isDisabled();
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        @Override
+        public Node getLayoutComponent() {
+            return nodeComponent;
+        }
+    }
+
 
 }

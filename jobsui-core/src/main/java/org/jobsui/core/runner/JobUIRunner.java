@@ -46,6 +46,11 @@ public class JobUIRunner<C> implements JobRunner {
 //                return;
             }
 
+            for (JobParameter jobParameter : job.getParameterDefs()) {
+                UIWidget<C> widget = context.getWidget(jobParameter);
+                window.add(widget);
+            }
+
             observeDependencies(ui, context);
 
             UIButton<C> runButton;

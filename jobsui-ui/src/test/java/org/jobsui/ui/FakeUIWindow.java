@@ -27,7 +27,6 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
     private volatile boolean started = false;
 //    private volatile boolean valid = false;
     private volatile AtomicInteger unnamed = new AtomicInteger(0);
-    private Map<String, UIWidget> widgets = new HashMap<>();
     private List<String> validationMessages = new ArrayList<>();
 
     @Override
@@ -62,7 +61,7 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
 
     @Override
     public void addButton(UIButton<T> button) {
-        add(button);
+//        add(button);
     }
 
     @Override
@@ -75,28 +74,28 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
         // TODO
     }
 
-    @Override
-    public UIWidget<T> add(String title, final UIComponent<T> component) {
-        AtomicBoolean disabled = new AtomicBoolean();
-
-        final UIWidget widget = mock(UIWidget.class);
-
-        when(widget.getComponent()).thenReturn(component);
-        doAnswer(invocation -> {
-            Boolean disabledValue = (Boolean) invocation.getArguments()[0];
-            disabled.set(disabledValue);
-            return null;
-        }).when(widget).setDisable(anyBoolean());
-        when(widget.isEnabled()).thenAnswer(invocation -> !disabled.get());
-
-        widgets.put(title, widget);
-        return widget;
-    }
-
-    @Override
-    public UIWidget<T> add(UIComponent<T> component) {
-        return add(Integer.toString(unnamed.addAndGet(1)), component);
-    }
+//    @Override
+//    public UIWidget<T> add(String title, final UIComponent<T> component) {
+//        AtomicBoolean disabled = new AtomicBoolean();
+//
+//        final UIWidget widget = mock(UIWidget.class);
+//
+//        when(widget.getUIComponent()).thenReturn(component);
+//        doAnswer(invocation -> {
+//            Boolean disabledValue = (Boolean) invocation.getArguments()[0];
+//            disabled.set(disabledValue);
+//            return null;
+//        }).when(widget).setDisable(anyBoolean());
+//        when(widget.isEnabled()).thenAnswer(invocation -> !disabled.get());
+//
+//        widgets.put(title, widget);
+//        return widget;
+//    }
+//
+//    @Override
+//    public UIWidget<T> add(UIComponent<T> component) {
+//        return add(Integer.toString(unnamed.addAndGet(1)), component);
+//    }
 
     @Override
     public void add(UIContainer<T> container) {
@@ -108,7 +107,11 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
         return null;
     }
 
-//    public boolean isValid() {
+    @Override
+    public void add(UIWidget<T> widget) {
+    }
+
+    //    public boolean isValid() {
 //        if (!started) {
 //            throw new IllegalStateException();
 //        }
@@ -132,10 +135,10 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
             }
         }
     }
-
-    public UIWidget getWidget(String title) {
-        return widgets.get(title);
-    }
+//
+//    public UIWidget getWidget(String title) {
+//        return widgets.get(title);
+//    }
 
     // TODO I don't like it here, it must know nothing about validation
     public List<String> getValidationMessages() {

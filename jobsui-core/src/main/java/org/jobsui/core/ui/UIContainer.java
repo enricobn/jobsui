@@ -5,9 +5,7 @@ package org.jobsui.core.ui;
  */
 public interface UIContainer<C> {
 
-    UIWidget<C> add(String title, UIComponent<C> component);
-
-    UIWidget<C> add(UIComponent<C> component);
+    void add(UIWidget<C> widget);
 
     void add(UIContainer<C> container);
 

@@ -13,10 +13,12 @@ import java.util.function.Consumer;
  * Created by enrico on 2/14/16.
  */
 public class SwingUIWindow implements UIWindow<JComponent> {
+    private final SwingUI ui;
     private final JFrame frame;
     private final SwingUIContainer container;
 
-    public SwingUIWindow(String title) {
+    public SwingUIWindow(SwingUI ui, String title) {
+        this.ui = ui;
         frame = new JFrame(title);
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
@@ -48,13 +50,14 @@ public class SwingUIWindow implements UIWindow<JComponent> {
 
     @Override
     public void showValidationMessage(String message) {
-        new SwingUI().showMessage(message);
+        ui.showMessage(message);
     }
 
     @Override
     public void addButton(UIButton<JComponent> button) {
         // TODO
-        add(button);
+        UIWidget<JComponent> widget = ui.createWidget(null, button);
+        container.add(widget);
     }
 
     @Override
@@ -68,16 +71,6 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     }
 
     @Override
-    public UIWidget<JComponent> add(String title, UIComponent<JComponent> component) {
-        return container.add(title, component);
-    }
-
-    @Override
-    public UIWidget<JComponent> add(UIComponent<JComponent> component) {
-        return container.add(component);
-    }
-
-    @Override
     public void add(UIContainer<JComponent> container) {
         this.container.add(container);
     }
@@ -85,5 +78,10 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     @Override
     public JComponent getComponent() {
         return container.getComponent();
+    }
+
+    @Override
+    public void add(UIWidget<JComponent> widget) {
+        container.add(widget);
     }
 }

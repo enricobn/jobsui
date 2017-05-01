@@ -13,10 +13,13 @@ import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockSettings;
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.listeners.InvocationListener;
+import org.mockito.stubbing.Answer;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -37,6 +40,7 @@ public class JobRunnerTest {
     private FakeUIWindow window;
     private FakeUIButton runButton;
     private FakeUIButton bookmarkButton;
+    private Map<String, UIWidget> widgets;
 
     private static class CachedJob {
         private final Supplier<Tuple2<Project,Job<String>>> supplier;
@@ -87,6 +91,7 @@ public class JobRunnerTest {
 
     @Before
     public void init() throws Exception {
+        widgets = new HashMap<>();
         ui = mock(UI.class);
         runner = new JobUIRunner<>(ui);
         window = new FakeUIWindow();
@@ -101,6 +106,28 @@ public class JobRunnerTest {
             exception.printStackTrace();
             return null;
         }).when(ui).showError(anyString(), any(Throwable.class));
+
+        when(ui.createWidget(anyString(), any(UIComponent.class))).thenAnswer(new Answer<UIWidget>() {
+            @Override
+            public UIWidget answer(InvocationOnMock invocation) throws Throwable {
+                String title = invocation.getArgumentAt(0, String.class);
+                UIComponent component = invocation.getArgumentAt(1, UIComponent.class);
+                AtomicBoolean disabled = new AtomicBoolean();
+
+                final UIWidget widget = mock(UIWidget.class);
+
+                when(widget.getComponent()).thenReturn(component);
+                doAnswer(invocation1 -> {
+                    Boolean disabledValue = (Boolean) invocation1.getArguments()[0];
+                    disabled.set(disabledValue);
+                    return null;
+                }).when(widget).setDisable(anyBoolean());
+                when(widget.isEnabled()).thenAnswer(invocation2 -> !disabled.get());
+
+                widgets.put(title, widget);
+                return widget;
+            }
+        });
     }
 
     @After
@@ -254,7 +281,7 @@ public class JobRunnerTest {
 
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
 
-        verify(window.getWidget("Name"), times(2)).setValidationMessages(captor.capture());
+        verify(widgets.get("Name"), times(2)).setValidationMessages(captor.capture());
 
         final List<String> messages1 = captor.getAllValues().get(0);
         // the first time is true since, in the script, there's a set to a default value
@@ -538,7 +565,7 @@ public class JobRunnerTest {
 
         jobRunnerWrapper.run(createSingleJobProject(job), job);
 
-        assertThat(window.getWidget("inv").isEnabled(), is(false));
+        assertThat(widgets.get("inv").isEnabled(), is(false));
     }
 
     @Test public void assert_that_when_dependencies_are_changed_then_component_is_enabled_or_disabled_on_dependencies_valid_status() throws Exception {
@@ -557,7 +584,7 @@ public class JobRunnerTest {
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
-                    UIWidget inv = window.getWidget("inv");
+                    UIWidget inv = widgets.get("inv");
 
                     assertThat(inv.isEnabled(), is(false));
                     nameComponent.setValue("Hello");

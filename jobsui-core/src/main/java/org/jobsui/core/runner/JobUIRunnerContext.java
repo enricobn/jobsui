@@ -330,7 +330,7 @@ public class JobUIRunnerContext<T extends Serializable, C> {
                     + jobParameter.getKey() + "\"");
         }
 
-        final UIWidget<C> widget = window.add(jobParameter.getName(), component);
+        final UIWidget<C> widget = ui.createWidget(jobParameter.getName(), component);
         if (widget == null) {
             throw new IllegalStateException("Cannot create widget for parameter with key \""
                     + jobParameter.getKey() + "\"");
