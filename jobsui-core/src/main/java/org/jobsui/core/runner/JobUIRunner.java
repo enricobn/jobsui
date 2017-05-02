@@ -104,7 +104,6 @@ public class JobUIRunner<C> implements JobRunner {
                 saveBookmarkButton = ui.create(UIButton.class);
 //                closeButton = ui.create(UIButton.class);
             } catch (UnsupportedComponentException e) {
-                // TODO
                 throw new RuntimeException(e);
             }
 

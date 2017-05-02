@@ -150,29 +150,7 @@ public class EditProject {
         root.getChildren().add(status);
 
         return root;
-//        Scene scene = new Scene(root, 800, 600);
-//
-//        stage.setScene(scene);
-//        stage.show();
-//        this.stage = stage;
     }
-
-//    private static void showError(String title, Throwable e) {
-//        // TODO
-//        e.printStackTrace();
-//        Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage());
-//        alert.setTitle(title);
-//        alert.setWidth(400);
-//        alert.setResizable(true);
-//        alert.showAndWait();
-//    }
-//
-//    private static void showError(String message) {
-//        Alert alert = new Alert(Alert.AlertType.ERROR, message);
-//        alert.setWidth(400);
-//        alert.setResizable(true);
-//        alert.showAndWait();
-//    }
 
     private TreeItem<EditItem> loadProject(ProjectFSXML projectXML) {
         TreeItem<EditItem> root = new TreeItem<>(new EditItem(ItemType.Project, projectXML::getName, projectXML));
