@@ -9,6 +9,7 @@ import org.jobsui.core.utils.Tuple2;
 import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.xml.ProjectXML;
+import org.jobsui.core.xml.WizardStep;
 import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockSettings;
@@ -740,6 +741,11 @@ public class JobRunnerTest {
             public List<String> validate(Map<String, Serializable> values) {
                 return Collections.emptyList();
             }
+
+            @Override
+            public List<WizardStep> getWizardSteps() {
+                return Collections.emptyList();
+            }
         };
 
     }
@@ -859,6 +865,11 @@ public class JobRunnerTest {
 
             @Override
             public List<String> validate(Map<String, Serializable> values) {
+                return Collections.emptyList();
+            }
+
+            @Override
+            public List<WizardStep> getWizardSteps() {
                 return Collections.emptyList();
             }
         };

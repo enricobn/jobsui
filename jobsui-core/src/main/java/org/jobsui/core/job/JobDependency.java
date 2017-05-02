@@ -46,7 +46,7 @@ public interface JobDependency {
         return sorted;
     }
 
-    static <T extends JobDependency> List<T> sort(List<T> jobDependencies) throws Exception {
+    static <T extends JobDependency> List<T> sort(Collection<T> jobDependencies) throws Exception {
         List<String> sortedDependencies = getSortedDependenciesKeys(jobDependencies);
 
         return jobDependencies.stream().sorted((o1, o2) -> {
@@ -61,5 +61,12 @@ public interface JobDependency {
     String getName();
 
     List<String> getDependencies();
+
+    default List<String> getSortedDependencies(JobDependencyProvider provider) throws Exception {
+        return JobDependency.getSortedDependenciesKeys(
+                getDependencies().stream()
+                        .map(provider::getJobDependency)
+                        .collect(Collectors.toList()));
+    }
 
 }

@@ -84,6 +84,11 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     }
 
     @Override
+    public void clear() {
+        container.clear();
+    }
+
+    @Override
     public void add(UIWidget<JComponent> widget) {
         container.add(widget);
     }

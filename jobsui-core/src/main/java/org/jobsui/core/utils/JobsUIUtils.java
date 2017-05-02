@@ -2,6 +2,7 @@ package org.jobsui.core.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -33,10 +34,7 @@ public interface JobsUIUtils {
     }
 
     static String spaces(int count) {
-        if (count <= 0) {
-            return "";
-        }
-        return new String(new char[count]).replace("\0", " ");
+        return repl(" ", count);
     }
 
     static File createTempDir(String prefix, String suffix) throws IOException {
@@ -46,5 +44,9 @@ public interface JobsUIUtils {
 
         assert(folder.mkdir());
         return folder;
+    }
+
+    static String repl(String s, int times) {
+        return String.join("", Collections.nCopies(times, s));
     }
 }

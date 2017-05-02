@@ -155,7 +155,9 @@ class JavaFXUIChoice implements UIChoice<Node> {
             combo.getSelectionModel().select(value);
         }
 
-        if (!combo.isVisible()) {
+        // if getScene() == null (the component has not been added to ui, for example in wizard)
+        // then the change is not automatically notified
+        if (!combo.isVisible() || combo.getScene() == null) {
             notifySubscribers();
         }
     }

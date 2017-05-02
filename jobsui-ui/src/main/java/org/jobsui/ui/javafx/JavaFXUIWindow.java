@@ -142,6 +142,11 @@ class JavaFXUIWindow implements UIWindow<Node> {
         bookmarkListView.getItems().addAll(ui.getPreferences().getBookmarks(project, job));
     }
 
+    @Override
+    public void clear() {
+        componentsPanel.getChildren().clear();
+    }
+
     private class CellFactory implements Callback<ListView<Bookmark>, ListCell<Bookmark>> {
         private final Project project;
         private final Job job;

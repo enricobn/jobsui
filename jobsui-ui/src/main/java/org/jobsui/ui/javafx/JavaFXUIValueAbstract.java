@@ -80,6 +80,12 @@ public class JavaFXUIValueAbstract implements UIValue<Node> {
             }
             component.setText(text);
         }
+
+        // if getScene() == null (the component has not been added to ui, for example in wizard)
+        // then the change is not automatically notified
+        if (!component.isVisible() || component.getScene() == null) {
+            notifySubscribers();
+        }
     }
 
     @Override

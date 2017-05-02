@@ -122,7 +122,7 @@ public class ProjectGroovyBuilder {
         List<JobParameterGroovy> sortedJobParameterDefs = JobDependency.sort(jobParameters);
 
         return new JobGroovy<>(groovyShell, jobXML.getId(), jobXML.getName(), sortedJobParameterDefs, jobExpressions,
-                jobXML.getRunScript(), jobXML.getValidateScript());
+                jobXML.getRunScript(), jobXML.getValidateScript(), jobXML.getWizardSteps());
     }
 
     private static <T,R> Object toGroovyFunction(Function<T,R> function) {

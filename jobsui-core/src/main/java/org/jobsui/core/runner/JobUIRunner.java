@@ -6,10 +6,12 @@ import org.jobsui.core.job.*;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
+import rx.functions.Action1;
 
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 4/29/16.
@@ -46,12 +48,53 @@ public class JobUIRunner<C> implements JobRunner {
 //                return;
             }
 
-            for (JobParameter jobParameter : job.getParameterDefs()) {
-                UIWidget<C> widget = context.getWidget(jobParameter);
-                window.add(widget);
+            if (!job.getWizardSteps().isEmpty()) {
+                WizardState wizardState = new WizardState(job);
+
+                UIButton<C> nextButton;
+                UIButton<C> previousButton;
+//            UIButton<C> closeButton;
+                try {
+                    nextButton = ui.create(UIButton.class);
+                    previousButton = ui.create(UIButton.class);
+//                closeButton = ui.create(UIButton.class);
+                } catch (UnsupportedComponentException e) {
+                    throw new RuntimeException(e);
+                }
+
+                nextButton.setTitle("Next");
+                previousButton.setTitle("Back");
+                previousButton.setEnabled(false);
+
+                nextButton.getObservable().subscribe(serializable -> {
+                    wizardState.next(context, window);
+                    nextButton.setEnabled(wizardState.hasNext());
+                    previousButton.setEnabled(wizardState.hasPrevious());
+                });
+
+                previousButton.getObservable().subscribe(serializable -> {
+                    wizardState.previous(context, window);
+                    nextButton.setEnabled(wizardState.hasNext());
+                    previousButton.setEnabled(wizardState.hasPrevious());
+                });
+
+                window.addButton(previousButton);
+                window.addButton(nextButton);
+
+                wizardState.updateWindow(context, window);
+
+            } else {
+                for (JobParameter jobParameter : job.getParameterDefs()) {
+                    UIWidget<C> widget = context.getWidget(jobParameter);
+                    window.add(widget);
+                }
             }
 
-            observeDependencies(ui, context);
+            try {
+                observeDependencies(ui, context);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
 
             UIButton<C> runButton;
             UIButton<C> saveBookmarkButton;
@@ -145,7 +188,11 @@ public class JobUIRunner<C> implements JobRunner {
                             List<String> validate = jobParameter.validate(bookmark.getValues(), value);
 
                             if (validate.isEmpty()) {
-                                context.getWidget(jobParameter).getComponent().setValue(value);
+                                try {
+                                    context.getWidget(jobParameter).getComponent().setValue(value);
+                                } catch (Exception e) {
+                                    throw new RuntimeException("Error setting value for parameter with key '" + jobDependency.getKey() + "'.", e);
+                                }
                             } else {
                                 ui.showMessage(String.format("Value '%s' for parameter '%s' is not valid:\n%s",
                                         value, jobParameter.getName(), String.join(",", validate)));
@@ -206,7 +253,7 @@ public class JobUIRunner<C> implements JobRunner {
         }
     }
 
-    private static <T extends Serializable, C> void observeDependencies(UI<C> ui, JobUIRunnerContext<T, C> context) {
+    private static <T extends Serializable, C> void observeDependencies(UI<C> ui, JobUIRunnerContext<T, C> context) throws Exception {
         Map<String, Serializable> validValues = new HashMap<>();
 
         context.valueChangeObserver().subscribe(changedValue -> {
@@ -215,7 +262,7 @@ public class JobUIRunner<C> implements JobRunner {
         });
 
         for (final JobDependency jobDependency : context.getSortedJobDependencies()) {
-            final List<String> dependencies = jobDependency.getDependencies();
+            final List<String> dependencies = jobDependency.getSortedDependencies(context);
             if (!dependencies.isEmpty()) {
                 List<Observable<Serializable>> observables = context.getDependenciesObservables(dependencies).getList();
 

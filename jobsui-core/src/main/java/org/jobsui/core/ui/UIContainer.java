@@ -11,4 +11,5 @@ public interface UIContainer<C> {
 
     C getComponent();
 
+    void clear();
 }

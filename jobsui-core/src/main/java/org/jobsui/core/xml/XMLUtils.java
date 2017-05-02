@@ -118,7 +118,12 @@ public interface XMLUtils {
                     start = false;
                 } else {
                     int leadingSpaces = JobsUIUtils.leadingSpaces(line);
-                    newLines.add(JobsUIUtils.spaces(leadingSpaces - spaces) + trimmed);
+                    int count = leadingSpaces - spaces;
+                    if (count > 0) {
+                        newLines.add(JobsUIUtils.spaces(count) + trimmed);
+                    } else {
+                        newLines.add(trimmed);
+                    }
                 }
             }
         } catch (IOException e) {

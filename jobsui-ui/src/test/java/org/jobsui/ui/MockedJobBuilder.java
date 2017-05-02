@@ -1,9 +1,6 @@
 package org.jobsui.ui;
 
-import org.jobsui.core.job.Job;
-import org.jobsui.core.job.JobDependency;
-import org.jobsui.core.job.JobExpression;
-import org.jobsui.core.job.JobParameter;
+import org.jobsui.core.job.*;
 import org.jobsui.core.runner.JobResultImpl;
 import org.jobsui.core.runner.JobValues;
 import org.jobsui.core.ui.*;
@@ -74,7 +71,14 @@ public class MockedJobBuilder<T> {
             return null;
         }).when(jobExpression).notifySubscribers(any(Serializable.class));
 
-        when(jobExpression.getDependencies()).thenReturn(Arrays.asList(dependencies));
+        List<String> dependenciesList = Arrays.asList(dependencies);
+        when(jobExpression.getDependencies()).thenReturn(dependenciesList);
+        try {
+            when(jobExpression.getSortedDependencies(any(JobDependencyProvider.class)))
+                    .thenReturn(dependenciesList);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
         expressions.put(key, jobExpression);
     }
@@ -161,7 +165,14 @@ public class MockedJobBuilder<T> {
         }
 
         public MockedParameter<COMP> dependsOn(String... dependencies) {
-            when(jobParameter.getDependencies()).thenReturn(Arrays.asList(dependencies));
+            List<String> dependenciesList = Arrays.asList(dependencies);
+            when(jobParameter.getDependencies()).thenReturn(dependenciesList);
+            try {
+                when(jobParameter.getSortedDependencies(any(JobDependencyProvider.class)))
+                        .thenReturn(dependenciesList);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
             return this;
         }
 

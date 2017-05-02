@@ -57,6 +57,11 @@ public class JavaFXUICheckBox implements UICheckBox<Node> {
     @Override
     public void setValue(Serializable value) {
         component.setSelected((Boolean) value);
+
+        // if getScene() == null then the change is not automatically notified
+        if (!component.isVisible() || component.getScene() == null) {
+            notifySubscribers();
+        }
     }
 
     @Override

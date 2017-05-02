@@ -2,6 +2,7 @@ package org.jobsui.core.job;
 
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobValues;
+import org.jobsui.core.xml.WizardStep;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * Created by enrico on 4/29/16.
  */
-public interface Job<T> {
+public interface Job<T> extends JobDependencyProvider {
 
     String getId();
 
@@ -38,6 +39,8 @@ public interface Job<T> {
     JobParameter getParameter(String key);
 
     JobExpression getExpression(String key);
+
+    List<WizardStep> getWizardSteps();
 
     default ClassLoader getClassLoader() {
         return null;
@@ -69,5 +72,4 @@ public interface Job<T> {
             return jobDependency;
         }
     }
-
 }

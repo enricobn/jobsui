@@ -48,6 +48,11 @@ public class SwingUIContainer implements UIContainer<JComponent> {
         return component;
     }
 
+    @Override
+    public void clear() {
+        component.removeAll();
+    }
+
     void addFiller() {
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.fill = GridBagConstraints.BOTH;

@@ -105,6 +105,11 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
     }
 
     @Override
+    public void clear() {
+
+    }
+
+    @Override
     public void add(UIWidget<T> widget) {
     }
 

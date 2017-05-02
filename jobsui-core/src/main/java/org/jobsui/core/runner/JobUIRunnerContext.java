@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Created by enrico on 3/11/17.
  */
-public class JobUIRunnerContext<T extends Serializable, C> {
+public class JobUIRunnerContext<T extends Serializable, C> implements JobDependencyProvider {
     private static final Logger LOGGER = Logger.getLogger(JobUIRunnerContext.class.getName());
     private final UI<C> ui;
     private final Job<T> job;
@@ -292,6 +292,10 @@ public class JobUIRunnerContext<T extends Serializable, C> {
             }
         }
         return result;
+    }
+
+    public JobDependency getJobDependency(String key) {
+        return job.getJobDependency(key);
     }
 
     public interface DependenciesObservables {

@@ -8,6 +8,7 @@ import org.jobsui.core.job.JobExpression;
 import org.jobsui.core.job.JobParameter;
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobResultImpl;
+import org.jobsui.core.xml.WizardStep;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class JobGroovy<T> extends JobAbstract<T> {
     private final String key;
     private final String name;
     private final List<JobParameterGroovy> parameterDefsGroovy;
+    private final List<WizardStep> wizardSteps;
     private final List<JobExpression> expressions;
     private final List<JobParameter> parameterDefs;
     private final Script run;
@@ -30,11 +32,12 @@ public class JobGroovy<T> extends JobAbstract<T> {
     private final GroovyShell shell;
 
     public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterGroovy> parameterDefsGroovy,
-                     List<JobExpressionGroovy> expressions, String runScript, String validateScript) {
+                     List<JobExpressionGroovy> expressions, String runScript, String validateScript, List<WizardStep> wizardSteps) {
         this.shell = shell;
         this.key = key;
         this.name = name;
         this.parameterDefsGroovy = parameterDefsGroovy;
+        this.wizardSteps = wizardSteps;
         this.expressions = new ArrayList<>();
         this.expressions.addAll(expressions);
         this.parameterDefs = new ArrayList<>();
@@ -105,5 +108,10 @@ public class JobGroovy<T> extends JobAbstract<T> {
     @Override
     public ClassLoader getClassLoader() {
         return shell.getClassLoader();
+    }
+
+    @Override
+    public List<WizardStep> getWizardSteps() {
+        return wizardSteps;
     }
 }
