@@ -6,12 +6,10 @@ import org.jobsui.core.job.*;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
-import rx.functions.Action1;
 
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 4/29/16.

@@ -1,6 +1,9 @@
 package org.jobsui.core.job;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.jobsui.core.utils.JobsUIUtils.repl;
 
