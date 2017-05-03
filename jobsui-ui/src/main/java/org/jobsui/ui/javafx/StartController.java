@@ -58,6 +58,19 @@ public class StartController implements Initializable {
         // TODO
     }
 
+    public void onEdit(ActionEvent actionEvent) {
+        DirectoryChooser chooser = new DirectoryChooser();
+        File file = chooser.showDialog(StartApp.getInstance().getStage());
+        if (file != null) {
+            try {
+                URL url = file.toURI().toURL();
+                editProject(url);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     private class CellFactory implements Callback<ListView<OpenedItem>, ListCell<OpenedItem>> {
         @Override
         public ListCell<OpenedItem> call(ListView<OpenedItem> lv) {
@@ -112,8 +125,7 @@ public class StartController implements Initializable {
                         throw new RuntimeException(e1);
                     }
 
-                    Task<ProjectFSXML> task = new LoadProjectXMLTask(new File(url.getPath()));
-                    ProgressDialog.run(task, "Opening project", project -> StartApp.getInstance().gotoEdit(project));
+                    editProject(url);
                 }
             });
             menu.getItems().add(editMenuItem);
@@ -122,6 +134,17 @@ public class StartController implements Initializable {
 
             return cell;
         }
+    }
+
+    private void editProject(URL url) {
+        Task<ProjectFSXML> task = new LoadProjectXMLTask(new File(url.getPath()));
+        ProgressDialog.run(task, "Opening project", project -> {
+            StartApp.getInstance().gotoEdit(project);
+            preferences.registerOpenedProject(url, project.getName());
+            projects.getItems().clear();
+            projects.getItems().addAll(preferences.getLastOpenedItems());
+        });
+
     }
 
     private SimpleProjectXML openProject(URL url) throws Exception {
@@ -158,11 +181,12 @@ public class StartController implements Initializable {
 
     private void openJob(URL url, String jobId, SimpleProjectXML simpleProjectXML) {
         Task<Tuple2<Project,Job<Serializable>>> task = new LoadJobTask(url, jobId);
-        ProgressDialog.run(task, "Opening job", tuple ->
-                StartApp.getInstance().gotoRun(tuple.first, tuple.second));
-        preferences.registerOpenedProject(url, simpleProjectXML.getName());
-        projects.getItems().clear();
-        projects.getItems().addAll(preferences.getLastOpenedItems());
+        ProgressDialog.run(task, "Opening job", tuple -> {
+                StartApp.getInstance().gotoRun(tuple.first, tuple.second);
+            preferences.registerOpenedProject(url, simpleProjectXML.getName());
+            projects.getItems().clear();
+            projects.getItems().addAll(preferences.getLastOpenedItems());
+        });
     }
 
     private static class JobWrapper {

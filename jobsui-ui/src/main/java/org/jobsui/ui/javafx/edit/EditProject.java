@@ -179,13 +179,6 @@ public class EditProject {
         return root;
     }
 
-    private TreeItem<EditItem> loadProject(File file) {
-        //TODO
-        return null;
-//        ProjectParser parser = ProjectParser.getParser(file.getAbsolutePath());
-//        return loadProject(parser.parse());
-    }
-
     private TreeItem<EditItem> createJobTreeItem(JobXML job) {
         TreeItem<EditItem> result = new TreeItem<>(new EditItem(ItemType.Job, job::getName, job));
 
