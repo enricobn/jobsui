@@ -7,7 +7,7 @@ import java.util.Set;
  */
 public interface Project {
 
-    String getId();
+    ProjectId getId();
 
     <T> Job<T> getJob(String key);
 

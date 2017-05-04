@@ -1,8 +1,6 @@
 package org.jobsui.core.bookmark;
 
-import org.jobsui.core.job.Job;
-import org.jobsui.core.job.JobParameter;
-import org.jobsui.core.job.Project;
+import org.jobsui.core.job.*;
 import org.jobsui.core.runner.JobValues;
 
 import java.io.Serializable;
@@ -13,14 +11,14 @@ import java.util.Map;
  * Created by enrico on 3/6/17.
  */
 public class Bookmark {
-    private final String projectId;
-    private final String jobId;
+    private final CompatibleProjectId projectId;
+    private final CompatibleJobId jobId;
     private final String name;
     private final Map<String, Serializable> values = new HashMap<>();
 
     public Bookmark(Project project, Job<?> job, String name, JobValues values) {
-        this.projectId = project.getId();
-        this.jobId = job.getId();
+        this.projectId = project.getId().toCompatibleProjectId();
+        this.jobId = job.getCompatibleJobId();
         this.name = name;
         for (JobParameter parameterDef : job.getParameterDefs()) {
             if (!parameterDef.isCalculated()) {
@@ -37,11 +35,11 @@ public class Bookmark {
         return values;
     }
 
-    public String getProjectId() {
+    public CompatibleProjectId getProjectId() {
         return projectId;
     }
 
-    public String getJobId() {
+    public CompatibleJobId getJobId() {
         return jobId;
     }
 

@@ -167,7 +167,7 @@ public class JobsUIPreferencesImplTest {
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
-        Project project = createProject("projectId");
+        Project project = createProject("test:projectId");
         Job<?> job = createJob("jobId");
 
         assertThat(sut.getBookmarks(project, job).isEmpty(), is(true));
@@ -179,7 +179,7 @@ public class JobsUIPreferencesImplTest {
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
-        Project project = createProject("projectId");
+        Project project = createProject("test:projectId");
         Job<?> job = createJob("jobId");
 
         assertThat(sut.getBookmarks(project, job).isEmpty(), is(true));
@@ -191,7 +191,7 @@ public class JobsUIPreferencesImplTest {
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
-        Project project = createProject("projectId");
+        Project project = createProject("test:projectId");
         Job<?> job = createJob("jobId");
 
         sut.getBookmarks(project, job);

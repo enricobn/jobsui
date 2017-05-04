@@ -3,6 +3,7 @@ package org.jobsui.core.bookmark;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobParameter;
 import org.jobsui.core.job.Project;
+import org.jobsui.core.job.ProjectId;
 import org.jobsui.core.runner.JobValues;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -36,6 +37,8 @@ public class BookmarkTest {
 
         List<JobParameter> parameterDefs = Arrays.asList(calculated, notCalculated);
         when(job.getParameterDefs()).thenReturn(parameterDefs);
+
+        when(project.getId()).thenReturn(ProjectId.of("test:bookmark", "1.0.0"));
 
         new Bookmark(project, job, "Bookmark", values);
 

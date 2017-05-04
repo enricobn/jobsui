@@ -1,5 +1,6 @@
 package org.jobsui.core.groovy;
 
+import com.github.zafarkhaja.semver.Version;
 import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
@@ -7,6 +8,7 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.Project;
+import org.jobsui.core.job.ProjectId;
 import org.jobsui.core.xml.*;
 
 import java.io.File;
@@ -60,7 +62,8 @@ public class ProjectGroovyBuilder {
             }
         });
 
-        ProjectGroovy projectGroovy = new ProjectGroovy(projectXML.getId(), projectXML.getName(), jobs, projects);
+        ProjectGroovy projectGroovy = new ProjectGroovy(ProjectId.of(projectXML.getId(), projectXML.getVersion()),
+                projectXML.getName(), jobs, projects);
 
         for (JobGroovy<?> job : jobs.values()) {
             job.init(projectGroovy);
@@ -121,7 +124,7 @@ public class ProjectGroovyBuilder {
 
         List<JobParameterGroovy> sortedJobParameterDefs = JobDependency.sort(jobParameters);
 
-        return new JobGroovy<>(groovyShell, jobXML.getId(), jobXML.getName(), sortedJobParameterDefs, jobExpressions,
+        return new JobGroovy<>(groovyShell, jobXML.getId(), Version.valueOf(jobXML.getVersion()), jobXML.getName(), sortedJobParameterDefs, jobExpressions,
                 jobXML.getRunScript(), jobXML.getValidateScript(), jobXML.getWizardSteps());
     }
 

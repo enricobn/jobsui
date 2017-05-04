@@ -1,4 +1,4 @@
 <?xml version="1.0"?>
-<Project id="external" name="External" version="external">
+<Project id="test:external" name="External" version="1.0.0">
     <Job>concat.xml</Job>
 </Project>

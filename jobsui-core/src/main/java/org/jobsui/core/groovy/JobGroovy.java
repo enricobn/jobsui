@@ -1,5 +1,6 @@
 package org.jobsui.core.groovy;
 
+import com.github.zafarkhaja.semver.Version;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
@@ -20,7 +21,8 @@ import java.util.Map;
  * Created by enrico on 5/4/16.
  */
 public class JobGroovy<T> extends JobAbstract<T> {
-    private final String key;
+    private final String id;
+    private final Version version;
     private final String name;
     private final List<JobParameterGroovy> parameterDefsGroovy;
     private final List<WizardStep> wizardSteps;
@@ -31,10 +33,11 @@ public class JobGroovy<T> extends JobAbstract<T> {
     private final Binding shellBinding;
     private final GroovyShell shell;
 
-    public JobGroovy(GroovyShell shell, String key, String name, List<JobParameterGroovy> parameterDefsGroovy,
+    public JobGroovy(GroovyShell shell, String id, Version version, String name, List<JobParameterGroovy> parameterDefsGroovy,
                      List<JobExpressionGroovy> expressions, String runScript, String validateScript, List<WizardStep> wizardSteps) {
         this.shell = shell;
-        this.key = key;
+        this.id = id;
+        this.version = version;
         this.name = name;
         this.parameterDefsGroovy = parameterDefsGroovy;
         this.wizardSteps = wizardSteps;
@@ -96,7 +99,12 @@ public class JobGroovy<T> extends JobAbstract<T> {
     }
 
     public String getId() {
-        return key;
+        return id;
+    }
+
+    @Override
+    public Version getVersion() {
+        return version;
     }
 
     public void init(ProjectGroovy project) {

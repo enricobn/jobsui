@@ -1,5 +1,6 @@
 package org.jobsui.core.job;
 
+import com.github.zafarkhaja.semver.Version;
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobValues;
 import org.jobsui.core.xml.WizardStep;
@@ -17,6 +18,8 @@ import java.util.stream.Collectors;
 public interface Job<T> extends JobDependencyProvider {
 
     String getId();
+
+    Version getVersion();
 
     String getName();
 
@@ -71,5 +74,9 @@ public interface Job<T> extends JobDependencyProvider {
         } else {
             return jobDependency;
         }
+    }
+
+    default CompatibleJobId getCompatibleJobId() {
+        return new CompatibleJobId(getId(), getVersion().getMajorVersion());
     }
 }

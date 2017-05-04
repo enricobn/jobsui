@@ -1,12 +1,15 @@
 package org.jobsui.core.bookmark;
 
 import com.thoughtworks.xstream.XStream;
+import org.jobsui.core.job.CompatibleJobId;
+import org.jobsui.core.job.CompatibleProjectId;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,13 +25,15 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
     private final File root;
 
     public static BookmarksStoreFSImpl getUser() {
-        File userRootDir =
-                new File(System.getProperty("java.util.prefs.userRoot",
-                        System.getProperty("user.home")));
-        return new BookmarksStoreFSImpl(new File(userRootDir, ".jobsui"));
+        return new BookmarksStoreFSImpl(
+                Paths.get(
+                    System.getProperty("java.util.prefs.userRoot", System.getProperty("user.home")),
+            ".jobsui",
+                    "bookmarks"
+                ).toFile());
     }
 
-    public BookmarksStoreFSImpl(File root) {
+    BookmarksStoreFSImpl(File root) {
         this.root = root;
     }
 
@@ -84,7 +89,15 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
     }
 
     private File getJobRoot(Project project, Job job) {
-        return new File(new File(root, project.getId()), job.getId());
+        CompatibleProjectId projectId = project.getId().toCompatibleProjectId();
+        CompatibleJobId jobId = job.getCompatibleJobId();
+        return root.toPath()
+                .resolve(projectId.getGroupId())
+                .resolve(projectId.getModuleId())
+                .resolve(Integer.toString(projectId.getMajorVersion()))
+                .resolve(jobId.getId())
+                .resolve(Integer.toString(jobId.getMajorVersion()))
+                .toFile();
     }
 
     @Override

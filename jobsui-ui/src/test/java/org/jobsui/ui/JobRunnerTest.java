@@ -1,5 +1,6 @@
 package org.jobsui.ui;
 
+import com.github.zafarkhaja.semver.Version;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.*;
 import org.jobsui.core.runner.JobResult;
@@ -622,7 +623,11 @@ public class JobRunnerTest {
         String id = job.getId();
         when(project.getJobsIds()).thenReturn(Collections.singleton(id));
         when(project.getJob(id)).thenReturn(job);
-        when(project.getId()).thenReturn("singleJobProject");
+        try {
+            when(project.getId()).thenReturn(ProjectId.of("test:singleJobProject", "1.0.0"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         when(project.getName()).thenReturn("Single JobProject for job " + id);
         return project;
     }
@@ -700,6 +705,11 @@ public class JobRunnerTest {
             @Override
             public String getId() {
                 return "JobRunnerTest.simpleJob";
+            }
+
+            @Override
+            public Version getVersion() {
+                return Version.valueOf("1.0.0");
             }
 
             @Override
@@ -826,6 +836,11 @@ public class JobRunnerTest {
             @Override
             public String getId() {
                 return "JobRunnerTest.complexJob";
+            }
+
+            @Override
+            public Version getVersion() {
+                return Version.valueOf("1.0.0");
             }
 
             @Override

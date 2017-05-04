@@ -1,5 +1,6 @@
 package org.jobsui.core.bookmark;
 
+import org.jobsui.core.TestUtils;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.runner.JobValues;
@@ -12,7 +13,6 @@ import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.jobsui.core.TestUtils.createJob;
-import static org.jobsui.core.TestUtils.createProject;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 
@@ -30,14 +30,14 @@ public class BookmarksStoreFSImplTest {
 
     @Test
     public void assert_that_when_there_is_no_folder_for_project_then_bookmarks_is_empty() throws Exception {
-        Project project = createProject("projectId");
+        Project project = createProject();
         Job<?> job = createJob("jobId");
         assertThat(sut.getBookmarks(project, job).isEmpty(), is(true));
     }
 
     @Test
     public void assert_that_when_a_bookmark_is_saved_then_it_can_be_retrieved() throws Exception {
-        Project project = createProject("projectId");
+        Project project = createProject();
         Job<?> job = createJob("jobId");
 
         JobValues values = mock(JobValues.class);
@@ -46,14 +46,14 @@ public class BookmarksStoreFSImplTest {
 
         Bookmark savedBookmark = sut.getBookmarks(project, job).get(0);
 
-        assertThat(savedBookmark.getProjectId(), is(project.getId()));
-        assertThat(savedBookmark.getJobId(), is(job.getId()));
+        assertThat(savedBookmark.getProjectId(), is(project.getId().toCompatibleProjectId()));
+        assertThat(savedBookmark.getJobId(), is(job.getCompatibleJobId()));
         assertThat(savedBookmark.getName(), is(bookmark.getName()));
     }
 
     @Test
     public void assert_that_bookmarks_are_ordered_by_name() throws Exception {
-        Project project = createProject("projectId");
+        Project project = createProject();
         Job<?> job = createJob("jobId");
 
         JobValues values = mock(JobValues.class);
@@ -71,7 +71,7 @@ public class BookmarksStoreFSImplTest {
 
     @Test
     public void assert_that_when_you_save_a_bookmark_with_the_sam_name_then_the_old_bookmark_is_replaced_with_the_new() throws Exception {
-        Project project = createProject("projectId");
+        Project project = createProject();
         Job<?> job = createJob("jobId");
 
         JobValues values = mock(JobValues.class);
@@ -87,14 +87,14 @@ public class BookmarksStoreFSImplTest {
 
         Bookmark savedBookmark = bookmarks.get(0);
 
-        assertThat(savedBookmark.getProjectId(), is(project.getId()));
-        assertThat(savedBookmark.getJobId(), is(job.getId()));
+        assertThat(savedBookmark.getProjectId(), is(project.getId().toCompatibleProjectId()));
+        assertThat(savedBookmark.getJobId(), is(job.getCompatibleJobId()));
         assertThat(savedBookmark.getName(), is(bookmark.getName()));
     }
 
     @Test
     public void assert_that_when_no_bookmarks_are_registered_for_a_job_then_existsBookmark_retuns_false() throws Exception {
-        Project project = createProject("projectId");
+        Project project = createProject();
         Job<?> job = createJob("jobId");
 
         assertThat(sut.existsBookmark(project, job, "test"), is(false));
@@ -102,7 +102,7 @@ public class BookmarksStoreFSImplTest {
 
     @Test
     public void assert_that_when_you_save_a_bookmark_then_existsBookmark_returns_true() throws Exception {
-        Project project = createProject("projectId");
+        Project project = createProject();
         Job<?> job = createJob("jobId");
 
         JobValues values = mock(JobValues.class);
@@ -114,7 +114,7 @@ public class BookmarksStoreFSImplTest {
 
     @Test
     public void assert_that_when_no_bookmarks_are_registered_for_a_job_then_deleteBookmark_retuns_false() throws Exception {
-        Project project = createProject("projectId");
+        Project project = createProject();
         Job<?> job = createJob("jobId");
 
         assertThat(sut.deleteBookmark(project, job, "test"), is(false));
@@ -122,7 +122,7 @@ public class BookmarksStoreFSImplTest {
 
     @Test
     public void assert_that_when_you_save_a_bookmark_then_deleteBookmark_returns_true() throws Exception {
-        Project project = createProject("projectId");
+        Project project = createProject();
         Job<?> job = createJob("jobId");
 
         JobValues values = mock(JobValues.class);
@@ -133,5 +133,12 @@ public class BookmarksStoreFSImplTest {
         assertThat(sut.getBookmarks(project, job).isEmpty(), is(true));
     }
 
+    private static Project createProject() {
+        try {
+            return TestUtils.createProject("test:projectId");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 }
