@@ -4,8 +4,13 @@ import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.JobsUIPreferencesImpl;
 import org.jobsui.core.bookmark.BookmarksStoreFSImpl;
+import org.jobsui.core.repository.RepositoriesProvider;
+import org.jobsui.core.repository.RepositoriesProviderImpl;
+import org.jobsui.core.repository.RepositoryURLStreamHandler;
+import org.jobsui.core.repository.RepositoryURLStreamHandlerFactory;
 import org.jobsui.ui.javafx.JavaFXUI;
 
+import java.net.URL;
 import java.util.prefs.Preferences;
 
 /**
@@ -21,6 +26,9 @@ public class Main {
     }
 
     private static void run(JobsUIMainParameters parameters) {
+        // TODO add repositories
+        RepositoryURLStreamHandlerFactory.getInstance();
+
         JobsUIPreferences preferences =
                 JobsUIPreferencesImpl.get(Preferences.userNodeForPackage(Main.class), BookmarksStoreFSImpl.getUser());
         new JavaFXUI(preferences).start();

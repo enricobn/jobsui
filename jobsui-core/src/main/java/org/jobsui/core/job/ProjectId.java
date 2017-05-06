@@ -12,12 +12,16 @@ public class ProjectId {
     private final String moduleId;
     private final Version version;
 
-    public static ProjectId of(String id, String version) throws Exception {
+    public static ProjectId of(String id, Version version) throws Exception {
         String[] components = id.split(":");
         if (components.length != 2) {
             throw new Exception(String.format("Invalid number of components: %s.", components.length));
         }
-        return new ProjectId(components[0], components[1], Version.valueOf(version));
+        return new ProjectId(components[0], components[1], version);
+    }
+
+    public static ProjectId of(String id, String version) throws Exception {
+        return of(id, Version.valueOf(version));
     }
 
     public ProjectId(String groupId, String moduleId, Version version) {
