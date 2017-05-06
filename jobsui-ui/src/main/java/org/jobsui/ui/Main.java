@@ -33,7 +33,7 @@ public class Main {
 
         JobsUIPreferences preferences =
                 JobsUIPreferencesImpl.get(Preferences.userNodeForPackage(Main.class), BookmarksStoreFSImpl.getUser());
-        new JavaFXUI(preferences).start();
+        new JavaFXUI(preferences).start(parameters);
     }
 
 }

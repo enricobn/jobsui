@@ -1,9 +1,17 @@
 package org.jobsui.core;
 
 import org.apache.commons.cli.*;
+import org.jobsui.core.groovy.ProjectGroovy;
+import org.jobsui.core.groovy.ProjectGroovyBuilder;
+import org.jobsui.core.job.Job;
+import org.jobsui.core.job.Project;
+import org.jobsui.core.xml.ProjectFSXML;
+import org.jobsui.core.xml.ProjectParserImpl;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,23 +23,37 @@ import java.util.function.Consumer;
  */
 public class JobsUIMainParameters {
     private final UIType uiType;
+    private StartAction action = StartAction.None;
+    private Project project;
+
+    private Job job;
+    private ProjectFSXML projectFSXML;
+    private URL projectURL;
 
     private JobsUIMainParameters(UIType uiType) {
         this.uiType = uiType;
     }
 
-    public enum UIType {
-        Swing,
-        JavFX
+    public void setAction(StartAction action) {
+        this.action = action;
+    }
+
+    public StartAction getAction() {
+        return action;
     }
 
     public static boolean parse(String[] args, Consumer<JobsUIMainParameters> onSuccess, Consumer<List<String>> onError) {
         List<String> validation = new ArrayList<>();
 
-//        Option run = Option.builder("run")
-//                .numberOfArgs(2)
-//                .argName("project> <job" )
-//                .build();
+        Option run = Option.builder("run")
+                .numberOfArgs(2)
+                .argName("project> <job")
+                .build();
+
+        Option edit = Option.builder("edit")
+                .hasArg()
+                .argName("project")
+                .build();
 
         Option ui = Option.builder("ui")
                 .hasArg()
@@ -39,7 +61,8 @@ public class JobsUIMainParameters {
                 .build();
 
         Options options = new Options();
-//        options.addOption(run);
+        options.addOption(run);
+        options.addOption(edit);
         options.addOption(ui);
         options.addOption("help", "");
 
@@ -54,6 +77,8 @@ public class JobsUIMainParameters {
                 onError.accept(Collections.singletonList(getHelp(options)));
                 return false;
             } else {
+                JobsUIMainParameters parameters;
+
                 UIType uiType = UIType.JavFX;
                 if (line.hasOption("ui")) {
                     String uiTypeString = line.getOptionValue("ui");
@@ -64,19 +89,47 @@ public class JobsUIMainParameters {
                         uiType = UIType.JavFX;
                     } else {
                         uiType = null;
-                        validation.add(String.format("Unknown ui type '%s'.",uiTypeString));
+                        validation.add(String.format("Unknown ui type '%s'.", uiTypeString));
                     }
                 }
 
-                if (line.hasOption("run")) {
-                    String[] values = line.getOptionValues("run");
+                parameters = new JobsUIMainParameters(uiType);
+
+                if (line.hasOption(run.getOpt())) {
+                    String[] values = line.getOptionValues(run.getOpt());
                     String projectString = values[0];
                     String jobString = values[1];
-                    System.out.println(String.format("Project %s Job %s.", projectString, jobString));
+                    try {
+                        File folder = new File(projectString);
+                        ProjectFSXML projectFSXML = new ProjectParserImpl().parse(folder);
+                        ProjectGroovy project = new ProjectGroovyBuilder().build(projectFSXML);
+                        Job<Object> job = project.getJob(jobString);
+                        if (job == null) {
+                            throw new Exception(String.format("Cannot find job %s.", jobString));
+                        }
+                        parameters.setProjectURL(folder.toURI().toURL());
+                        parameters.setAction(StartAction.Run);
+                        parameters.setProject(project);
+                        parameters.setJob(job);
+                    } catch (Exception e) {
+                        onError.accept(Collections.singletonList(e.getMessage()));
+                        return false;
+                    }
+                } else if (line.hasOption(edit.getOpt())) {
+                    String projectString = line.getOptionValue(edit.getOpt());
+                    try {
+                        File folder = new File(projectString);
+                        ProjectFSXML projectFSXML = new ProjectParserImpl().parse(folder);
+                        parameters.setProjectURL(folder.toURI().toURL());
+                        parameters.setAction(StartAction.Edit);
+                        parameters.setProjectFSXML(projectFSXML);
+                    } catch (Exception e) {
+                        onError.accept(Collections.singletonList(e.getMessage()));
+                        return false;
+                    }
                 }
 
                 if (validation.isEmpty()) {
-                    JobsUIMainParameters parameters = new JobsUIMainParameters(uiType);
                     onSuccess.accept(parameters);
                     return true;
                 } else {
@@ -85,7 +138,7 @@ public class JobsUIMainParameters {
                 }
 
             }
-        } catch( ParseException exp ) {
+        } catch (ParseException exp) {
             onError.accept(Arrays.asList(exp.getMessage(), getHelp(options)));
             return false;
         }
@@ -93,6 +146,38 @@ public class JobsUIMainParameters {
 
     public UIType getUiType() {
         return uiType;
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public void setProject(Project project) {
+        this.project = project;
+    }
+
+    public Job getJob() {
+        return job;
+    }
+
+    public void setJob(Job job) {
+        this.job = job;
+    }
+
+    public ProjectFSXML getProjectFSXML() {
+        return projectFSXML;
+    }
+
+    public void setProjectFSXML(ProjectFSXML projectFSXML) {
+        this.projectFSXML = projectFSXML;
+    }
+
+    public void setProjectURL(URL projectURL) {
+        this.projectURL = projectURL;
+    }
+
+    public URL getProjectURL() {
+        return projectURL;
     }
 
     private static String getHelp(Options options) {
@@ -112,5 +197,4 @@ public class JobsUIMainParameters {
         );
         return out.toString();
     }
-
 }

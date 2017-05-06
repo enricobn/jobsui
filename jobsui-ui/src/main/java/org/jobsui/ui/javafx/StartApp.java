@@ -41,12 +41,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.runner.JobUIRunner;
 import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.xml.ProjectFSXML;
+import org.jobsui.core.StartAction;
 import org.jobsui.ui.javafx.edit.EditProject;
 
 import java.io.Serializable;
@@ -60,14 +62,16 @@ import java.util.logging.Logger;
 public class StartApp extends Application {
     private static final StartApp instance = new StartApp();
     private static JavaFXUI ui;
+    private static JobsUIMainParameters parameters;
     private Stage stage;
 
     public static StartApp getInstance() {
         return instance;
     }
 
-    public static void main(JavaFXUI ui) {
+    public static void main(JavaFXUI ui, JobsUIMainParameters parameters) {
         StartApp.ui = ui;
+        StartApp.parameters = parameters;
         launch();
     }
 
@@ -79,13 +83,24 @@ public class StartApp extends Application {
         Thread.setDefaultUncaughtExceptionHandler(JavaFXUI::uncaughtException);
 
         try {
-            if (getPreferences().getTheme() == JobsUITheme.Material) {
+
+            if (parameters.getAction() == StartAction.Run) {
+                ui.getPreferences().registerOpenedProject(parameters.getProjectURL(),
+                        parameters.getProject().getName());
+                gotoRun(parameters.getProject(), parameters.getJob());
+            } else if (parameters.getAction() == StartAction.Edit) {
+                ui.getPreferences().registerOpenedProject(parameters.getProjectURL(),
+                        parameters.getProjectFSXML().getName());
+                gotoEdit(parameters.getProjectFSXML());
+            } else if (getPreferences().getTheme() == JobsUITheme.Material) {
                 replaceSceneContent(primaryStage, StartApp.class.getResource("StartMaterial.fxml"));
+                primaryStage.setTitle("JobsUI");
+                primaryStage.show();
             } else {
                 replaceSceneContent(primaryStage, StartApp.class.getResource("Start.fxml"));
+                primaryStage.setTitle("JobsUI");
+                primaryStage.show();
             }
-            primaryStage.setTitle("JobsUI");
-            primaryStage.show();
         } catch (Exception e) {
             Logger.getLogger(StartApp.class.getName()).log(Level.SEVERE, null, e);
             throw new RuntimeException(e);
