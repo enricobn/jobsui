@@ -21,8 +21,10 @@ public class Main {
     public static void main(String[] args) throws Exception {
         JobsUIMainParameters.parse(args,
                 Main::run,
-                errors -> JavaFXUI.showMessageStatic("Error starting application:\n" +
-                        String.join("\n", errors)));
+                errors -> System.err.println(String.join("\n", errors)));
+
+//        errors -> JavaFXUI.showMessageStatic("Error starting application:\n" +
+//                        String.join("\n", errors)));
     }
 
     private static void run(JobsUIMainParameters parameters) {
