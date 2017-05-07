@@ -7,10 +7,12 @@ import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.xml.ProjectFSXML;
 import org.jobsui.core.xml.ProjectParserImpl;
+import org.jobsui.core.xml.ProjectXML;
 
 import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -100,14 +102,22 @@ public class JobsUIMainParameters {
                     String projectString = values[0];
                     String jobString = values[1];
                     try {
-                        File folder = new File(projectString);
-                        ProjectFSXML projectFSXML = new ProjectParserImpl().parse(folder);
-                        ProjectGroovy project = new ProjectGroovyBuilder().build(projectFSXML);
+                        // in case of run either a folder or an URL can be specified
+                        URL url;
+                        try {
+                            url = new URL(projectString);
+                        } catch (MalformedURLException e) {
+                            url = new File(projectString).toURI().toURL();
+                            System.out.println(url);
+                        }
+
+                        ProjectXML projectXML = new ProjectParserImpl().parse(url);
+                        ProjectGroovy project = new ProjectGroovyBuilder().build(projectXML);
                         Job<Object> job = project.getJob(jobString);
                         if (job == null) {
                             throw new Exception(String.format("Cannot find job %s.", jobString));
                         }
-                        parameters.setProjectURL(folder.toURI().toURL());
+                        parameters.setProjectURL(url);
                         parameters.setAction(StartAction.Run);
                         parameters.setProject(project);
                         parameters.setJob(job);
@@ -119,6 +129,11 @@ public class JobsUIMainParameters {
                     String projectString = line.getOptionValue(edit.getOpt());
                     try {
                         File folder = new File(projectString);
+                        if (!folder.exists() || !folder.isDirectory()) {
+                            onError.accept(Collections.singletonList(
+                                    String.format("%s is not a file, does not exist or is not a directory.", folder)));
+                            return false;
+                        }
                         ProjectFSXML projectFSXML = new ProjectParserImpl().parse(folder);
                         parameters.setProjectURL(folder.toURI().toURL());
                         parameters.setAction(StartAction.Edit);
