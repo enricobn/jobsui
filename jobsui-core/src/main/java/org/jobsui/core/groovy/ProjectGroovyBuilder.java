@@ -8,6 +8,7 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
 import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.Project;
+import org.jobsui.core.job.ProjectBuilder;
 import org.jobsui.core.job.ProjectId;
 import org.jobsui.core.xml.*;
 
@@ -23,10 +24,11 @@ import java.util.stream.Collectors;
 /**
  * Created by enrico on 10/11/16.
  */
-public class ProjectGroovyBuilder {
+public class ProjectGroovyBuilder implements ProjectBuilder {
     private static final Logger LOGGER = Logger.getLogger(ProjectGroovyBuilder.class.getName());
 
-    public ProjectGroovy build(ProjectXML projectXML) throws Exception {
+    @Override
+    public Project build(ProjectXML projectXML) throws Exception {
         LOGGER.info("Building project " + projectXML.getId());
 
         LOGGER.info("Creating groovy shell for project " + projectXML.getId());

@@ -1,7 +1,0 @@
-- when I import an external project is name needed?
-- rename key to id
-- CallXML has no matching class JobCall
-- ExpressionXML and CallXML as ParameterXML
-  is it needed?
-   returns both
-- Editproject: the call to JobXML.getParameter is needed? Can I call a specific method for parameter, expression and call?

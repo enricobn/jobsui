@@ -1,11 +1,12 @@
 package org.jobsui.core;
 
 import org.apache.commons.cli.*;
-import org.jobsui.core.groovy.ProjectGroovy;
-import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
+import org.jobsui.core.job.ProjectBuilder;
+import org.jobsui.core.utils.JobsUIUtils;
 import org.jobsui.core.xml.ProjectFSXML;
+import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.xml.ProjectXML;
 
@@ -14,6 +15,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,7 +24,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Created by enrico on 3/29/17.
+ * A class for parsing the command line arguments.
  */
 public class JobsUIMainParameters {
     private final UIType uiType;
@@ -36,7 +39,7 @@ public class JobsUIMainParameters {
         this.uiType = uiType;
     }
 
-    public void setAction(StartAction action) {
+    private void setAction(StartAction action) {
         this.action = action;
     }
 
@@ -44,7 +47,9 @@ public class JobsUIMainParameters {
         return action;
     }
 
-    public static boolean parse(String[] args, Consumer<JobsUIMainParameters> onSuccess, Consumer<List<String>> onError) {
+    public static boolean parse(String[] args, ProjectParser projectParser, ProjectBuilder projectBuilder,
+                                FileSystem fileSystem,
+                                Consumer<JobsUIMainParameters> onSuccess, Consumer<List<String>> onError) {
         List<String> validation = new ArrayList<>();
 
         Option run = Option.builder("run")
@@ -111,8 +116,8 @@ public class JobsUIMainParameters {
                             System.out.println(url);
                         }
 
-                        ProjectXML projectXML = new ProjectParserImpl().parse(url);
-                        ProjectGroovy project = new ProjectGroovyBuilder().build(projectXML);
+                        ProjectXML projectXML = projectParser.parse(url);
+                        Project project = projectBuilder.build(projectXML);
                         Job<Object> job = project.getJob(jobString);
                         if (job == null) {
                             throw new Exception(String.format("Cannot find job %s.", jobString));
@@ -122,24 +127,25 @@ public class JobsUIMainParameters {
                         parameters.setProject(project);
                         parameters.setJob(job);
                     } catch (Exception e) {
-                        onError.accept(Collections.singletonList(e.getMessage()));
+                        toError(onError, e);
                         return false;
                     }
                 } else if (line.hasOption(edit.getOpt())) {
                     String projectString = line.getOptionValue(edit.getOpt());
                     try {
-                        File folder = new File(projectString);
+                        Path path = fileSystem.getPath(projectString);
+                        File folder = path.toFile();
                         if (!folder.exists() || !folder.isDirectory()) {
                             onError.accept(Collections.singletonList(
                                     String.format("%s is not a file, does not exist or is not a directory.", folder)));
                             return false;
                         }
-                        ProjectFSXML projectFSXML = new ProjectParserImpl().parse(folder);
-                        parameters.setProjectURL(folder.toURI().toURL());
+                        ProjectFSXML projectFSXML = projectParser.parse(folder);
+                        parameters.setProjectURL(path.toUri().toURL());
                         parameters.setAction(StartAction.Edit);
                         parameters.setProjectFSXML(projectFSXML);
                     } catch (Exception e) {
-                        onError.accept(Collections.singletonList(e.getMessage()));
+                        toError(onError, e);
                         return false;
                     }
                 }
@@ -157,6 +163,14 @@ public class JobsUIMainParameters {
             onError.accept(Arrays.asList(exp.getMessage(), getHelp(options)));
             return false;
         }
+    }
+
+    private static void toError(Consumer<List<String>> onError, Exception e) {
+        String message = e.getMessage();
+        if (message == null) {
+            message = e.toString();
+        }
+        onError.accept(Arrays.asList(message, JobsUIUtils.toString(e)));
     }
 
     public UIType getUiType() {
@@ -183,11 +197,11 @@ public class JobsUIMainParameters {
         return projectFSXML;
     }
 
-    public void setProjectFSXML(ProjectFSXML projectFSXML) {
+    private void setProjectFSXML(ProjectFSXML projectFSXML) {
         this.projectFSXML = projectFSXML;
     }
 
-    public void setProjectURL(URL projectURL) {
+    private void setProjectURL(URL projectURL) {
         this.projectURL = projectURL;
     }
 

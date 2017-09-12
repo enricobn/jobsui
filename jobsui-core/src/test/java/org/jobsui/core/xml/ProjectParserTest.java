@@ -3,6 +3,7 @@ package org.jobsui.core.xml;
 import org.jobsui.core.groovy.ProjectGroovy;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.Job;
+import org.jobsui.core.job.Project;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -33,8 +34,8 @@ public class ProjectParserTest {
 
     @Test
     public void test_parse() throws Exception {
-        ProjectGroovy projectGroovy = new ProjectGroovyBuilder().build(projectXML);
-        Job<Object> job = projectGroovy.getJob("simple");
+        Project project = new ProjectGroovyBuilder().build(projectXML);
+        Job<Object> job = project.getJob("simple");
 
         assertThat(job, is(notNullValue()));
         assertThat(job.getParameter("name").getName(), is("Name"));

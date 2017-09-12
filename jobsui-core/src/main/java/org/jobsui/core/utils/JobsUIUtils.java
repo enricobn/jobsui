@@ -2,6 +2,8 @@ package org.jobsui.core.utils;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Collections;
 import java.util.List;
 
@@ -48,5 +50,16 @@ public interface JobsUIUtils {
 
     static String repl(String s, int times) {
         return String.join("", Collections.nCopies(times, s));
+    }
+
+    static String toString(Throwable th) {
+        try (StringWriter sw = new StringWriter();
+            PrintWriter pw = new PrintWriter(sw)) {
+
+            th.printStackTrace(pw);
+            return sw.toString();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
