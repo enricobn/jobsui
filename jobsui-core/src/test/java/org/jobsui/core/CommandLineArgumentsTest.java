@@ -13,10 +13,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.File;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.util.List;
@@ -29,7 +26,7 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JobsUIMainParametersTest {
+public class CommandLineArgumentsTest {
 
     @Mock
     private ProjectParser projectParser;
@@ -49,7 +46,7 @@ public class JobsUIMainParametersTest {
     private File projectFile;
     private URI projectURI = new URI("file://project");
 
-    public JobsUIMainParametersTest() throws Exception {
+    public CommandLineArgumentsTest() throws Exception {
     }
 
     @Before
@@ -66,28 +63,28 @@ public class JobsUIMainParametersTest {
 
     @Test
     public void parseRun() throws Exception {
-        Consumer<JobsUIMainParameters> onSuccess = params -> {
-            assertTrue(params.getAction() == StartAction.Run);
-            assertTrue(params.getProject() == project);
-            assertTrue(params.getJob() == job);
+        Consumer<CommandLineArguments> onSuccess = arguments -> {
+            assertTrue(arguments.getAction() == StartAction.Run);
+            assertTrue(arguments.getProject() == project);
+            assertTrue(arguments.getJob() == job);
         };
 
         Consumer<List<String>> onFailure = error -> fail(error.toString());
 
-        assertTrue(JobsUIMainParameters.parse(new String[]{"-run", "projectFSXML", "job"},
+        assertTrue(CommandLineArguments.parse(new String[]{"-run", "projectFSXML", "job"},
                 projectParser, projectBuilder, fileSystem, onSuccess, onFailure));
     }
 
     @Test
     public void parseEdit() throws Exception {
-        Consumer<JobsUIMainParameters> onSuccess = params -> {
-            assertTrue(params.getAction() == StartAction.Edit);
-            assertTrue(params.getProjectFSXML() == projectFSXML);
+        Consumer<CommandLineArguments> onSuccess = arguments -> {
+            assertTrue(arguments.getAction() == StartAction.Edit);
+            assertTrue(arguments.getProjectFSXML() == projectFSXML);
         };
 
         Consumer<List<String>> onFailure = error -> fail(error.toString());
 
-        assertTrue(JobsUIMainParameters.parse(new String[]{"-edit", "projectFSXML"},
+        assertTrue(CommandLineArguments.parse(new String[]{"-edit", "projectFSXML"},
                 projectParser, projectBuilder, fileSystem, onSuccess, onFailure));
     }
 }

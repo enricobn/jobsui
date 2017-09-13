@@ -7,7 +7,6 @@ import org.jobsui.core.job.ProjectBuilder;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.jobsui.core.xml.ProjectFSXML;
 import org.jobsui.core.xml.ProjectParser;
-import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.xml.ProjectXML;
 
 import java.io.File;
@@ -24,9 +23,9 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * A class for parsing the command line arguments.
+ * A class for the command line arguments.
  */
-public class JobsUIMainParameters {
+public class CommandLineArguments {
     private final UIType uiType;
     private StartAction action = StartAction.None;
     private Project project;
@@ -35,7 +34,7 @@ public class JobsUIMainParameters {
     private ProjectFSXML projectFSXML;
     private URL projectURL;
 
-    private JobsUIMainParameters(UIType uiType) {
+    private CommandLineArguments(UIType uiType) {
         this.uiType = uiType;
     }
 
@@ -47,9 +46,12 @@ public class JobsUIMainParameters {
         return action;
     }
 
+    /**
+     * Parses the command line parameters.
+     */
     public static boolean parse(String[] args, ProjectParser projectParser, ProjectBuilder projectBuilder,
-                                FileSystem fileSystem,
-                                Consumer<JobsUIMainParameters> onSuccess, Consumer<List<String>> onError) {
+                                FileSystem fileSystem, Consumer<CommandLineArguments> onSuccess,
+                                Consumer<List<String>> onError) {
         List<String> validation = new ArrayList<>();
 
         Option run = Option.builder("run")
@@ -84,23 +86,23 @@ public class JobsUIMainParameters {
                 onError.accept(Collections.singletonList(getHelp(options)));
                 return false;
             } else {
-                JobsUIMainParameters parameters;
+                CommandLineArguments arguments;
 
-                UIType uiType = UIType.JavFX;
+                UIType uiType = UIType.JavaFX;
                 if (line.hasOption("ui")) {
                     String uiTypeString = line.getOptionValue("ui");
 
                     if ("swing".equals(uiTypeString.toLowerCase())) {
                         uiType = UIType.Swing;
                     } else if ("javafx".equals(uiTypeString.toLowerCase())) {
-                        uiType = UIType.JavFX;
+                        uiType = UIType.JavaFX;
                     } else {
                         uiType = null;
                         validation.add(String.format("Unknown ui type '%s'.", uiTypeString));
                     }
                 }
 
-                parameters = new JobsUIMainParameters(uiType);
+                arguments = new CommandLineArguments(uiType);
 
                 if (line.hasOption(run.getOpt())) {
                     String[] values = line.getOptionValues(run.getOpt());
@@ -122,10 +124,10 @@ public class JobsUIMainParameters {
                         if (job == null) {
                             throw new Exception(String.format("Cannot find job %s.", jobString));
                         }
-                        parameters.setProjectURL(url);
-                        parameters.setAction(StartAction.Run);
-                        parameters.setProject(project);
-                        parameters.setJob(job);
+                        arguments.setProjectURL(url);
+                        arguments.setAction(StartAction.Run);
+                        arguments.setProject(project);
+                        arguments.setJob(job);
                     } catch (Exception e) {
                         toError(onError, e);
                         return false;
@@ -141,9 +143,9 @@ public class JobsUIMainParameters {
                             return false;
                         }
                         ProjectFSXML projectFSXML = projectParser.parse(folder);
-                        parameters.setProjectURL(path.toUri().toURL());
-                        parameters.setAction(StartAction.Edit);
-                        parameters.setProjectFSXML(projectFSXML);
+                        arguments.setProjectURL(path.toUri().toURL());
+                        arguments.setAction(StartAction.Edit);
+                        arguments.setProjectFSXML(projectFSXML);
                     } catch (Exception e) {
                         toError(onError, e);
                         return false;
@@ -151,7 +153,7 @@ public class JobsUIMainParameters {
                 }
 
                 if (validation.isEmpty()) {
-                    onSuccess.accept(parameters);
+                    onSuccess.accept(arguments);
                     return true;
                 } else {
                     onError.accept(validation);

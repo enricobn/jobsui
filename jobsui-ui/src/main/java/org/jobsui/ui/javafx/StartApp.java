@@ -41,7 +41,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
-import org.jobsui.core.JobsUIMainParameters;
+import org.jobsui.core.CommandLineArguments;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
@@ -62,16 +62,16 @@ import java.util.logging.Logger;
 public class StartApp extends Application {
     private static final StartApp instance = new StartApp();
     private static JavaFXUI ui;
-    private static JobsUIMainParameters parameters;
+    private static CommandLineArguments arguments;
     private Stage stage;
 
     public static StartApp getInstance() {
         return instance;
     }
 
-    public static void main(JavaFXUI ui, JobsUIMainParameters parameters) {
+    public static void main(JavaFXUI ui, CommandLineArguments arguments) {
         StartApp.ui = ui;
-        StartApp.parameters = parameters;
+        StartApp.arguments = arguments;
         launch();
     }
 
@@ -84,14 +84,14 @@ public class StartApp extends Application {
 
         try {
 
-            if (parameters.getAction() == StartAction.Run) {
-                ui.getPreferences().registerOpenedProject(parameters.getProjectURL(),
-                        parameters.getProject().getName());
-                gotoRun(parameters.getProject(), parameters.getJob());
-            } else if (parameters.getAction() == StartAction.Edit) {
-                ui.getPreferences().registerOpenedProject(parameters.getProjectURL(),
-                        parameters.getProjectFSXML().getName());
-                gotoEdit(parameters.getProjectFSXML());
+            if (arguments.getAction() == StartAction.Run) {
+                ui.getPreferences().registerOpenedProject(arguments.getProjectURL(),
+                        arguments.getProject().getName());
+                gotoRun(arguments.getProject(), arguments.getJob());
+            } else if (arguments.getAction() == StartAction.Edit) {
+                ui.getPreferences().registerOpenedProject(arguments.getProjectURL(),
+                        arguments.getProjectFSXML().getName());
+                gotoEdit(arguments.getProjectFSXML());
             } else if (getPreferences().getTheme() == JobsUITheme.Material) {
                 replaceSceneContent(primaryStage, StartApp.class.getResource("StartMaterial.fxml"));
                 primaryStage.setTitle("JobsUI");

@@ -24,7 +24,7 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
     private static final Logger LOGGER = Logger.getLogger(BookmarksStoreFSImpl.class.getName());
     private final File root;
 
-    public static BookmarksStoreFSImpl getUser() {
+    public static BookmarksStore getUserStore() {
         return new BookmarksStoreFSImpl(
                 Paths.get(
                     System.getProperty("java.util.prefs.userRoot", System.getProperty("user.home")),

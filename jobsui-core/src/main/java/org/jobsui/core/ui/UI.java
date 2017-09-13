@@ -1,6 +1,6 @@
 package org.jobsui.core.ui;
 
-import org.jobsui.core.JobsUIMainParameters;
+import org.jobsui.core.CommandLineArguments;
 import org.jobsui.core.JobsUIPreferences;
 
 import java.util.Optional;
@@ -24,7 +24,7 @@ public interface UI<T> {
 
     void showError(String message, Throwable t);
 
-    void start(JobsUIMainParameters parameters);
+    void start(CommandLineArguments arguments);
 
     Optional<String> askString(String message);
 

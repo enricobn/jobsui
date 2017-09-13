@@ -10,7 +10,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.stage.Stage;
 import org.hamcrest.core.Is;
-import org.jobsui.core.JobsUIMainParameters;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.OpenedItem;
 import org.jobsui.core.job.Job;
@@ -43,8 +42,6 @@ import static org.mockito.Mockito.when;
 public class TestMain extends ApplicationTest {
     @Mock
     private JobsUIPreferences preferences;
-    @Mock
-    private JobsUIMainParameters parameters;
     private OpenedItem openedItem;
     private URL projectResource;
 

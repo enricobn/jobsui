@@ -8,7 +8,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import org.jobsui.core.JobsUIMainParameters;
+import org.jobsui.core.CommandLineArguments;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.*;
 
@@ -72,8 +72,8 @@ public class JavaFXUI implements UI<Node> {
     }
 
     @Override
-    public void start(JobsUIMainParameters parameters) {
-        StartApp.main(this, parameters);
+    public void start(CommandLineArguments arguments) {
+        StartApp.main(this, arguments);
     }
 
     @Override

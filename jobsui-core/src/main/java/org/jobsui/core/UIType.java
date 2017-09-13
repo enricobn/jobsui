@@ -5,5 +5,5 @@ package org.jobsui.core;
  */
 public enum UIType {
     Swing,
-    JavFX
+    JavaFX
 }

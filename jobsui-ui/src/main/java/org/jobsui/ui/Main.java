@@ -1,6 +1,6 @@
 package org.jobsui.ui;
 
-import org.jobsui.core.JobsUIMainParameters;
+import org.jobsui.core.CommandLineArguments;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.JobsUIPreferencesImpl;
 import org.jobsui.core.bookmark.BookmarksStoreFSImpl;
@@ -9,7 +9,6 @@ import org.jobsui.core.repository.RepositoryURLStreamHandlerFactory;
 import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.ui.javafx.JavaFXUI;
 
-import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.util.prefs.Preferences;
 
@@ -19,7 +18,7 @@ import java.util.prefs.Preferences;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        JobsUIMainParameters.parse(args,
+        CommandLineArguments.parse(args,
                 new ProjectParserImpl(),
                 new ProjectGroovyBuilder(),
                 FileSystems.getDefault(),
@@ -30,13 +29,17 @@ public class Main {
 //                        String.join("\n", errors)));
     }
 
-    private static void run(JobsUIMainParameters parameters) {
+    private static void run(CommandLineArguments arguments) {
         // TODO add repositories
         RepositoryURLStreamHandlerFactory.getInstance();
 
         JobsUIPreferences preferences =
-                JobsUIPreferencesImpl.get(Preferences.userNodeForPackage(Main.class), BookmarksStoreFSImpl.getUser());
-        new JavaFXUI(preferences).start(parameters);
+                JobsUIPreferencesImpl.get(
+                        Preferences.userNodeForPackage(Main.class),
+                        BookmarksStoreFSImpl.getUserStore()
+                );
+
+        new JavaFXUI(preferences).start(arguments);
     }
 
 }
