@@ -14,10 +14,12 @@ import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.UIComponentType;
+import org.jobsui.core.utils.JobsUIUtils;
 import org.jobsui.core.xml.*;
 import org.jobsui.ui.javafx.JavaFXUI;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -49,6 +51,15 @@ public class EditProject {
         saveButton = ui.createButton();
         saveButton.setText("Save");
         saveButton.setOnAction(event -> {
+            // I backup the current project
+            File tempDir;
+            try {
+                tempDir = JobsUIUtils.createTempDir("jobsui", projectXML.getFolder().getName());
+                FileUtils.copyDirectory(projectXML.getFolder(), tempDir);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
             try {
                 for (String originalJob : originalJobs) {
                     File file = new File(projectXML.getFolder(), originalJob);
@@ -63,8 +74,18 @@ public class EditProject {
                 }
 
                 ProjectXMLExporter exporter = new ProjectXMLExporter();
+
                 exporter.export(projectXML, projectXML.getFolder());
+
+                FileUtils.deleteDirectory(tempDir);
             } catch (Exception e) {
+                // I restore the project
+                try {
+                    FileUtils.deleteDirectory(projectXML.getFolder());
+                    FileUtils.copyDirectory(tempDir, projectXML.getFolder());
+                } catch (IOException e1) {
+                    throw new RuntimeException(e);
+                }
                 ui.showError("Error saving project.", e);
             }
         });
@@ -183,17 +204,17 @@ public class EditProject {
     private TreeItem<EditItem> createJobTreeItem(JobXML job) {
         TreeItem<EditItem> result = new TreeItem<>(new EditItem(ItemType.Job, job::getName, job));
 
-        addParameters(result, job, "parameters", ItemType.Parameter, job.getSimpleParameterXMLs());
-        addParameters(result, job, "expressions", ItemType.Expression, job.getExpressionXMLs());
-        addParameters(result, job, "calls", ItemType.Call, job.getCallXMLs());
+        addParameters(result, job, "parameters", ItemType.Parameters, ItemType.Parameter, job.getSimpleParameterXMLs());
+        addParameters(result, job, "expressions", ItemType.Expressions, ItemType.Expression, job.getExpressionXMLs());
+        addParameters(result, job, "calls", ItemType.Calls, ItemType.Call, job.getCallXMLs());
 
         result.setExpanded(true);
         return result;
     }
 
-    private void addParameters(TreeItem<EditItem> result, JobXML jobXML, String containerText, ItemType itemType,
+    private void addParameters(TreeItem<EditItem> result, JobXML jobXML, String containerText, ItemType containerType, ItemType itemType,
                                List<? extends ParameterXML> parametersList) {
-        TreeItem<EditItem> parameters = new TreeItem<>(new EditItem(ItemType.Parameters, () -> containerText, jobXML));
+        TreeItem<EditItem> parameters = new TreeItem<>(new EditItem(containerType, () -> containerText, jobXML));
         parameters.setExpanded(true);
         result.getChildren().add(parameters);
 
@@ -274,8 +295,11 @@ public class EditProject {
         EditItem item = treeItem.getValue();
 
         if (item.itemType == ItemType.Parameters) {
-            addParameterMenu(contextMenu, treeItem);
-
+            populateParametersMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Expressions) {
+            populateExpressionsMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Calls) {
+            populateCallsMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Dependencies) {
             ParameterXML parameterXML = (ParameterXML) item.payload;
             List<String> dependencies = parameterXML.getDependencies();
@@ -321,13 +345,51 @@ public class EditProject {
         }
     }
 
-    private void addParameterMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private void populateExpressionsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         JobXMLImpl jobXML = findAncestorPayload(treeItem, ItemType.Job);
         if (jobXML == null) {
             return;
         }
 
-        Menu addParameter = new Menu("Add parameter");
+        MenuItem add = new MenuItem("Add");
+        contextMenu.getItems().add(add);
+        add.setOnAction(event -> {
+            ExpressionXML expressionXML = new ExpressionXML("newKey", "newName");
+            try {
+                jobXML.add(expressionXML);
+                addParameter(treeItem, ItemType.Expression, expressionXML, jobXML);
+            } catch (Exception e1) {
+                ui.showError("Error adding new expression.", e1);
+            }
+        });
+    }
+
+    private void populateCallsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        JobXMLImpl jobXML = findAncestorPayload(treeItem, ItemType.Job);
+        if (jobXML == null) {
+            return;
+        }
+
+        MenuItem add = new MenuItem("Add");
+        contextMenu.getItems().add(add);
+        add.setOnAction(event -> {
+            CallXML callXML = new CallXML("newKey", "newName");
+            try {
+                jobXML.add(callXML);
+                addParameter(treeItem, ItemType.Expression, callXML, jobXML);
+            } catch (Exception e1) {
+                ui.showError("Error adding new call.", e1);
+            }
+        });
+    }
+
+    private void populateParametersMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        JobXMLImpl jobXML = findAncestorPayload(treeItem, ItemType.Job);
+        if (jobXML == null) {
+            return;
+        }
+
+        Menu addParameter = new Menu("Add");
         contextMenu.getItems().add(addParameter);
 
         for (UIComponentType uiComponentType : UIComponentType.values()) {

@@ -1,16 +1,14 @@
 DOING
 ------
-- create a new project on edit if the folder does not exists: can I "set it on the main parameters" and handle that
-  in the edit window? Can I accept editing without a folder then show a window to create a new project or open an existing one?
 
 TODO
 -----
+- validate expressions and calls on edit
 - command line arguments could be run or edit, then the others are options: -project -job -ui, so:
   - to run a job: `jobsui run -project <pathtoproject> -job <jobid>`
   - to edit a project: `jobsui edit -project <pathtoproject>`
   - to open the main application: `jobsui`
 - project's version must be mandatory on save
-- when I save a project, I must save the previous project, then restore it if something goes wrong
 - when I import an external project is name needed?
 - rename key to id
 - CallXML has no matching class JobCall
@@ -22,3 +20,5 @@ TODO
 DONE
 -----
 - refactoring and testing JobsUIParameters
+- create a new project
+- when I save a project, I must backup the previous project, then restore it if something goes wrong
