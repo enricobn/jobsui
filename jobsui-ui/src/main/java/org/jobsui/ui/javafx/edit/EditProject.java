@@ -253,8 +253,20 @@ public class EditProject {
     }
 
     enum ItemType {
-        Project, ScriptFile, Job, Parameter, Expression, Dependency, Dependencies, Parameters, Scripts, Libraries,
-        Library, Call
+        Project,
+            Libraries,
+                Library,
+            Scripts,
+                ScriptFile,
+            Job,
+                Parameters,
+                    Parameter,
+                        Dependencies,
+                            Dependency,
+                Expressions,
+                    Expression,
+                Calls,
+                    Call
     }
 
     private void populateContextMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {

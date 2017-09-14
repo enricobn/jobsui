@@ -2,17 +2,17 @@ package org.jobsui.ui.javafx.edit;
 
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.jobsui.core.ui.UIComponentType;
 import org.jobsui.core.xml.*;
-import org.jobsui.ui.javafx.*;
+import org.jobsui.ui.javafx.JavaFXUI;
+import org.jobsui.ui.javafx.LabeledDirectoryChooser;
+import org.jobsui.ui.javafx.LabeledField;
+import org.jobsui.ui.javafx.StartApp;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,13 +20,6 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class NewProject {
-    private final String parentFolder;
-    private final String projectName;
-
-    private NewProject(String parentFolder, String projectName) {
-        this.parentFolder = parentFolder;
-        this.projectName = projectName;
-    }
 
     public static Optional<ProjectFSXML> show(JavaFXUI ui) {
         VBox root = new VBox(5);
@@ -107,19 +100,11 @@ public class NewProject {
                 if (projectFolder.exists()) {
                     ui.showMessage("Folder " + projectFolder + " already exists.");
                 } else if (projectFolder.mkdir()) {
-                    ProjectFSXMLImpl projectFSXML = new ProjectFSXMLImpl(projectFolder,
-                            namespace + ":" + id, name, "1.0.0");
+                    ProjectFSXMLImpl projectFSXML = createProjectXML(projectFolder, namespace, id, name);
 
-                    JobXMLImpl jobXML = new JobXMLImpl("newjob", "NewJob", "1.0.0");
-                    SimpleParameterXML parameter = new SimpleParameterXML("message", "Message",
-                            UIComponentType.Value);
-                    parameter.setOnInitScript("component.setValue('Hello world')");
-                    jobXML.add(parameter);
-                    jobXML.setRunScript("println(\"${message}\")");
-
-                    projectFSXML.addJob("newjob.xml", jobXML);
                     new ProjectXMLExporter().export(projectFSXML, projectFolder);
                     project.set(projectFSXML);
+                    ui.getPreferences().registerOpenedProject(projectFolder.toURI().toURL(), name);
                     stage.close();
                 }
             } catch (Exception e) {
@@ -134,7 +119,6 @@ public class NewProject {
                 }
             }
 
-
         });
 
         stage.showAndWait();
@@ -144,6 +128,21 @@ public class NewProject {
         } else {
             return Optional.empty();
         }
+    }
+
+    private static ProjectFSXMLImpl createProjectXML(File projectFolder, String namespace, String id, String name) throws Exception {
+        ProjectFSXMLImpl projectFSXML = new ProjectFSXMLImpl(projectFolder,
+                namespace + ":" + id, name, "1.0.0");
+
+        JobXMLImpl jobXML = new JobXMLImpl("newjob", "NewJob", "1.0.0");
+        SimpleParameterXML parameter = new SimpleParameterXML("message", "Message",
+                UIComponentType.Value);
+        parameter.setOnInitScript("component.setValue('Hello world')");
+        jobXML.add(parameter);
+        jobXML.setRunScript("println(\"${message}\")");
+
+        projectFSXML.addJob("newjob.xml", jobXML);
+        return projectFSXML;
     }
 
 }
