@@ -1,6 +1,7 @@
 package org.jobsui.core.xml;
 
 import org.apache.commons.io.FileUtils;
+import org.jobsui.core.utils.Tuple3;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -17,7 +18,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
 import static org.jobsui.core.xml.XMLUtils.getElementContent;
@@ -50,9 +51,9 @@ public class ProjectParserImpl implements ProjectParser {
             throw new Exception("Cannot find project file (" + PROJECT_FILE_NAME + ") in " + folder);
         }
 
-        ProjectFSXMLImpl projectFSXML = parse(folder.toURI().toURL(), (id, name) -> {
+        ProjectFSXMLImpl projectFSXML = parse(folder.toURI().toURL(), triple -> {
             try {
-                return new ProjectFSXMLImpl(folder, id, name);
+                return new ProjectFSXMLImpl(folder, triple.first, triple.second, triple.third);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -77,15 +78,17 @@ public class ProjectParserImpl implements ProjectParser {
 
     @Override
     public ProjectXML parse(URL url) throws Exception {
-        return parse(url, (id,name) -> new ProjectXMLImpl(url, id, name), false);
+        return parse(url, triple -> new ProjectXMLImpl(url, triple.first, triple.second, triple.third), false);
     }
 
     @Override
-    public SimpleProjectXML parseSimple(URL url) throws Exception {
-        return parse(url, (id,name) -> new SimpleProjectXMLImpl(url, id, name), true);
+    public <T extends SimpleProjectXML> T parseSimple(URL url) throws Exception {
+        return (T) parse(url, triple -> new SimpleProjectXMLImpl(url, triple.first, triple.second, triple.third),
+                true);
     }
 
-    private static  <T extends SimpleProjectXMLImpl> T parse(URL url, BiFunction<String,String,T> supplier, boolean simple) throws Exception {
+    private static  <T extends SimpleProjectXMLImpl> T parse(URL url, Function<Tuple3<String,String, String>,T> supplier,
+                                                         boolean simple) throws Exception {
         LOGGER.info("Parsing " + url);
         URL projectURL = new URL(url + "/" + PROJECT_FILE_NAME);
 
@@ -112,11 +115,11 @@ public class ProjectParserImpl implements ProjectParser {
             String projectId = getMandatoryAttribute((Element) projects.item(0), "id", subject);
             subject = "Project with id='" + projectId + "'";
             String projectName = getMandatoryAttribute((Element) projects.item(0), "name", subject);
-
-            projectXML = supplier.apply(projectId, projectName);
-
             String projectVersion = getMandatoryAttribute((Element) projects.item(0), "version", subject);
-            projectXML.setVersion(projectVersion);
+
+            projectXML = supplier.apply(new Tuple3<>(projectId, projectName, projectVersion));
+
+//            projectXML.setVersion(projectVersion);
 
             parseProject(doc, projectXML, simple);
         }

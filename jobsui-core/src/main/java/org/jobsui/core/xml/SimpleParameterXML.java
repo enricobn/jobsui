@@ -11,10 +11,11 @@ public class SimpleParameterXML extends ParameterXML {
     private boolean visible;
     private boolean optional;
     private String onInitScript;
-    private UIComponentType component;
+    private final UIComponentType component;
 
-    public SimpleParameterXML(String key, String name) {
+    public SimpleParameterXML(String key, String name, UIComponentType component) {
         super(key, name);
+        this.component = component;
     }
 
     public void setValidateScript(String parameterValidateScript) {
@@ -57,9 +58,9 @@ public class SimpleParameterXML extends ParameterXML {
         return onInitScript;
     }
 
-    public void setComponent(UIComponentType component) {
-        this.component = component;
-    }
+//    public void setComponent(UIComponentType component) {
+//        this.component = component;
+//    }
 
     public UIComponentType getComponent() {
         return component;

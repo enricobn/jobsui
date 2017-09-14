@@ -61,7 +61,7 @@ public class CommandLineArguments {
 
         Option edit = Option.builder("edit")
                 .hasArg()
-                .argName("project")
+                .argName("project").optionalArg(true)
                 .build();
 
         Option ui = Option.builder("ui")
@@ -135,17 +135,21 @@ public class CommandLineArguments {
                 } else if (line.hasOption(edit.getOpt())) {
                     String projectString = line.getOptionValue(edit.getOpt());
                     try {
-                        Path path = fileSystem.getPath(projectString);
-                        File folder = path.toFile();
-                        if (!folder.exists() || !folder.isDirectory()) {
-                            onError.accept(Collections.singletonList(
-                                    String.format("%s is not a file, does not exist or is not a directory.", folder)));
-                            return false;
-                        }
-                        ProjectFSXML projectFSXML = projectParser.parse(folder);
-                        arguments.setProjectURL(path.toUri().toURL());
                         arguments.setAction(StartAction.Edit);
-                        arguments.setProjectFSXML(projectFSXML);
+
+                        if (projectString != null && !projectString.isEmpty()) {
+                            Path path = fileSystem.getPath(projectString);
+                            File folder = path.toFile();
+                            if (!folder.exists() || !folder.isDirectory()) {
+                                onError.accept(Collections.singletonList(
+                                        String.format("%s is not a file, does not exist or is not a directory.", folder)));
+                                return false;
+                            }
+
+                            ProjectFSXML projectFSXML = projectParser.parse(folder);
+                            arguments.setProjectURL(path.toUri().toURL());
+                            arguments.setProjectFSXML(projectFSXML);
+                        }
                     } catch (Exception e) {
                         toError(onError, e);
                         return false;

@@ -18,10 +18,11 @@ public class SimpleProjectXMLImpl implements SimpleProjectXML {
     private String name;
     private String version;
 
-    public SimpleProjectXMLImpl(URL projectURL, String id, String name) {
+    public SimpleProjectXMLImpl(URL projectURL, String id, String name, String version) {
         this.id = id;
         this.name = name;
         this.projectURL = projectURL;
+        this.version = version;
     }
 
     public URL getRelativeURL(String relativePath) {

@@ -50,9 +50,11 @@ import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.xml.ProjectFSXML;
 import org.jobsui.core.StartAction;
 import org.jobsui.ui.javafx.edit.EditProject;
+import org.jobsui.ui.javafx.edit.NewProject;
 
 import java.io.Serializable;
 import java.net.URL;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -89,9 +91,13 @@ public class StartApp extends Application {
                         arguments.getProject().getName());
                 gotoRun(arguments.getProject(), arguments.getJob());
             } else if (arguments.getAction() == StartAction.Edit) {
-                ui.getPreferences().registerOpenedProject(arguments.getProjectURL(),
-                        arguments.getProjectFSXML().getName());
-                gotoEdit(arguments.getProjectFSXML());
+                if (arguments.getProjectFSXML() != null) {
+                    ui.getPreferences().registerOpenedProject(arguments.getProjectURL(),
+                            arguments.getProjectFSXML().getName());
+                    gotoEdit(arguments.getProjectFSXML());
+                } else {
+                    gotoNew();
+                }
             } else if (getPreferences().getTheme() == JobsUITheme.Material) {
                 replaceSceneContent(primaryStage, StartApp.class.getResource("StartMaterial.fxml"));
                 primaryStage.setTitle("JobsUI");
@@ -120,23 +126,33 @@ public class StartApp extends Application {
         }
     }
 
+    void gotoNew() {
+        Optional<ProjectFSXML> newProject = NewProject.show(ui);
+
+        newProject.ifPresent(this::editProject);
+    }
+
     void gotoEdit(ProjectFSXML projectXML) {
-        EditProject editProject = new EditProject();
         stage = new Stage();
         try {
             try {
-                Parent root = editProject.getRoot(ui);
-                Stage stage = StartApp.getInstance().replaceSceneContent(root, projectXML.getName());
-                editProject.edit(projectXML, false);
-                editProject.loadPreferences(stage);
-                stage.setOnHiding(event -> editProject.savePreferences(stage));
-                stage.showAndWait();
+                editProject(projectXML);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void editProject(ProjectFSXML projectXML) {
+        EditProject editProject = new EditProject();
+        Parent root = editProject.getEditNode(ui);
+        Stage stage = StartApp.getInstance().replaceSceneContent(root, projectXML.getName());
+        editProject.edit(projectXML, false);
+        editProject.loadPreferences(stage);
+        stage.setOnHiding(event -> editProject.savePreferences(stage));
+        stage.showAndWait();
     }
 
     private static String resourceToURL(String resource) {
@@ -196,7 +212,7 @@ public class StartApp extends Application {
         ((HBox) decorator.getChildren().get(0)).getChildren().add(0, titleLabel);
     }
 
-    Stage replaceSceneContent(Parent page, String title) {
+    public Stage replaceSceneContent(Parent page, String title) {
         Stage stage = new Stage();
         replaceSceneContent(stage, page);
         stage.setTitle(title);

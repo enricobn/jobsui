@@ -11,12 +11,12 @@ import java.util.stream.Collectors;
 /**
  * Created by enrico on 4/5/17.
  */
-class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
+public class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
     private File folder;
     private final Map<String,Map<String,String>> scriptFiles = new HashMap<>();
 
-    ProjectFSXMLImpl(File folder, String id, String name) throws MalformedURLException {
-        super(folder.toURI().toURL(), id, name);
+    public ProjectFSXMLImpl(File folder, String id, String name, String version) throws MalformedURLException {
+        super(folder.toURI().toURL(), id, name, version);
         this.folder = folder;
 
     }

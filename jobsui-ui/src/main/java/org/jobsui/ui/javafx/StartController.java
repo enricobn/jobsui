@@ -55,7 +55,7 @@ public class StartController implements Initializable {
     }
 
     public void onNew(ActionEvent actionEvent) {
-        // TODO
+        StartApp.getInstance().gotoNew();
     }
 
     public void onEdit(ActionEvent actionEvent) {

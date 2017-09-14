@@ -11,8 +11,8 @@ import java.util.Map;
 class ProjectXMLImpl extends SimpleProjectXMLImpl implements ProjectXML {
     private final Map<String, JobXML> jobXMLs = new HashMap<>();
 
-    ProjectXMLImpl(URL projectURL, String id, String name) {
-        super(projectURL, id, name);
+    ProjectXMLImpl(URL projectURL, String id, String name, String version) {
+        super(projectURL, id, name, version);
     }
 
 //    public JobParser getParser(String relativePath) throws Exception {
@@ -20,11 +20,11 @@ class ProjectXMLImpl extends SimpleProjectXMLImpl implements ProjectXML {
 //        return JobParser.getParser(path.getAbsolutePath());
 //    }
 
-    public void addJob(String job, JobXML jobXML) {
-        if (jobXMLs.containsKey(job)) {
-            throw new IllegalArgumentException("Job \"" + job + "\" already added.");
+    public void addJob(String jobFile, JobXML jobXML) {
+        if (jobXMLs.containsKey(jobFile)) {
+            throw new IllegalArgumentException("Job \"" + jobFile + "\" already added.");
         }
-        jobXMLs.put(job, jobXML);
+        jobXMLs.put(jobFile, jobXML);
     }
 
     //    public void addGroovyFile(File file) {

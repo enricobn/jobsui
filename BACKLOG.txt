@@ -5,6 +5,12 @@ DOING
 
 TODO
 -----
+- command line arguments could be run or edit, then the others are options: -project -job -ui, so:
+  - to run a job: `jobsui run -project <pathtoproject> -job <jobid>`
+  - to edit a project: `jobsui edit -project <pathtoproject>`
+  - to open the main application: `jobsui`
+- project's version must be mandatory on save
+- when I save a project, I must save the previous project, then restore it if something goes wrong
 - when I import an external project is name needed?
 - rename key to id
 - CallXML has no matching class JobCall

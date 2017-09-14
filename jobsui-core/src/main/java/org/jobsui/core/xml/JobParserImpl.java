@@ -185,13 +185,13 @@ public class JobParserImpl implements JobParser {
             boolean visible = visibleString == null || visibleString.isEmpty() || Boolean.parseBoolean(visibleString);
             boolean optional = optionalString != null && !optionalString.isEmpty() && Boolean.parseBoolean(optionalString);
 
-            SimpleParameterXML simpleParameterXML = new SimpleParameterXML(parameterKey, parameterName);
+            SimpleParameterXML simpleParameterXML = new SimpleParameterXML(parameterKey, parameterName,
+                    UIComponentType.valueOf(component));
             simpleParameterXML.setValidateScript(parameterValidateScript);
             simpleParameterXML.setOnInitScript(onInitScript);
             simpleParameterXML.setOnDependenciesChangeScript(onDependenciesChangeScript);
             simpleParameterXML.setVisible(visible);
             simpleParameterXML.setOptional(optional);
-            simpleParameterXML.setComponent(UIComponentType.valueOf(component));
 
             addDependencies(element, simpleParameterXML);
 

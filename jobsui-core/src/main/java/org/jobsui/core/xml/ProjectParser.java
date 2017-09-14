@@ -12,5 +12,5 @@ public interface ProjectParser {
 
     ProjectXML parse(URL url) throws Exception;
 
-    SimpleProjectXML parseSimple(URL url) throws Exception;
+    <T extends SimpleProjectXML> T parseSimple(URL url) throws Exception;
 }

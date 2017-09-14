@@ -13,6 +13,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.jobsui.core.JobsUIPreferences;
+import org.jobsui.core.ui.UIComponentType;
 import org.jobsui.core.xml.*;
 import org.jobsui.ui.javafx.JavaFXUI;
 
@@ -37,7 +38,7 @@ public class EditProject {
     private JavaFXUI ui;
     private SplitPane splitPane;
 
-    public Parent getRoot(JavaFXUI ui) {
+    public Parent getEditNode(JavaFXUI ui) {
         this.ui = ui;
         preferences = ui.getPreferences();
         VBox root = new VBox(5);
@@ -313,17 +314,24 @@ public class EditProject {
         if (jobXML == null) {
             return;
         }
-        MenuItem addParameter = new MenuItem("Add parameter");
+
+        Menu addParameter = new Menu("Add parameter");
         contextMenu.getItems().add(addParameter);
-        addParameter.setOnAction(e -> {
-            SimpleParameterXML parameter = new SimpleParameterXML("newKey", "newName");
-            try {
-                jobXML.add(parameter);
-                addParameter(treeItem, ItemType.Parameter, parameter, jobXML);
-            } catch (Exception e1) {
-                ui.showError("Error adding new parameter.", e1);
-            }
-        });
+
+        for (UIComponentType uiComponentType : UIComponentType.values()) {
+            MenuItem addParameterType = new MenuItem(uiComponentType.name());
+            addParameter.getItems().add(addParameterType);
+            addParameterType.setOnAction(e -> {
+                SimpleParameterXML parameter = new SimpleParameterXML("newKey", "newName", uiComponentType);
+                try {
+                    jobXML.add(parameter);
+                    addParameter(treeItem, ItemType.Parameter, parameter, jobXML);
+                } catch (Exception e1) {
+                    ui.showError("Error adding new parameter.", e1);
+                }
+            });
+        }
+
     }
 
     static <T> T findAncestorPayload(TreeItem<EditItem> treeItem, ItemType... itemTypes) {
