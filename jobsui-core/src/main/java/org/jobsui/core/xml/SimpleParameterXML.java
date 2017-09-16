@@ -51,7 +51,7 @@ public class SimpleParameterXML extends ParameterXML {
     }
 
     public void setOnInitScript(String onInitScript) {
-        this.onInitScript = onInitScript;
+        this.onInitScript = XMLUtils.scriptToEditForm(onInitScript);
     }
 
     public String getOnInitScript() {

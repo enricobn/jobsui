@@ -61,7 +61,7 @@ class ItemDetail extends VBox {
                 break;
 
             case Parameter:
-                setParameterDetail(treeItem);
+                setSimpleParameterDetail(treeItem);
                 break;
 
             case Expression: {
@@ -107,42 +107,28 @@ class ItemDetail extends VBox {
     }
 
     private void setCallDetail(TreeItem<EditItem> treeItem) {
-        CallXML parameter = (CallXML) treeItem.getValue().payload;
-
-        addTextProperty(treeItem, "Key", parameter::getKey, parameter::setKey);
-        addTextProperty(treeItem, "Name", parameter::getName, parameter::setName);
-
-        // TODO
+        if (!setParameterDetail(treeItem)) {
+            return;
+        }
     }
 
     private void setExpressionDetail(TreeItem<EditItem> treeItem) {
-        ExpressionXML parameter = (ExpressionXML) treeItem.getValue().payload;
+        if (!setParameterDetail(treeItem)) {
+            return;
+        }
 
-        addTextProperty(treeItem, "Key", parameter::getKey, parameter::setKey);
-        addTextProperty(treeItem, "Name", parameter::getName, parameter::setName);
+        ExpressionXML parameter = (ExpressionXML) treeItem.getValue().payload;
 
         addTextAreaProperty(treeItem, "Evaluate", parameter::getEvaluateScript, parameter::setEvaluateScript,
                 false);
     }
 
-    private void setParameterDetail(TreeItem<EditItem> treeItem) {
-        if (treeItem == null) {
-            ui.showMessage("Cannot find item.");
-            return;
-        }
-
-        JobXMLImpl jobXML = EditProject.findAncestorPayload(treeItem, EditProject.ItemType.Job);
-
-        if (jobXML == null) {
-            ui.showMessage("Cannot find job for item.");
+    private void setSimpleParameterDetail(TreeItem<EditItem> treeItem) {
+        if (!setParameterDetail(treeItem)) {
             return;
         }
 
         SimpleParameterXML parameter = (SimpleParameterXML) treeItem.getValue().payload;
-
-        addTextProperty(treeItem, "Key", parameter::getKey, key -> jobXML.changeParameterKey(parameter, key));
-
-        addTextProperty(treeItem, "Name", parameter::getName, parameter::setName);
 
         addTextAreaProperty(treeItem, "On init", parameter::getOnInitScript,
                 parameter::setOnInitScript, false);
@@ -152,6 +138,28 @@ class ItemDetail extends VBox {
 
         addTextAreaProperty(treeItem, "Validate", parameter::getValidateScript, parameter::setValidateScript,
                 false);
+    }
+
+    private boolean setParameterDetail(TreeItem<EditItem> treeItem) {
+        if (treeItem == null) {
+            ui.showMessage("Cannot find item.");
+            return false;
+        }
+
+        JobXMLImpl jobXML = EditProject.findAncestorPayload(treeItem, EditProject.ItemType.Job);
+
+        if (jobXML == null) {
+            ui.showMessage("Cannot find job for item.");
+            return false;
+        }
+
+        ParameterXML parameter = (ParameterXML) treeItem.getValue().payload;
+
+        addTextProperty(treeItem, "Key", parameter::getKey, key -> jobXML.changeParameterKey(parameter, key));
+
+        addTextProperty(treeItem, "Name", parameter::getName, parameter::setName);
+
+        return true;
     }
 
     private void addTextProperty(TreeItem<EditItem> treeItem, String title, Supplier<String> get, Consumer<String> set) {

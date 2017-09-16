@@ -2,9 +2,13 @@ DOING
 ------
 
 TODO
------
+------
+- warning on closing project edit with changes
+- why getScriptsLocations() and not getScriptLocation? Do I need more than one location different from "scripts"?
+- when I create a new project and add it to the last opened project registry, I must, eventually, update the main window
 - validate expressions and calls on edit
-- command line arguments could be run or edit, then the others are options: -project -job -ui, so:
+- command line arguments could be new, run or edit, then the others are options: -project -job -ui, so:
+  - to create a new job: `jobsui new` (is it needed?, It can be easily done in the main application)
   - to run a job: `jobsui run -project <pathtoproject> -job <jobid>`
   - to edit a project: `jobsui edit -project <pathtoproject>`
   - to open the main application: `jobsui`
@@ -19,6 +23,11 @@ TODO
 
 DONE
 -----
+- onInit script is not formatted in edit
+- problem in JobsUIUtils.createTempDir which does not create the tempdir
+- add menu for adding a script
+- error adding a dependency when just added an expression and renamed
+- add "component" variable in onDependencyChange event in groovy as widget.getComponent()
 - refactoring and testing JobsUIParameters
 - create a new project
 - when I save a project, I must backup the previous project, then restore it if something goes wrong

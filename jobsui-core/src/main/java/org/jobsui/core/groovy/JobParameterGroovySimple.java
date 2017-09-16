@@ -81,6 +81,7 @@ public class JobParameterGroovySimple extends JobParameterAbstract implements Jo
             // I reset the bindings otherwise I get "global" or previous bindings
             onDependenciesChange.setBinding(new Binding());
             onDependenciesChange.setProperty("widget", widget);
+            onDependenciesChange.setProperty("component", widget.getComponent());
             onDependenciesChange.setProperty("values", values);
             for (Map.Entry<String, Serializable> entry : values.entrySet()) {
                 onDependenciesChange.setProperty(entry.getKey(), entry.getValue());

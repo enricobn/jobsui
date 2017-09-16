@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -286,8 +287,12 @@ public class EditProject {
                             Dependency,
                 Expressions,
                     Expression,
+                        //Dependencies
+                            //Dependency
                 Calls,
                     Call
+                        //Dependencies
+                            //Dependency
     }
 
     private void populateContextMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
@@ -300,6 +305,8 @@ public class EditProject {
             populateExpressionsMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Calls) {
             populateCallsMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Scripts) {
+            populateScriptsMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Dependencies) {
             ParameterXML parameterXML = (ParameterXML) item.payload;
             List<String> dependencies = parameterXML.getDependencies();
@@ -343,6 +350,28 @@ public class EditProject {
                 parameterXML.removeDependency((String)item.payload);
             });
         }
+    }
+
+    private void populateScriptsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        ProjectFSXMLImpl projectXML = findAncestorPayload(treeItem, ItemType.Project);
+        if (projectXML == null) {
+            return;
+        }
+
+        MenuItem add = new MenuItem("Add");
+        contextMenu.getItems().add(add);
+        add.setOnAction(event -> {
+            try {
+                Optional<String> oname = ui.askString("File name");
+                oname.ifPresent(name -> {
+                    projectXML.addScriptFile(projectXML.getScriptsLocations().iterator().next(), name, "");
+                    TreeItem<EditItem> scriptItem = new TreeItem<>(new EditItem(ItemType.ScriptFile, () -> name, name));
+                    treeItem.getChildren().add(scriptItem);
+                });
+            } catch (Exception e1) {
+                ui.showError("Error adding new script.", e1);
+            }
+        });
     }
 
     private void populateExpressionsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {

@@ -42,9 +42,13 @@ public interface JobsUIUtils {
     static File createTempDir(String prefix, String suffix) throws IOException {
         File folder = File.createTempFile(prefix, suffix);
         folder.deleteOnExit();
-        assert(folder.delete());
+        if (!folder.delete()) {
+            throw new IOException("Cannot delete " + folder);
+        }
 
-        assert(folder.mkdir());
+        if (!folder.mkdir()) {
+            throw new IOException("Cannot create folder " + folder);
+        }
         return folder;
     }
 
