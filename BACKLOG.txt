@@ -1,9 +1,9 @@
 DOING
 ------
 
-TODO
-------
-- warning on closing project edit with changes
+NEXT
+-----
+- warning on closing project editing with changes
 - why getScriptsLocations() and not getScriptLocation? Do I need more than one location different from "scripts"?
 - when I create a new project and add it to the last opened project registry, I must, eventually, update the main window
 - validate expressions and calls on edit
@@ -23,6 +23,7 @@ TODO
 
 DONE
 -----
+- refactor JobXMLImpl using only one map for all types of parameters
 - onInit script is not formatted in edit
 - problem in JobsUIUtils.createTempDir which does not create the tempdir
 - add menu for adding a script

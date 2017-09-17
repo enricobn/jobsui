@@ -3,18 +3,14 @@ package org.jobsui.core.xml;
 import org.jobsui.core.utils.JobsUIUtils;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 10/11/16.
  */
 public class JobXMLImpl implements JobXML {
-    private final List<SimpleParameterXML> simpleParameterXMLs = new ArrayList<>();
-    private final List<ExpressionXML> expressionXMLs = new ArrayList<>();
-    private final List<CallXML> callXMLs = new ArrayList<>();
-    private final Map<String, ParameterXML> parameters = new HashMap<>();
-    private final Map<String, ExpressionXML> expressions = new HashMap<>();
+    private final Map<String, ParameterXML> parameters = new LinkedHashMap<>();
     private final List<WizardStep> wizardSteps = new ArrayList<>();
-
     private final String id;
     private final String version;
     private String name;
@@ -38,17 +34,14 @@ public class JobXMLImpl implements JobXML {
 
     public void add(SimpleParameterXML simpleParameterXML) throws Exception {
         addCheckedParameter(simpleParameterXML);
-        simpleParameterXMLs.add(simpleParameterXML);
     }
 
     public void add(ExpressionXML expressionXML) throws Exception {
-        addCheckedExpression(expressionXML);
-        expressionXMLs.add(expressionXML);
+        addCheckedParameter(expressionXML);
     }
 
     public void add(CallXML callXML) throws Exception {
         addCheckedParameter(callXML);
-        callXMLs.add(callXML);
     }
 
     @Override
@@ -73,60 +66,55 @@ public class JobXMLImpl implements JobXML {
 
     @Override
     public List<SimpleParameterXML> getSimpleParameterXMLs() {
-        return simpleParameterXMLs;
+        return getParameters(SimpleParameterXML.class);
     }
 
     @Override
     public List<ExpressionXML> getExpressionXMLs() {
-        return expressionXMLs;
+        return getParameters(ExpressionXML.class);
     }
 
     @Override
     public List<CallXML> getCallXMLs() {
-        return callXMLs;
+        return getParameters(CallXML.class);
+    }
+
+    private <T extends ParameterXML> List<T> getParameters(Class<T> clazz) {
+        return parameters.values().stream()
+                .filter(clazz::isInstance)
+                .map(e -> (T) e)
+                .collect(Collectors.toList());
     }
 
     private void addCheckedParameter(ParameterXML parameterXML) throws Exception {
-        if (expressions.containsKey(parameterXML.getKey())) {
+        if (parameters.containsKey(parameterXML.getKey())) {
             throw new Exception("Duplicate key '" + parameterXML.getKey() + "' for parameter " +
                     "with name '" + parameterXML.getName() + "'.");
         }
 
-        if (parameters.put(parameterXML.getKey(), parameterXML) != null) {
-            throw new Exception("Duplicate key '" + parameterXML.getKey() + "' for parameter " +
-                    "with name '" + parameterXML.getName() + "'.");
-        }
+        parameters.put(parameterXML.getKey(), parameterXML);
         parameterXML.setOrder(order);
         order += 1_000;
     }
 
-    private void addCheckedExpression(ExpressionXML expressionXML) throws Exception {
-        if (parameters.containsKey(expressionXML.getKey())) {
-            throw new Exception("Duplicate key '" + expressionXML.getKey() + "' for expression " +
-                    "with name '" + expressionXML.getName() + "'.");
-        }
-        if (expressions.put(expressionXML.getKey(), expressionXML) != null) {
-            throw new Exception("Duplicate key '" + expressionXML.getKey() + "' for expression " +
-                    "with name '" + expressionXML.getName() + "'.");
-        }
-    }
-
     @Override
     public ParameterXML getParameter(String key) {
-        if (!parameters.containsKey(key)) {
-            return expressions.get(key);
-        }
         return parameters.get(key);
     }
 
-//    @Override
-//    public SimpleParameterXML getSimpleParameter(String key) {
-//        return parameters.get(key);
-//    }
-
     @Override
     public ExpressionXML getExpression(String key) {
-        return expressions.get(key);
+        return getParameter(key, ExpressionXML.class);
+    }
+
+    private <T extends ParameterXML> T getParameter(String key, Class<T> clazz) {
+        ParameterXML parameterXML = parameters.get(key);
+        if (parameterXML == null) {
+            return null;
+        } else if (clazz.isAssignableFrom(parameterXML.getClass())) {
+            return (T) parameterXML;
+        }
+        throw new RuntimeException("Key='" + key + "' is a " + parameterXML.getClass().getName() + ".");
     }
 
     @Override
