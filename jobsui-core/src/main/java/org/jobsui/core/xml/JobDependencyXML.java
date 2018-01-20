@@ -10,7 +10,6 @@ import java.util.List;
  */
 public abstract class JobDependencyXML implements ValidatingXML,JobDependency {
     private final List<String> dependencies = new ArrayList<>();
-    private int order;
     private String key;
 
     JobDependencyXML(String key) {

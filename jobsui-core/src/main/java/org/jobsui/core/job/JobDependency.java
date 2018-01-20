@@ -63,10 +63,10 @@ public interface JobDependency {
     List<String> getDependencies();
 
     default List<String> getSortedDependencies(JobDependencyProvider provider) throws Exception {
-        return JobDependency.getSortedDependenciesKeys(
-                getDependencies().stream()
-                        .map(provider::getJobDependency)
-                        .collect(Collectors.toList()));
+        List<JobDependency> dependencies = getDependencies().stream()
+                .map(provider::getJobDependency)
+                .collect(Collectors.toList());
+        return JobDependency.getSortedDependenciesKeys(dependencies);
     }
 
 }
