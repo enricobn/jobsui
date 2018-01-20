@@ -90,13 +90,13 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
 
     @Override
     public List<Bookmark> getBookmarks(Project project, Job job) {
-        // I cannot cache bookmarks since it depends on job's classloader
+        // I cannot cache bookmarks since they depend on job's classloader
         return Collections.unmodifiableList(bookmarksStore.getBookmarks(project, job));
     }
 
     @Override
     public void saveBookmark(Project project, Job job, Bookmark bookmark) {
-        // I cannot cache bookmarks since it depends on job's classloader
+        // I cannot cache bookmarks since they depend on job's classloader
         try {
             bookmarksStore.saveBookmark(project, job, bookmark);
         } catch (IOException e) {

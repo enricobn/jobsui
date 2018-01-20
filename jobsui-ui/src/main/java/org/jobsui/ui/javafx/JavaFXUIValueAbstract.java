@@ -64,12 +64,7 @@ public class JavaFXUIValueAbstract extends UIValueAbstract<Node> {
         if (value == null) {
             component.setText(null);
         } else {
-            String text;
-            if (getConverter() != null) {
-                text = getConverter().toString(value);
-            } else {
-                text = value.toString();
-            }
+            String text = getConverter().toString(value);
             component.setText(text);
         }
 
