@@ -1,7 +1,6 @@
 package org.jobsui.ui.swing;
 
-import org.jobsui.core.ui.StringConverter;
-import org.jobsui.core.ui.UIValue;
+import org.jobsui.ui.common.UIValueAbstract;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -15,11 +14,10 @@ import java.util.List;
 /**
  * Created by enrico on 5/1/16.
  */
-public class SwingUIValue implements UIValue<JComponent> {
+public class SwingUIValue extends UIValueAbstract<JComponent> {
     private final JTextField component = new JTextField();
     private final Observable<Serializable> observable;
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
-    private StringConverter<Serializable> converter;
     private Serializable defaultValue;
 
     public SwingUIValue() {
@@ -33,7 +31,7 @@ public class SwingUIValue implements UIValue<JComponent> {
 
                 @Override
                 public void focusLost(FocusEvent e) {
-                    Serializable value = converter.fromString(component.getText());
+                    Serializable value = getConverter().fromString(component.getText());
                     subscriber.onNext(value);
                 }
             });
@@ -49,7 +47,7 @@ public class SwingUIValue implements UIValue<JComponent> {
 
     @Override
     public Serializable getValue() {
-        return converter.fromString(component.getText());
+        return getConverter().fromString(component.getText());
     }
 
     public JComponent getComponent() {
@@ -59,10 +57,6 @@ public class SwingUIValue implements UIValue<JComponent> {
     public void setDefaultValue(Serializable value) {
         this.defaultValue = value;
         setValue(value);
-    }
-
-    public void setConverter(StringConverter<Serializable> converter) {
-        this.converter = converter;
     }
 
     @Override
@@ -79,7 +73,7 @@ public class SwingUIValue implements UIValue<JComponent> {
 
     @Override
     public void setValue(Serializable value) {
-        component.setText(converter.toString(value));
+        component.setText(getConverter().toString(value));
     }
 
     @Override

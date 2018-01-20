@@ -2,9 +2,7 @@ package org.jobsui.ui.javafx;
 
 import javafx.scene.Node;
 import javafx.scene.control.TextField;
-import org.jobsui.core.ui.StringConverter;
-import org.jobsui.core.ui.StringConverterString;
-import org.jobsui.core.ui.UIValue;
+import org.jobsui.ui.common.UIValueAbstract;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -15,11 +13,10 @@ import java.util.List;
 /**
  * Created by enrico on 3/30/17.
  */
-public class JavaFXUIValueAbstract implements UIValue<Node> {
+public class JavaFXUIValueAbstract extends UIValueAbstract<Node> {
     private final TextField component;
     private final Observable<Serializable> observable;
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
-    private StringConverter<Serializable> converter = new StringConverterString();
 
     public JavaFXUIValueAbstract(TextField component) {
         this.component = component;
@@ -28,11 +25,6 @@ public class JavaFXUIValueAbstract implements UIValue<Node> {
             subscribers.add(subscriber);
         });
         component.textProperty().addListener((obs, oldValue, newValue) -> notifySubscribers());
-    }
-
-    @Override
-    public void setConverter(StringConverter<Serializable> converter) {
-        this.converter = converter;
     }
 
     @Override
@@ -73,8 +65,8 @@ public class JavaFXUIValueAbstract implements UIValue<Node> {
             component.setText(null);
         } else {
             String text;
-            if (converter != null) {
-                text = converter.toString(value);
+            if (getConverter() != null) {
+                text = getConverter().toString(value);
             } else {
                 text = value.toString();
             }
