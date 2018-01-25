@@ -109,31 +109,28 @@ public class JobRunnerTest {
             return null;
         }).when(ui).showError(anyString(), any(Throwable.class));
 
-        when(ui.createWidget(anyString(), any(UIComponent.class))).thenAnswer(new Answer<UIWidget>() {
-            @Override
-            public UIWidget answer(InvocationOnMock invocation) throws Throwable {
-                String title = invocation.getArgumentAt(0, String.class);
-                UIComponent component = invocation.getArgumentAt(1, UIComponent.class);
-                AtomicBoolean disabled = new AtomicBoolean();
+        when(ui.createWidget(anyString(), any())).thenAnswer((Answer<UIWidget>) invocation -> {
+            String title = invocation.getArgumentAt(0, String.class);
+            UIComponent component = invocation.getArgumentAt(1, UIComponent.class);
+            AtomicBoolean disabled = new AtomicBoolean();
 
-                final UIWidget widget = mock(UIWidget.class);
+            final UIWidget widget = mock(UIWidget.class);
 
-                when(widget.getComponent()).thenReturn(component);
-                doAnswer(invocation1 -> {
-                    Boolean disabledValue = (Boolean) invocation1.getArguments()[0];
-                    disabled.set(disabledValue);
-                    return null;
-                }).when(widget).setDisable(anyBoolean());
-                when(widget.isEnabled()).thenAnswer(invocation2 -> !disabled.get());
+            when(widget.getComponent()).thenReturn(component);
+            doAnswer(invocation1 -> {
+                Boolean disabledValue = (Boolean) invocation1.getArguments()[0];
+                disabled.set(disabledValue);
+                return null;
+            }).when(widget).setDisable(anyBoolean());
+            when(widget.isEnabled()).thenAnswer(invocation2 -> !disabled.get());
 
-                widgets.put(title, widget);
-                return widget;
-            }
+            widgets.put(title, widget);
+            return widget;
         });
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         verify(runButton).setTitle("Run");
         verify(bookmarkButton).setTitle("Bookmark");
     }
@@ -700,7 +697,7 @@ public class JobRunnerTest {
         surname.addDependency(name.getKey());
         parameterDefs.add(surname);
 
-        return new JobAbstract<String>() {
+        return new Job<String>() {
 
             @Override
             public String getId() {
@@ -832,7 +829,7 @@ public class JobRunnerTest {
         user.addDependency(db.getKey());
         user.addDependency(version.getKey());
 
-        return new JobAbstract<String>() {
+        return new Job<String>() {
             @Override
             public String getId() {
                 return "JobRunnerTest.complexJob";

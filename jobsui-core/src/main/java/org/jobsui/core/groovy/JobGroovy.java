@@ -4,7 +4,7 @@ import com.github.zafarkhaja.semver.Version;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
-import org.jobsui.core.job.JobAbstract;
+import org.jobsui.core.job.Job;
 import org.jobsui.core.job.JobExpression;
 import org.jobsui.core.job.JobParameter;
 import org.jobsui.core.runner.JobResult;
@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * Created by enrico on 5/4/16.
  */
-public class JobGroovy<T> extends JobAbstract<T> {
+public class JobGroovy<T> implements Job<T> {
     private final String id;
     private final Version version;
     private final String name;

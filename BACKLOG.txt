@@ -1,5 +1,6 @@
 DOING
 ------
+- JobDependency and JobDependencyXML are correct names?
 
 NEXT
 -----
@@ -20,6 +21,8 @@ NEXT
   is it needed?
    returns both
 - EditProject: the call to JobXML.getParameter is needed? Can I call a specific method for parameter, expression and call?
+- JobsUIPreferencesImpl why save every time all?
+- history of run
 
 DONE
 -----

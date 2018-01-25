@@ -39,10 +39,6 @@ public interface Job<T> extends JobDependencyProvider {
 
     List<String> validate(Map<String, Serializable> values);
 
-    JobParameter getParameter(String key);
-
-    JobExpression getExpression(String key);
-
     List<WizardStep> getWizardSteps();
 
     default ClassLoader getClassLoader() {
@@ -79,4 +75,24 @@ public interface Job<T> extends JobDependencyProvider {
     default CompatibleJobId getCompatibleJobId() {
         return new CompatibleJobId(getId(), getVersion().getMajorVersion());
     }
+
+
+    default JobParameter getParameter(String key) {
+        for (JobParameter parameterDef : getParameterDefs()) {
+            if (parameterDef.getKey().equals(key)) {
+                return parameterDef;
+            }
+        }
+        return null;
+    }
+
+    default JobExpression getExpression(String key) {
+        for (JobExpression jobExpression : getExpressions()) {
+            if (jobExpression.getKey().equals(key)) {
+                return jobExpression;
+            }
+        }
+        return null;
+    }
+
 }
