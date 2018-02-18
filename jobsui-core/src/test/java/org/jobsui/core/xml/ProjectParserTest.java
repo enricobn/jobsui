@@ -1,9 +1,9 @@
 package org.jobsui.core.xml;
 
-import org.jobsui.core.groovy.ProjectGroovy;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
+import org.jobsui.core.ui.UIComponentRegistryImpl;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -50,7 +50,7 @@ public class ProjectParserTest {
     public void assert_that_is_visible_for_inv_expression_in_Simplejob_is_false() throws Exception {
         JobParser parser = new JobParserImpl();
         URL url = ProjectParserTest.class.getResource("/simplejob/simple.xml");
-        JobXML job = parser.parse("simple", url);
+        JobXML job = parser.parse("simple", url, new UIComponentRegistryImpl());
         ExpressionXML inv = job.getExpression("inv");
         assertThat(inv.isVisible(), is(false));
     }
@@ -59,7 +59,7 @@ public class ProjectParserTest {
     public void parse_wizard() throws Exception {
         JobParser parser = new JobParserImpl();
         URL url = ProjectParserTest.class.getResource("/simplejob/simpleWithWizard.xml");
-        JobXML job = parser.parse("simpleWithWizard", url);
+        JobXML job = parser.parse("simpleWithWizard", url, new UIComponentRegistryImpl());
 
         assertThat(job.getWizardSteps().size(), is(2));
 

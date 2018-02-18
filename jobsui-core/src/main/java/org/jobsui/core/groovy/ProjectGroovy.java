@@ -3,6 +3,7 @@ package org.jobsui.core.groovy;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.job.ProjectId;
+import org.jobsui.core.ui.UIComponentRegistry;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -17,7 +18,8 @@ public class ProjectGroovy implements Project {
     private final Map<String, JobGroovy<Serializable>> jobs;
     private final Map<String, Project> referencedProjects;
 
-    public ProjectGroovy(ProjectId id, String name, Map<String, JobGroovy<Serializable>> jobs, Map<String, Project> referencedProjects) {
+    public ProjectGroovy(ProjectId id, String name, Map<String, JobGroovy<Serializable>> jobs,
+                         Map<String, Project> referencedProjects) {
         this.id = id;
         this.name = name;
         this.jobs = jobs;
@@ -43,7 +45,7 @@ public class ProjectGroovy implements Project {
     public String getName() {
         return name;
     }
-
+    
     public Project getProject(String id) {
         return referencedProjects.get(id);
     }

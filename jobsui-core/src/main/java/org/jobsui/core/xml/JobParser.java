@@ -1,5 +1,7 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.ui.UIComponentRegistry;
+
 import java.net.URL;
 
 /**
@@ -7,6 +9,6 @@ import java.net.URL;
  */
 public interface JobParser {
 
-    JobXML parse(String id, URL url) throws Exception;
+    JobXML parse(String id, URL url, UIComponentRegistry uiComponentRegistry) throws Exception;
 
 }

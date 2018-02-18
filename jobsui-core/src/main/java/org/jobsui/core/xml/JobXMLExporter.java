@@ -1,5 +1,6 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.ui.UIComponentRegistryImpl;
 import org.jobsui.core.ui.UIComponentType;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.w3c.dom.Document;
@@ -37,8 +38,8 @@ class JobXMLExporter {
         for (SimpleParameterXML parameter : jobXML.getSimpleParameterXMLs()) {
             Element element = createParameterElement(doc, rootElement, parameter, "Parameter");
 
-            if (!parameter.getComponent().equals(UIComponentType.Value)) {
-                XMLUtils.addAttr(element, "component", parameter.getComponent().name());
+            if (!parameter.getComponent().equals(UIComponentRegistryImpl.Value.getName())) {
+                XMLUtils.addAttr(element, "component", parameter.getComponent().getName());
             }
 
             if (parameter.getOnInitScript() != null && !parameter.getOnInitScript().isEmpty()) {

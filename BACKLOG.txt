@@ -1,9 +1,10 @@
 DOING
 ------
-- JobDependency and JobDependencyXML are correct names?
+- customizable UIComponentType
 
 NEXT
 -----
+- JobDependency and JobDependencyXML are correct names?
 - warning on closing project editing with changes
 - why getScriptsLocations() and not getScriptLocation? Do I need more than one location different from "scripts"?
 - when I create a new project and add it to the last opened project registry, I must, eventually, update the main window

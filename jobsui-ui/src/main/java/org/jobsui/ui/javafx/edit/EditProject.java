@@ -13,17 +13,17 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.jobsui.core.JobsUIPreferences;
+import org.jobsui.core.ui.UIComponentRegistry;
+import org.jobsui.core.ui.UIComponentRegistryImpl;
 import org.jobsui.core.ui.UIComponentType;
+import org.jobsui.core.ui.UIComponentRegistryComposite;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.jobsui.core.xml.*;
 import org.jobsui.ui.javafx.JavaFXUI;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -40,6 +40,23 @@ public class EditProject {
     private JobsUIPreferences preferences;
     private JavaFXUI ui;
     private SplitPane splitPane;
+    private final UIComponentRegistryComposite uiComponentRegistry = new UIComponentRegistryComposite();
+    private final UIComponentRegistry customUiComponentRegistry = new UIComponentRegistry() {
+        @Override
+        public Optional<UIComponentType> getComponentType(String name) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Collection<UIComponentType> getComponentTypes() {
+            return Collections.emptyList();
+        }
+    };
+
+    public EditProject() {
+        uiComponentRegistry.add(customUiComponentRegistry);
+        uiComponentRegistry.add(new UIComponentRegistryImpl());
+    }
 
     public Parent getEditNode(JavaFXUI ui) {
         this.ui = ui;
@@ -421,8 +438,8 @@ public class EditProject {
         Menu addParameter = new Menu("Add");
         contextMenu.getItems().add(addParameter);
 
-        for (UIComponentType uiComponentType : UIComponentType.values()) {
-            MenuItem addParameterType = new MenuItem(uiComponentType.name());
+        for (UIComponentType uiComponentType : uiComponentRegistry.getComponentTypes()) {
+            MenuItem addParameterType = new MenuItem(uiComponentType.getName());
             addParameter.getItems().add(addParameterType);
             addParameterType.setOnAction(e -> {
                 SimpleParameterXML parameter = new SimpleParameterXML("newKey", "newName", uiComponentType);

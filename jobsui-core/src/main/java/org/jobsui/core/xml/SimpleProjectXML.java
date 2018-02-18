@@ -1,5 +1,7 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.ui.UIComponentRegistry;
+
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
@@ -38,4 +40,7 @@ public interface SimpleProjectXML extends ValidatingXML {
                 .map(location -> getRelativeURL(location + "/"))
                 .collect(Collectors.toList()).toArray(new URL[0]);
     }
+
+    UIComponentRegistry getUiComponentRegistry();
+
 }

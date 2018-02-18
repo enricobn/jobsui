@@ -56,6 +56,7 @@ public class TestMain extends ApplicationTest {
         when(preferences.getRunHeight()).thenReturn(600d);
         when(preferences.getEditWidth()).thenReturn(600d);
         when(preferences.getEditHeight()).thenReturn(600d);
+        when(preferences.getRunDividerPosition()).thenReturn(0.4d);
     }
 
     @Override
@@ -105,7 +106,7 @@ public class TestMain extends ApplicationTest {
     }
 
     @Test
-    public void run() throws Exception {
+    public void run() {
         openProject();
 
         Button okButton = getButtonByText("OK");
@@ -126,6 +127,8 @@ public class TestMain extends ApplicationTest {
             sleep(100);
             Button button = getButtonByText("Run");
             if (button != null) {
+                // TODO I don't know why I must sleep
+                sleep(500);
                 return button;
             }
         }

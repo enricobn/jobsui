@@ -1,6 +1,8 @@
 package org.jobsui.core.xml;
 
 import org.jobsui.core.groovy.JobsUIParseException;
+import org.jobsui.core.ui.UIComponentRegistry;
+import org.jobsui.core.ui.UIComponentRegistryImpl;
 import org.jobsui.core.ui.UIComponentType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -40,11 +42,11 @@ public class JobParserImpl implements JobParser {
 
     public static JobXML parse(SimpleProjectXML projectXML, String jobResource) throws Exception {
         JobParserImpl jobParser = new JobParserImpl();
-        return jobParser.parse(projectXML.getJobId(jobResource), projectXML.getRelativeURL(jobResource));
+        return jobParser.parse(projectXML.getJobId(jobResource), projectXML.getRelativeURL(jobResource), projectXML.getUiComponentRegistry());
     }
 
     @Override
-    public JobXML parse(String id, URL url) throws Exception {
+    public JobXML parse(String id, URL url, UIComponentRegistry uiComponentRegistry) throws Exception {
         try (InputStream inputStream = url.openStream()) {
             final StreamSource source = new StreamSource(inputStream);
             try {
@@ -78,7 +80,7 @@ public class JobParserImpl implements JobParser {
 
             jobXML.setValidateScript(validateScript);
 
-            parseParameters(doc, jobXML);
+            parseParameters(doc, jobXML, uiComponentRegistry);
 
             parseExpressions(doc, jobXML);
 
@@ -161,7 +163,7 @@ public class JobParserImpl implements JobParser {
         }
     }
 
-    private static void parseParameters(Document doc, JobXMLImpl jobXML)
+    private static void parseParameters(Document doc, JobXMLImpl jobXML, UIComponentRegistry uiComponentRegistry)
             throws Exception {
         NodeList parametersList = doc.getElementsByTagName("Parameter");
 
@@ -185,8 +187,13 @@ public class JobParserImpl implements JobParser {
             boolean visible = visibleString == null || visibleString.isEmpty() || Boolean.parseBoolean(visibleString);
             boolean optional = optionalString != null && !optionalString.isEmpty() && Boolean.parseBoolean(optionalString);
 
+            // TODO throw Exception?
+            UIComponentType componentType = uiComponentRegistry
+                    .getComponentType(component)
+                    .orElse(UIComponentRegistryImpl.Value);
+
             SimpleParameterXML simpleParameterXML = new SimpleParameterXML(parameterKey, parameterName,
-                    UIComponentType.valueOf(component));
+                    componentType);
             simpleParameterXML.setValidateScript(parameterValidateScript);
             simpleParameterXML.setOnInitScript(onInitScript);
             simpleParameterXML.setOnDependenciesChangeScript(onDependenciesChangeScript);

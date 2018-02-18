@@ -48,17 +48,7 @@ public class JobParameterGroovySimple extends JobParameterAbstract implements Jo
 
     @Override
     public <C> UIComponent<C> createComponent(UI<C> ui) throws UnsupportedComponentException {
-        UIComponent uiComponent;
-
-        switch (componentType) {
-            case Value: uiComponent = ui.create(UIValue.class); break;
-            case Password: uiComponent = ui.create(UIPassword.class); break;
-            case Choice: uiComponent = ui.create(UIChoice.class); break;
-            case CheckBox: uiComponent = ui.create(UICheckBox.class); break;
-            case Button: uiComponent = ui.create(UIButton.class); break;
-            case List: uiComponent = ui.create(UIList.class); break;
-            default: throw new IllegalArgumentException("Cannot instantiate component " + componentType);
-        }
+        UIComponent uiComponent = componentType.create(ui);
 
         if (onInit != null) {
             // I reset the bindings otherwise I get "global" or previous bindings

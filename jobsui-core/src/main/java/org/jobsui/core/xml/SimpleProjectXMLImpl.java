@@ -1,5 +1,7 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.ui.UIComponentRegistry;
+import org.jobsui.core.ui.UIComponentRegistryImpl;
 import org.jobsui.core.utils.JobsUIUtils;
 
 import java.net.MalformedURLException;
@@ -15,6 +17,7 @@ public class SimpleProjectXMLImpl implements SimpleProjectXML {
     private final Set<String> libraries = new HashSet<>();
     private final Map<String, String> imports = new HashMap<>();
     private final List<String> jobs = new ArrayList<>();
+    private final UIComponentRegistry uiComponentRegistry = new UIComponentRegistryImpl();
     private String name;
     private String version;
 
@@ -97,6 +100,11 @@ public class SimpleProjectXMLImpl implements SimpleProjectXML {
 
     public String getVersion() {
         return version;
+    }
+
+    @Override
+    public UIComponentRegistry getUiComponentRegistry() {
+        return uiComponentRegistry;
     }
 
     public void setVersion(String version) {

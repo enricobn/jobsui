@@ -7,6 +7,7 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
+import org.jobsui.core.ui.UIComponentRegistryImpl;
 import org.jobsui.core.ui.UIComponentType;
 import org.jobsui.core.xml.*;
 import org.jobsui.ui.javafx.JavaFXUI;
@@ -136,7 +137,7 @@ public class NewProject {
 
         JobXMLImpl jobXML = new JobXMLImpl("newjob", "NewJob", "1.0.0");
         SimpleParameterXML parameter = new SimpleParameterXML("message", "Message",
-                UIComponentType.Value);
+                UIComponentRegistryImpl.Value);
         parameter.setOnInitScript("component.setValue('Hello world')");
         jobXML.add(parameter);
         jobXML.setRunScript("println(\"${message}\")");
