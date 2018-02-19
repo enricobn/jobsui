@@ -1,10 +1,8 @@
-package org.jobsui.ui.javafx;
+package org.jobsui.ui.javafx.uicomponent;
 
-import com.jfoenix.controls.JFXCheckBox;
 import javafx.scene.Node;
-import javafx.scene.control.CheckBox;
-import org.jobsui.core.ui.JobsUITheme;
-import org.jobsui.core.ui.UICheckBox;
+import javafx.scene.control.TextField;
+import org.jobsui.ui.common.UIValueAbstract;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -13,22 +11,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by enrico on 5/31/16.
+ * Created by enrico on 3/30/17.
  */
-public class JavaFXUICheckBox implements UICheckBox<Node> {
-    private final CheckBox component;
+public class JavaFXUIValueAbstract extends UIValueAbstract<Node> {
+    private final TextField component;
     private final Observable<Serializable> observable;
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
-    private final JavaFXUI ui;
 
-    public JavaFXUICheckBox(JavaFXUI ui) {
-        this.ui = ui;
-        component = createCheckBox();
+    public JavaFXUIValueAbstract(TextField component) {
+        this.component = component;
         observable = Observable.create(subscriber -> {
             subscriber.onStart();
             subscribers.add(subscriber);
         });
-        component.setOnAction(event -> notifySubscribers());
+        component.textProperty().addListener((obs, oldValue, newValue) -> notifySubscribers());
+    }
+
+    @Override
+    public void setDefaultValue(Serializable value) {
+        setValue(value);
     }
 
     @Override
@@ -42,13 +43,13 @@ public class JavaFXUICheckBox implements UICheckBox<Node> {
     }
 
     @Override
-    public Boolean getValue() {
-        return component.isSelected();
+    public Serializable getValue() {
+        return component.getText();
     }
 
     @Override
     public void notifySubscribers() {
-        for (Subscriber<? super Boolean> subscriber : subscribers) {
+        for (Subscriber<? super Serializable> subscriber : subscribers) {
             subscriber.onNext(getValue());
         }
     }
@@ -60,9 +61,15 @@ public class JavaFXUICheckBox implements UICheckBox<Node> {
 
     @Override
     public void setValue(Serializable value) {
-        component.setSelected((Boolean) value);
+        if (value == null) {
+            component.setText(null);
+        } else {
+            String text = getConverter().toString(value);
+            component.setText(text);
+        }
 
-        // if getScene() == null then the change is not automatically notified
+        // if getScene() == null (the component has not been added to ui, for example in wizard)
+        // then the change is not automatically notified
         if (!component.isVisible() || component.getScene() == null) {
             notifySubscribers();
         }
@@ -70,21 +77,10 @@ public class JavaFXUICheckBox implements UICheckBox<Node> {
 
     @Override
     public void setTitle(String label) {
-//        component.setText(label);
     }
 
     @Override
     public void setEnabled(boolean enable) {
         component.setDisable(!enable);
-    }
-
-    private CheckBox createCheckBox() {
-        CheckBox result;
-        if (ui.getPreferences().getTheme() == JobsUITheme.Material) {
-            result = new JFXCheckBox();
-        } else {
-            result = new CheckBox();
-        }
-        return result;
     }
 }

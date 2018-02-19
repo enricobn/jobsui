@@ -1,10 +1,11 @@
-package org.jobsui.ui.javafx;
+package org.jobsui.ui.javafx.uicomponent;
 
 import com.jfoenix.controls.JFXButton;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.ui.UIButton;
+import org.jobsui.ui.javafx.JavaFXUI;
 import rx.Observable;
 import rx.Subscriber;
 

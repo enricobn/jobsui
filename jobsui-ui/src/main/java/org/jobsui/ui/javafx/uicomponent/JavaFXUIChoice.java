@@ -1,4 +1,4 @@
-package org.jobsui.ui.javafx;
+package org.jobsui.ui.javafx.uicomponent;
 
 import com.jfoenix.controls.JFXComboBox;
 import javafx.event.ActionEvent;
@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.ui.UIChoice;
+import org.jobsui.ui.javafx.JavaFXUI;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -18,7 +19,7 @@ import java.util.Objects;
 /**
  * Created by enrico on 10/7/16.
  */
-class JavaFXUIChoice implements UIChoice<Node> {
+public class JavaFXUIChoice implements UIChoice<Node> {
 //    private final FlowPane component = new FlowPane();
     private final Node component;
     private final ComboBox<Serializable> combo;
@@ -29,7 +30,7 @@ class JavaFXUIChoice implements UIChoice<Node> {
     //    private String title;
     private boolean disableListener = false;
 
-    JavaFXUIChoice(JavaFXUI ui) {
+    public JavaFXUIChoice(JavaFXUI ui) {
         this.ui = ui;
         combo = createComboBox();
         component = combo;

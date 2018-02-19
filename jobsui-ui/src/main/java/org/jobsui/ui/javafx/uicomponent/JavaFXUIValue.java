@@ -1,9 +1,10 @@
-package org.jobsui.ui.javafx;
+package org.jobsui.ui.javafx.uicomponent;
 
 import com.jfoenix.controls.JFXTextField;
 import javafx.scene.control.TextField;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.JobsUITheme;
+import org.jobsui.ui.javafx.JavaFXUI;
 
 /**
  * Created by enrico on 3/30/17.

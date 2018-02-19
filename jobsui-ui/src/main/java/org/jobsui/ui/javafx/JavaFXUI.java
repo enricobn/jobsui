@@ -1,6 +1,5 @@
 package org.jobsui.ui.javafx;
 
-import com.jfoenix.controls.*;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.VPos;
@@ -11,6 +10,7 @@ import javafx.scene.layout.Priority;
 import org.jobsui.core.CommandLineArguments;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.*;
+import org.jobsui.ui.javafx.uicomponent.*;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
