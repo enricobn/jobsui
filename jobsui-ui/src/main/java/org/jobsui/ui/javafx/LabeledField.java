@@ -1,12 +1,13 @@
 package org.jobsui.ui.javafx;
 
+import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import org.jobsui.core.ui.UIValue;
 
 public class LabeledField extends VBox {
 
-    private final TextField field;
+    private final UIValue<Node> field;
 
     public LabeledField(JavaFXUI ui, String text) {
 
@@ -14,11 +15,11 @@ public class LabeledField extends VBox {
         label.getStyleClass().add(JobsUIFXStyles.EDIT_PROPERTY_NAME_TEXT);
         getChildren().add(label);
 
-        this.field = ui.createTextField();
-        getChildren().add(field);
+        this.field = ui.createValue();
+        getChildren().add(field.getComponent());
     }
 
-    public TextField getField() {
+    public UIValue<Node> getField() {
         return field;
     }
 }

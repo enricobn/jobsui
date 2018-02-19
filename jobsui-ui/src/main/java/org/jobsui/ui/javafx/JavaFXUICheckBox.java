@@ -1,7 +1,9 @@
 package org.jobsui.ui.javafx;
 
+import com.jfoenix.controls.JFXCheckBox;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
+import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.ui.UICheckBox;
 import rx.Observable;
 import rx.Subscriber;
@@ -17,9 +19,11 @@ public class JavaFXUICheckBox implements UICheckBox<Node> {
     private final CheckBox component;
     private final Observable<Serializable> observable;
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
+    private final JavaFXUI ui;
 
     public JavaFXUICheckBox(JavaFXUI ui) {
-        component = ui.createCheckBox();
+        this.ui = ui;
+        component = createCheckBox();
         observable = Observable.create(subscriber -> {
             subscriber.onStart();
             subscribers.add(subscriber);
@@ -72,5 +76,15 @@ public class JavaFXUICheckBox implements UICheckBox<Node> {
     @Override
     public void setEnabled(boolean enable) {
         component.setDisable(!enable);
+    }
+
+    private CheckBox createCheckBox() {
+        CheckBox result;
+        if (ui.getPreferences().getTheme() == JobsUITheme.Material) {
+            result = new JFXCheckBox();
+        } else {
+            result = new CheckBox();
+        }
+        return result;
     }
 }

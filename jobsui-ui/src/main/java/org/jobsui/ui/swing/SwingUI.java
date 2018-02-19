@@ -38,20 +38,33 @@ public class SwingUI implements UI<JComponent> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <COMP extends UIComponent> COMP create(Class<COMP> componentType) throws UnsupportedComponentException {
-        if (componentType == UIButton.class) {
-            return (COMP) new SwingUIButton();
-        } else if (componentType == UIChoice.class) {
-            return (COMP) new SwingUIChoice();
-        } else if (componentType == UIList.class) {
-            return (COMP) new SwingUIList();
-        } else if (componentType == UIValue.class) {
-            return (COMP) new SwingUIValue();
-        } else if (componentType == UICheckBox.class) {
-            return (COMP) new SwingUICheckBox();
-        }
-        throw new UnsupportedComponentException("SWING: cannot find component for " + componentType.getName());
+    public UIButton<JComponent> createButton() {
+        return new SwingUIButton();
+    }
+
+    @Override
+    public UICheckBox<JComponent> createCheckBox() {
+        return new SwingUICheckBox();
+    }
+
+    @Override
+    public UIChoice<JComponent> createChoice() {
+        return new SwingUIChoice();
+    }
+
+    @Override
+    public UIList<JComponent> createList() {
+        return new SwingUIList();
+    }
+
+    @Override
+    public UIPassword<JComponent> createPassword() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public UIValue<JComponent> createValue() {
+        return new SwingUIValue();
     }
 
     @Override

@@ -1,9 +1,11 @@
 package org.jobsui.ui.javafx;
 
+import com.jfoenix.controls.JFXComboBox;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
+import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.ui.UIChoice;
 import rx.Observable;
 import rx.Subscriber;
@@ -23,11 +25,13 @@ class JavaFXUIChoice implements UIChoice<Node> {
 //    private final Button button = new Button("...");
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
     private final Observable<Serializable> observable;
-//    private String title;
+    private final JavaFXUI ui;
+    //    private String title;
     private boolean disableListener = false;
 
     JavaFXUIChoice(JavaFXUI ui) {
-        combo = ui.createComboBox();
+        this.ui = ui;
+        combo = createComboBox();
         component = combo;
         observable = Observable.create(subscriber -> {
             subscriber.onStart();
@@ -166,5 +170,17 @@ class JavaFXUIChoice implements UIChoice<Node> {
     public void setTitle(String label) {
 //        this.title = label;
     }
+
+    private <T> ComboBox<T> createComboBox() {
+        ComboBox<T> result;
+        if (ui.getPreferences().getTheme() == JobsUITheme.Material) {
+            result = new JFXComboBox<>();
+        } else {
+            result = new ComboBox<>();
+        }
+        return result;
+    }
+
+
 
 }

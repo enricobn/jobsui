@@ -1,21 +1,20 @@
 package org.jobsui.ui.javafx;
 
-import javafx.scene.control.Button;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
+import org.jobsui.core.ui.UIButton;
+import org.jobsui.core.ui.UIValue;
 
 import java.io.File;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
+import java.util.Objects;
 
 public class LabeledDirectoryChooser extends VBox {
 
-    private final TextField field;
+    private final UIValue<Node> field;
 
     public LabeledDirectoryChooser(JavaFXUI ui, String text) {
         Label label = new Label(text);
@@ -25,19 +24,19 @@ public class LabeledDirectoryChooser extends VBox {
         HBox hBox = new HBox(10);
         getChildren().add(hBox);
 
-        this.field = ui.createTextField();
-        HBox.setHgrow(field, Priority.ALWAYS);
-        hBox.getChildren().add(field);
+        this.field = ui.createValue();
+        HBox.setHgrow(field.getComponent(), Priority.ALWAYS);
+        hBox.getChildren().add(field.getComponent());
 
-        Button button = ui.createButton();
-        button.setText("...");
-        button.setOnAction(event -> {
+        UIButton<Node> button = ui.createButton();
+        button.setTitle("...");
+        button.getObservable().subscribe(event -> {
             DirectoryChooser chooser = new DirectoryChooser();
 
-            if (field.getText() != null && !field.getText().isEmpty()) {
+            if (field.getValue() != null && !Objects.toString(field.getValue()).isEmpty()) {
 
                 try {
-                    File file = new File(field.getText());
+                    File file = new File(Objects.toString(field.getValue()));
                     if (file.isDirectory()) {
                         chooser.setInitialDirectory(file);
                     }
@@ -50,14 +49,14 @@ public class LabeledDirectoryChooser extends VBox {
 
             File file = chooser.showDialog(null);
             if (file != null) {
-                field.setText(file.getAbsolutePath());
+                field.setValue(file.getAbsolutePath());
             }
 
         });
-        hBox.getChildren().add(button);
+        hBox.getChildren().add(button.getComponent());
     }
 
-    public TextField getField() {
+    public UIValue<Node> getField() {
         return field;
     }
 }

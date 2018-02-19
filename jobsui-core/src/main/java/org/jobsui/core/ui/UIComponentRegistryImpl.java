@@ -8,37 +8,37 @@ public class UIComponentRegistryImpl implements UIComponentRegistry {
     public static UIComponentType Button = new UIComponentTypeAbstract("Button") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
-            return (COMP) ui.create(UIButton.class);
+            return (COMP) ui.createButton();
         }
     };
     public static UIComponentType CheckBox = new UIComponentTypeAbstract("CheckBox") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
-            return (COMP) ui.create(UICheckBox.class);
+            return (COMP) ui.createCheckBox();
         }
     };
     public static UIComponentType Choice = new UIComponentTypeAbstract("Choice") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
-            return (COMP) ui.create(UIChoice.class);
+            return (COMP) ui.createChoice();
         }
     };
     public static UIComponentType List = new UIComponentTypeAbstract("List") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
-            return (COMP) ui.create(UIList.class);
+            return (COMP) ui.createList();
         }
     };
     public static UIComponentType Password = new UIComponentTypeAbstract("Password") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
-            return (COMP) ui.create(UIPassword.class);
+            return (COMP) ui.createPassword();
         }
     };
     public static UIComponentType Value = new UIComponentTypeAbstract("Value") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
-            return (COMP) ui.create(UIValue.class);
+            return (COMP) ui.createValue();
         }
     };
     private Collection<UIComponentType> componentTypes = Arrays.asList(Button, CheckBox, Choice, List, Password, Value);

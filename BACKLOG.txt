@@ -1,6 +1,6 @@
 DOING
 ------
-- customizable UIComponentType
+- customizable UIComponentType:
 
 NEXT
 -----

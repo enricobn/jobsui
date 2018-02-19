@@ -1,6 +1,7 @@
 package org.jobsui.ui.javafx.edit;
 
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -11,6 +12,7 @@ import javafx.scene.paint.Paint;
 import org.fxmisc.richtext.CodeArea;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.JobsUITheme;
+import org.jobsui.core.ui.UIValue;
 import org.jobsui.core.xml.*;
 import org.jobsui.ui.javafx.JavaFXUI;
 import org.jobsui.ui.javafx.JobsUIFXStyles;
@@ -165,15 +167,15 @@ class ItemDetail extends VBox {
     private void addTextProperty(TreeItem<EditItem> treeItem, String title, Supplier<String> get, Consumer<String> set) {
         addPropertyNameLabel(title);
 
-        TextField control = ui.createTextField();
-        control.setPromptText(title);
-        control.setText(get.get());
+        UIValue<Node> control = ui.createValue();
+        control.setTitle(title);
+        control.setValue(get.get());
 
-        control.textProperty().addListener((observable, oldValue, newValue) -> {
-            set.accept(newValue);
+        control.getObservable().subscribe(newValue -> {
+            set.accept(Objects.toString(newValue));
             updateSelectedItem(treeItem);
         });
-        getChildren().add(control);
+        getChildren().add(control.getComponent());
     }
 
     private void addPropertyNameLabel(String text) {

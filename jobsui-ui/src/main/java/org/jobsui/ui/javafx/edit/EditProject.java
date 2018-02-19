@@ -2,6 +2,7 @@ package org.jobsui.ui.javafx.edit;
 
 import javafx.application.Platform;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
@@ -13,10 +14,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.jobsui.core.JobsUIPreferences;
-import org.jobsui.core.ui.UIComponentRegistry;
-import org.jobsui.core.ui.UIComponentRegistryImpl;
-import org.jobsui.core.ui.UIComponentType;
-import org.jobsui.core.ui.UIComponentRegistryComposite;
+import org.jobsui.core.ui.*;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.jobsui.core.xml.*;
 import org.jobsui.ui.javafx.JavaFXUI;
@@ -36,7 +34,7 @@ public class EditProject {
     private ProjectFSXML projectXML = null;
     private List<String> originalJobs = null;
     private List<String> originalScriptLocations = null;
-    private Button saveButton;
+    private UIButton<Node> saveButton;
     private JobsUIPreferences preferences;
     private JavaFXUI ui;
     private SplitPane splitPane;
@@ -67,8 +65,8 @@ public class EditProject {
         buttons.setPadding(new Insets(5, 5, 5, 5));
 
         saveButton = ui.createButton();
-        saveButton.setText("Save");
-        saveButton.setOnAction(event -> {
+        saveButton.setTitle("Save");
+        saveButton.getObservable().subscribe(event -> {
             // I backup the current project
             File tempDir;
             try {
@@ -107,11 +105,11 @@ public class EditProject {
                 ui.showError("Error saving project.", e);
             }
         });
-        buttons.getChildren().add(saveButton);
+        buttons.getChildren().add(saveButton.getComponent());
 
-        Button saveAsButton = ui.createButton();
-        saveAsButton.setText("Save as");
-        saveAsButton.setOnAction(event -> {
+        UIButton<Node> saveAsButton = ui.createButton();
+        saveAsButton.setTitle("Save as");
+        saveAsButton.getObservable().subscribe(event -> {
             try {
                 DirectoryChooser chooser = new DirectoryChooser();
                 chooser.setTitle("Save project");
@@ -131,7 +129,7 @@ public class EditProject {
                     }
                     ProjectXMLExporter exporter = new ProjectXMLExporter();
                     exporter.export(projectXML, file);
-                    saveButton.setDisable(false);
+                    saveButton.setEnabled(true);
                     projectXML.setFolder(file);
                     setProjectXML(projectXML);
                 }
@@ -139,7 +137,7 @@ public class EditProject {
                 ui.showError("Error saving project.", e);
             }
         });
-        buttons.getChildren().add(saveAsButton);
+        buttons.getChildren().add(saveAsButton.getComponent());
 
         root.getChildren().add(buttons);
 
@@ -261,7 +259,7 @@ public class EditProject {
         setProjectXML(projectXML);
 
         if (isNew) {
-            saveButton.setDisable(true);
+            saveButton.setEnabled(false);
         }
 
         TreeItem<EditItem> root = loadProject(projectXML);

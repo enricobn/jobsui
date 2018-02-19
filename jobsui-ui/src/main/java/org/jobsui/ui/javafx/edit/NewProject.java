@@ -1,14 +1,14 @@
 package org.jobsui.ui.javafx.edit;
 
 import javafx.geometry.Insets;
-import javafx.scene.control.Button;
+import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
+import org.jobsui.core.ui.UIButton;
 import org.jobsui.core.ui.UIComponentRegistryImpl;
-import org.jobsui.core.ui.UIComponentType;
 import org.jobsui.core.xml.*;
 import org.jobsui.ui.javafx.JavaFXUI;
 import org.jobsui.ui.javafx.LabeledDirectoryChooser;
@@ -17,6 +17,7 @@ import org.jobsui.ui.javafx.StartApp;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,14 +30,14 @@ public class NewProject {
         VBox.setVgrow(buttons, Priority.NEVER);
         buttons.setPadding(new Insets(5, 5, 5, 5));
 
-        Button createButton = ui.createButton();
-        createButton.setText("Create");
-        buttons.getChildren().add(createButton);
+        UIButton<Node> createButton = ui.createButton();
+        createButton.setTitle("Create");
+        buttons.getChildren().add(createButton.getComponent());
 
         root.getChildren().add(buttons);
 
         LabeledDirectoryChooser labeledParentFolder = new LabeledDirectoryChooser(ui, "Parent folder");
-        labeledParentFolder.getField().setText(".");
+        labeledParentFolder.getField().setValue(".");
         labeledParentFolder.setPadding(new Insets(20, 10, 0, 10));
         root.getChildren().add(labeledParentFolder);
 
@@ -46,12 +47,12 @@ public class NewProject {
 
         LabeledField labeledNamespace = new LabeledField(ui,"Namespace");
         labeledNamespace.setPadding(new Insets(10, 10, 0, 10));
-        labeledNamespace.getField().setText("myself.com");
+        labeledNamespace.getField().setValue("myself.com");
         root.getChildren().add(labeledNamespace);
 
         LabeledField labeledId = new LabeledField(ui,"Id");
         labeledId.setPadding(new Insets(10, 10, 0, 10));
-        labeledId.getField().setText("myproject");
+        labeledId.getField().setValue("myproject");
         root.getChildren().add(labeledId);
 
         LabeledField labeledName = new LabeledField(ui, "Project name");
@@ -62,35 +63,35 @@ public class NewProject {
 
         AtomicReference<ProjectFSXML> project = new AtomicReference<>();
 
-        createButton.setOnAction(event -> {
+        createButton.getObservable().subscribe(event -> {
             File projectFolder = null;
             try {
 
-                String parentFolder = labeledParentFolder.getField().getText();
+                String parentFolder = Objects.toString(labeledParentFolder.getField().getValue());
                 if (parentFolder == null || parentFolder.isEmpty()) {
                     ui.showMessage("Folder is mandatory.");
                     return;
                 }
 
-                String folder = labeledFolderName.getField().getText();
+                String folder = Objects.toString(labeledFolderName.getField().getValue());
                 if (folder == null || folder.isEmpty()) {
                     ui.showMessage("Folder name is mandatory.");
                     return;
                 }
 
-                String namespace = labeledNamespace.getField().getText();
+                String namespace = Objects.toString(labeledNamespace.getField().getValue());
                 if (namespace == null || namespace.isEmpty()) {
                     ui.showMessage("Namespace is mandatory.");
                     return;
                 }
 
-                String id = labeledId.getField().getText();
+                String id = Objects.toString(labeledId.getField().getValue());
                 if (id == null || id.isEmpty()) {
                     ui.showMessage("Id is mandatory.");
                     return;
                 }
 
-                String name = labeledName.getField().getText();
+                String name = Objects.toString(labeledName.getField().getValue());
                 if (name == null || name.isEmpty()) {
                     ui.showMessage("Project name is mandatory.");
                     return;

@@ -1,7 +1,9 @@
 package org.jobsui.ui.javafx;
 
+import com.jfoenix.controls.JFXButton;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.ui.UIButton;
 import rx.Observable;
 import rx.Subscriber;
@@ -17,9 +19,11 @@ public class JavaFXUIButton implements UIButton<Node> {
     private final Button component;
     private final Observable<Serializable> observable;
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
+    private final JavaFXUI ui;
 
     public JavaFXUIButton(JavaFXUI ui) {
-        component = ui.createButton();
+        this.ui = ui;
+        component = createButton();
         observable = Observable.create(subscriber -> {
             subscriber.onStart();
             subscribers.add(subscriber);
@@ -66,5 +70,16 @@ public class JavaFXUIButton implements UIButton<Node> {
     @Override
     public void setEnabled(boolean enable) {
         component.setDisable(!enable);
+    }
+
+    private Button createButton() {
+        Button result;
+        if (ui.getPreferences().getTheme() == JobsUITheme.Material) {
+            result = new JFXButton();
+            result.getStyleClass().add("button-raised");
+        } else {
+            result = new Button();
+        }
+        return result;
     }
 }

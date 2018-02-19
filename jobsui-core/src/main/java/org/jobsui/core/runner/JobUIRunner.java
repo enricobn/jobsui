@@ -52,13 +52,9 @@ public class JobUIRunner<C> implements JobRunner {
                 UIButton<C> nextButton;
                 UIButton<C> previousButton;
 //            UIButton<C> closeButton;
-                try {
-                    nextButton = ui.create(UIButton.class);
-                    previousButton = ui.create(UIButton.class);
+                nextButton = ui.createButton();
+                previousButton = ui.createButton();
 //                closeButton = ui.create(UIButton.class);
-                } catch (UnsupportedComponentException e) {
-                    throw new RuntimeException(e);
-                }
 
                 nextButton.setTitle("Next");
                 previousButton.setTitle("Back");
@@ -97,13 +93,9 @@ public class JobUIRunner<C> implements JobRunner {
             UIButton<C> runButton;
             UIButton<C> saveBookmarkButton;
 //            UIButton<C> closeButton;
-            try {
-                runButton = ui.create(UIButton.class);
-                saveBookmarkButton = ui.create(UIButton.class);
+            runButton = ui.createButton();
+            saveBookmarkButton = ui.createButton();
 //                closeButton = ui.create(UIButton.class);
-            } catch (UnsupportedComponentException e) {
-                throw new RuntimeException(e);
-            }
 
             runButton.setEnabled(false);
             runButton.setTitle("Run");

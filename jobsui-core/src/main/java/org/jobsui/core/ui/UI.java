@@ -20,7 +20,17 @@ public interface UI<T> {
 
     void log(String message, Throwable th);
 
-    <COMP extends UIComponent> COMP create(Class<COMP> componentType) throws UnsupportedComponentException;
+    UIButton<T> createButton();
+
+    UICheckBox<T> createCheckBox();
+
+    UIChoice<T> createChoice();
+
+    UIList<T> createList();
+
+    UIPassword<T> createPassword();
+
+    UIValue<T> createValue();
 
     void showError(String message, Throwable t);
 

@@ -100,7 +100,7 @@ public class JobRunnerTest {
         when(ui.createWindow(anyString())).thenReturn(window);
         runButton = spy(new FakeUIButton());
         bookmarkButton = spy(new FakeUIButton());
-        when(ui.create(UIButton.class)).thenReturn(runButton, bookmarkButton);
+        when(ui.createButton()).thenReturn(runButton, bookmarkButton);
         doAnswer(invocation -> {
             String message = invocation.getArgumentAt(0, String.class);
             Exception exception = invocation.getArgumentAt(1, Exception.class);
@@ -138,7 +138,7 @@ public class JobRunnerTest {
     @Test public void assert_that_simplejob_is_valid_when_run_with_valid_parameters() throws Exception {
         final FakeUiValue uiValueName = new FakeUiValue();
         final FakeUiValue uiValueSurname = new FakeUiValue();
-        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+        when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
@@ -154,7 +154,7 @@ public class JobRunnerTest {
     @Test public void assert_that_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
         final FakeUiValue uiValueName = new FakeUiValue();
         final FakeUiValue uiValueSurname = new FakeUiValue();
-        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+        when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
@@ -170,7 +170,7 @@ public class JobRunnerTest {
     @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters() throws Exception {
         FakeUiValue uiValueName = new FakeUiValue();
         FakeUiValue uiValueSurname = new FakeUiValue();
-        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+        when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton);
 
@@ -182,7 +182,7 @@ public class JobRunnerTest {
     @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters_on_interact() throws Exception {
         FakeUiValue uiValueName = new FakeUiValue();
         FakeUiValue uiValueSurname = new FakeUiValue();
-        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+        when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
@@ -199,7 +199,7 @@ public class JobRunnerTest {
     @Test public void assert_that_groovy_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
         final FakeUiValue uiValueName = new FakeUiValue();
         final FakeUiValue uiValueSurname = new FakeUiValue();
-        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
+        when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
@@ -215,8 +215,8 @@ public class JobRunnerTest {
     @Test public void assert_that_groovy_loaded_simplejob_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
         final FakeUiValue uiValueName = new FakeUiValue();
         final FakeUiValue uiValueSurname = new FakeUiValue();
-        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
-        when(ui.create(UIChoice.class)).thenReturn(new FakeUIChoice());
+        when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
+        when(ui.createChoice()).thenReturn(new FakeUIChoice());
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
@@ -233,7 +233,7 @@ public class JobRunnerTest {
         final FakeUIChoice uiChoiceVersion = new FakeUIChoice();
         final FakeUIChoice uiChoiceDb = new FakeUIChoice();
         final FakeUIChoice uiChoiceUser = new FakeUIChoice();
-        when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
+        when(ui.createChoice()).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
@@ -253,7 +253,7 @@ public class JobRunnerTest {
         final FakeUIChoice uiChoiceVersion = new FakeUIChoice();
         final FakeUIChoice uiChoiceDb = new FakeUIChoice();
         final FakeUIChoice uiChoiceUser = new FakeUIChoice();
-        when(ui.create(UIChoice.class)).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
+        when(ui.createChoice()).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
@@ -270,8 +270,8 @@ public class JobRunnerTest {
     @Test public void assert_that_not_valid_parameter_invokes_set_validation_on_widget() throws Exception {
         final FakeUiValue uiValueName = new FakeUiValue();
         final FakeUiValue uiValueSurname = new FakeUiValue();
-        when(ui.create(UIValue.class)).thenReturn(uiValueName, uiValueSurname);
-        when(ui.create(UIChoice.class)).thenReturn(new FakeUIChoice());
+        when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
+        when(ui.createChoice()).thenReturn(new FakeUIChoice());
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> uiValueName.setValue(null));
@@ -371,7 +371,7 @@ public class JobRunnerTest {
     @Test public void assert_that_groovy_external_concat_job_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
         final FakeUiValue uiValueFirst = new FakeUiValue();
         final FakeUiValue uiValueSecond = new FakeUiValue();
-        when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
+        when(ui.createValue()).thenReturn(uiValueFirst, uiValueSecond);
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
@@ -389,8 +389,8 @@ public class JobRunnerTest {
         final FakeUiValue uiValueSecond = new FakeUiValue();
         final FakeUIChoice uiValueInv = new FakeUIChoice();
 
-        when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
-        when(ui.create(UIChoice.class)).thenReturn(uiValueInv);
+        when(ui.createValue()).thenReturn(uiValueFirst, uiValueSecond);
+        when(ui.createChoice()).thenReturn(uiValueInv);
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
@@ -408,8 +408,8 @@ public class JobRunnerTest {
         final FakeUiValue uiValueSecond = new FakeUiValue();
         final FakeUIChoice uiValueInv = new FakeUIChoice();
 
-        when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
-        when(ui.create(UIChoice.class)).thenReturn(uiValueInv);
+        when(ui.createValue()).thenReturn(uiValueFirst, uiValueSecond);
+        when(ui.createChoice()).thenReturn(uiValueInv);
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
@@ -426,7 +426,7 @@ public class JobRunnerTest {
         final FakeUiValue uiValueFirst = new FakeUiValue();
         final FakeUiValue uiValueSecond = new FakeUiValue();
 
-        when(ui.create(UIValue.class)).thenReturn(uiValueFirst, uiValueSecond);
+        when(ui.createValue()).thenReturn(uiValueFirst, uiValueSecond);
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {
@@ -667,7 +667,7 @@ public class JobRunnerTest {
                 new NotEmptyStringValidator(), false, true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-                final UIValue<?> uiValue = (UIValue<?>) ui.create(UIValue.class);
+                final UIValue<?> uiValue = (UIValue<?>) ui.createValue();
                 uiValue.setConverter(new StringConverterString());
                 uiValue.setDefaultValue("John");
                 return uiValue;
@@ -685,7 +685,7 @@ public class JobRunnerTest {
                 new NotEmptyStringValidator(), false, true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-                final UIValue<?> uiValue = (UIValue<?>) ui.create(UIValue.class);
+                final UIValue<?> uiValue = (UIValue<?>) ui.createValue();
                 uiValue.setConverter(new StringConverterString());
                 return uiValue;
             }
@@ -768,7 +768,7 @@ public class JobRunnerTest {
                 true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-                return ui.create(UIChoice.class);
+                return ui.createChoice();
             }
 
             @Override
@@ -785,7 +785,7 @@ public class JobRunnerTest {
                 true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-                return ui.create(UIChoice.class);
+                return ui.createChoice();
             }
 
             @Override
@@ -811,7 +811,7 @@ public class JobRunnerTest {
                 true) {
             @Override
             public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
-                return ui.create(UIChoice.class);
+                return ui.createChoice();
             }
 
             @Override

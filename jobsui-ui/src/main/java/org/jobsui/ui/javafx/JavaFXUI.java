@@ -50,20 +50,33 @@ public class JavaFXUI implements UI<Node> {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <COMP extends UIComponent> COMP create(Class<COMP> componentType) throws UnsupportedComponentException {
-        if (componentType == UIChoice.class) {
-            return (COMP) new JavaFXUIChoice(this);
-        } else if (componentType == UICheckBox.class) {
-            return (COMP) new JavaFXUICheckBox(this);
-        } else if (componentType == UIButton.class) {
-            return (COMP) new JavaFXUIButton(this);
-        } else if (componentType == UIValue.class) {
-            return (COMP) new JavaFXUIValue(this);
-        } else if (componentType == UIPassword.class) {
-            return (COMP) new JavaFXUIPassword(this);
-        }
-        throw new UnsupportedComponentException("JavaFX: cannot find component for " + componentType.getName());
+    public UIChoice<Node> createChoice() {
+        return new JavaFXUIChoice(this);
+    }
+
+    @Override
+    public UIList<Node> createList() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public UIPassword<Node> createPassword() {
+        return new JavaFXUIPassword(this);
+    }
+
+    @Override
+    public UIValue<Node> createValue() {
+        return new JavaFXUIValue(this);
+    }
+
+    @Override
+    public UIButton<Node> createButton() {
+        return new JavaFXUIButton(this);
+    }
+
+    @Override
+    public UICheckBox<Node> createCheckBox() {
+        return new JavaFXUICheckBox(this);
     }
 
     @Override
@@ -165,57 +178,6 @@ public class JavaFXUI implements UI<Node> {
 
         // Traditional way to get the response value.
         return dialog.showAndWait();
-    }
-
-    public Button createButton() {
-        Button result;
-        if (getPreferences().getTheme() == JobsUITheme.Material) {
-            result = new JFXButton();
-            result.getStyleClass().add("button-raised");
-        } else {
-            result = new Button();
-        }
-        return result;
-    }
-
-    public <T> ComboBox<T> createComboBox() {
-        ComboBox<T> result;
-        if (getPreferences().getTheme() == JobsUITheme.Material) {
-            result = new JFXComboBox<>();
-        } else {
-            result = new ComboBox<>();
-        }
-        return result;
-    }
-
-    public CheckBox createCheckBox() {
-        CheckBox result;
-        if (getPreferences().getTheme() == JobsUITheme.Material) {
-            result = new JFXCheckBox();
-        } else {
-            result = new CheckBox();
-        }
-        return result;
-    }
-
-    public TextField createTextField() {
-        TextField result;
-        if (getPreferences().getTheme() == JobsUITheme.Material) {
-            result = new JFXTextField();
-        } else {
-            result = new TextField();
-        }
-        return result;
-    }
-
-    public PasswordField createPasswordField() {
-        PasswordField result;
-        if (getPreferences().getTheme() == JobsUITheme.Material) {
-            result = new JFXPasswordField();
-        } else {
-            result = new PasswordField();
-        }
-        return result;
     }
 
     private static class NodeUIWidget implements UIWidget<Node> {

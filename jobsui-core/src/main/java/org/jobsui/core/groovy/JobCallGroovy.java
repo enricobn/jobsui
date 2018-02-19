@@ -30,7 +30,7 @@ public class JobCallGroovy<T extends Serializable> extends JobParameterAbstract 
     @Override
     public <C> UIComponent<C> createComponent(UI<C> ui) throws UnsupportedComponentException {
         @SuppressWarnings("unchecked")
-        final UIChoice<C> component = ui.create(UIChoice.class);
+        final UIChoice<C> component = ui.createChoice();
         if (getDependencies().isEmpty()) {
             evaluate(component, Collections.emptyMap());
         }
