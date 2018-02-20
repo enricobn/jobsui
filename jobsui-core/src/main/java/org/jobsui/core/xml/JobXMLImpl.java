@@ -1,5 +1,7 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.runner.JobsUIValidationResult;
+import org.jobsui.core.runner.JobsUIValidationResultImpl;
 import org.jobsui.core.utils.JobsUIUtils;
 
 import java.util.*;
@@ -195,5 +197,34 @@ public class JobXMLImpl implements JobXML {
     @Override
     public List<WizardStep> getWizardSteps() {
         return wizardSteps;
+    }
+
+    @Override
+    public JobsUIValidationResult removeParameter(ParameterXML parameterXML) {
+        JobsUIValidationResultImpl result = new JobsUIValidationResultImpl();
+
+        List<String> messages = getJobDependencyXmls().stream()
+                .filter(d -> d.getDependencies().contains(parameterXML.getKey()))
+                .map(d -> {
+                    String parameterType;
+
+                    if (d instanceof ExpressionXML) {
+                        parameterType = "Expression";
+                    } else if (d instanceof CallXML) {
+                        parameterType = "Call";
+                    } else {
+                        parameterType = "Parameter";
+                    }
+                    return parameterType + " " + d.getName() + " depends from " + parameterXML.getName() + ".";
+                })
+                .collect(Collectors.toList());
+
+        result.setMessages(messages);
+
+        if (result.isValid()) {
+            parameters.remove(parameterXML.getKey());
+        }
+
+        return result;
     }
 }

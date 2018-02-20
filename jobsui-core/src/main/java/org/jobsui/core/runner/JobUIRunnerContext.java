@@ -104,13 +104,13 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
      * Creates an Observable that emits a JobValidation, with the validation status of the job, when all values are set or
      * a value is changed.
      */
-    public Observable<JobValidation> jobValidationObserver() {
+    public Observable<JobsUIValidationResult> jobValidationObserver() {
         List<Observable<Serializable>> observables = getDependenciesObservables().getList();
 
         return Observable.combineLatest(observables, args -> {
             int i = 0;
 
-            JobValidation jobValidation = new JobValidation();
+            JobsUIValidationResultImpl jobValidation = new JobsUIValidationResultImpl();
 
             Map<String, Serializable> values = new HashMap<>();
 

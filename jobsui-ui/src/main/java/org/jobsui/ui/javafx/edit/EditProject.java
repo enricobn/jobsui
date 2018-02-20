@@ -14,6 +14,7 @@ import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.jobsui.core.JobsUIPreferences;
+import org.jobsui.core.runner.JobsUIValidationResult;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.jobsui.core.xml.*;
@@ -323,47 +324,72 @@ public class EditProject {
         } else if (item.itemType == ItemType.Scripts) {
             populateScriptsMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Dependencies) {
-            ParameterXML parameterXML = (ParameterXML) item.payload;
-            List<String> dependencies = parameterXML.getDependencies();
-            JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
-
-            if (jobXML == null) {
-                ui.showMessage("Cannot find job for " + item);
-                return;
-            }
-
-            List<String> parameters = getAllParameters(jobXML);
-            parameters.removeAll(dependencies);
-
-            if (!parameters.isEmpty()) {
-                Menu addDependency = new Menu("Add dependency");
-
-                for (String dependency : parameters) {
-                    if (parameterXML.getKey().equals(dependency)) {
-                        continue;
-                    }
-                    ParameterXML parameter = jobXML.getParameter(dependency);
-                    String name = parameter.getName();
-                    MenuItem dependencyMenuItem = new MenuItem(name);
-                    dependencyMenuItem.setOnAction(e -> {
-                        parameterXML.addDependency(dependency);
-                        TreeItem<EditItem> newDep = new TreeItem<>(new EditItem(ItemType.Dependency,
-                                () -> name, dependency));
-                        treeItem.getChildren().add(newDep);
-                    });
-                    addDependency.getItems().add(dependencyMenuItem);
-                }
-
-                contextMenu.getItems().add(addDependency);
-            }
+            populateDependenciesMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Dependency) {
-            MenuItem delete = new MenuItem("Delete");
-            contextMenu.getItems().add(delete);
-            delete.setOnAction(t -> {
-                ParameterXML parameterXML = (ParameterXML) treeItem.getParent().getValue().payload;
+            populateDependencyMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Parameter) {
+            populateParameterMenu(contextMenu, treeItem);
+        }
+    }
+
+    private void populateParameterMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        MenuItem delete = new MenuItem("Delete");
+        contextMenu.getItems().add(delete);
+        delete.setOnAction(t -> {
+            JobXML jobXML = (JobXML) treeItem.getParent().getValue().payload;
+            JobsUIValidationResult validationResult = jobXML.removeParameter((ParameterXML) treeItem.getValue().payload);
+
+            if (validationResult.isValid()) {
                 treeItem.getParent().getChildren().remove(treeItem);
-                parameterXML.removeDependency((String)item.payload);
-            });
+            } else {
+                ui.showMessage(validationResult.getMessages().stream().collect(Collectors.joining("\n")));
+            }
+        });
+    }
+
+    private void populateDependencyMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        MenuItem delete = new MenuItem("Delete");
+        contextMenu.getItems().add(delete);
+        delete.setOnAction(t -> {
+            ParameterXML parameterXML = (ParameterXML) treeItem.getParent().getValue().payload;
+            treeItem.getParent().getChildren().remove(treeItem);
+            parameterXML.removeDependency((String)treeItem.getValue().payload);
+        });
+    }
+
+    private void populateDependenciesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        ParameterXML parameterXML = (ParameterXML) treeItem.getValue().payload;
+        List<String> dependencies = parameterXML.getDependencies();
+        JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
+
+        if (jobXML == null) {
+            ui.showMessage("Cannot find job for " + treeItem.getValue());
+            return;
+        }
+
+        List<String> parameters = getAllParameters(jobXML);
+        parameters.removeAll(dependencies);
+
+        if (!parameters.isEmpty()) {
+            Menu addDependency = new Menu("Add dependency");
+
+            for (String dependency : parameters) {
+                if (parameterXML.getKey().equals(dependency)) {
+                    continue;
+                }
+                ParameterXML parameter = jobXML.getParameter(dependency);
+                String name = parameter.getName();
+                MenuItem dependencyMenuItem = new MenuItem(name);
+                dependencyMenuItem.setOnAction(e -> {
+                    parameterXML.addDependency(dependency);
+                    TreeItem<EditItem> newDep = new TreeItem<>(new EditItem(ItemType.Dependency,
+                            () -> name, dependency));
+                    treeItem.getChildren().add(newDep);
+                });
+                addDependency.getItems().add(dependencyMenuItem);
+            }
+
+            contextMenu.getItems().add(addDependency);
         }
     }
 

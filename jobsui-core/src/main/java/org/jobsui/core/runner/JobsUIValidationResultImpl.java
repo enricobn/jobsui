@@ -7,7 +7,7 @@ import java.util.List;
 /**
  * Created by enrico on 3/13/17.
  */
-class JobValidation {
+public class JobsUIValidationResultImpl implements JobsUIValidationResult {
     private boolean valid = true;
     private List<String> messages = new ArrayList<>();
 
@@ -19,10 +19,12 @@ class JobValidation {
         this.messages = messages;
     }
 
+    @Override
     public boolean isValid() {
         return valid && messages.isEmpty();
     }
 
+    @Override
     public List<String> getMessages() {
         return Collections.unmodifiableList(messages);
     }

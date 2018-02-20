@@ -1,5 +1,7 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.runner.JobsUIValidationResult;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -38,4 +40,6 @@ public interface JobXML extends ValidatingXML{
         result.addAll(getExpressionXMLs());
         return result;
     }
+
+    JobsUIValidationResult removeParameter(ParameterXML parameterXML);
 }

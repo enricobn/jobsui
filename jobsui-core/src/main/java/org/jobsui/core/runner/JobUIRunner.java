@@ -143,7 +143,7 @@ public class JobUIRunner<C> implements JobRunner {
 //                ui.gotoStart();
 //            });
 
-            Observable<JobValidation> validationObserver = context.jobValidationObserver();
+            Observable<JobsUIValidationResult> validationObserver = context.jobValidationObserver();
 
             validationObserver.subscribe(v -> {
                 valid = v.isValid();
