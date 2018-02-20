@@ -1,9 +1,9 @@
 DOING
 ------
-- customizable UIComponentType:
 
 NEXT
 -----
+- customizable UIComponentType
 - JobDependency and JobDependencyXML are correct names?
 - warning on closing project editing with changes
 - why getScriptsLocations() and not getScriptLocation? Do I need more than one location different from "scripts"?
@@ -27,6 +27,7 @@ NEXT
 
 DONE
 -----
+- component to choose files and folders
 - refactor JobXMLImpl using only one map for all types of parameters
 - onInit script is not formatted in edit
 - problem in JobsUIUtils.createTempDir which does not create the tempdir
