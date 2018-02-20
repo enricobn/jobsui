@@ -436,20 +436,21 @@ public class EditProject {
         Menu addParameter = new Menu("Add");
         contextMenu.getItems().add(addParameter);
 
-        for (UIComponentType uiComponentType : uiComponentRegistry.getComponentTypes()) {
-            MenuItem addParameterType = new MenuItem(uiComponentType.getName());
-            addParameter.getItems().add(addParameterType);
-            addParameterType.setOnAction(e -> {
-                SimpleParameterXML parameter = new SimpleParameterXML("newKey", "newName", uiComponentType);
-                try {
-                    jobXML.add(parameter);
-                    addParameter(treeItem, ItemType.Parameter, parameter, jobXML);
-                } catch (Exception e1) {
-                    ui.showError("Error adding new parameter.", e1);
-                }
+        uiComponentRegistry.getComponentTypes().stream()
+            .sorted(Comparator.comparing(UIComponentType::getName))
+            .forEach(uiComponentType -> {
+                MenuItem addParameterType = new MenuItem(uiComponentType.getName());
+                addParameter.getItems().add(addParameterType);
+                addParameterType.setOnAction(e -> {
+                    SimpleParameterXML parameter = new SimpleParameterXML("newKey", "newName", uiComponentType);
+                    try {
+                        jobXML.add(parameter);
+                        addParameter(treeItem, ItemType.Parameter, parameter, jobXML);
+                    } catch (Exception e1) {
+                        ui.showError("Error adding new parameter.", e1);
+                    }
+                });
             });
-        }
-
     }
 
     static <T> T findAncestorPayload(TreeItem<EditItem> treeItem, ItemType... itemTypes) {
