@@ -32,6 +32,8 @@ public interface UI<T> {
 
     UIValue<T> createValue();
 
+    UIFileChooser<T> createFileChooser();
+
     void showError(String message, Throwable t);
 
     void start(CommandLineArguments arguments);

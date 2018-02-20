@@ -80,6 +80,11 @@ public class JavaFXUI implements UI<Node> {
     }
 
     @Override
+    public UIFileChooser<Node> createFileChooser() {
+        return new JavaFXUIFileChooser(this);
+    }
+
+    @Override
     public void showError(String message, Throwable t) {
         showErrorStatic(message, t);
     }

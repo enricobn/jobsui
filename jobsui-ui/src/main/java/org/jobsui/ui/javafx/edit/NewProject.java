@@ -11,7 +11,7 @@ import org.jobsui.core.ui.UIButton;
 import org.jobsui.core.ui.UIComponentRegistryImpl;
 import org.jobsui.core.xml.*;
 import org.jobsui.ui.javafx.JavaFXUI;
-import org.jobsui.ui.javafx.LabeledDirectoryChooser;
+import org.jobsui.ui.javafx.JavaFXUIFileChooser;
 import org.jobsui.ui.javafx.LabeledField;
 import org.jobsui.ui.javafx.StartApp;
 
@@ -36,7 +36,9 @@ public class NewProject {
 
         root.getChildren().add(buttons);
 
-        LabeledDirectoryChooser labeledParentFolder = new LabeledDirectoryChooser(ui, "Parent folder");
+        JavaFXUIFileChooser labeledParentFolder = new JavaFXUIFileChooser(ui);
+        labeledParentFolder.setFolder();
+        labeledParentFolder.setTitle("Parent folder");
         labeledParentFolder.getField().setValue(".");
         labeledParentFolder.setPadding(new Insets(20, 10, 0, 10));
         root.getChildren().add(labeledParentFolder);

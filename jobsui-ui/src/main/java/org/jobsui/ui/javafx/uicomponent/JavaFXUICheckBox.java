@@ -5,6 +5,7 @@ import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.ui.UICheckBox;
+import org.jobsui.ui.javafx.JavaFXUI;
 import rx.Observable;
 import rx.Subscriber;
 

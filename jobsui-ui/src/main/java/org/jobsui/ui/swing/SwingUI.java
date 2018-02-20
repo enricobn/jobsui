@@ -68,6 +68,11 @@ public class SwingUI implements UI<JComponent> {
     }
 
     @Override
+    public UIFileChooser<JComponent> createFileChooser() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void showError(String message, Throwable t) {
         // TODO
         try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
