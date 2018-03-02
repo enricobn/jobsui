@@ -424,7 +424,8 @@ public class EditProject {
         MenuItem add = new MenuItem("Add");
         contextMenu.getItems().add(add);
         add.setOnAction(event -> {
-            ExpressionXML expressionXML = new ExpressionXML("newKey", "newName");
+            String newKey = nextAvailableKey(jobXML, "newKey");
+            ExpressionXML expressionXML = new ExpressionXML(newKey, "newName");
             try {
                 jobXML.add(expressionXML);
                 addParameter(treeItem, ItemType.Expression, expressionXML, jobXML);
@@ -443,7 +444,8 @@ public class EditProject {
         MenuItem add = new MenuItem("Add");
         contextMenu.getItems().add(add);
         add.setOnAction(event -> {
-            CallXML callXML = new CallXML("newKey", "newName");
+            String newKey = nextAvailableKey(jobXML,"newKey");
+            CallXML callXML = new CallXML(newKey, "newName");
             try {
                 jobXML.add(callXML);
                 addParameter(treeItem, ItemType.Expression, callXML, jobXML);
@@ -466,9 +468,13 @@ public class EditProject {
             .sorted(Comparator.comparing(UIComponentType::getName))
             .forEach(uiComponentType -> {
                 MenuItem addParameterType = new MenuItem(uiComponentType.getName());
+
                 addParameter.getItems().add(addParameterType);
+
                 addParameterType.setOnAction(e -> {
-                    SimpleParameterXML parameter = new SimpleParameterXML("newKey", "newName", uiComponentType);
+                    String newKey = nextAvailableKey(jobXML,"newKey");
+
+                    SimpleParameterXML parameter = new SimpleParameterXML(newKey, "newName", uiComponentType);
                     try {
                         jobXML.add(parameter);
                         addParameter(treeItem, ItemType.Parameter, parameter, jobXML);
@@ -477,6 +483,22 @@ public class EditProject {
                     }
                 });
             });
+    }
+
+    private String nextAvailableKey(JobXML jobXML, String prefix) {
+        String newKey = prefix;
+        int i = 0;
+
+        while (true) {
+            boolean found = jobXML.getAllParameters().stream()
+                    .map(ParameterXML::getKey)
+                    .anyMatch(newKey::equals);
+            if (!found) {
+                break;
+            }
+            newKey = prefix + Integer.toString(++i);
+        }
+        return newKey;
     }
 
     static <T> T findAncestorPayload(TreeItem<EditItem> treeItem, ItemType... itemTypes) {

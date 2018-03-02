@@ -25,6 +25,13 @@ public interface JobXML extends ValidatingXML{
 
     List<CallXML> getCallXMLs();
 
+    default Collection<ParameterXML> getAllParameters() {
+        Collection<ParameterXML> result = new ArrayList<>(getSimpleParameterXMLs());
+        result.addAll(getExpressionXMLs());
+        result.addAll(getCallXMLs());
+        return result;
+    }
+
     ParameterXML getParameter(String key);
 
 //    SimpleParameterXML getSimpleParameter(String key);
