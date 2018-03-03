@@ -7,13 +7,17 @@ import java.util.function.Supplier;
  */
 class EditItem {
     private final Supplier<String> title;
-    final EditProject.ItemType itemType;
+    final ItemType itemType;
     final Object payload;
 
-    EditItem(EditProject.ItemType itemType, Supplier<String> title, Object payload) {
+    EditItem(ItemType itemType, Supplier<String> title, Object payload) {
         this.itemType = itemType;
         this.title = title;
         this.payload = payload;
+
+        if (!itemType.getPayloadType().isAssignableFrom(payload.getClass())) {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override

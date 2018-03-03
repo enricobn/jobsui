@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by enrico on 10/9/16.
@@ -40,6 +39,10 @@ public class EditProject {
     private JavaFXUI ui;
     private SplitPane splitPane;
     private final UIComponentRegistryComposite uiComponentRegistry = new UIComponentRegistryComposite();
+    /**
+     * The idea is that new types of UIComponent, or different implementations, can be created by users.
+     * TODO find a way to customize it
+     */
     private final UIComponentRegistry customUiComponentRegistry = new UIComponentRegistry() {
         @Override
         public Optional<UIComponentType> getComponentType(String name) {
@@ -290,27 +293,6 @@ public class EditProject {
         stage.setHeight(preferences.getEditHeight());
     }
 
-    enum ItemType {
-        Project,
-            Libraries,
-                Library,
-            Scripts,
-                ScriptFile,
-            Job,
-                Parameters,
-                    Parameter,
-                        Dependencies,
-                            Dependency,
-                Expressions,
-                    Expression,
-                        //Dependencies
-                            //Dependency
-                Calls,
-                    Call
-                        //Dependencies
-                            //Dependency
-    }
-
     private void populateContextMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         contextMenu.getItems().clear();
         EditItem item = treeItem.getValue();
@@ -367,7 +349,7 @@ public class EditProject {
             return;
         }
 
-        List<String> parameters = getAllParameters(jobXML);
+        List<String> parameters = getAllParametersKeys(jobXML);
         parameters.removeAll(dependencies);
 
         if (!parameters.isEmpty()) {
@@ -424,7 +406,7 @@ public class EditProject {
         MenuItem add = new MenuItem("Add");
         contextMenu.getItems().add(add);
         add.setOnAction(event -> {
-            String newKey = nextAvailableKey(jobXML, "newKey");
+            String newKey = nextAvailableParameterKey(jobXML);
             ExpressionXML expressionXML = new ExpressionXML(newKey, "newName");
             try {
                 jobXML.add(expressionXML);
@@ -444,7 +426,7 @@ public class EditProject {
         MenuItem add = new MenuItem("Add");
         contextMenu.getItems().add(add);
         add.setOnAction(event -> {
-            String newKey = nextAvailableKey(jobXML,"newKey");
+            String newKey = nextAvailableParameterKey(jobXML);
             CallXML callXML = new CallXML(newKey, "newName");
             try {
                 jobXML.add(callXML);
@@ -472,7 +454,7 @@ public class EditProject {
                 addParameter.getItems().add(addParameterType);
 
                 addParameterType.setOnAction(e -> {
-                    String newKey = nextAvailableKey(jobXML,"newKey");
+                    String newKey = nextAvailableParameterKey(jobXML);
 
                     SimpleParameterXML parameter = new SimpleParameterXML(newKey, "newName", uiComponentType);
                     try {
@@ -485,8 +467,8 @@ public class EditProject {
             });
     }
 
-    private String nextAvailableKey(JobXML jobXML, String prefix) {
-        String newKey = prefix;
+    private String nextAvailableParameterKey(JobXML jobXML) {
+        String newKey = "newKey";
         int i = 0;
 
         while (true) {
@@ -496,7 +478,7 @@ public class EditProject {
             if (!found) {
                 break;
             }
-            newKey = prefix + Integer.toString(++i);
+            newKey = "newKey" + Integer.toString(++i);
         }
         return newKey;
     }
@@ -517,10 +499,8 @@ public class EditProject {
         return null;
     }
 
-    private static List<String> getAllParameters(JobXML jobXML) {
-        return Stream.concat(Stream.concat(jobXML.getCallXMLs().stream(),
-                jobXML.getExpressionXMLs().stream()),
-                jobXML.getSimpleParameterXMLs().stream())
+    private static List<String> getAllParametersKeys(JobXML jobXML) {
+        return jobXML.getAllParameters().stream()
                 .map(ParameterXML::getKey).collect(Collectors.toList());
     }
 

@@ -3,7 +3,6 @@ package org.jobsui.ui.javafx.edit;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.*;
@@ -96,10 +95,10 @@ class ItemDetail extends VBox {
     }
 
     private void setGroovyFileDetail(TreeItem<EditItem> treeItem) {
-        String scriptsRoot = EditProject.findAncestorPayload(treeItem, EditProject.ItemType.Scripts);
+        String scriptsRoot = EditProject.findAncestorPayload(treeItem, ItemType.Scripts);
         Objects.requireNonNull(scriptsRoot);
 
-        ProjectFSXML project = EditProject.findAncestorPayload(treeItem, EditProject.ItemType.Project);
+        ProjectFSXML project = EditProject.findAncestorPayload(treeItem, ItemType.Project);
         Objects.requireNonNull(project);
 
         String scriptName = (String) treeItem.getValue().payload;
@@ -148,7 +147,7 @@ class ItemDetail extends VBox {
             return false;
         }
 
-        JobXMLImpl jobXML = EditProject.findAncestorPayload(treeItem, EditProject.ItemType.Job);
+        JobXMLImpl jobXML = EditProject.findAncestorPayload(treeItem, ItemType.Job);
 
         if (jobXML == null) {
             ui.showMessage("Cannot find job for item.");
