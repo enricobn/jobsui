@@ -16,7 +16,7 @@ public interface SimpleProjectXML extends ValidatingXML {
 
     URL getRelativeURL(String relativePath);
 
-    Set<String> getLibraries();
+    Set<ProjectLibraryXML> getLibraries();
 
     Map<String, String> getImports();
 

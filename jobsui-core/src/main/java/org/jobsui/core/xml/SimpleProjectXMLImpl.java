@@ -14,7 +14,7 @@ import java.util.*;
 public class SimpleProjectXMLImpl implements SimpleProjectXML {
     private final URL projectURL;
     private final String id;
-    private final Set<String> libraries = new HashSet<>();
+    private final Set<ProjectLibraryXML> libraries = new HashSet<>();
     private final Map<String, String> imports = new HashMap<>();
     private final List<String> jobs = new ArrayList<>();
     private final UIComponentRegistry uiComponentRegistry = new UIComponentRegistryImpl();
@@ -43,15 +43,15 @@ public class SimpleProjectXMLImpl implements SimpleProjectXML {
         }
     }
 
-    public void addLibrary(String library) {
-        libraries.add(library);
+    public void addLibrary(String library) throws Exception {
+        libraries.add(ProjectLibraryXML.of(library));
     }
 
     public void addImport(String name, String uri) {
         imports.put(name, uri);
     }
 
-    public Set<String> getLibraries() {
+    public Set<ProjectLibraryXML> getLibraries() {
         return libraries;
     }
 

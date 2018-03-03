@@ -34,8 +34,8 @@ public class ProjectXMLExporter {
         XMLUtils.addAttr(rootElement, "version", projectXML.getVersion());
         doc.appendChild(rootElement);
 
-        for (String library : projectXML.getLibraries()) {
-            XMLUtils.addTextElement(rootElement, "Library", library, false);
+        for (ProjectLibraryXML library : projectXML.getLibraries()) {
+            XMLUtils.addTextElement(rootElement, "Library", library.toString(), false);
         }
 
         for (Map.Entry<String, String> entry : projectXML.getImports().entrySet()) {

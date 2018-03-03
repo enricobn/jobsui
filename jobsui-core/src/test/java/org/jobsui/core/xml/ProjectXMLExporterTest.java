@@ -5,7 +5,6 @@ import org.jobsui.core.utils.JobsUIUtils;
 import org.junit.Test;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.List;
@@ -52,7 +51,7 @@ public class ProjectXMLExporterTest {
         }
     }
 
-    private static void check(ProjectFSXML original, ProjectFSXML exported) throws IOException {
+    private static void check(ProjectFSXML original, ProjectFSXML exported) {
         assertThat(exported.getId(), is(original.getId()));
         assertThat(exported.getName(), is(original.getName()));
         assertThat(exported.getJobs(), is(original.getJobs()));

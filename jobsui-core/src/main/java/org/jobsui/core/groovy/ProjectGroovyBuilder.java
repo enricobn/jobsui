@@ -152,9 +152,8 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
         GroovyScriptEngine engine = new GroovyScriptEngine(projectXML.getScripsLocationsURLS());
         GroovyClassLoader cl = engine.getGroovyClassLoader();
 
-        for (String library : projectXML.getLibraries()) {
-            String[] split = library.split(":");
-            File file = IvyUtils.resolveArtifact(split[0], split[1], split[2]);
+        for (ProjectLibraryXML library : projectXML.getLibraries()) {
+            File file = IvyUtils.resolveArtifact(library.getGroupId(), library.getArtifactId(), library.getVersion());
 
             cl.addURL(file.toURI().toURL());
         }

@@ -200,7 +200,7 @@ public class EditProject {
         TreeItem<EditItem> libraries = new TreeItem<>(new EditItem(ItemType.Libraries, () -> "libraries", projectXML));
         root.getChildren().add(libraries);
         projectXML.getLibraries().stream()
-                .map(l -> new EditItem(ItemType.Library, () -> l, l))
+                .map(l -> new EditItem(ItemType.Library, () -> l.toString(), l))
                 .map(TreeItem::new)
                 .forEach(treeItem -> libraries.getChildren().add(treeItem));
 
@@ -311,7 +311,46 @@ public class EditProject {
             populateDependencyMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Parameter) {
             populateParameterMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Libraries) {
+            populateLibrariesMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Library) {
+            populateLibraryMenu(contextMenu, treeItem);
         }
+    }
+
+    private void populateLibraryMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        ProjectFSXMLImpl projectXML = findAncestorPayload(treeItem, ItemType.Project);
+        if (projectXML == null) {
+            return;
+        }
+
+        ProjectLibraryXML library = (ProjectLibraryXML) treeItem.getValue().payload;
+
+        MenuItem delete = new MenuItem("Delete");
+        contextMenu.getItems().add(delete);
+        delete.setOnAction(t -> {
+            projectXML.getLibraries().remove(library);
+            treeItem.getParent().getChildren().remove(treeItem);
+        });
+    }
+
+    private void populateLibrariesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        ProjectFSXMLImpl projectXML = findAncestorPayload(treeItem, ItemType.Project);
+        if (projectXML == null) {
+            return;
+        }
+
+        MenuItem add = new MenuItem("Add");
+        contextMenu.getItems().add(add);
+        add.setOnAction(event -> {
+            ProjectLibraryXML library = new ProjectLibraryXML();
+            library.setGroupId("groupId");
+            library.setArtifactId("artifactId");
+            library.setVersion("1.0");
+            projectXML.getLibraries().add(library);
+            TreeItem<EditItem> item = new TreeItem<>(new EditItem(ItemType.Library, library::toString, library));
+            treeItem.getChildren().add(item);
+        });
     }
 
     private void populateParameterMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {

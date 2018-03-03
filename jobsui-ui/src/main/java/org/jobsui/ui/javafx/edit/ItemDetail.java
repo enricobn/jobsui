@@ -74,7 +74,29 @@ class ItemDetail extends VBox {
                 setCallDetail(treeItem);
                 break;
             }
+
+            case Library: {
+                setLibraryDetail(treeItem);
+                break;
+            }
         }
+    }
+
+    private boolean setLibraryDetail(TreeItem<EditItem> treeItem) {
+        ProjectLibraryXML library = (ProjectLibraryXML) treeItem.getValue().payload;
+
+        ProjectXML projectXML = EditProject.findAncestorPayload(treeItem, ItemType.Project);
+
+        if (projectXML == null) {
+            ui.showMessage("Cannot find project for item.");
+            return false;
+        }
+
+        addTextProperty(treeItem, "Group id", library::getGroupId, library::setGroupId);
+        addTextProperty(treeItem, "Artifact id", library::getArtifactId, library::setArtifactId);
+        addTextProperty(treeItem, "Version", library::getVersion, library::setVersion);
+
+        return true;
     }
 
     private void setProjectDetail(TreeItem<EditItem> treeItem) {
@@ -202,7 +224,7 @@ class ItemDetail extends VBox {
         if (!validate.isEmpty()) {
             Label label = new Label("?");
             label.setTextFill(Color.RED);
-            label.setTooltip(new Tooltip(String.join(", ", validate)));
+            label.setTooltip(new Tooltip(String.join("\n", validate)));
             treeItem.setGraphic(label);
         } else {
             treeItem.setGraphic(null);

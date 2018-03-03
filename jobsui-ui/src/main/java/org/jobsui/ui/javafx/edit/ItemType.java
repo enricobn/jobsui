@@ -5,7 +5,7 @@ import org.jobsui.core.xml.*;
 enum ItemType {
     Project(ProjectXML.class),
         Libraries(ProjectXML.class),
-            Library(String.class),
+            Library(ProjectLibraryXML.class),
         Scripts(String.class),
             ScriptFile(String.class),
         Job(JobXML.class),
