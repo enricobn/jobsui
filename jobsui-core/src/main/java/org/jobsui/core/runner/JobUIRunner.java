@@ -47,7 +47,12 @@ public class JobUIRunner<C> implements JobRunner {
             }
 
             if (!job.getWizardSteps().isEmpty()) {
-                WizardState wizardState = new WizardState(job);
+                WizardState wizardState;
+                try {
+                    wizardState = new WizardState(job);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
 
                 UIButton<C> nextButton;
                 UIButton<C> previousButton;

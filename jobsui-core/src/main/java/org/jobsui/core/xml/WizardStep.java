@@ -2,6 +2,7 @@ package org.jobsui.core.xml;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by enrico on 4/30/17.
@@ -10,7 +11,7 @@ public interface WizardStep extends ValidatingXML {
 
     String getName();
 
-    List<String> getDependencies();
+    Set<String> getDependencies();
 
     String getValidateScript();
 

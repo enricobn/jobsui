@@ -38,8 +38,7 @@ public interface JobDependency {
             }
             if (!found) {
                 StringBuilder sb = new StringBuilder("Unresolved dependencies:\n");
-                toSort.entrySet()
-                        .forEach(entry -> sb.append(entry.getKey()).append(":").append(entry.getValue()).append('\n'));
+                toSort.forEach((key, value) -> sb.append(key).append(":").append(value).append('\n'));
                 throw new Exception(sb.toString());
             }
         }

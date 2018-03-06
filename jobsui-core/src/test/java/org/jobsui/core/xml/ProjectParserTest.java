@@ -65,12 +65,12 @@ public class ProjectParserTest {
 
         WizardStep firstStep = job.getWizardSteps().get(0);
         assertThat(firstStep.getName(), is("First"));
-        assertThat(firstStep.getDependencies(), is(Collections.singletonList("name")));
+        assertThat(firstStep.getDependencies(), is(Collections.singleton("name")));
         assertThat(firstStep.getValidateScript(), nullValue());
 
         WizardStep secondStep = job.getWizardSteps().get(1);
         assertThat(secondStep.getName(), is("Second"));
-        assertThat(secondStep.getDependencies(), is(Collections.singletonList("dependent")));
+        assertThat(secondStep.getDependencies(), is(Collections.singleton("dependent")));
         assertThat(secondStep.getValidateScript(), notNullValue());
     }
 }

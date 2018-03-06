@@ -3,9 +3,13 @@ DOING
 
 NEXT
 -----
+- WizardStep is used in XML and job, may be better to have two classes?
+- rename WizardStep to Group?
+- WizardStep has no custom validation nor automatic (through dependencies)
+- is it better to define Wizard step only with a name and reference it in parameters?
 - customizable UIComponentType
 - JobDependency and JobDependencyXML are correct names?
-- warning on closing project editing with changes
+- Edit: warning on closing project with changes
 - why getScriptsLocations() and not getScriptLocation? Do I need more than one location different from "scripts"?
 - when I create a new project and add it to the last opened project registry, I must, eventually, update the main window
 - validate expressions and calls on edit
@@ -27,6 +31,7 @@ NEXT
 
 DONE
 -----
+- sorted dependencies in WizardStep
 - Edit: added support for changing component type
 - Edit: edit libraries
 - Edit: delete of parameter

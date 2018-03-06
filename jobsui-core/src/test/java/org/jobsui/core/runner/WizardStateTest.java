@@ -12,9 +12,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -135,7 +133,7 @@ public class WizardStateTest {
         verify(window, times(3)).add(any(UIWidget.class));
     }
 
-    private WizardState createWizardStateWithOneStep() {
+    private WizardState createWizardStateWithOneStep() throws Exception {
         List<WizardStep> steps = Collections.singletonList(mock(WizardStep.class));
         when(job.getWizardSteps()).thenReturn(steps);
 
@@ -153,7 +151,7 @@ public class WizardStateTest {
         JobParameter second = addJobParameter("second");
         JobParameter third = addJobParameter("third");
 
-        List<String> dependencies = Arrays.asList(first.getKey(), second.getKey());
+        Set<String> dependencies = new HashSet<>(Arrays.asList(first.getKey(), second.getKey()));
         when(wizardStep.getDependencies()).thenReturn(dependencies);
 
         List<WizardStep> steps = Collections.singletonList(wizardStep);

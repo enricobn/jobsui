@@ -21,10 +21,15 @@ public class WizardState {
     private final Job<?> job;
     private final List<WizardStep> steps;
     private int step = 0;
+    private List<String> sortedDependencies;
 
-    public WizardState(Job<?> job) {
+    public WizardState(Job<?> job) throws Exception {
         this.job = job;
         this.steps = new ArrayList<>(job.getWizardSteps());
+
+        sortedDependencies = job.getSortedDependencies().stream()
+                .map(JobDependency::getKey)
+                .collect(Collectors.toList());
 
         Set<String> dependencies = steps.stream()
                 .flatMap(step -> step.getDependencies().stream())
@@ -55,7 +60,7 @@ public class WizardState {
         return step > 0;
     }
 
-    public <T extends Serializable,C> void next(JobUIRunnerContext<T,C> context, UIWindow<C> window) {
+    public <T extends Serializable, C> void next(JobUIRunnerContext<T, C> context, UIWindow<C> window) {
         ++step;
         updateWindow(context, window);
     }
@@ -65,10 +70,12 @@ public class WizardState {
 
         window.clear();
 
-        for (String dependency : wizardStep.getDependencies()) {
-            JobParameter jobParameter = job.getParameter(dependency);
-            UIWidget<C> widget = context.getWidget(jobParameter);
-            window.add(widget);
+        for (String dependency : sortedDependencies) {
+            if (wizardStep.getDependencies().contains(dependency)) {
+                JobParameter jobParameter = job.getParameter(dependency);
+                UIWidget<C> widget = context.getWidget(jobParameter);
+                window.add(widget);
+            }
         }
     }
 

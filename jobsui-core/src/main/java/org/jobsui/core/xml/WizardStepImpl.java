@@ -1,14 +1,14 @@
 package org.jobsui.core.xml;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Created by enrico on 4/30/17.
  */
 public class WizardStepImpl implements WizardStep {
-    private List<String> dependencies = new ArrayList<>();
+    private Set<String> dependencies = new HashSet<>();
     private String validateScript;
     private String name;
 
@@ -18,8 +18,8 @@ public class WizardStepImpl implements WizardStep {
     }
 
     @Override
-    public List<String> getDependencies() {
-        return Collections.unmodifiableList(dependencies);
+    public Set<String> getDependencies() {
+        return Collections.unmodifiableSet(dependencies);
     }
 
     @Override
