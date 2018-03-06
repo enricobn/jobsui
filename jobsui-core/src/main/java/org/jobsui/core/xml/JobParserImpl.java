@@ -192,8 +192,8 @@ public class JobParserImpl implements JobParser {
                     .getComponentType(component)
                     .orElse(UIComponentRegistryImpl.Value);
 
-            SimpleParameterXML simpleParameterXML = new SimpleParameterXML(parameterKey, parameterName,
-                    componentType);
+            SimpleParameterXML simpleParameterXML = new SimpleParameterXML(parameterKey, parameterName);
+            simpleParameterXML.setComponent(componentType);
             simpleParameterXML.setValidateScript(parameterValidateScript);
             simpleParameterXML.setOnInitScript(onInitScript);
             simpleParameterXML.setOnDependenciesChangeScript(onDependenciesChangeScript);

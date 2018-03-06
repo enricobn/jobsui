@@ -139,8 +139,8 @@ public class NewProject {
                 namespace + ":" + id, name, "1.0.0");
 
         JobXMLImpl jobXML = new JobXMLImpl("newjob", "NewJob", "1.0.0");
-        SimpleParameterXML parameter = new SimpleParameterXML("message", "Message",
-                UIComponentRegistryImpl.Value);
+        SimpleParameterXML parameter = new SimpleParameterXML("message", "Message");
+        parameter.setComponent(UIComponentRegistryImpl.Value);
         parameter.setOnInitScript("component.setValue('Hello world')");
         jobXML.add(parameter);
         jobXML.setRunScript("println(\"${message}\")");

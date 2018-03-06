@@ -10,16 +10,18 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import org.fxmisc.richtext.CodeArea;
 import org.jobsui.core.JobsUIPreferences;
-import org.jobsui.core.ui.JobsUITheme;
-import org.jobsui.core.ui.UIValue;
+import org.jobsui.core.ui.*;
 import org.jobsui.core.xml.*;
 import org.jobsui.ui.javafx.JavaFXUI;
 import org.jobsui.ui.javafx.JobsUIFXStyles;
 
+import java.io.Serializable;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 4/28/17.
@@ -37,11 +39,13 @@ class ItemDetail extends VBox {
 
     private final JavaFXUI ui;
     private final JobsUIPreferences preferences;
+    private final UIComponentRegistry uiComponentRegistry;
 
-    public ItemDetail(JavaFXUI ui) {
+    public ItemDetail(JavaFXUI ui, UIComponentRegistry uiComponentRegistry) {
         super(0);
         this.ui = ui;
         this.preferences = ui.getPreferences();
+        this.uiComponentRegistry = uiComponentRegistry;
     }
 
     public void setSelectedItem(TreeItem<EditItem> treeItem) {
@@ -153,6 +157,13 @@ class ItemDetail extends VBox {
 
         SimpleParameterXML parameter = (SimpleParameterXML) treeItem.getValue().payload;
 
+        List<UIComponentType> uiComponentTypes = uiComponentRegistry.getComponentTypes().stream()
+                .sorted(Comparator.comparing(UIComponentType::getName))
+                .collect(Collectors.toList());
+
+        addComboProperty(treeItem, "Component", parameter::getComponent, parameter::setComponent,
+                uiComponentTypes);
+
         addTextAreaProperty(treeItem, "On init", parameter::getOnInitScript,
                 parameter::setOnInitScript, false);
 
@@ -183,6 +194,21 @@ class ItemDetail extends VBox {
         addTextProperty(treeItem, "Name", parameter::getName, parameter::setName);
 
         return true;
+    }
+
+    private <T extends Serializable> void addComboProperty(TreeItem<EditItem> treeItem, String title, Supplier<T> get, Consumer<T> set, List<T> items) {
+        addPropertyNameLabel(title);
+
+        UIChoice<Node> control = ui.createChoice();
+        control.setTitle(title);
+        control.setItems(items);
+        control.setValue(get.get());
+
+        control.getObservable().subscribe(newValue -> {
+            set.accept((T)newValue);
+            updateSelectedItem(treeItem);
+        });
+        getChildren().add(control.getComponent());
     }
 
     private void addTextProperty(TreeItem<EditItem> treeItem, String title, Supplier<String> get, Consumer<String> set) {

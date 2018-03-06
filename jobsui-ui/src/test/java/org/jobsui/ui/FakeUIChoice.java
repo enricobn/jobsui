@@ -14,7 +14,7 @@ import static org.junit.Assert.assertTrue;
  * Created by enrico on 5/5/16.
  */
 public class FakeUIChoice extends FakeUIComponent implements UIChoice<FakeComponent> {
-    private List<Serializable> items = Collections.emptyList();
+    private List<? extends Serializable> items = Collections.emptyList();
     private Serializable selectedItem;
 
     @Override
@@ -23,7 +23,7 @@ public class FakeUIChoice extends FakeUIComponent implements UIChoice<FakeCompon
     }
 
     @Override
-    public void setItems(List<Serializable> items) {
+    public void setItems(List<? extends Serializable> items) {
         this.items = items;
         if (items.size() == 0) {
             setValue(null);
@@ -62,7 +62,7 @@ public class FakeUIChoice extends FakeUIComponent implements UIChoice<FakeCompon
         throw new IllegalArgumentException("Cannot find item do \"" + s + "\".");
     }
 
-    public List<Serializable> getItems() {
+    public List<? extends Serializable> getItems() {
         return items;
     }
 }

@@ -10,6 +10,6 @@ public interface UIChoice<C> extends UIComponent<C> {
 
     void setEnabled(boolean enable);
 
-    void setItems(List<Serializable> items);
+    void setItems(List<? extends Serializable> items);
 
 }

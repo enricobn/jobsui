@@ -57,7 +57,7 @@ public class JavaFXUIChoice implements UIChoice<Node> {
     }
 
     @Override
-    public void setItems(final List<Serializable> items) {
+    public void setItems(final List<? extends Serializable> items) {
         final Serializable selectedItem = combo.getSelectionModel().getSelectedItem();
 
         disableListener = true;

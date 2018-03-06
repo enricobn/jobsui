@@ -21,7 +21,7 @@ public class SwingUIChoice implements UIChoice<JComponent> {
     private final JComboBox<Serializable> combo = new JComboBox<>();
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
     private final Observable<Serializable> observable;
-    private List<Serializable> items = new ArrayList<>();
+    private List<? extends Serializable> items = new ArrayList<>();
     private String title;
     private boolean disableListener = false;
 
@@ -61,7 +61,8 @@ public class SwingUIChoice implements UIChoice<JComponent> {
         }
 
         button.addActionListener(e -> {
-            final SwingFilteredList<Serializable> filteredList = new SwingFilteredList<>(title, items, (Serializable)combo.getSelectedItem());
+            final SwingFilteredList<? extends Serializable> filteredList = new SwingFilteredList(title, items,
+                    combo.getSelectedItem());
             filteredList.show();
             if (filteredList.isOk()) {
                 setValue(filteredList.getSelectedItem());
@@ -91,7 +92,7 @@ public class SwingUIChoice implements UIChoice<JComponent> {
     }
 
     @Override
-    public void setItems(final List<Serializable> items) {
+    public void setItems(final List<? extends Serializable> items) {
 //        System.out.println("SwingUIChoice.setItems " + items);
 //        if (items.equals(this.items)) {
 //            return;

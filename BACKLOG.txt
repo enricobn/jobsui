@@ -27,6 +27,7 @@ NEXT
 
 DONE
 -----
+- Edit: added support for changing component type
 - Edit: edit libraries
 - Edit: delete of parameter
 - component to choose files and folders

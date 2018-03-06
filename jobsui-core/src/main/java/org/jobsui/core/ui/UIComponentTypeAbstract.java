@@ -12,4 +12,8 @@ public abstract class UIComponentTypeAbstract implements UIComponentType {
         return name;
     }
 
+    @Override
+    public String toString() {
+        return name;
+    }
 }

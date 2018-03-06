@@ -180,7 +180,7 @@ public class EditProject {
             }
         });
 
-        itemDetail = new ItemDetail(ui);
+        itemDetail = new ItemDetail(ui, uiComponentRegistry);
         itemDetail.setPadding(new Insets(5, 5, 5, 5));
 
         splitPane = new SplitPane(itemsTree, itemDetail);
@@ -495,7 +495,8 @@ public class EditProject {
                 addParameterType.setOnAction(e -> {
                     String newKey = nextAvailableParameterKey(jobXML);
 
-                    SimpleParameterXML parameter = new SimpleParameterXML(newKey, "newName", uiComponentType);
+                    SimpleParameterXML parameter = new SimpleParameterXML(newKey, "newName");
+                    parameter.setComponent(uiComponentType);
                     try {
                         jobXML.add(parameter);
                         addParameter(treeItem, ItemType.Parameter, parameter, jobXML);
