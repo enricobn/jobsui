@@ -83,7 +83,16 @@ class ItemDetail extends VBox {
                 setLibraryDetail(treeItem);
                 break;
             }
+
+            case WizardStep:
+                setWizardStepDetail(treeItem);
+                break;
         }
+    }
+
+    private void setWizardStepDetail(TreeItem<EditItem> treeItem) {
+        WizardStep wizardStep = (WizardStep) treeItem.getValue().payload;
+        addTextProperty(treeItem, "Name", wizardStep::getName, wizardStep::setName);
     }
 
     private boolean setLibraryDetail(TreeItem<EditItem> treeItem) {

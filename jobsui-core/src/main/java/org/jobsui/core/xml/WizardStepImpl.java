@@ -1,6 +1,5 @@
 package org.jobsui.core.xml;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,7 +18,7 @@ public class WizardStepImpl implements WizardStep {
 
     @Override
     public Set<String> getDependencies() {
-        return Collections.unmodifiableSet(dependencies);
+        return dependencies;
     }
 
     @Override

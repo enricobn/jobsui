@@ -15,6 +15,8 @@ public interface WizardStep extends ValidatingXML {
 
     String getValidateScript();
 
+    void setName(String name);
+
     default List<String> validate() {
         List<String> messages = new ArrayList<>();
         if (getName() == null || getName().isEmpty()) {

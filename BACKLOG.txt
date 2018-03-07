@@ -31,6 +31,7 @@ NEXT
 
 DONE
 -----
+- Edit: wizard
 - sorted dependencies in WizardStep
 - Edit: added support for changing component type
 - Edit: edit libraries

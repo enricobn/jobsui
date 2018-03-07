@@ -224,12 +224,35 @@ public class EditProject {
     private TreeItem<EditItem> createJobTreeItem(JobXML job) {
         TreeItem<EditItem> result = new TreeItem<>(new EditItem(ItemType.Job, job::getName, job));
 
+
         addParameters(result, job, "parameters", ItemType.Parameters, ItemType.Parameter, job.getSimpleParameterXMLs());
         addParameters(result, job, "expressions", ItemType.Expressions, ItemType.Expression, job.getExpressionXMLs());
         addParameters(result, job, "calls", ItemType.Calls, ItemType.Call, job.getCallXMLs());
 
+        addWizard(job, result);
+
         result.setExpanded(true);
         return result;
+    }
+
+    private void addWizard(JobXML job, TreeItem<EditItem> result) {
+        TreeItem<EditItem> wizardSteps = new TreeItem<>(new EditItem(ItemType.WizardSteps, () -> "wizard", job));
+
+        result.getChildren().add(wizardSteps);
+
+        job.getWizardSteps().forEach(w -> {
+            TreeItem<EditItem> wizardStep = new TreeItem<>(new EditItem(ItemType.WizardStep, w::getName, w));
+            wizardSteps.getChildren().add(wizardStep);
+            TreeItem<EditItem> dependencies = new TreeItem<>(new EditItem(ItemType.WizardStepDependencies, () -> "parameters", w));
+            wizardStep.getChildren().add(dependencies);
+
+            w.getDependencies().forEach(d -> {
+                TreeItem<EditItem> dependency = new TreeItem<>(new EditItem(ItemType.WizardStepDependency, () -> job.getParameter(d).getName(), d));
+                dependencies.getChildren().add(dependency);
+            });
+
+        });
+
     }
 
     private void addParameters(TreeItem<EditItem> result, JobXML jobXML, String containerText, ItemType containerType, ItemType itemType,
@@ -315,7 +338,95 @@ public class EditProject {
             populateLibrariesMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Library) {
             populateLibraryMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.WizardSteps) {
+            populateWizardStepsMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.WizardStep) {
+            populateWizardStepMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.WizardStepDependencies) {
+            populateWizardStepDependenciesMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.WizardStepDependency) {
+            populateWizardStepDependencyMenu(contextMenu, treeItem);
+
         }
+    }
+
+    private void populateWizardStepDependencyMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        WizardStep wizardStep = findAncestorPayload(treeItem, ItemType.WizardStep);
+
+        String parameterKey = (String) treeItem.getValue().payload;
+
+        MenuItem delete = new MenuItem("Delete");
+        contextMenu.getItems().add(delete);
+        delete.setOnAction(t -> {
+            wizardStep.getDependencies().remove(parameterKey);
+            treeItem.getParent().getChildren().remove(treeItem);
+        });
+    }
+
+    private void populateWizardStepDependenciesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
+
+        WizardStep wizardStep = (WizardStep) treeItem.getValue().payload;
+
+        List<String> parameters = getParametersKeys(jobXML);
+        parameters.removeAll(wizardStep.getDependencies());
+
+        if (!parameters.isEmpty()) {
+            Menu addDependency = new Menu("Add");
+
+            for (String dependency : parameters) {
+
+                ParameterXML parameter = jobXML.getParameter(dependency);
+                String name = parameter.getName();
+                MenuItem dependencyMenuItem = new MenuItem(name);
+                dependencyMenuItem.setOnAction(e -> {
+                    wizardStep.getDependencies().add(dependency);
+                    TreeItem<EditItem> newDep = new TreeItem<>(new EditItem(ItemType.WizardStepDependency,
+                            () -> name, dependency));
+                    treeItem.getChildren().add(newDep);
+                });
+                addDependency.getItems().add(dependencyMenuItem);
+            }
+
+            contextMenu.getItems().add(addDependency);
+        }
+
+    }
+
+    private void populateWizardStepMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
+        if (jobXML == null) {
+            return;
+        }
+
+        WizardStep wizardStep = (WizardStep) treeItem.getValue().payload;
+
+        MenuItem delete = new MenuItem("Delete");
+        contextMenu.getItems().add(delete);
+        delete.setOnAction(t -> {
+            jobXML.getWizardSteps().remove(wizardStep);
+            treeItem.getParent().getChildren().remove(treeItem);
+        });
+    }
+
+    private void populateWizardStepsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
+        if (jobXML == null) {
+            return;
+        }
+
+        MenuItem add = new MenuItem("Add");
+        contextMenu.getItems().add(add);
+        add.setOnAction(t -> {
+            WizardStepImpl wizardStep = new WizardStepImpl();
+            wizardStep.setName("New wizard step");
+            jobXML.getWizardSteps().add(wizardStep);
+            TreeItem<EditItem> item = new TreeItem<>(new EditItem(ItemType.WizardStep, wizardStep::getName, wizardStep));
+            TreeItem<EditItem> dependencies = new TreeItem<>(new EditItem(ItemType.WizardStepDependencies, () -> "parameters", wizardStep));
+            item.getChildren().add(dependencies);
+
+            treeItem.getChildren().add(item);
+        });
     }
 
     private void populateLibraryMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
@@ -446,7 +557,7 @@ public class EditProject {
         contextMenu.getItems().add(add);
         add.setOnAction(event -> {
             String newKey = nextAvailableParameterKey(jobXML);
-            ExpressionXML expressionXML = new ExpressionXML(newKey, "newName");
+            ExpressionXML expressionXML = new ExpressionXML(newKey, "New expression");
             try {
                 jobXML.add(expressionXML);
                 addParameter(treeItem, ItemType.Expression, expressionXML, jobXML);
@@ -466,7 +577,7 @@ public class EditProject {
         contextMenu.getItems().add(add);
         add.setOnAction(event -> {
             String newKey = nextAvailableParameterKey(jobXML);
-            CallXML callXML = new CallXML(newKey, "newName");
+            CallXML callXML = new CallXML(newKey, "New call");
             try {
                 jobXML.add(callXML);
                 addParameter(treeItem, ItemType.Expression, callXML, jobXML);
@@ -495,7 +606,7 @@ public class EditProject {
                 addParameterType.setOnAction(e -> {
                     String newKey = nextAvailableParameterKey(jobXML);
 
-                    SimpleParameterXML parameter = new SimpleParameterXML(newKey, "newName");
+                    SimpleParameterXML parameter = new SimpleParameterXML(newKey, "New Parameter");
                     parameter.setComponent(uiComponentType);
                     try {
                         jobXML.add(parameter);
@@ -543,6 +654,12 @@ public class EditProject {
         return jobXML.getAllParameters().stream()
                 .map(ParameterXML::getKey).collect(Collectors.toList());
     }
+
+    private static List<String> getParametersKeys(JobXML jobXML) {
+        return jobXML.getSimpleParameterXMLs().stream()
+                .map(ParameterXML::getKey).collect(Collectors.toList());
+    }
+
 
     private static TreeItem<EditItem> findItem(TreeItem<EditItem> root, EditItem item) {
         if (root.getValue() == item) {
