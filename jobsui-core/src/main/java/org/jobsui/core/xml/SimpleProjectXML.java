@@ -7,7 +7,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 4/20/17.
@@ -38,7 +37,7 @@ public interface SimpleProjectXML extends ValidatingXML {
     default URL[] getScripsLocationsURLS() {
         return getScriptsLocations().stream()
                 .map(location -> getRelativeURL(location + "/"))
-                .collect(Collectors.toList()).toArray(new URL[0]);
+                .toArray(URL[]::new);
     }
 
     UIComponentRegistry getUiComponentRegistry();

@@ -204,9 +204,11 @@ public class EditProject {
                 .map(TreeItem::new)
                 .forEach(treeItem -> libraries.getChildren().add(treeItem));
 
+        TreeItem<EditItem> scriptsItem = new TreeItem<>(new EditItem(ItemType.Scripts, projectXML));
+        root.getChildren().add(scriptsItem);
         for (String location : projectXML.getScriptsLocations()) {
-            TreeItem<EditItem> locationItem = new TreeItem<>(new EditItem(ItemType.Scripts, location));
-            root.getChildren().add(locationItem);
+            TreeItem<EditItem> locationItem = new TreeItem<>(new EditItem(ItemType.ScriptsLocation, location));
+            scriptsItem.getChildren().add(locationItem);
             projectXML.getScriptFilesNames(location).stream()
                     .map(fileName -> new EditItem(ItemType.ScriptFile, fileName))
                     .map(TreeItem::new)
@@ -336,8 +338,10 @@ public class EditProject {
             populateCallsMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Call) {
             populateParameterMenu(contextMenu, treeItem);
-        } else if (item.itemType == ItemType.Scripts) {
-            populateScriptsMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.ScriptsLocation) {
+            populateScriptsLocationMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.ScriptFile) {
+            populateScriptFileMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Libraries) {
             populateLibrariesMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Library) {
@@ -350,8 +354,23 @@ public class EditProject {
             populateWizardStepDependenciesMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.WizardStepDependency) {
             populateWizardStepDependencyMenu(contextMenu, treeItem);
-
         }
+    }
+
+    private void populateScriptFileMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        ProjectFSXML projectXML = findAncestorPayload(treeItem, ItemType.Project);
+
+        String location = findAncestorPayload(treeItem, ItemType.ScriptsLocation);
+
+        String scriptFile = (String) treeItem.getValue().payload;
+
+        MenuItem delete = new MenuItem("Delete");
+        contextMenu.getItems().add(delete);
+        delete.setOnAction(t -> {
+            projectXML.removeScriptFile(location, scriptFile);
+            treeItem.getParent().getChildren().remove(treeItem);
+        });
+
     }
 
     private void populateWizardStepDependencyMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
@@ -529,8 +548,8 @@ public class EditProject {
         }
     }
 
-    private void populateScriptsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        ProjectFSXMLImpl projectXML = findAncestorPayload(treeItem, ItemType.Project);
+    private void populateScriptsLocationMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        ProjectFSXML projectXML = findAncestorPayload(treeItem, ItemType.Project);
         if (projectXML == null) {
             return;
         }

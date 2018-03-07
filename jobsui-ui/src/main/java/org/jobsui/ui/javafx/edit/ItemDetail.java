@@ -130,7 +130,7 @@ class ItemDetail extends VBox {
     }
 
     private void setGroovyFileDetail(TreeItem<EditItem> treeItem) {
-        String scriptsRoot = EditProject.findAncestorPayload(treeItem, ItemType.Scripts);
+        String scriptsRoot = EditProject.findAncestorPayload(treeItem, ItemType.ScriptsLocation);
         Objects.requireNonNull(scriptsRoot);
 
         ProjectFSXML project = EditProject.findAncestorPayload(treeItem, ItemType.Project);

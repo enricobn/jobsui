@@ -57,8 +57,18 @@ public class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
         this.folder = folder;
     }
 
+    @Override
     public void addScriptFile(String root, String name, String content) {
         Map<String, String> map = scriptFiles.computeIfAbsent(root, key -> new HashMap<>());
         map.put(name, content);
     }
+
+    @Override
+    public void removeScriptFile(String root, String name) {
+        Map<String, String> map = scriptFiles.get(root);
+        if (map != null) {
+            map.remove(name);
+        }
+    }
+
 }

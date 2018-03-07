@@ -21,4 +21,8 @@ public interface ProjectFSXML extends ProjectXML {
     void setVersion(String version);
 
     void setFolder(File folder);
+
+    void addScriptFile(String root, String name, String content);
+
+    void removeScriptFile(String root, String name);
 }
