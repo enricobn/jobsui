@@ -195,20 +195,20 @@ public class EditProject {
     }
 
     private TreeItem<EditItem> loadProject(ProjectFSXML projectXML) {
-        TreeItem<EditItem> root = new TreeItem<>(new EditItem(ItemType.Project, projectXML::getName, projectXML));
+        TreeItem<EditItem> root = new TreeItem<>(new EditItem(ItemType.Project, projectXML));
 
-        TreeItem<EditItem> libraries = new TreeItem<>(new EditItem(ItemType.Libraries, () -> "libraries", projectXML));
+        TreeItem<EditItem> libraries = new TreeItem<>(new EditItem(ItemType.Libraries, projectXML));
         root.getChildren().add(libraries);
         projectXML.getLibraries().stream()
-                .map(l -> new EditItem(ItemType.Library, () -> l.toString(), l))
+                .map(l -> new EditItem(ItemType.Library, l))
                 .map(TreeItem::new)
                 .forEach(treeItem -> libraries.getChildren().add(treeItem));
 
         for (String location : projectXML.getScriptsLocations()) {
-            TreeItem<EditItem> locationItem = new TreeItem<>(new EditItem(ItemType.Scripts, () -> location, location));
+            TreeItem<EditItem> locationItem = new TreeItem<>(new EditItem(ItemType.Scripts, location));
             root.getChildren().add(locationItem);
             projectXML.getScriptFilesNames(location).stream()
-                    .map(fileName -> new EditItem(ItemType.ScriptFile, () -> fileName, fileName))
+                    .map(fileName -> new EditItem(ItemType.ScriptFile, fileName))
                     .map(TreeItem::new)
                     .forEach(treeItem -> locationItem.getChildren().add(treeItem));
         }
@@ -222,12 +222,12 @@ public class EditProject {
     }
 
     private TreeItem<EditItem> createJobTreeItem(JobXML job) {
-        TreeItem<EditItem> result = new TreeItem<>(new EditItem(ItemType.Job, job::getName, job));
+        TreeItem<EditItem> result = new TreeItem<>(new EditItem(ItemType.Job, job));
 
 
-        addParameters(result, job, "parameters", ItemType.Parameters, ItemType.Parameter, job.getSimpleParameterXMLs());
-        addParameters(result, job, "expressions", ItemType.Expressions, ItemType.Expression, job.getExpressionXMLs());
-        addParameters(result, job, "calls", ItemType.Calls, ItemType.Call, job.getCallXMLs());
+        addParameters(result, job, ItemType.Parameters, ItemType.Parameter, job.getSimpleParameterXMLs());
+        addParameters(result, job, ItemType.Expressions, ItemType.Expression, job.getExpressionXMLs());
+        addParameters(result, job, ItemType.Calls, ItemType.Call, job.getCallXMLs());
 
         addWizard(job, result);
 
@@ -236,18 +236,18 @@ public class EditProject {
     }
 
     private void addWizard(JobXML job, TreeItem<EditItem> result) {
-        TreeItem<EditItem> wizardSteps = new TreeItem<>(new EditItem(ItemType.WizardSteps, () -> "wizard", job));
+        TreeItem<EditItem> wizardSteps = new TreeItem<>(new EditItem(ItemType.WizardSteps, job));
 
         result.getChildren().add(wizardSteps);
 
         job.getWizardSteps().forEach(w -> {
-            TreeItem<EditItem> wizardStep = new TreeItem<>(new EditItem(ItemType.WizardStep, w::getName, w));
+            TreeItem<EditItem> wizardStep = new TreeItem<>(new EditItem(ItemType.WizardStep, w));
             wizardSteps.getChildren().add(wizardStep);
-            TreeItem<EditItem> dependencies = new TreeItem<>(new EditItem(ItemType.WizardStepDependencies, () -> "parameters", w));
+            TreeItem<EditItem> dependencies = new TreeItem<>(new EditItem(ItemType.WizardStepDependencies, w));
             wizardStep.getChildren().add(dependencies);
 
             w.getDependencies().forEach(d -> {
-                TreeItem<EditItem> dependency = new TreeItem<>(new EditItem(ItemType.WizardStepDependency, () -> job.getParameter(d).getName(), d));
+                TreeItem<EditItem> dependency = new TreeItem<>(new EditItem(ItemType.WizardStepDependency, job.getParameter(d)));
                 dependencies.getChildren().add(dependency);
             });
 
@@ -255,9 +255,9 @@ public class EditProject {
 
     }
 
-    private void addParameters(TreeItem<EditItem> result, JobXML jobXML, String containerText, ItemType containerType, ItemType itemType,
+    private void addParameters(TreeItem<EditItem> result, JobXML jobXML, ItemType containerType, ItemType itemType,
                                List<? extends ParameterXML> parametersList) {
-        TreeItem<EditItem> parameters = new TreeItem<>(new EditItem(containerType, () -> containerText, jobXML));
+        TreeItem<EditItem> parameters = new TreeItem<>(new EditItem(containerType, jobXML));
         parameters.setExpanded(true);
         result.getChildren().add(parameters);
 
@@ -265,9 +265,9 @@ public class EditProject {
     }
 
     private void addParameter(TreeItem<EditItem> parameters, ItemType itemType, ParameterXML parameterDef, JobXML jobXML) {
-        TreeItem<EditItem> parameterTI = new TreeItem<>(new EditItem(itemType, parameterDef::getName, parameterDef));
+        TreeItem<EditItem> parameterTI = new TreeItem<>(new EditItem(itemType, parameterDef));
         parameters.getChildren().add(parameterTI);
-        TreeItem<EditItem> dependencies = new TreeItem<>(new EditItem(ItemType.Dependencies, () -> "dependencies", parameterDef));
+        TreeItem<EditItem> dependencies = new TreeItem<>(new EditItem(ItemType.Dependencies, parameterDef));
         parameterTI.getChildren().add(dependencies);
         parameterDef.getDependencies().stream()
                 .map(depKey -> {
@@ -277,7 +277,7 @@ public class EditProject {
                     }
                     return dep;
                 })
-                .map(dep -> new EditItem(ItemType.Dependency, dep::getName, dep.getKey()))
+                .map(dep -> new EditItem(ItemType.Dependency, dep))
                 .map(TreeItem::new)
                 .forEach(dependencies.getChildren()::add);
     }
@@ -322,18 +322,22 @@ public class EditProject {
 
         if (item.itemType == ItemType.Parameters) {
             populateParametersMenu(contextMenu, treeItem);
-        } else if (item.itemType == ItemType.Expressions) {
-            populateExpressionsMenu(contextMenu, treeItem);
-        } else if (item.itemType == ItemType.Calls) {
-            populateCallsMenu(contextMenu, treeItem);
-        } else if (item.itemType == ItemType.Scripts) {
-            populateScriptsMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Parameter) {
+            populateParameterMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Dependencies) {
             populateDependenciesMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Dependency) {
             populateDependencyMenu(contextMenu, treeItem);
-        } else if (item.itemType == ItemType.Parameter) {
+        } else if (item.itemType == ItemType.Expressions) {
+            populateExpressionsMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Expression) {
             populateParameterMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Calls) {
+            populateCallsMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Call) {
+            populateParameterMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Scripts) {
+            populateScriptsMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Libraries) {
             populateLibrariesMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Library) {
@@ -353,7 +357,7 @@ public class EditProject {
     private void populateWizardStepDependencyMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         WizardStep wizardStep = findAncestorPayload(treeItem, ItemType.WizardStep);
 
-        String parameterKey = (String) treeItem.getValue().payload;
+        String parameterKey = ((ParameterXML) treeItem.getValue().payload).getKey();
 
         MenuItem delete = new MenuItem("Delete");
         contextMenu.getItems().add(delete);
@@ -382,7 +386,7 @@ public class EditProject {
                 dependencyMenuItem.setOnAction(e -> {
                     wizardStep.getDependencies().add(dependency);
                     TreeItem<EditItem> newDep = new TreeItem<>(new EditItem(ItemType.WizardStepDependency,
-                            () -> name, dependency));
+                            parameter));
                     treeItem.getChildren().add(newDep);
                 });
                 addDependency.getItems().add(dependencyMenuItem);
@@ -421,8 +425,8 @@ public class EditProject {
             WizardStepImpl wizardStep = new WizardStepImpl();
             wizardStep.setName("New wizard step");
             jobXML.getWizardSteps().add(wizardStep);
-            TreeItem<EditItem> item = new TreeItem<>(new EditItem(ItemType.WizardStep, wizardStep::getName, wizardStep));
-            TreeItem<EditItem> dependencies = new TreeItem<>(new EditItem(ItemType.WizardStepDependencies, () -> "parameters", wizardStep));
+            TreeItem<EditItem> item = new TreeItem<>(new EditItem(ItemType.WizardStep, wizardStep));
+            TreeItem<EditItem> dependencies = new TreeItem<>(new EditItem(ItemType.WizardStepDependencies, wizardStep));
             item.getChildren().add(dependencies);
 
             treeItem.getChildren().add(item);
@@ -459,7 +463,7 @@ public class EditProject {
             library.setArtifactId("artifactId");
             library.setVersion("1.0");
             projectXML.getLibraries().add(library);
-            TreeItem<EditItem> item = new TreeItem<>(new EditItem(ItemType.Library, library::toString, library));
+            TreeItem<EditItem> item = new TreeItem<>(new EditItem(ItemType.Library, library));
             treeItem.getChildren().add(item);
         });
     }
@@ -485,7 +489,7 @@ public class EditProject {
         delete.setOnAction(t -> {
             ParameterXML parameterXML = (ParameterXML) treeItem.getParent().getValue().payload;
             treeItem.getParent().getChildren().remove(treeItem);
-            parameterXML.removeDependency((String)treeItem.getValue().payload);
+            parameterXML.removeDependency(((ParameterXML)treeItem.getValue().payload).getKey());
         });
     }
 
@@ -503,7 +507,7 @@ public class EditProject {
         parameters.removeAll(dependencies);
 
         if (!parameters.isEmpty()) {
-            Menu addDependency = new Menu("Add dependency");
+            Menu addDependency = new Menu("Add");
 
             for (String dependency : parameters) {
                 if (parameterXML.getKey().equals(dependency)) {
@@ -515,7 +519,7 @@ public class EditProject {
                 dependencyMenuItem.setOnAction(e -> {
                     parameterXML.addDependency(dependency);
                     TreeItem<EditItem> newDep = new TreeItem<>(new EditItem(ItemType.Dependency,
-                            () -> name, dependency));
+                            parameter));
                     treeItem.getChildren().add(newDep);
                 });
                 addDependency.getItems().add(dependencyMenuItem);
@@ -538,7 +542,7 @@ public class EditProject {
                 Optional<String> oname = ui.askString("File name");
                 oname.ifPresent(name -> {
                     projectXML.addScriptFile(projectXML.getScriptsLocations().iterator().next(), name, "");
-                    TreeItem<EditItem> scriptItem = new TreeItem<>(new EditItem(ItemType.ScriptFile, () -> name, name));
+                    TreeItem<EditItem> scriptItem = new TreeItem<>(new EditItem(ItemType.ScriptFile, name));
                     treeItem.getChildren().add(scriptItem);
                 });
             } catch (Exception e1) {
@@ -580,7 +584,7 @@ public class EditProject {
             CallXML callXML = new CallXML(newKey, "New call");
             try {
                 jobXML.add(callXML);
-                addParameter(treeItem, ItemType.Expression, callXML, jobXML);
+                addParameter(treeItem, ItemType.Call, callXML, jobXML);
             } catch (Exception e1) {
                 ui.showError("Error adding new call.", e1);
             }

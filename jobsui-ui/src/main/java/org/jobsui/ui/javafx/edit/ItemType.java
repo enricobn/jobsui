@@ -2,37 +2,45 @@ package org.jobsui.ui.javafx.edit;
 
 import org.jobsui.core.xml.*;
 
+import java.util.function.Function;
+
 enum ItemType {
-    Project(ProjectXML.class),
-        Libraries(ProjectXML.class),
-            Library(ProjectLibraryXML.class),
-        Scripts(String.class),
-            ScriptFile(String.class),
-        Job(JobXML.class),
-            WizardSteps(JobXML.class),
-                WizardStep(WizardStep.class),
-                    WizardStepDependencies(WizardStep.class),
-                        WizardStepDependency(String.class),
-            Parameters(JobXML.class),
-                Parameter(SimpleParameterXML.class),
-                    Dependencies(ParameterXML.class),
-                        Dependency(String.class),
-            Expressions(JobXML.class),
-                Expression(ExpressionXML.class),
+    Project(ProjectXML.class, ProjectXML::getName),
+        Libraries(ProjectXML.class, p -> "libraries"),
+            Library(ProjectLibraryXML.class, ProjectLibraryXML::toString),
+        Scripts(String.class, p -> "scripts"),
+            ScriptFile(String.class, p -> p),
+        Job(JobXML.class, JobXML::getName),
+            WizardSteps(JobXML.class, p -> "wizards"),
+                WizardStep(WizardStep.class, org.jobsui.core.xml.WizardStep::getName),
+                    WizardStepDependencies(WizardStep.class, p -> "parameters"),
+                        WizardStepDependency(ParameterXML.class, ParameterXML::getName),
+            Parameters(JobXML.class, p -> "parameters"),
+                Parameter(SimpleParameterXML.class, SimpleParameterXML::getName),
+                    Dependencies(ParameterXML.class, p -> "dependencies"),
+                        Dependency(ParameterXML.class, ParameterXML::getName),
+            Expressions(JobXML.class, p -> "expressions"),
+                Expression(ExpressionXML.class, ExpressionXML::getName),
                     //Dependencies
                         //Dependency
-            Calls(JobXML.class),
-                Call(CallXML.class);
+            Calls(JobXML.class, p -> "calls"),
+                Call(CallXML.class, CallXML::getName);
                     //Dependencies
                         //Dependency
 
     private final Class<?> payloadType;
+    private final Function<Object,String> titleFunction;
 
-    ItemType(Class<?> payloadType) {
+    <T> ItemType(Class<T> payloadType, Function<T, String> titleFunction) {
         this.payloadType = payloadType;
+        this.titleFunction = (Function<Object, String>) titleFunction;
     }
 
     public Class<?> getPayloadType() {
         return payloadType;
+    }
+
+    public Function<Object, String> getTitleFunction() {
+        return titleFunction;
     }
 }
