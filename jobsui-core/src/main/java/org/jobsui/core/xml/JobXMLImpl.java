@@ -6,6 +6,7 @@ import org.jobsui.core.utils.JobsUIUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Created by enrico on 10/11/16.
@@ -203,7 +204,7 @@ public class JobXMLImpl implements JobXML {
     public JobsUIValidationResult removeParameter(ParameterXML parameterXML) {
         JobsUIValidationResultImpl result = new JobsUIValidationResultImpl();
 
-        List<String> messages = getJobDependencyXmls().stream()
+        Stream<String> parametersDependenciesMessages = getJobDependencyXmls().stream()
                 .filter(d -> d.getDependencies().contains(parameterXML.getKey()))
                 .map(d -> {
                     String parameterType;
@@ -216,10 +217,13 @@ public class JobXMLImpl implements JobXML {
                         parameterType = "Parameter";
                     }
                     return parameterType + " " + d.getName() + " depends from " + parameterXML.getName() + ".";
-                })
-                .collect(Collectors.toList());
+                });
 
-        result.setMessages(messages);
+        Stream<String> wizardMessages = getWizardSteps().stream()
+                .filter(w -> w.getDependencies().contains(parameterXML.getKey()))
+                .map(w -> "Wizard step " + w.getName() + " depends on " + parameterXML.getName() + ".");
+
+        result.setMessages(Stream.concat(parametersDependenciesMessages, wizardMessages).collect(Collectors.toList()));
 
         if (result.isValid()) {
             parameters.remove(parameterXML.getKey());
