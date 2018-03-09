@@ -3,6 +3,8 @@ DOING
 
 NEXT
 -----
+- now saving a job will delete old job files and script folder, but retain other files, to preserve other files,
+  but save as does not copy the other files. What to do?
 - WizardStep is used in XML and job, may be better to have two classes?
 - rename WizardStep to Group?
 - WizardStep has no custom validation nor automatic (through dependencies)

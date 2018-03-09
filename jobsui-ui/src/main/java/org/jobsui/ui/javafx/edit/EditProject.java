@@ -32,7 +32,7 @@ public class EditProject {
     private TreeView<EditItem> itemsTree;
     private ItemDetail itemDetail;
     private ProjectFSXML projectXML = null;
-    private List<JobXML> originalJobs = null;
+    private List<String> originalJobFiles = null;
     private List<String> originalScriptLocations = null;
     private UIButton<Node> saveButton;
     private JobsUIPreferences preferences;
@@ -81,8 +81,8 @@ public class EditProject {
             }
 
             try {
-                for (JobXML originalJob : originalJobs) {
-                    File file = new File(projectXML.getFolder(), JobXMLImpl.getFileName(originalJob.getId()));
+                for (String originalJobFile : originalJobFiles) {
+                    File file = new File(projectXML.getFolder(), originalJobFile);
                     if (file.exists()) {
                         file.delete();
                     }
@@ -300,7 +300,9 @@ public class EditProject {
 
     private void setProjectXML(ProjectFSXML projectXML) {
         this.projectXML = projectXML;
-        this.originalJobs = new ArrayList<>(projectXML.getJobs());
+        this.originalJobFiles = projectXML.getJobs().stream()
+                .map(job -> JobXMLImpl.getFileName(job.getId()))
+                .collect(Collectors.toList());
         this.originalScriptLocations = new ArrayList<>(projectXML.getScriptsLocations());
 //        stage.setTitle(projectXML.getName());
     }
