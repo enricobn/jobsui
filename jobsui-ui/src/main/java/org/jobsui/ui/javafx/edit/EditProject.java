@@ -378,7 +378,7 @@ public class EditProject {
     private void populateProjectMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         ProjectFSXMLImpl projectXML = (ProjectFSXMLImpl) treeItem.getValue().payload;
 
-        MenuItem add = new MenuItem("Add");
+        MenuItem add = new MenuItem("Add job");
         contextMenu.getItems().add(add);
         add.setOnAction(t -> {
             JobXML jobXML;

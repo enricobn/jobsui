@@ -5,6 +5,8 @@ import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import org.jobsui.core.CommandLineArguments;
@@ -137,6 +139,7 @@ public class JavaFXUI implements UI<Node> {
         alert.setTitle("JobsUI");
         alert.setHeaderText("Error");
         alert.setContentText(message);
+        alert.setResizable(true);
 
 // Create expandable Exception.
         StringWriter sw = new StringWriter();
@@ -145,6 +148,14 @@ public class JavaFXUI implements UI<Node> {
         String exceptionText = sw.toString();
 
         Label label = new Label("The exception stacktrace was:");
+
+        Button copyButton = new Button("Copy");
+        copyButton.setOnAction(event -> {
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            ClipboardContent content = new ClipboardContent();
+            content.putString(exceptionText);
+            clipboard.setContent(content);
+        });
 
         TextArea textArea = new TextArea(exceptionText);
         textArea.setEditable(false);
@@ -159,6 +170,7 @@ public class JavaFXUI implements UI<Node> {
         expContent.setMaxWidth(Double.MAX_VALUE);
         expContent.add(label, 0, 0);
         expContent.add(textArea, 0, 1);
+        expContent.add(copyButton, 0, 2);
 
 // Set expandable Exception into the dialog pane.
         alert.getDialogPane().setExpandableContent(expContent);
