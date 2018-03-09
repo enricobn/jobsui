@@ -23,6 +23,7 @@ import org.jobsui.ui.javafx.JavaFXUI;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -384,7 +385,9 @@ public class EditProject {
         add.setOnAction(t -> {
             JobXML jobXML;
             try {
-                jobXML = NewProject.createJobXML();
+                String id = nextAvailableKey(projectXML.getJobs(), JobXML::getId, "newJob");
+                jobXML = JobXMLImpl.createExampleJobXML(id, "New job");
+                jobXML.setId(id);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -681,20 +684,25 @@ public class EditProject {
     }
 
     private String nextAvailableParameterKey(JobXML jobXML) {
-        String newKey = "newKey";
+        return nextAvailableKey(jobXML.getAllParameters(), ParameterXML::getKey, "newParam");
+    }
+
+    private <T> String nextAvailableKey(Collection<T> collection, Function<T, String> getKey, String prefix) {
+        String newKey = prefix;
         int i = 0;
 
         while (true) {
-            boolean found = jobXML.getAllParameters().stream()
-                    .map(ParameterXML::getKey)
+            boolean found = collection.stream()
+                    .map(getKey)
                     .anyMatch(newKey::equals);
             if (!found) {
                 break;
             }
-            newKey = "newKey" + Integer.toString(++i);
+            newKey = prefix + Integer.toString(++i);
         }
         return newKey;
     }
+
 
     static <T> T findAncestorPayload(TreeItem<EditItem> treeItem, Class<T> payloadClass) {
         return findAncestorPayload(treeItem, item -> payloadClass.isAssignableFrom(item.payload.getClass()));

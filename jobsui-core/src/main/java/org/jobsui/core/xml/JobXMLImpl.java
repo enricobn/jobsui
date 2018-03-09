@@ -2,6 +2,7 @@ package org.jobsui.core.xml;
 
 import org.jobsui.core.runner.JobsUIValidationResult;
 import org.jobsui.core.runner.JobsUIValidationResultImpl;
+import org.jobsui.core.ui.UIComponentRegistryImpl;
 import org.jobsui.core.utils.JobsUIUtils;
 
 import java.util.*;
@@ -29,6 +30,16 @@ public class JobXMLImpl implements JobXML {
 
     public static String getFileName(String id) {
         return id + ".xml";
+    }
+
+    public static JobXMLImpl createExampleJobXML(String id, String name) throws Exception {
+        JobXMLImpl jobXML = new JobXMLImpl(id, name, "1.0.0");
+        SimpleParameterXML parameter = new SimpleParameterXML("message", "Message");
+        parameter.setComponent(UIComponentRegistryImpl.Value);
+        parameter.setOnInitScript("component.setValue('Hello world')");
+        jobXML.add(parameter);
+        jobXML.setRunScript("println(\"${message}\")");
+        return jobXML;
     }
 
     public void setRunScript(String runScript) {

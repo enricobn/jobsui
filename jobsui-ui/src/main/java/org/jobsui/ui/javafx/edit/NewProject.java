@@ -8,8 +8,10 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.jobsui.core.ui.UIButton;
-import org.jobsui.core.ui.UIComponentRegistryImpl;
-import org.jobsui.core.xml.*;
+import org.jobsui.core.xml.JobXMLImpl;
+import org.jobsui.core.xml.ProjectFSXML;
+import org.jobsui.core.xml.ProjectFSXMLImpl;
+import org.jobsui.core.xml.ProjectXMLExporter;
 import org.jobsui.ui.javafx.JavaFXUI;
 import org.jobsui.ui.javafx.JavaFXUIFileChooser;
 import org.jobsui.ui.javafx.LabeledField;
@@ -138,20 +140,10 @@ public class NewProject {
         ProjectFSXMLImpl projectFSXML = new ProjectFSXMLImpl(projectFolder,
                 namespace + ":" + id, name, "1.0.0");
 
-        JobXMLImpl jobXML = createJobXML();
+        JobXMLImpl jobXML = JobXMLImpl.createExampleJobXML("job", "Job");
 
         projectFSXML.addJob(jobXML);
         return projectFSXML;
-    }
-
-    public static JobXMLImpl createJobXML() throws Exception {
-        JobXMLImpl jobXML = new JobXMLImpl("newjob", "NewJob", "1.0.0");
-        SimpleParameterXML parameter = new SimpleParameterXML("message", "Message");
-        parameter.setComponent(UIComponentRegistryImpl.Value);
-        parameter.setOnInitScript("component.setValue('Hello world')");
-        jobXML.add(parameter);
-        jobXML.setRunScript("println(\"${message}\")");
-        return jobXML;
     }
 
 }
