@@ -54,7 +54,7 @@ public class ProjectXMLExporterTest {
     private static void check(ProjectFSXML original, ProjectFSXML exported) {
         assertThat(exported.getId(), is(original.getId()));
         assertThat(exported.getName(), is(original.getName()));
-        assertThat(exported.getJobs(), is(original.getJobs()));
+        assertThat(getJobsIds(exported.getJobs()), is(getJobsIds(original.getJobs())));
         assertThat(exported.getImports(), is(original.getImports()));
         assertThat(exported.getLibraries(), is(original.getLibraries()));
         assertThat(exported.getScriptsLocations(), is(original.getScriptsLocations()));
@@ -66,13 +66,18 @@ public class ProjectXMLExporterTest {
             }
         }
 
-        for (String job : exported.getJobs()) {
-            JobXML exportedJobXML = exported.getJobXML(job);
-            JobXML originalJobXML = original.getJobXML(job);
+        for (JobXML job : exported.getJobs()) {
+            JobXML exportedJobXML = exported.getJobXMLById(job.getId());
+            JobXML originalJobXML = original.getJobXMLById(job.getId());
 
             check(originalJobXML, exportedJobXML);
         }
+    }
 
+    private static Collection<String> getJobsIds(Collection<JobXML> jobs) {
+        return jobs.stream()
+                .map(JobXML::getId)
+                .collect(Collectors.toList());
     }
 
     private static void check(JobXML originalJobXML, JobXML exportedJobXML) {

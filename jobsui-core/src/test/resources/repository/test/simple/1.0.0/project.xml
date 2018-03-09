@@ -1,4 +1,4 @@
 <Project id="test:simple" name="Simple project" version="1.0.0">
     <Library>org.apache.commons:commons-lang3:3.4</Library>
-    <Job>simple.xml</Job>
+    <Job>simple</Job>
 </Project>

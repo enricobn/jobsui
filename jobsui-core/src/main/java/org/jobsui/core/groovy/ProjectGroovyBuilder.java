@@ -38,8 +38,7 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
 
         Map<String, JobGroovy<Serializable>> jobs = new HashMap<>();
 
-        projectXML.getJobs().stream()
-                .map(projectXML::getJobXML)
+        projectXML.getJobs()
                 .forEach(jobXML -> {
                     try {
                         jobs.put(jobXML.getId(), build(groovyShell, jobXML));
@@ -53,11 +52,11 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
         ProjectParserImpl projectParser = new ProjectParserImpl();
 
         ProjectGroovyBuilder projectGroovyBuilder = new ProjectGroovyBuilder();
-        projectXML.getImports().entrySet().forEach(entry -> {
+        projectXML.getImports().forEach((key, value) -> {
             try {
 //                ProjectParser projectParser = projectXML.getJobParser(entry.getValue());
-                ProjectXML refProjectXML = projectParser.parse(projectXML.getRelativeURL(entry.getValue()));
-                projects.put(entry.getKey(), projectGroovyBuilder.build(refProjectXML));
+                ProjectXML refProjectXML = projectParser.parse(projectXML.getRelativeURL(value));
+                projects.put(key, projectGroovyBuilder.build(refProjectXML));
             } catch (Exception e) {
                 // TODO
                 throw new RuntimeException(e);

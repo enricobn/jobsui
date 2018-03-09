@@ -14,9 +14,9 @@ import java.util.stream.Stream;
 public class JobXMLImpl implements JobXML {
     private final Map<String, ParameterXML> parameters = new LinkedHashMap<>();
     private final List<WizardStep> wizardSteps = new ArrayList<>();
-    private final String id;
-    private final String version;
+    private String id;
     private String name;
+    private String version;
     private String runScript;
     private String validateScript;
     private int order;
@@ -25,6 +25,10 @@ public class JobXMLImpl implements JobXML {
         this.name = name;
         this.id = id;
         this.version = version;
+    }
+
+    public static String getFileName(String id) {
+        return id + ".xml";
     }
 
     public void setRunScript(String runScript) {
@@ -230,5 +234,15 @@ public class JobXMLImpl implements JobXML {
         }
 
         return result;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @Override
+    public void setVersion(String version) {
+        this.version = version;
     }
 }

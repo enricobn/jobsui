@@ -49,4 +49,8 @@ public interface JobXML extends ValidatingXML{
     }
 
     JobsUIValidationResult removeParameter(ParameterXML parameterXML);
+
+    void setId(String id);
+
+    void setVersion(String version);
 }

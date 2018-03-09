@@ -57,7 +57,7 @@ public class ProjectParserImpl implements ProjectParser {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        }, false);
+        });
 
         Charset utf8 = Charset.forName("UTF-8");
 
@@ -78,17 +78,10 @@ public class ProjectParserImpl implements ProjectParser {
 
     @Override
     public ProjectXML parse(URL url) throws Exception {
-        return parse(url, triple -> new ProjectXMLImpl(url, triple.first, triple.second, triple.third), false);
+        return parse(url, triple -> new ProjectXMLImpl(url, triple.first, triple.second, triple.third));
     }
 
-    @Override
-    public <T extends SimpleProjectXML> T parseSimple(URL url) throws Exception {
-        return (T) parse(url, triple -> new SimpleProjectXMLImpl(url, triple.first, triple.second, triple.third),
-                true);
-    }
-
-    private static  <T extends SimpleProjectXMLImpl> T parse(URL url, Function<Tuple3<String,String, String>,T> supplier,
-                                                         boolean simple) throws Exception {
+    private static <T extends ProjectXMLImpl> T parse(URL url, Function<Tuple3<String,String, String>,T> supplier) throws Exception {
         LOGGER.info("Parsing " + url);
         URL projectURL = new URL(url + "/" + PROJECT_FILE_NAME);
 
@@ -121,7 +114,7 @@ public class ProjectParserImpl implements ProjectParser {
 
 //            projectXML.setVersion(projectVersion);
 
-            parseProject(doc, projectXML, simple);
+            parseProject(doc, projectXML);
         }
 
         LOGGER.info("Parsed " + url);
@@ -129,7 +122,7 @@ public class ProjectParserImpl implements ProjectParser {
 
     }
 
-    private static void parseProject(Document doc, SimpleProjectXMLImpl projectXML, boolean simple) throws Exception {
+    private static void parseProject(Document doc, ProjectXMLImpl projectXML) throws Exception {
         String subject;
         NodeList libraries = doc.getElementsByTagName("Library");
 
@@ -154,17 +147,9 @@ public class ProjectParserImpl implements ProjectParser {
         for (int i = 0; i < jobs.getLength(); i++) {
             Element element = (Element) jobs.item(i);
             subject = "Job for Project with id='" + projectXML.getId() + "'";
-            String jobFile = getElementContent(element, "#text", false, subject);
+            String id = getElementContent(element, "#text", true, subject);
 
-            if (jobFile == null || !jobFile.endsWith(".xml")) {
-                throw new Exception(jobFile + " is not a valid job file name: it must end with .xml.");
-            }
-
-            if (simple) {
-                projectXML.addJob(jobFile);
-            } else {
-                ((ProjectXMLImpl) projectXML).addJob(jobFile, JobParserImpl.parse(projectXML, jobFile));
-            }
+            projectXML.addJob(JobParserImpl.parse(projectXML, id));
         }
     }
 

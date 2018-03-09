@@ -40,9 +40,11 @@ public class JobParserImpl implements JobParser {
         jobValidator = jobSchema.newValidator();
     }
 
-    public static JobXML parse(SimpleProjectXML projectXML, String jobResource) throws Exception {
+    public static JobXML parse(ProjectXML projectXML, String id) throws Exception {
         JobParserImpl jobParser = new JobParserImpl();
-        return jobParser.parse(projectXML.getJobId(jobResource), projectXML.getRelativeURL(jobResource), projectXML.getUiComponentRegistry());
+        return jobParser.parse(id,
+                projectXML.getRelativeURL(JobXMLImpl.getFileName(id)),
+                projectXML.getUiComponentRegistry());
     }
 
     @Override

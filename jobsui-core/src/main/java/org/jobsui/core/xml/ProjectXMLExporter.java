@@ -44,8 +44,8 @@ public class ProjectXMLExporter {
             XMLUtils.addAttr(element, "name", entry.getKey());
         }
 
-        for (String job : projectXML.getJobs()) {
-            XMLUtils.addTextElement(rootElement, "Job", job, false);
+        for (JobXML job : projectXML.getJobs()) {
+            XMLUtils.addTextElement(rootElement, "Job", job.getId(), false);
         }
 
         XMLUtils.write(doc, new File(folder, ProjectParserImpl.PROJECT_FILE_NAME),
@@ -63,8 +63,8 @@ public class ProjectXMLExporter {
 
         JobXMLExporter jobXMLExporter = new JobXMLExporter();
 
-        for (String job : projectXML.getJobs()) {
-            jobXMLExporter.export(projectXML.getJobXML(job), new File(folder, job));
+        for (JobXML job : projectXML.getJobs()) {
+            jobXMLExporter.export(job, new File(folder, JobXMLImpl.getFileName(job.getId())));
         }
 
     }

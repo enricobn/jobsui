@@ -121,8 +121,9 @@ class ItemDetail extends VBox {
     private void setJobDetail(TreeItem<EditItem> treeItem) {
         JobXMLImpl jobXML = (JobXMLImpl) treeItem.getValue().payload;
 
-        // TODO key (file name)
+        addTextProperty(treeItem, "Key", jobXML::getId, jobXML::setId);
         addTextProperty(treeItem, "Name", jobXML::getName, jobXML::setName);
+        addTextProperty(treeItem, "Version", jobXML::getVersion, jobXML::setVersion);
 
         addTextAreaProperty(treeItem, "Validate", jobXML::getValidateScript, jobXML::setValidateScript,
                 false);

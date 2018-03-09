@@ -134,19 +134,24 @@ public class NewProject {
         }
     }
 
-    private static ProjectFSXMLImpl createProjectXML(File projectFolder, String namespace, String id, String name) throws Exception {
+    public static ProjectFSXMLImpl createProjectXML(File projectFolder, String namespace, String id, String name) throws Exception {
         ProjectFSXMLImpl projectFSXML = new ProjectFSXMLImpl(projectFolder,
                 namespace + ":" + id, name, "1.0.0");
 
+        JobXMLImpl jobXML = createJobXML();
+
+        projectFSXML.addJob(jobXML);
+        return projectFSXML;
+    }
+
+    public static JobXMLImpl createJobXML() throws Exception {
         JobXMLImpl jobXML = new JobXMLImpl("newjob", "NewJob", "1.0.0");
         SimpleParameterXML parameter = new SimpleParameterXML("message", "Message");
         parameter.setComponent(UIComponentRegistryImpl.Value);
         parameter.setOnInitScript("component.setValue('Hello world')");
         jobXML.add(parameter);
         jobXML.setRunScript("println(\"${message}\")");
-
-        projectFSXML.addJob("newjob.xml", jobXML);
-        return projectFSXML;
+        return jobXML;
     }
 
 }

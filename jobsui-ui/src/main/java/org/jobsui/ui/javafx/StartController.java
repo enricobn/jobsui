@@ -13,7 +13,10 @@ import org.jobsui.core.OpenedItem;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.utils.Tuple2;
-import org.jobsui.core.xml.*;
+import org.jobsui.core.xml.JobXML;
+import org.jobsui.core.xml.ProjectFSXML;
+import org.jobsui.core.xml.ProjectParserImpl;
+import org.jobsui.core.xml.ProjectXML;
 
 import java.io.File;
 import java.io.Serializable;
@@ -147,23 +150,22 @@ public class StartController implements Initializable {
 
     }
 
-    private SimpleProjectXML openProject(URL url) throws Exception {
+    private ProjectXML openProject(URL url) {
         ProjectParserImpl projectParser = new ProjectParserImpl();
-        SimpleProjectXML simpleProjectXML;
+        ProjectXML simpleProjectXML;
         try {
-            simpleProjectXML = projectParser.parseSimple(url);
+            simpleProjectXML = projectParser.parse(url);
         } catch (Exception e1) {
             throw new RuntimeException(e1);
         }
 
         if (simpleProjectXML.getJobs().size() == 1) {
-            String jobFile = simpleProjectXML.getJobs().iterator().next();
+            JobXML job = simpleProjectXML.getJobs().iterator().next();
 
-            openJob(url, simpleProjectXML.getJobId(jobFile), simpleProjectXML);
+            openJob(url, job.getId(), simpleProjectXML);
         } else {
-            ProjectXML projectXML = projectParser.parse(url);
             List<JobWrapper> jobWrappers = simpleProjectXML.getJobs().stream()
-                    .map(job -> new JobWrapper(projectXML.getJobXML(job)))
+                    .map(JobWrapper::new)
                     .collect(Collectors.toList());
 
             Optional<JobWrapper> jobWrapperO = JavaFXUI.chooseStatic("Choose job", jobWrappers);
@@ -179,7 +181,7 @@ public class StartController implements Initializable {
         return simpleProjectXML;
     }
 
-    private void openJob(URL url, String jobId, SimpleProjectXML simpleProjectXML) {
+    private void openJob(URL url, String jobId, ProjectXML simpleProjectXML) {
         Task<Tuple2<Project,Job<Serializable>>> task = new LoadJobTask(url, jobId);
         ProgressDialog.run(task, "Opening job", tuple -> {
                 StartApp.getInstance().gotoRun(tuple.first, tuple.second);

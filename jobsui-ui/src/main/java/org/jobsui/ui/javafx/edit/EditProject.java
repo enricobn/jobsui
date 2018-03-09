@@ -32,7 +32,7 @@ public class EditProject {
     private TreeView<EditItem> itemsTree;
     private ItemDetail itemDetail;
     private ProjectFSXML projectXML = null;
-    private List<String> originalJobs = null;
+    private List<JobXML> originalJobs = null;
     private List<String> originalScriptLocations = null;
     private UIButton<Node> saveButton;
     private JobsUIPreferences preferences;
@@ -81,8 +81,8 @@ public class EditProject {
             }
 
             try {
-                for (String originalJob : originalJobs) {
-                    File file = new File(projectXML.getFolder(), originalJob);
+                for (JobXML originalJob : originalJobs) {
+                    File file = new File(projectXML.getFolder(), JobXMLImpl.getFileName(originalJob.getId()));
                     if (file.exists()) {
                         file.delete();
                     }
@@ -216,7 +216,6 @@ public class EditProject {
         }
 
         projectXML.getJobs().stream()
-                .map(projectXML::getJobXML)
                 .sorted(Comparator.comparing(JobXML::getName))
                 .map(this::createJobTreeItem)
                 .forEach(root.getChildren()::add);
@@ -354,7 +353,30 @@ public class EditProject {
             populateWizardStepDependenciesMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.WizardStepDependency) {
             populateWizardStepDependencyMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Project) {
+            populateProjectMenu(contextMenu, treeItem);
         }
+    }
+
+    private void populateProjectMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        ProjectFSXMLImpl projectXML = (ProjectFSXMLImpl) treeItem.getValue().payload;
+
+        MenuItem add = new MenuItem("Add");
+        contextMenu.getItems().add(add);
+        add.setOnAction(t -> {
+            JobXML jobXML;
+            try {
+                jobXML = NewProject.createJobXML();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            projectXML.addJob(jobXML);
+
+            TreeItem<EditItem> item = createJobTreeItem(jobXML);
+
+            treeItem.getChildren().add(item);
+        });
+
     }
 
     private void populateScriptFileMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {

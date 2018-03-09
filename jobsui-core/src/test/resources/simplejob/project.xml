@@ -1,12 +1,12 @@
 <Project id="test:simple" name="Simple" version="1.0.0">
     <Library>org.apache.commons:commons-lang3:3.4</Library>
     <Import name="ext">../external</Import>
-    <Job>concat.xml</Job>
-    <Job>simple.xml</Job>
-    <Job>simpleWithExpression.xml</Job>
-    <Job>simpleWithExternalCall.xml</Job>
-    <Job>simpleWithInternalCall.xml</Job>
-    <Job>simpleWithParameterDependency.xml</Job>
-    <Job>simpleWithChoice.xml</Job>
-    <Job>simpleWithWizard.xml</Job>
+    <Job>concat</Job>
+    <Job>simple</Job>
+    <Job>simpleWithExpression</Job>
+    <Job>simpleWithExternalCall</Job>
+    <Job>simpleWithInternalCall</Job>
+    <Job>simpleWithParameterDependency</Job>
+    <Job>simpleWithChoice</Job>
+    <Job>simpleWithWizard</Job>
 </Project>
