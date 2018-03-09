@@ -357,7 +357,22 @@ public class EditProject {
             populateWizardStepDependencyMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Project) {
             populateProjectMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Job) {
+            populateJobMenu(contextMenu, treeItem);
         }
+    }
+
+    private void populateJobMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        ProjectFSXML projectXML = findAncestorPayload(treeItem, ItemType.Project);
+
+        JobXML jobXML = (JobXML) treeItem.getValue().payload;
+
+        MenuItem delete = new MenuItem("Delete");
+        contextMenu.getItems().add(delete);
+        delete.setOnAction(t -> {
+            projectXML.getJobs().remove(jobXML);
+            treeItem.getParent().getChildren().remove(treeItem);
+        });
     }
 
     private void populateProjectMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
