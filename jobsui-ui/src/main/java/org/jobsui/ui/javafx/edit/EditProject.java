@@ -23,6 +23,7 @@ import org.jobsui.ui.javafx.JavaFXUI;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
@@ -363,7 +364,7 @@ public class EditProject {
     }
 
     private void populateJobMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        ProjectFSXML projectXML = findAncestorPayload(treeItem, ItemType.Project);
+        ProjectFSXML projectXML = findAncestorPayload(treeItem, ProjectFSXML.class);
 
         JobXML jobXML = (JobXML) treeItem.getValue().payload;
 
@@ -397,7 +398,7 @@ public class EditProject {
     }
 
     private void populateScriptFileMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        ProjectFSXML projectXML = findAncestorPayload(treeItem, ItemType.Project);
+        ProjectFSXML projectXML = findAncestorPayload(treeItem, ProjectFSXML.class);
 
         String location = findAncestorPayload(treeItem, ItemType.ScriptsLocation);
 
@@ -413,7 +414,7 @@ public class EditProject {
     }
 
     private void populateWizardStepDependencyMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        WizardStep wizardStep = findAncestorPayload(treeItem, ItemType.WizardStep);
+        WizardStep wizardStep = findAncestorPayload(treeItem, WizardStep.class);
 
         String parameterKey = ((ParameterXML) treeItem.getValue().payload).getKey();
 
@@ -426,7 +427,7 @@ public class EditProject {
     }
 
     private void populateWizardStepDependenciesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
+        JobXML jobXML = findAncestorPayload(treeItem, JobXML.class);
 
         WizardStep wizardStep = (WizardStep) treeItem.getValue().payload;
 
@@ -437,7 +438,6 @@ public class EditProject {
             Menu addDependency = new Menu("Add");
 
             for (String dependency : parameters) {
-
                 ParameterXML parameter = jobXML.getParameter(dependency);
                 String name = parameter.getName();
                 MenuItem dependencyMenuItem = new MenuItem(name);
@@ -456,7 +456,7 @@ public class EditProject {
     }
 
     private void populateWizardStepMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
+        JobXML jobXML = findAncestorPayload(treeItem, JobXML.class);
         if (jobXML == null) {
             return;
         }
@@ -472,7 +472,7 @@ public class EditProject {
     }
 
     private void populateWizardStepsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
+        JobXML jobXML = findAncestorPayload(treeItem, JobXML.class);
         if (jobXML == null) {
             return;
         }
@@ -492,7 +492,7 @@ public class EditProject {
     }
 
     private void populateLibraryMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        ProjectFSXMLImpl projectXML = findAncestorPayload(treeItem, ItemType.Project);
+        ProjectXML projectXML = findAncestorPayload(treeItem, ProjectXML.class);
         if (projectXML == null) {
             return;
         }
@@ -508,7 +508,7 @@ public class EditProject {
     }
 
     private void populateLibrariesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        ProjectFSXMLImpl projectXML = findAncestorPayload(treeItem, ItemType.Project);
+        ProjectXML projectXML = findAncestorPayload(treeItem, ProjectXML.class);
         if (projectXML == null) {
             return;
         }
@@ -554,7 +554,7 @@ public class EditProject {
     private void populateDependenciesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         ParameterXML parameterXML = (ParameterXML) treeItem.getValue().payload;
         List<String> dependencies = parameterXML.getDependencies();
-        JobXML jobXML = findAncestorPayload(treeItem, ItemType.Job);
+        JobXML jobXML = findAncestorPayload(treeItem, JobXML.class);
 
         if (jobXML == null) {
             ui.showMessage("Cannot find job for " + treeItem.getValue());
@@ -588,7 +588,7 @@ public class EditProject {
     }
 
     private void populateScriptsLocationMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        ProjectFSXML projectXML = findAncestorPayload(treeItem, ItemType.Project);
+        ProjectFSXML projectXML = findAncestorPayload(treeItem, ProjectFSXML.class);
         if (projectXML == null) {
             return;
         }
@@ -610,7 +610,7 @@ public class EditProject {
     }
 
     private void populateExpressionsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        JobXMLImpl jobXML = findAncestorPayload(treeItem, ItemType.Job);
+        JobXMLImpl jobXML = findAncestorPayload(treeItem, JobXMLImpl.class);
         if (jobXML == null) {
             return;
         }
@@ -630,7 +630,7 @@ public class EditProject {
     }
 
     private void populateCallsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        JobXMLImpl jobXML = findAncestorPayload(treeItem, ItemType.Job);
+        JobXMLImpl jobXML = findAncestorPayload(treeItem, JobXMLImpl.class);
         if (jobXML == null) {
             return;
         }
@@ -650,7 +650,7 @@ public class EditProject {
     }
 
     private void populateParametersMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        JobXMLImpl jobXML = findAncestorPayload(treeItem, ItemType.Job);
+        JobXMLImpl jobXML = findAncestorPayload(treeItem, JobXMLImpl.class);
         if (jobXML == null) {
             return;
         }
@@ -696,20 +696,25 @@ public class EditProject {
         return newKey;
     }
 
+    static <T> T findAncestorPayload(TreeItem<EditItem> treeItem, Class<T> payloadClass) {
+        return findAncestorPayload(treeItem, item -> payloadClass.isAssignableFrom(item.payload.getClass()));
+    }
+
     static <T> T findAncestorPayload(TreeItem<EditItem> treeItem, ItemType... itemTypes) {
+        Set<ItemType> itemTypesSet = new HashSet<>(Arrays.asList(itemTypes));
+        return findAncestorPayload(treeItem, item -> itemTypesSet.contains(item.itemType));
+    }
+
+    static <T> T findAncestorPayload(TreeItem<EditItem> treeItem, Predicate<EditItem> predicate) {
         TreeItem<EditItem> ancestor = treeItem.getParent();
-        while (ancestor != null) {
-            EditItem value = ancestor.getValue();
-            if (value != null) {
-                for (ItemType itemType : itemTypes) {
-                    if (value.itemType == itemType) {
-                        return (T) value.payload;
-                    }
-                }
-            }
-            ancestor = ancestor.getParent();
+
+        if (ancestor == null) {
+            return null;
+        } else if (predicate.test(ancestor.getValue())) {
+            return (T) ancestor.getValue().payload;
+        } else {
+            return findAncestorPayload(ancestor, predicate);
         }
-        return null;
     }
 
     private static List<String> getAllParametersKeys(JobXML jobXML) {
