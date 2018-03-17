@@ -54,14 +54,10 @@ public class JobUIRunner<C> implements JobRunner {
                     throw new RuntimeException(e);
                 }
 
-                UIButton<C> nextButton;
-                UIButton<C> previousButton;
-//            UIButton<C> closeButton;
-                nextButton = ui.createButton();
-                previousButton = ui.createButton();
-//                closeButton = ui.create(UIButton.class);
-
+                UIButton<C> nextButton = ui.createButton();
                 nextButton.setTitle("Next");
+
+                UIButton<C> previousButton = ui.createButton();
                 previousButton.setTitle("Back");
                 previousButton.setEnabled(false);
 
@@ -95,58 +91,9 @@ public class JobUIRunner<C> implements JobRunner {
                 throw new RuntimeException(e);
             }
 
-            UIButton<C> runButton;
-            UIButton<C> saveBookmarkButton;
-//            UIButton<C> closeButton;
-            runButton = ui.createButton();
-            saveBookmarkButton = ui.createButton();
-//                closeButton = ui.create(UIButton.class);
+            UIButton<C> runButton = createRunButton(job, values, atomicResult);
 
-            runButton.setEnabled(false);
-            runButton.setTitle("Run");
-
-            runButton.getObservable().subscribe(serializableVoid -> {
-                try {
-                    JobResult<T> result = job.run(values);
-                    if (result.getException() != null) {
-                        ui.showError("Error running job.", result.getException());
-                    } else {
-                        atomicResult.set(result.get());
-                    }
-                } catch (Exception e) {
-                    ui.showError("Error running job.", e);
-                }
-            });
-
-            saveBookmarkButton.setEnabled(false);
-            saveBookmarkButton.setTitle("Bookmark");
-
-            saveBookmarkButton.getObservable().subscribe(serializableVoid -> {
-                Optional<String> name = ui.askString("Bookmark's name");
-                name.ifPresent(n -> {
-                    JobsUIPreferences preferences = ui.getPreferences();
-
-                    boolean ok = true;
-                    if (preferences.existsBookmark(project, job, n)) {
-                        ok = ui.askOKCancel("A bookmark with the same name exists. Do you want to override it?");
-                    }
-
-                    if (ok) {
-                        try {
-                            Bookmark bookmark = new Bookmark(project, job, n, values);
-                            preferences.saveBookmark(project, job, bookmark);
-                            window.refreshBookmarks(project, job);
-                        } catch (Exception e) {
-                            ui.showError("Error saving bookmark.", e);
-                        }
-                    }
-                });
-            });
-
-//            closeButton.setTitle("Close");
-//            closeButton.getObservable().subscribe(serializableVoid -> {
-//                ui.gotoStart();
-//            });
+            UIButton<C> saveBookmarkButton = createSaveBookmarkButton(project, job, window, values);
 
             Observable<JobsUIValidationResult> validationObserver = context.jobValidationObserver();
 
@@ -171,7 +118,9 @@ public class JobUIRunner<C> implements JobRunner {
             notifyInitialValue(context);
 
             window.addButton(runButton);
+
             window.addButton(saveBookmarkButton);
+
             window.setOnOpenBookmark(bookmark -> {
                 try {
                     for (JobDependency jobDependency : job.getSortedDependencies()) {
@@ -205,6 +154,55 @@ public class JobUIRunner<C> implements JobRunner {
             throw exceptions.get(0);
         }
         return atomicResult.get();
+    }
+
+    private <T extends Serializable> UIButton<C> createSaveBookmarkButton(Project project, Job<T> job, UIWindow<C> window, JobValues values) {
+        UIButton<C> saveBookmarkButton = ui.createButton();
+        saveBookmarkButton.setEnabled(false);
+        saveBookmarkButton.setTitle("Bookmark");
+
+        saveBookmarkButton.getObservable().subscribe(serializableVoid -> {
+            Optional<String> name = ui.askString("Bookmark's name");
+            name.ifPresent(n -> {
+                JobsUIPreferences preferences = ui.getPreferences();
+
+                boolean ok = true;
+                if (preferences.existsBookmark(project, job, n)) {
+                    ok = ui.askOKCancel("A bookmark with the same name exists. Do you want to override it?");
+                }
+
+                if (ok) {
+                    try {
+                        Bookmark bookmark = new Bookmark(project, job, n, values);
+                        preferences.saveBookmark(project, job, bookmark);
+                        window.refreshBookmarks(project, job);
+                    } catch (Exception e) {
+                        ui.showError("Error saving bookmark.", e);
+                    }
+                }
+            });
+        });
+        return saveBookmarkButton;
+    }
+
+    private <T extends Serializable> UIButton<C> createRunButton(Job<T> job, JobValues values, AtomicReference<T> atomicResult) {
+        UIButton<C> runButton = ui.createButton();
+        runButton.setEnabled(false);
+        runButton.setTitle("Run");
+
+        runButton.getObservable().subscribe(serializableVoid -> {
+            try {
+                JobResult<T> result = job.run(values);
+                if (result.getException() != null) {
+                    ui.showError("Error running job.", result.getException());
+                } else {
+                    atomicResult.set(result.get());
+                }
+            } catch (Exception e) {
+                ui.showError("Error running job.", e);
+            }
+        });
+        return runButton;
     }
 
     private static void setValidationMessage(List<String> validate, JobParameter jobParameter, UIWidget<?> widget,
