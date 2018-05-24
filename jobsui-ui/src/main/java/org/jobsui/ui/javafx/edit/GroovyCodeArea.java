@@ -60,7 +60,11 @@ class GroovyCodeArea {
 
         codeArea.richChanges()
                 .filter(ch -> !ch.getInserted().equals(ch.getRemoved()))
-                .subscribe(change -> codeArea.setStyleSpans(0, computeHighlighting(codeArea.getText())));
+                .subscribe(change -> {
+                    StyleSpans<? extends Collection<String>> styleSpans = computeHighlighting(codeArea.getText());
+                    if (styleSpans != null)
+                        codeArea.setStyleSpans(0, styleSpans);
+                });
 
         if (theme == JobsUITheme.Dark) {
             codeArea.setBackground(new Background(new BackgroundFill(new Color(50f / 256, 50f / 255, 50f / 255, 0),
@@ -103,8 +107,12 @@ class GroovyCodeArea {
             spansBuilder.add(Collections.singleton(styleClass), matcher.end() - matcher.start());
             lastKwEnd = matcher.end();
         }
-        spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
-        return spansBuilder.create();
+        if (text.length() - lastKwEnd > 0) {
+            spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
+            return spansBuilder.create();
+        } else {
+            return null;
+        }
     }
 
 }
