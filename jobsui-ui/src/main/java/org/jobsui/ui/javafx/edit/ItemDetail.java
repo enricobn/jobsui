@@ -114,6 +114,7 @@ class ItemDetail extends VBox {
 
     private void setProjectDetail(TreeItem<EditItem> treeItem) {
         ProjectFSXML project = (ProjectFSXML) treeItem.getValue().payload;
+        addTextProperty(treeItem, "Id", project::getId, project::setId);
         addTextProperty(treeItem, "Name", project::getName, project::setName);
         addTextProperty(treeItem, "Version", project::getVersion, project::setVersion);
     }

@@ -13,10 +13,10 @@ import java.util.*;
  */
 public class ProjectXMLImpl implements ProjectXML {
     private final URL projectURL;
-    private final String id;
     private final Set<ProjectLibraryXML> libraries = new HashSet<>();
     private final Map<String, String> imports = new HashMap<>();
     private final UIComponentRegistry uiComponentRegistry = new UIComponentRegistryImpl();
+    private String id;
     private String name;
     private String version;
 
@@ -122,5 +122,10 @@ public class ProjectXMLImpl implements ProjectXML {
     public JobXML getJobXMLById(String id) {
         return jobXMLs.get(id);
     }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
 
 }
