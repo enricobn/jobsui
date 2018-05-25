@@ -6,10 +6,7 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.Border;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import org.jobsui.core.JobsUIPreferences;
@@ -38,7 +35,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
     @Override
     public void show(Project project, Job job, Runnable callback) {
         buttonsPanel = new HBox(5);
-        buttonsPanel.setPadding(new Insets(10, 5, 5, 5));
+        buttonsPanel.setPadding(new Insets(5, 5, 5, 5));
 
         componentsPanel = new VBox(10);
         componentsPanel.setPadding(new Insets(5, 5, 5, 5));
@@ -69,17 +66,27 @@ class JavaFXUIWindow implements UIWindow<Node> {
         }
     }
 
-    private static VBox createMainPanel(HBox buttonsPanel, VBox componentsPanel) {
-        VBox mainPanel = new VBox(5);
+    private static VBox createMainPanel(Pane buttonsPanel, VBox componentsPanel) {
+        VBox mainPanel = new VBox();
+        VBox.setVgrow(buttonsPanel, Priority.NEVER);
         mainPanel.getChildren().add(buttonsPanel);
-        mainPanel.getChildren().add(componentsPanel);
+
+        VBox.setVgrow(componentsPanel, Priority.ALWAYS);
+        ScrollPane scrollPane = new ScrollPane(componentsPanel);
+        scrollPane.setFitToWidth(true);
+        VBox.setVgrow(scrollPane, Priority.ALWAYS);
+        mainPanel.getChildren().add(scrollPane);
+
         return mainPanel;
     }
 
     private static VBox createBookmarksPanel(ListView<Bookmark> bookmarkListView) {
         VBox bookmarksPanel = new VBox(5);
+
         Label bookmarksLabel = new Label("Bookmarks");
+        bookmarksLabel.getStyleClass().add(JobsUIFXStyles.FIELD_LABEL);
         bookmarksLabel.setPadding(new Insets(5, 5, 5, 5));
+
         bookmarksPanel.getChildren().add(bookmarksLabel);
         bookmarksPanel.getChildren().add(bookmarkListView);
         VBox.setVgrow(bookmarkListView, Priority.ALWAYS);
@@ -116,8 +123,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
     @Override
     public void addButton(UIButton<Node> button) {
-        UIWidget<Node> widget = ui.createWidget(null, button);
-        buttonsPanel.getChildren().add(widget.getLayoutComponent());
+        buttonsPanel.getChildren().add(button.getComponent());
     }
 
     @Override

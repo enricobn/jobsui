@@ -25,7 +25,7 @@ public class JavaFXUIFileChooser extends VBox implements UIFileChooser<Node> {
 
     public JavaFXUIFileChooser(JavaFXUI ui) {
         label = new Label();
-        label.getStyleClass().add(JobsUIFXStyles.EDIT_PROPERTY_NAME_TEXT);
+        label.getStyleClass().add(JobsUIFXStyles.FIELD_LABEL);
         getChildren().add(label);
 
         HBox hBox = new HBox(10);

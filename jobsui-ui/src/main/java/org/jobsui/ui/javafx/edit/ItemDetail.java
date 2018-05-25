@@ -237,7 +237,7 @@ class ItemDetail extends VBox {
 
     private void addPropertyNameLabel(String text) {
         Label label = new Label(text);
-        label.getStyleClass().add(JobsUIFXStyles.EDIT_PROPERTY_NAME_TEXT);
+        label.getStyleClass().add(JobsUIFXStyles.FIELD_LABEL);
         if (!getChildren().isEmpty()) {
             label.setPadding(new Insets(20, 0, 0, 0));
         }

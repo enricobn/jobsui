@@ -13,9 +13,9 @@
         <VBox.margin>
             <Insets bottom="10.0"/>
         </VBox.margin>
-        <Button mnemonicParsing="false" onAction="#onOpen" text="Open"/>
-        <Button mnemonicParsing="false" onAction="#onEdit" text="Edit"/>
         <Button mnemonicParsing="false" onAction="#onNew" text="New"/>
+        <Button mnemonicParsing="false" onAction="#onOpen" text="Open and run"/>
+        <Button mnemonicParsing="false" onAction="#onEdit" text="Open and edit"/>
     </HBox>
     <ListView fx:id="projects" layoutX="3.0" layoutY="5.0" prefWidth="228.0" VBox.vgrow="ALWAYS"/>
 </VBox>

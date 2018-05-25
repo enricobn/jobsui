@@ -1,14 +1,13 @@
 package org.jobsui.ui.javafx;
 
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import org.jobsui.core.CommandLineArguments;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.*;
@@ -200,22 +199,15 @@ public class JavaFXUI implements UI<Node> {
     private static class NodeUIWidget implements UIWidget<Node> {
         private final String title;
         private final UIComponent<Node> component;
-        private final GridPane nodeComponent;
+        private final VBox nodeComponent;
         private final Label label;
 
         NodeUIWidget(String title, UIComponent<Node> component) {
             this.title = title;
             this.component = component;
-            nodeComponent = new GridPane();
-            label = new Label(title == null || title.isEmpty() ? null : title + ":");
-            if (title != null && !title.isEmpty() ) {
-                label.setMinWidth(100);
-            }
-            label.setAlignment(Pos.BOTTOM_RIGHT);
-            nodeComponent.add(label, 0, 0);
-            GridPane.setValignment(label, VPos.BOTTOM);
-            GridPane.setMargin(label, new Insets(0, 5, 0, 0));
-            nodeComponent.add(component.getComponent(), 1, 0);
+            nodeComponent = new VBox();
+            label = label(title);
+            nodeComponent.getChildren().add(component.getComponent());
         }
 
         @Override
@@ -237,7 +229,7 @@ public class JavaFXUI implements UI<Node> {
         public void setValidationMessages(List<String> messages) {
             if (messages.isEmpty()) {
                 label.getStyleClass().clear();
-                label.getStyleClass().add("label");
+                label.getStyleClass().add(JobsUIFXStyles.FIELD_LABEL);
                 label.setTooltip(null);
             } else {
                 String text = String.join(",", messages);
@@ -258,6 +250,16 @@ public class JavaFXUI implements UI<Node> {
         @Override
         public Node getLayoutComponent() {
             return nodeComponent;
+        }
+
+        private Label label(String text) {
+            Label label = new Label(text);
+            label.getStyleClass().add(JobsUIFXStyles.FIELD_LABEL);
+            //if (!nodeComponent.getChildren().isEmpty()) {
+                label.setPadding(new Insets(20, 0, 0, 0));
+            //}
+            nodeComponent.getChildren().add(label);
+            return label;
         }
     }
 

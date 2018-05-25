@@ -3,6 +3,25 @@ DOING
 
 NEXT
 -----
+- on new project:
+ - why parent folder and folder?
+ - Namespace -> Group id?
+ - id -> Artifact id
+ - Project name -> Description
+ - store as the last opened project
+- on edit:
+  - enable save only if there are pending changes
+  - add Save & Run
+  - copy and paste parameter
+  - move parameter
+- run:
+  - copy bookmark
+- tab on edit script: 4 spaces
+- when I write the job.xml change parameter's fields order to:
+  - key, name, component, dependsOn
+- when I write the job.xml put [DATA] in scripts
+- is project version needed? Probably yes for repository.
+- add a way to upgrade job data (bookmarks, calls) to a new version
 - now saving a job will delete old job files and script folder, but retain other files, to preserve other files,
   but save as does not copy the other files. What to do?
 - WizardStep is used in XML and job, may be better to have two classes?
