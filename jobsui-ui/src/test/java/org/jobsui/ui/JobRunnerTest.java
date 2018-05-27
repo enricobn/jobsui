@@ -15,7 +15,6 @@ import org.junit.*;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockSettings;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.listeners.InvocationListener;
 import org.mockito.stubbing.Answer;
 
@@ -109,7 +108,7 @@ public class JobRunnerTest {
             return null;
         }).when(ui).showError(anyString(), any(Throwable.class));
 
-        when(ui.createWidget(anyString(), any())).thenAnswer((Answer<UIWidget>) invocation -> {
+        when(ui.createWidget(anyString(), any(), anyBoolean())).thenAnswer((Answer<UIWidget>) invocation -> {
             String title = invocation.getArgumentAt(0, String.class);
             UIComponent component = invocation.getArgumentAt(1, UIComponent.class);
             AtomicBoolean disabled = new AtomicBoolean();

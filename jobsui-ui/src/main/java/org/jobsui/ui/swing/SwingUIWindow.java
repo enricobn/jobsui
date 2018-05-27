@@ -59,7 +59,7 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     @Override
     public void addButton(UIButton<JComponent> button) {
         // TODO
-        UIWidget<JComponent> widget = ui.createWidget(null, button);
+        UIWidget<JComponent> widget = ui.createWidget(null, button, false);
         container.add(widget);
     }
 

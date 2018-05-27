@@ -44,6 +44,6 @@ public interface UI<T> {
 
     JobsUIPreferences getPreferences();
 
-    UIWidget<T> createWidget(String title, UIComponent<T> component);
+    UIWidget<T> createWidget(String title, UIComponent<T> component, boolean buttonForDefault);
 
 }

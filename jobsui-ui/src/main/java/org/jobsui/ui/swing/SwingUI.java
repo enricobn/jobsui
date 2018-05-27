@@ -4,11 +4,13 @@ import org.jobsui.core.CommandLineArguments;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.utils.JobsUIUtils;
+import rx.Observable;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.Optional;
 
@@ -108,7 +110,7 @@ public class SwingUI implements UI<JComponent> {
     }
 
     @Override
-    public UIWidget<JComponent> createWidget(String title, UIComponent<JComponent> component) {
+    public UIWidget<JComponent> createWidget(String title, UIComponent<JComponent> component, boolean buttonForDefault) {
         return new SwingUIWidget(title, component);
     }
 
@@ -176,6 +178,11 @@ public class SwingUI implements UI<JComponent> {
         @Override
         public JComponent getLayoutComponent() {
             return panel;
+        }
+
+        @Override
+        public Optional<Observable<Serializable>> getButtonForDefaultObservable() {
+            return Optional.empty();
         }
     }
 

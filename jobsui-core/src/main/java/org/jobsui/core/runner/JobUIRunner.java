@@ -39,7 +39,7 @@ public class JobUIRunner<C> implements JobRunner {
             JobUIRunnerContext<T,C> context;
 
             try {
-                 context = JobUIRunnerContext.of(job, ui, window);
+                 context = JobUIRunnerContext.of(project, job, ui, window);
             } catch (Exception e) {
                 throw new RuntimeException((e));
 //                exceptions.add(e);
@@ -82,6 +82,15 @@ public class JobUIRunner<C> implements JobRunner {
                 for (JobParameter jobParameter : job.getParameterDefs()) {
                     UIWidget<C> widget = context.getWidget(jobParameter);
                     window.add(widget);
+                }
+            }
+
+            Bookmark defaults = ui.getPreferences().getDefaults(project, job);
+            for (JobParameter jobParameter : job.getParameterDefs()) {
+                Serializable value = defaults.getValues().get(jobParameter.getKey());
+                if (value != null) {
+                    UIWidget<C> widget = context.getWidget(jobParameter);
+                    widget.getComponent().setValue(value);
                 }
             }
 

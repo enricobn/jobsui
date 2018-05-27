@@ -4,15 +4,14 @@ import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.bookmark.BookmarksStore;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
+import org.jobsui.core.runner.JobValuesImpl;
 import org.jobsui.core.ui.JobsUITheme;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 3/29/17.
@@ -32,6 +31,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     static final String LAST_OPENED_PROJECTS_NODE = "lastOpenedProjects";
     static final String OPENED_PROJECT_PATH_PREFIX = "path_";
     static final String OPENED_PROJECT_NAME_PREFIX = "name_";
+    public static final String DEFAULTS = "__defaults__";
     private final Preferences lastOpenedProjectsNode;
     private final Preferences othersNode;
     private final Preferences editNode;
@@ -91,7 +91,9 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     @Override
     public List<Bookmark> getBookmarks(Project project, Job job) {
         // I cannot cache bookmarks since they depend on job's classloader
-        return Collections.unmodifiableList(bookmarksStore.getBookmarks(project, job));
+        return bookmarksStore.getBookmarks(project, job).stream()
+                .filter(it -> !it.getName().equals(DEFAULTS))
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -105,6 +107,16 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
 
         List<Bookmark> bookmarks = new ArrayList<>(getBookmarks(project, job));
         bookmarks.sort(Comparator.comparing(Bookmark::getName));
+    }
+
+    @Override
+    public Bookmark getDefaults(Project project, Job job) {
+        Optional<Bookmark> bookmarkO = bookmarksStore.getBookmark(project, job, DEFAULTS);
+        if (bookmarkO.isPresent()) {
+            return bookmarkO.get();
+        } else {
+            return new Bookmark(project, job, DEFAULTS, new JobValuesImpl());
+        }
     }
 
     @Override

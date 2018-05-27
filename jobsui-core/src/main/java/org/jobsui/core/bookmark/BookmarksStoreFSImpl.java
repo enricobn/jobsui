@@ -10,10 +10,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -47,10 +44,7 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
         File file = new File(jobRoot, bookmark.getName() + ".xml");
 
         try (FileWriter fileWriter = new FileWriter(file)) {
-            XStream xstream = new XStream();
-            if (job.getClassLoader() != null) {
-                xstream.setClassLoader(job.getClassLoader());
-            }
+            XStream xstream = getXStream(job);
             xstream.toXML(bookmark, fileWriter);
         }
     }
@@ -69,15 +63,13 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
 
         List<Bookmark> result = new ArrayList<>();
 
-        XStream xstream = new XStream();
-        if (job.getClassLoader() != null) {
-            xstream.setClassLoader(job.getClassLoader());
-        }
+        XStream xstream = getXStream(job);
 
         for (String fileName : list) {
             File file = new File(jobRoot, fileName);
             try {
-                result.add((Bookmark) xstream.fromXML(file));
+                Bookmark bookmark = (Bookmark) xstream.fromXML(file);
+                result.add(bookmark);
             } catch (Exception e) {
                 LOGGER.log(Level.SEVERE, "Error loading bookmark from " + file, e);
             }
@@ -114,5 +106,33 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
             return false;
         }
         return file.delete();
+    }
+
+    @Override
+    public Optional<Bookmark> getBookmark(Project project, Job job, String name) {
+        File jobRoot = getJobRoot(project, job);
+
+        File file = new File(jobRoot, name + ".xml");
+
+        if (!file.exists()) {
+            return Optional.empty();
+        }
+
+        try {
+            XStream xstream = getXStream(job);
+            return Optional.of((Bookmark) xstream.fromXML(file));
+
+        } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Error loading bookmark from " + file, e);
+        }
+        return Optional.empty();
+    }
+
+    private XStream getXStream(Job job) {
+        XStream xstream = new XStream();
+        if (job.getClassLoader() != null) {
+            xstream.setClassLoader(job.getClassLoader());
+        }
+        return xstream;
     }
 }

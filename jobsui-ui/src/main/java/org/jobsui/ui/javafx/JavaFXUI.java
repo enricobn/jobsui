@@ -6,14 +6,17 @@ import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.jobsui.core.CommandLineArguments;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.*;
 import org.jobsui.ui.javafx.uicomponent.*;
+import rx.Observable;
 
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.List;
 import java.util.Optional;
@@ -122,8 +125,8 @@ public class JavaFXUI implements UI<Node> {
 
 
     @Override
-    public UIWidget<Node> createWidget(String title, final UIComponent<Node> component) {
-        NodeUIWidget widget = new NodeUIWidget(title, component);
+    public UIWidget<Node> createWidget(String title, final UIComponent<Node> component, boolean buttonForDefault) {
+        NodeUIWidget widget = new NodeUIWidget(title, component, buttonForDefault);
         Node node = widget.getLayoutComponent();
         node.managedProperty().bind(node.visibleProperty());
         return widget;
@@ -196,18 +199,32 @@ public class JavaFXUI implements UI<Node> {
         return dialog.showAndWait();
     }
 
-    private static class NodeUIWidget implements UIWidget<Node> {
+    private class NodeUIWidget implements UIWidget<Node> {
         private final String title;
         private final UIComponent<Node> component;
         private final VBox nodeComponent;
         private final Label label;
+        private UIButton<Node> buttonForDefault;
 
-        NodeUIWidget(String title, UIComponent<Node> component) {
+        NodeUIWidget(String title, UIComponent<Node> component, boolean buttonForDefault) {
             this.title = title;
             this.component = component;
             nodeComponent = new VBox();
             label = label(title);
-            nodeComponent.getChildren().add(component.getComponent());
+
+            if (buttonForDefault) {
+                HBox box = new HBox(5);
+                box.getChildren().add(component.getComponent());
+
+                this.buttonForDefault = JavaFXUI.this.createButton();
+                this.buttonForDefault.getComponent().setScaleX(0.6);
+                this.buttonForDefault.getComponent().setScaleY(0.6);
+                box.getChildren().add(this.buttonForDefault.getComponent());
+                this.buttonForDefault.setTitle("Default");
+                nodeComponent.getChildren().add(box);
+            } else {
+                nodeComponent.getChildren().add(component.getComponent());
+            }
         }
 
         @Override
@@ -250,6 +267,15 @@ public class JavaFXUI implements UI<Node> {
         @Override
         public Node getLayoutComponent() {
             return nodeComponent;
+        }
+
+        @Override
+        public Optional<Observable<Serializable>> getButtonForDefaultObservable() {
+            if (buttonForDefault == null) {
+                return Optional.empty();
+            } else {
+                return Optional.of(buttonForDefault.getObservable());
+            }
         }
 
         private Label label(String text) {

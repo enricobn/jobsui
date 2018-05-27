@@ -1,5 +1,6 @@
 package org.jobsui.core.runner;
 
+import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.job.*;
 import org.jobsui.core.ui.*;
 import rx.Observable;
@@ -16,28 +17,42 @@ import java.util.stream.Collectors;
 public class JobUIRunnerContext<T extends Serializable, C> implements JobDependencyProvider {
     private static final Logger LOGGER = Logger.getLogger(JobUIRunnerContext.class.getName());
     private final UI<C> ui;
+    private final Project project;
     private final Job<T> job;
     private final Map<String,UIWidget<C>> widgets;
     private final List<JobDependency> sortedJobDependencies;
     private final DependenciesObservables dependenciesObservables;
 
-    private JobUIRunnerContext(UI<C> ui, Job<T> job, Map<String, UIWidget<C>> widgets,
-                              List<JobDependency> sortedJobDependencies,
-                              DependenciesObservables dependenciesObservables) {
+    private JobUIRunnerContext(UI<C> ui, Project project, Job<T> job, Map<String, UIWidget<C>> widgets,
+                               List<JobDependency> sortedJobDependencies,
+                               DependenciesObservables dependenciesObservables) {
         this.ui = ui;
+        this.project = project;
         this.job = job;
         this.widgets = widgets;
         this.sortedJobDependencies = sortedJobDependencies;
         this.dependenciesObservables = dependenciesObservables;
     }
 
-    public static <T extends Serializable, C> JobUIRunnerContext<T,C> of(Job<T> job, UI<C> ui, UIWindow<C> window) throws Exception {
+    public static <T extends Serializable, C> JobUIRunnerContext<T,C> of(Project project, Job<T> job,
+                                                                         UI<C> ui,
+                                                                         UIWindow<C> window) throws Exception {
         LOGGER.fine("Creating Job runner context");
 
         Map<String,UIWidget<C>> widgets = new HashMap<>();
         for (final JobParameter jobParameter : job.getParameterDefs()) {
             UIWidget<C> widget = createWidget(ui, window, jobParameter);
             widget.setDisable(!jobParameter.getDependencies().isEmpty());
+            Optional<Observable<Serializable>> buttonForDefaultObservable = widget.getButtonForDefaultObservable();
+            buttonForDefaultObservable.ifPresent(observable -> observable.subscribe(a -> {
+                Bookmark defaults = ui.getPreferences().getDefaults(project, job);
+
+                Serializable value = widget.getComponent().getValue();
+
+                defaults.getValues().put(jobParameter.getKey(), value);
+
+                ui.getPreferences().saveBookmark(project, job, defaults);
+            }));
             widgets.put(jobParameter.getKey(), widget);
         }
 
@@ -50,7 +65,7 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
 
         LOGGER.fine("Created Job runner context");
 
-        return new JobUIRunnerContext<>(ui, job, widgets, sortedDependencies, dependenciesObservables);
+        return new JobUIRunnerContext<>(ui, project, job, widgets, sortedDependencies, dependenciesObservables);
     }
 
     public Job<T> getJob() {
@@ -334,7 +349,7 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
                     + jobParameter.getKey() + "\"");
         }
 
-        final UIWidget<C> widget = ui.createWidget(jobParameter.getName(), component);
+        final UIWidget<C> widget = ui.createWidget(jobParameter.getName(), component, jobParameter.getDependencies().isEmpty());
         if (widget == null) {
             throw new IllegalStateException("Cannot create widget for parameter with key \""
                     + jobParameter.getKey() + "\"");
