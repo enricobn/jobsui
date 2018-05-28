@@ -125,6 +125,10 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
     }
 
     public void waitUntilStarted() {
+        boolean inDebug =
+                java.lang.management.ManagementFactory.getRuntimeMXBean().
+                        getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
+
         long start = System.currentTimeMillis();
         while (!started) {
             try {
@@ -132,7 +136,7 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            if (System.currentTimeMillis() - start > TIMEOUT) {
+            if (System.currentTimeMillis() - start > TIMEOUT && !inDebug) {
                 throw new IllegalStateException("Timeout on waitUntilStarted.");
             }
         }
