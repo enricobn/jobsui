@@ -1,5 +1,6 @@
 package org.jobsui.core;
 
+import org.jobsui.core.bookmark.BookmarksStore;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.job.ProjectBuilder;
@@ -21,8 +22,7 @@ import java.util.function.Consumer;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -44,6 +44,9 @@ public class CommandLineArgumentsTest {
     private Path projectPath;
     @Mock
     private File projectFile;
+    @Mock
+    private BookmarksStore bookmarksStore;
+
     private URI projectURI = new URI("file://project");
 
     public CommandLineArgumentsTest() throws Exception {
@@ -52,7 +55,7 @@ public class CommandLineArgumentsTest {
     @Before
     public void setUp() throws Exception {
         when(projectParser.parse(any(File.class))).thenReturn(projectFSXML);
-        when(projectBuilder.build(any(ProjectXML.class))).thenReturn(project);
+        when(projectBuilder.build(any(ProjectXML.class), eq(bookmarksStore))).thenReturn(project);
         when(project.getJob("job")).thenReturn(job);
         when(fileSystem.getPath(anyString())).thenReturn(projectPath);
         when(projectPath.toFile()).thenReturn(projectFile);
@@ -72,7 +75,7 @@ public class CommandLineArgumentsTest {
         Consumer<List<String>> onFailure = error -> fail(error.toString());
 
         assertTrue(CommandLineArguments.parse(new String[]{"-run", "projectFSXML", "job"},
-                projectParser, projectBuilder, fileSystem, onSuccess, onFailure));
+                projectParser, projectBuilder, fileSystem, onSuccess, onFailure, bookmarksStore));
     }
 
     @Test
@@ -85,6 +88,6 @@ public class CommandLineArgumentsTest {
         Consumer<List<String>> onFailure = error -> fail(error.toString());
 
         assertTrue(CommandLineArguments.parse(new String[]{"-edit", "projectFSXML"},
-                projectParser, projectBuilder, fileSystem, onSuccess, onFailure));
+                projectParser, projectBuilder, fileSystem, onSuccess, onFailure, bookmarksStore));
     }
 }

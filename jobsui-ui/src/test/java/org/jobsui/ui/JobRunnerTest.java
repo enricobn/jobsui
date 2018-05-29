@@ -1,22 +1,32 @@
 package org.jobsui.ui;
 
 import com.github.zafarkhaja.semver.Version;
+import org.jobsui.core.JobsUIPreferences;
+import org.jobsui.core.bookmark.Bookmark;
+import org.jobsui.core.bookmark.BookmarksStore;
+import org.jobsui.core.bookmark.SavedLink;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.*;
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobUIRunner;
+import org.jobsui.core.runner.JobValues;
+import org.jobsui.core.runner.JobValuesImpl;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.utils.Tuple2;
 import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.xml.ProjectXML;
 import org.jobsui.core.xml.WizardStep;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
 import org.mockito.MockSettings;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.listeners.InvocationListener;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import java.io.Serializable;
@@ -34,15 +44,21 @@ import static org.mockito.Mockito.*;
 /**
  * Created by enrico on 4/30/16.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class JobRunnerTest {
-    private static Map<String, Project> projects;
-    private static Map<JobType, CachedJob> jobs;
+    private Map<String, Project> projects;
+    private Map<JobType, CachedJob> jobs;
     private JobUIRunner<FakeComponent> runner;
-    private UI<FakeComponent> ui;
     private FakeUIWindow window;
     private FakeUIButton runButton;
     private FakeUIButton bookmarkButton;
     private Map<String, UIWidget> widgets;
+    @Mock
+    private UI<FakeComponent> ui;
+    @Mock
+    private BookmarksStore bookmarksStore;
+    @Mock
+    private JobsUIPreferences preferences;
 
     private static class CachedJob {
         private final Supplier<Tuple2<Project,Job<String>>> supplier;
@@ -65,14 +81,17 @@ public class JobRunnerTest {
         simpleJob,
         simpleFSJob,
         complexJob,
-        simpleJobWithExpression
+        simpleJobWithExpression,
+        simpleWithSaved
     }
 
-    @BeforeClass
-    public static void initStatic() throws Exception {
+    @Before
+    public void init() throws Exception {
         projects = new HashMap<>();
+
         jobs = new HashMap<>();
-        jobs.put(JobType.simpleWithInternalCallFSJob, new CachedJob(() -> getJob("/simplejob", "simpleWithInternalCall")));
+        jobs.put(JobType.simpleWithInternalCallFSJob, new CachedJob(() ->
+                getJob("/simplejob", "simpleWithInternalCall")));
         jobs.put(JobType.simpleFSJob, new CachedJob(() -> getJob("/simplejob", "simple")));
         jobs.put(JobType.simpleJobWithExpression, new CachedJob(() -> getJob("/simplejob", "simpleWithExpression")));
         jobs.put(JobType.simpleJob, new CachedJob(() -> {
@@ -83,21 +102,14 @@ public class JobRunnerTest {
             Job<String> complexJob = createComplexJob();
             return new Tuple2<>(createSingleJobProject(complexJob), complexJob);
         }));
-    }
+        jobs.put(JobType.simpleWithSaved, new CachedJob(() -> getJob("/simplejob", "simpleWithSaved")));
 
-    @AfterClass
-    public static void teardownStatic() throws Exception {
-        jobs = null;
-        projects = null;
-    }
-
-    @Before
-    public void init() throws Exception {
         widgets = new HashMap<>();
-        ui = mock(UI.class);
         runner = new JobUIRunner<>(ui);
         window = new FakeUIWindow();
         when(ui.createWindow(anyString())).thenReturn(window);
+        when(ui.getPreferences()).thenReturn(preferences);
+        when(preferences.getBookmarksStore()).thenReturn(bookmarksStore);
         runButton = spy(new FakeUIButton());
         bookmarkButton = spy(new FakeUIButton());
         when(ui.createButton()).thenReturn(runButton, bookmarkButton);
@@ -133,6 +145,8 @@ public class JobRunnerTest {
     public void tearDown() {
         verify(runButton).setTitle("Run");
         verify(bookmarkButton).setTitle("Bookmark");
+        jobs = null;
+        projects = null;
     }
 
     @Test public void assert_that_simplejob_is_valid_when_run_with_valid_parameters() throws Exception {
@@ -615,6 +629,38 @@ public class JobRunnerTest {
         assertThat(((FakeUiValue) nameComponent).isEnabled(), is(true));
     }
 
+    @Test public void assert_that_simpleWithSaved_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
+
+        Tuple2<Project, Job<String>> projectSimpleJob = jobs.get(JobType.simpleFSJob).get();
+
+        Tuple2<Project, Job<String>> projectJob = jobs.get(JobType.simpleWithSaved).get();
+        Map<String, Bookmark> bookmarks = new HashMap<>();
+
+        Map<String, Serializable> firstMapValues = new HashMap<>();
+        firstMapValues.put("name", "John");
+        firstMapValues.put("surname", "Doe");
+
+        JobValues firstValues = new JobValuesImpl(firstMapValues);
+
+        Bookmark bookmark = new Bookmark(projectSimpleJob.first, projectSimpleJob.second, "1", "John Doe", firstValues);
+
+        bookmarks.put(bookmark.getKey(), bookmark);
+
+        when(bookmarksStore.getBookmarks(any(Project.class), any(Job.class))).thenReturn(bookmarks);
+
+        final FakeUIChoice uiValueName = new FakeUIChoice();
+        when(ui.createChoice()).thenReturn(uiValueName);
+
+        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+                () -> {
+                    uiValueName.setValue(new SavedLink("1", "simple", "John Doe"));
+                });
+
+        String result = jobRunnerWrapper.run(projectJob);
+
+        assertThat(result, equalTo("John Doe"));
+    }
+
     private static Project createSingleJobProject(Job job) {
         Project project = mock(Project.class);
         String id = job.getId();
@@ -637,7 +683,7 @@ public class JobRunnerTest {
         });
     }
 
-    private static <T> Tuple2<Project,Job<T>> getJob(String file, String jobId) {
+    private <T> Tuple2<Project,Job<T>> getJob(String file, String jobId) {
         Project project;
         Job<T> job;
         try {
@@ -645,7 +691,7 @@ public class JobRunnerTest {
             if (project == null) {
                 ProjectParser parser = new ProjectParserImpl();
                 ProjectXML projectXML = parser.parse(JobRunnerTest.class.getResource(file));
-                project = new ProjectGroovyBuilder().build(projectXML);
+                project = new ProjectGroovyBuilder().build(projectXML, bookmarksStore);
                 projects.put(file, project);
             }
             job = project.getJob(jobId);

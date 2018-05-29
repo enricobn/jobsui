@@ -9,4 +9,5 @@
     <Job>simpleWithParameterDependency</Job>
     <Job>simpleWithChoice</Job>
     <Job>simpleWithWizard</Job>
+    <Job>simpleWithSaved</Job>
 </Project>

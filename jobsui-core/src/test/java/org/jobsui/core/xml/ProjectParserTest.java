@@ -1,5 +1,6 @@
 package org.jobsui.core.xml;
 
+import org.jobsui.core.bookmark.BookmarksStore;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
@@ -7,6 +8,9 @@ import org.jobsui.core.ui.UIComponentRegistryImpl;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.net.URL;
 import java.util.Collections;
@@ -18,8 +22,11 @@ import static org.junit.Assert.assertThat;
 /**
  * Created by enrico on 5/4/16.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ProjectParserTest {
     private static ProjectXML projectXML;
+    @Mock
+    private BookmarksStore bookmarkStore;
 
     @BeforeClass
     public static void setUpStatic() throws Exception {
@@ -34,7 +41,7 @@ public class ProjectParserTest {
 
     @Test
     public void test_parse() throws Exception {
-        Project project = new ProjectGroovyBuilder().build(projectXML);
+        Project project = new ProjectGroovyBuilder().build(projectXML, bookmarkStore);
         Job<Object> job = project.getJob("simple");
 
         assertThat(job, is(notNullValue()));

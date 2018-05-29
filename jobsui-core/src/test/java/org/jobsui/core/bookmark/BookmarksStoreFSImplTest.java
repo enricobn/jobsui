@@ -9,7 +9,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.jobsui.core.TestUtils.createJob;
@@ -41,10 +43,10 @@ public class BookmarksStoreFSImplTest {
         Job<?> job = createJob("jobId");
 
         JobValues values = mock(JobValues.class);
-        Bookmark bookmark = new Bookmark(project, job, "bookmark", values);
+        Bookmark bookmark = createBookmark(project, job, values);
         sut.saveBookmark(project, job, bookmark);
 
-        Bookmark savedBookmark = sut.getBookmarks(project, job).get(0);
+        Bookmark savedBookmark = getBookmarks(project, job).get(0);
 
         assertThat(savedBookmark.getProjectId(), is(project.getId().toCompatibleProjectId()));
         assertThat(savedBookmark.getJobId(), is(job.getCompatibleJobId()));
@@ -57,13 +59,13 @@ public class BookmarksStoreFSImplTest {
         Job<?> job = createJob("jobId");
 
         JobValues values = mock(JobValues.class);
-        Bookmark bookmark2 = new Bookmark(project, job, "bookmark2", values);
+        Bookmark bookmark2 = createBookmark(project, job, values, "bookmark2");
         sut.saveBookmark(project, job, bookmark2);
 
-        Bookmark bookmark1 = new Bookmark(project, job, "bookmark1", values);
+        Bookmark bookmark1 = createBookmark(project, job, values, "bookmark1");
         sut.saveBookmark(project, job, bookmark1);
 
-        List<Bookmark> savedBookmarks = sut.getBookmarks(project, job);
+        List<Bookmark> savedBookmarks = getBookmarks(project, job);
 
         assertThat(savedBookmarks.get(0).getName(), is(bookmark1.getName()));
         assertThat(savedBookmarks.get(1).getName(), is(bookmark2.getName()));
@@ -75,13 +77,13 @@ public class BookmarksStoreFSImplTest {
         Job<?> job = createJob("jobId");
 
         JobValues values = mock(JobValues.class);
-        Bookmark bookmark = new Bookmark(project, job, "bookmark", values);
+        Bookmark bookmark = createBookmark(project, job, values);
         sut.saveBookmark(project, job, bookmark);
 
-        bookmark = new Bookmark(project, job, "bookmark", values);
+        bookmark = createBookmark(project, job, values);
         sut.saveBookmark(project, job, bookmark);
 
-        List<Bookmark> bookmarks = sut.getBookmarks(project, job);
+        List<Bookmark> bookmarks = getBookmarks(project, job);
 
         assertThat(bookmarks.size(), is(1));
 
@@ -90,6 +92,10 @@ public class BookmarksStoreFSImplTest {
         assertThat(savedBookmark.getProjectId(), is(project.getId().toCompatibleProjectId()));
         assertThat(savedBookmark.getJobId(), is(job.getCompatibleJobId()));
         assertThat(savedBookmark.getName(), is(bookmark.getName()));
+    }
+
+    private ArrayList<Bookmark> getBookmarks(Project project, Job<?> job) {
+        return new ArrayList<>(sut.getBookmarks(project, job).values());
     }
 
     @Test
@@ -106,7 +112,7 @@ public class BookmarksStoreFSImplTest {
         Job<?> job = createJob("jobId");
 
         JobValues values = mock(JobValues.class);
-        Bookmark bookmark = new Bookmark(project, job, "bookmark", values);
+        Bookmark bookmark = createBookmark(project, job, values);
         sut.saveBookmark(project, job, bookmark);
 
         assertThat(sut.existsBookmark(project, job, bookmark.getName()), is(true));
@@ -126,7 +132,7 @@ public class BookmarksStoreFSImplTest {
         Job<?> job = createJob("jobId");
 
         JobValues values = mock(JobValues.class);
-        Bookmark bookmark = new Bookmark(project, job, "bookmark", values);
+        Bookmark bookmark = createBookmark(project, job, values);
         sut.saveBookmark(project, job, bookmark);
 
         assertThat(sut.deleteBookmark(project, job, bookmark.getName()), is(true));
@@ -139,6 +145,15 @@ public class BookmarksStoreFSImplTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private Bookmark createBookmark(Project project, Job<?> job, JobValues values) {
+        return createBookmark(project, job, values, "bookmark");
+    }
+
+    private Bookmark createBookmark(Project project, Job<?> job, JobValues values, String name) {
+        String key = UUID.randomUUID().toString();
+        return new Bookmark(project, job, key,name, values);
     }
 
 }

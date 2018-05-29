@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class JobUIRunner<C> implements JobRunner {
     private final UI<C> ui;
     private boolean valid = false;
+    private Bookmark activeBookmark;
 
     public JobUIRunner(UI<C> ui) {
         this.ui = ui;
@@ -39,7 +40,7 @@ public class JobUIRunner<C> implements JobRunner {
             JobUIRunnerContext<T,C> context;
 
             try {
-                 context = JobUIRunnerContext.of(job, ui, window);
+                 context = JobUIRunnerContext.of(project, job, ui, window);
             } catch (Exception e) {
                 throw new RuntimeException((e));
 //                exceptions.add(e);
@@ -86,21 +87,24 @@ public class JobUIRunner<C> implements JobRunner {
             }
 
             try {
-                observeDependencies(ui, context);
+                observeDependencies(ui, context, project);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
 
-            UIButton<C> runButton = createRunButton(job, values, atomicResult);
+            UIButton<C> runButton = createRunButton(context, values, atomicResult);
 
-            UIButton<C> saveBookmarkButton = createSaveBookmarkButton(project, job, window, values);
+            UIButton<C> saveAsButton = createSaveAsButton(project, job, window, values);
+            UIButton<C> saveButton = createSaveButton(project, job, window, values);
+            saveButton.setEnabled(false);
 
             Observable<JobsUIValidationResult> validationObserver = context.jobValidationObserver();
 
             validationObserver.subscribe(v -> {
                 valid = v.isValid();
                 runButton.setEnabled(v.isValid());
-                saveBookmarkButton.setEnabled(v.isValid());
+                saveAsButton.setEnabled(v.isValid());
+                saveButton.setEnabled(v.isValid() && activeBookmark != null);
                 window.showValidationMessage(String.join(", ", v.getMessages()));
             });
 
@@ -119,7 +123,9 @@ public class JobUIRunner<C> implements JobRunner {
 
             window.addButton(runButton);
 
-            window.addButton(saveBookmarkButton);
+            window.addButton(saveButton);
+
+            window.addButton(saveAsButton);
 
             window.setOnOpenBookmark(bookmark -> {
                 try {
@@ -141,6 +147,8 @@ public class JobUIRunner<C> implements JobRunner {
                                         value, jobParameter.getName(), String.join(",", validate)));
                                 break;
                             }
+                            this.activeBookmark = bookmark;
+                            saveButton.setEnabled(true);
                         }
                     }
                 } catch (Exception e) {
@@ -156,13 +164,13 @@ public class JobUIRunner<C> implements JobRunner {
         return atomicResult.get();
     }
 
-    private <T extends Serializable> UIButton<C> createSaveBookmarkButton(Project project, Job<T> job, UIWindow<C> window, JobValues values) {
-        UIButton<C> saveBookmarkButton = ui.createButton();
-        saveBookmarkButton.setEnabled(false);
-        saveBookmarkButton.setTitle("Bookmark");
+    private <T extends Serializable> UIButton<C> createSaveAsButton(Project project, Job<T> job, UIWindow<C> window, JobValues values) {
+        UIButton<C> button = ui.createButton();
+        button.setEnabled(false);
+        button.setTitle("Save as");
 
-        saveBookmarkButton.getObservable().subscribe(serializableVoid -> {
-            Optional<String> name = ui.askString("Bookmark's name");
+        button.getObservable().subscribe(serializableVoid -> {
+            Optional<String> name = ui.askString("Name");
             name.ifPresent(n -> {
                 JobsUIPreferences preferences = ui.getPreferences();
 
@@ -173,26 +181,47 @@ public class JobUIRunner<C> implements JobRunner {
 
                 if (ok) {
                     try {
-                        Bookmark bookmark = new Bookmark(project, job, n, values);
+                        Bookmark bookmark = new Bookmark(project, job, UUID.randomUUID().toString(), n, values);
                         preferences.saveBookmark(project, job, bookmark);
                         window.refreshBookmarks(project, job);
+                        this.activeBookmark = bookmark;
                     } catch (Exception e) {
                         ui.showError("Error saving bookmark.", e);
                     }
                 }
             });
         });
-        return saveBookmarkButton;
+        return button;
     }
 
-    private <T extends Serializable> UIButton<C> createRunButton(Job<T> job, JobValues values, AtomicReference<T> atomicResult) {
+    private <T extends Serializable> UIButton<C> createSaveButton(Project project, Job<T> job, UIWindow<C> window, JobValues values) {
+        UIButton<C> button = ui.createButton();
+        button.setEnabled(false);
+        button.setTitle("Save");
+
+        button.getObservable().subscribe(serializableVoid -> {
+                JobsUIPreferences preferences = ui.getPreferences();
+
+                try {
+                    activeBookmark.getValues().clear();
+                    activeBookmark.getValues().putAll(values.getMap(job));
+                    preferences.saveBookmark(project, job, activeBookmark);
+                } catch (Exception e) {
+                    ui.showError("Error saving bookmark.", e);
+                }
+            });
+        return button;
+    }
+
+
+    private <T extends Serializable> UIButton<C> createRunButton(JobUIRunnerContext<T, C> context, JobValues values, AtomicReference<T> atomicResult) {
         UIButton<C> runButton = ui.createButton();
         runButton.setEnabled(false);
         runButton.setTitle("Run");
 
         runButton.getObservable().subscribe(serializableVoid -> {
             try {
-                JobResult<T> result = job.run(values);
+                JobResult<T> result = context.getJob().run(context.transformValues(values.getMap(context.getJob())));
                 if (result.getException() != null) {
                     ui.showError("Error running job.", result.getException());
                 } else {
@@ -205,8 +234,7 @@ public class JobUIRunner<C> implements JobRunner {
         return runButton;
     }
 
-    private static void setValidationMessage(List<String> validate, JobParameter jobParameter, UIWidget<?> widget,
-                                             UI<?> ui) {
+    private void setValidationMessage(List<String> validate, JobParameter jobParameter, UIWidget<?> widget) {
         if (!jobParameter.isVisible()) {
             if (!validate.isEmpty()) {
                 ui.showMessage(jobParameter.getName() + ": " + JobsUIUtils.getMessagesAsString(validate));
@@ -216,7 +244,7 @@ public class JobUIRunner<C> implements JobRunner {
         }
     }
 
-    private static <T extends Serializable, C> void setComponentValidationMessage(JobUIRunnerContext<T, C> context) {
+    private <T extends Serializable> void setComponentValidationMessage(JobUIRunnerContext<T, C> context) {
         Map<String, Observable<Serializable>> observables = context.getDependenciesObservables().getMap();
 
         Map<String, Serializable> validValues = new HashMap<>();
@@ -229,23 +257,27 @@ public class JobUIRunner<C> implements JobRunner {
                     UIWidget<C> widget = context.getWidget(jobParameter);
 
                     // I set the validation message only if all dependencies are valid
-                    if (JobUIRunnerContext.getDependenciesValues(validValues, jobParameter).size() == jobParameter.getDependencies().size()) {
-                        List<String> validate = jobParameter.validate(validValues, value);
+                    Map<String, Serializable> dependenciesValues = JobUIRunnerContext.getDependenciesValues(validValues,
+                            jobParameter);
+                    if (dependenciesValues.size() == jobParameter.getDependencies().size()) {
+                        Map<String, Serializable> transformedValues = context.transformValues(validValues);
+                        List<String> validate = jobParameter.validate(transformedValues, value);
                         if (validate.isEmpty()) {
                             validValues.put(jobDependency.getKey(), value);
                         } else {
                             validValues.remove(jobDependency.getKey());
                         }
-                        setValidationMessage(validate, jobParameter, widget, context.getUi());
+                        setValidationMessage(validate, jobParameter, widget);
                     } else {
-                        setValidationMessage(Collections.emptyList(), jobParameter, widget, context.getUi());
+                        setValidationMessage(Collections.emptyList(), jobParameter, widget);
                     }
                 }
             });
         }
     }
 
-    private static <T extends Serializable, C> void observeDependencies(UI<C> ui, JobUIRunnerContext<T, C> context) throws Exception {
+    private static <T extends Serializable, C> void observeDependencies(UI<C> ui, JobUIRunnerContext<T, C> context,
+                                                                        Project project) throws Exception {
         Map<String, Serializable> validValues = new HashMap<>();
 
         context.valueChangeObserver().subscribe(changedValue -> {
@@ -261,16 +293,19 @@ public class JobUIRunner<C> implements JobRunner {
                 final Observable<Map<String, Serializable>> observable =
                         context.combineDependenciesObservables(dependencies, observables, validValues);
 
-                observable.subscribe(objects -> {
+                observable.subscribe(values -> {
                     // all dependencies are valid
-                    if (objects.size() == dependencies.size()) {
+                    if (values.size() == dependencies.size()) {
+                        Map<String, Serializable> transormedValues = context.transformValues(values);
+
                         if (jobDependency instanceof JobParameter) {
                             JobParameter jobParameter = (JobParameter) jobDependency;
                             final UIWidget widget = context.getWidget(jobParameter);
                             widget.setDisable(false);
                             context.reEnableDependants(validValues, jobDependency);
                             try {
-                                jobParameter.onDependenciesChange(widget, objects);
+                                jobParameter.onDependenciesChange(widget, transormedValues);
+
                             } catch (Exception e) {
                                 ui.showError("Error on onDependenciesChange for parameter " + jobParameter.getName(), e);
                                 widget.setValidationMessages(Collections.singletonList(e.getMessage()));
@@ -281,7 +316,7 @@ public class JobUIRunner<C> implements JobRunner {
                         } else if (jobDependency instanceof JobExpression) {
                             JobExpression jobExpression = (JobExpression) jobDependency;
                             //jobExpression.onDependenciesChange(objects);
-                            Serializable value = jobExpression.evaluate(objects);
+                            Serializable value = jobExpression.evaluate(transormedValues);
                             jobExpression.notifySubscribers(value);
                             context.reEnableDependants(validValues, jobDependency);
                         } else {
@@ -313,10 +348,10 @@ public class JobUIRunner<C> implements JobRunner {
             } else if (jobDependency instanceof JobParameter) {
                 JobParameter jobParameter = (JobParameter) jobDependency;
                 UIComponent<C> component = context.getWidget(jobParameter).getComponent();
-                Serializable value = component.getValue();
+                Serializable value = context.transformValue(component.getValue());
                 if (JobUIRunnerContext.isValid(jobParameter, values, value)) {
 //                    component.setValue(value);
-                    values.put(jobDependency.getKey(), value);
+                    values.put(jobDependency.getKey(), context.transformValue(value));
                     component.notifySubscribers();
                 }
             } else {

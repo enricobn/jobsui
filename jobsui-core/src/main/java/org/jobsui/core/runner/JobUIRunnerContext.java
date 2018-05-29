@@ -1,5 +1,7 @@
 package org.jobsui.core.runner;
 
+import org.jobsui.core.bookmark.Bookmark;
+import org.jobsui.core.bookmark.SavedLink;
 import org.jobsui.core.job.*;
 import org.jobsui.core.ui.*;
 import rx.Observable;
@@ -16,22 +18,24 @@ import java.util.stream.Collectors;
 public class JobUIRunnerContext<T extends Serializable, C> implements JobDependencyProvider {
     private static final Logger LOGGER = Logger.getLogger(JobUIRunnerContext.class.getName());
     private final UI<C> ui;
+    private final Project project;
     private final Job<T> job;
     private final Map<String,UIWidget<C>> widgets;
     private final List<JobDependency> sortedJobDependencies;
     private final DependenciesObservables dependenciesObservables;
 
-    private JobUIRunnerContext(UI<C> ui, Job<T> job, Map<String, UIWidget<C>> widgets,
+    private JobUIRunnerContext(UI<C> ui, Project project, Job<T> job, Map<String, UIWidget<C>> widgets,
                               List<JobDependency> sortedJobDependencies,
                               DependenciesObservables dependenciesObservables) {
         this.ui = ui;
+        this.project = project;
         this.job = job;
         this.widgets = widgets;
         this.sortedJobDependencies = sortedJobDependencies;
         this.dependenciesObservables = dependenciesObservables;
     }
 
-    public static <T extends Serializable, C> JobUIRunnerContext<T,C> of(Job<T> job, UI<C> ui, UIWindow<C> window) throws Exception {
+    public static <T extends Serializable, C> JobUIRunnerContext<T,C> of(Project project, Job<T> job, UI<C> ui, UIWindow<C> window) throws Exception {
         LOGGER.fine("Creating Job runner context");
 
         Map<String,UIWidget<C>> widgets = new HashMap<>();
@@ -50,7 +54,7 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
 
         LOGGER.fine("Created Job runner context");
 
-        return new JobUIRunnerContext<>(ui, job, widgets, sortedDependencies, dependenciesObservables);
+        return new JobUIRunnerContext<>(ui, project, job, widgets, sortedDependencies, dependenciesObservables);
     }
 
     public Job<T> getJob() {
@@ -296,6 +300,31 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
 
     public JobDependency getJobDependency(String key) {
         return job.getJobDependency(key);
+    }
+
+    public Project getProject() {
+        return project;
+    }
+
+    public Serializable transformValue(Serializable value) {
+        Serializable transformedValues;
+        if (value instanceof SavedLink) {
+            SavedLink savedLink = (SavedLink) value;
+            Job<Object> job = project.getJob(savedLink.getJobId());
+            Map<String, Bookmark> bookmarks = ui.getPreferences().getBookmarksStore()
+                    .getBookmarks(project, job);
+            Bookmark bookmark = bookmarks.get(savedLink.getId());
+            transformedValues = (Serializable) bookmark.getValues();
+        } else {
+            transformedValues = value;
+        }
+        return transformedValues;
+    }
+
+    public Map<String, Serializable> transformValues(Map<String, Serializable> values) {
+        Map<String, Serializable> transformedValues = new HashMap<>(values.size());
+        values.forEach((key, value) -> transformedValues.put(key, transformValue(value)));
+        return transformedValues;
     }
 
     public interface DependenciesObservables {

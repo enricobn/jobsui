@@ -182,7 +182,7 @@ public class StartController implements Initializable {
     }
 
     private void openJob(URL url, String jobId, ProjectXML simpleProjectXML) {
-        Task<Tuple2<Project,Job<Serializable>>> task = new LoadJobTask(url, jobId);
+        Task<Tuple2<Project,Job<Serializable>>> task = new LoadJobTask(url, jobId, preferences.getBookmarksStore());
         ProgressDialog.run(task, "Opening job", tuple -> {
                 StartApp.getInstance().gotoRun(tuple.first, tuple.second);
             preferences.registerOpenedProject(url, simpleProjectXML.getName());

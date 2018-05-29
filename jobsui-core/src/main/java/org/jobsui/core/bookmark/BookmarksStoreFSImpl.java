@@ -10,12 +10,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 4/17/17.
@@ -56,15 +54,15 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
     }
 
     @Override
-    public List<Bookmark> getBookmarks(Project project, Job job) {
+    public Map<String, Bookmark> getBookmarks(Project project, Job job) {
         File jobRoot = getJobRoot(project, job);
         if (!jobRoot.exists()) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
 
         String[] list = jobRoot.list((dir, name) -> name.endsWith(".xml"));
         if (list == null) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
 
         List<Bookmark> result = new ArrayList<>();
@@ -79,13 +77,19 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
             try {
                 result.add((Bookmark) xstream.fromXML(file));
             } catch (Exception e) {
+                // TODO show a message in UI
                 LOGGER.log(Level.SEVERE, "Error loading bookmark from " + file, e);
             }
         }
 
         result.sort(Comparator.comparing(Bookmark::getName));
 
-        return result;
+        return result.stream()
+                .collect(Collectors.toMap(
+                        Bookmark::getKey,
+                        it -> it,
+                        (u,v) -> { throw new IllegalStateException(String.format("Duplicate key %s", u)); },
+                        LinkedHashMap::new));
     }
 
     private File getJobRoot(Project project, Job job) {

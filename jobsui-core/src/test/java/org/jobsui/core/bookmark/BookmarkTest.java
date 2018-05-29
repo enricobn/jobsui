@@ -40,7 +40,7 @@ public class BookmarkTest {
 
         when(project.getId()).thenReturn(ProjectId.of("test:bookmark", "1.0.0"));
 
-        new Bookmark(project, job, "Bookmark", values);
+        new Bookmark(project, job, "1", "Bookmark", values);
 
         verify(values, never()).getValue(calculated);
         verify(values, times(1)).getValue(notCalculated);

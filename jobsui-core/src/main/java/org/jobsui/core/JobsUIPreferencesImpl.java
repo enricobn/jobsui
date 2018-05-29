@@ -91,7 +91,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     @Override
     public List<Bookmark> getBookmarks(Project project, Job job) {
         // I cannot cache bookmarks since they depend on job's classloader
-        return Collections.unmodifiableList(bookmarksStore.getBookmarks(project, job));
+        return new ArrayList<>(bookmarksStore.getBookmarks(project, job).values());
     }
 
     @Override
@@ -181,6 +181,11 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     @Override
     public double getRunDividerPosition() {
         return runDividerPosition;
+    }
+
+    @Override
+    public BookmarksStore getBookmarksStore() {
+        return bookmarksStore;
     }
 
     private void load() {

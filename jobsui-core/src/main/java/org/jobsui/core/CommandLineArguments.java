@@ -1,6 +1,7 @@
 package org.jobsui.core;
 
 import org.apache.commons.cli.*;
+import org.jobsui.core.bookmark.BookmarksStore;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.job.ProjectBuilder;
@@ -51,7 +52,7 @@ public class CommandLineArguments {
      */
     public static boolean parse(String[] args, ProjectParser projectParser, ProjectBuilder projectBuilder,
                                 FileSystem fileSystem, Consumer<CommandLineArguments> onSuccess,
-                                Consumer<List<String>> onError) {
+                                Consumer<List<String>> onError, BookmarksStore bookmarksStore) {
         List<String> validation = new ArrayList<>();
 
         Option run = Option.builder("run")
@@ -119,7 +120,7 @@ public class CommandLineArguments {
                         }
 
                         ProjectXML projectXML = projectParser.parse(url);
-                        Project project = projectBuilder.build(projectXML);
+                        Project project = projectBuilder.build(projectXML, bookmarksStore);
                         Job<Object> job = project.getJob(jobString);
                         if (job == null) {
                             throw new Exception(String.format("Cannot find job %s.", jobString));

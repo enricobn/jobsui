@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<Job name="Simple with saved" version="1.0.0">
+
+    <Parameter key="name" name="Name" component="Choice">
+        <OnInit>
+            component.items = saved("simple")
+        </OnInit>
+    </Parameter>
+
+    <Run>
+        return name.name + " " + name.surname
+    </Run>
+
+</Job>

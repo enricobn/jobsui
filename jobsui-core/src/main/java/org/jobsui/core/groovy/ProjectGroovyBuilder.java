@@ -6,6 +6,8 @@ import groovy.lang.GroovyShell;
 import groovy.util.GroovyScriptEngine;
 import org.codehaus.groovy.control.CompilerConfiguration;
 import org.codehaus.groovy.control.customizers.ImportCustomizer;
+import org.jobsui.core.bookmark.BookmarksStore;
+import org.jobsui.core.bookmark.SavedLink;
 import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.job.ProjectBuilder;
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -28,12 +31,13 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
     private static final Logger LOGGER = Logger.getLogger(ProjectGroovyBuilder.class.getName());
 
     @Override
-    public Project build(ProjectXML projectXML) throws Exception {
+    public Project build(ProjectXML projectXML, BookmarksStore bookmarksStore) throws Exception {
         LOGGER.info("Building project " + projectXML.getId());
 
         LOGGER.info("Creating groovy shell for project " + projectXML.getId());
         GroovyShell groovyShell = createGroovyShell(projectXML);
         groovyShell.setProperty("projectRelativeURL", toGroovyFunction(projectXML::getRelativeURL));
+
         LOGGER.info("Created groovy shell for project " + projectXML.getId());
 
         Map<String, JobGroovy<Serializable>> jobs = new HashMap<>();
@@ -56,7 +60,7 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
             try {
 //                ProjectParser projectParser = projectXML.getJobParser(entry.getValue());
                 ProjectXML refProjectXML = projectParser.parse(projectXML.getRelativeURL(value));
-                projects.put(key, projectGroovyBuilder.build(refProjectXML));
+                projects.put(key, projectGroovyBuilder.build(refProjectXML, bookmarksStore));
             } catch (Exception e) {
                 // TODO
                 throw new RuntimeException(e);
@@ -65,6 +69,13 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
 
         ProjectGroovy projectGroovy = new ProjectGroovy(ProjectId.of(projectXML.getId(), projectXML.getVersion()),
                 projectXML.getName(), jobs, projects);
+
+        groovyShell.setProperty("saved", toGroovyFunction((String jobId) ->
+                bookmarksStore.getBookmarks(projectGroovy, jobs.get(jobId)).values().stream()
+                .map(it -> new SavedLink(it.getKey(), jobId, it.getName()))
+                .collect(Collectors.toList())
+            )
+        );
 
         for (JobGroovy<?> job : jobs.values()) {
             job.init(projectGroovy);
@@ -133,6 +144,14 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
         return new Object() {
             public R call(T arg) {
                 return function.apply(arg);
+            }
+        };
+    }
+
+    private static <T,U,R> Object toGroovyFunction(BiFunction<T,U,R> function) {
+        return new Object() {
+            public R call(T arg, U arg1) {
+                return function.apply(arg, arg1);
             }
         };
     }

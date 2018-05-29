@@ -23,7 +23,8 @@ public class Main {
                 new ProjectGroovyBuilder(),
                 FileSystems.getDefault(),
                 Main::run,
-                errors -> System.err.println(String.join("\n", errors)));
+                errors -> System.err.println(String.join("\n", errors)),
+                BookmarksStoreFSImpl.getUserStore());
 
 //        errors -> JavaFXUI.showMessageStatic("Error starting application:\n" +
 //                        String.join("\n", errors)));

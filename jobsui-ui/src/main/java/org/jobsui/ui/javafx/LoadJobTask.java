@@ -1,6 +1,7 @@
 package org.jobsui.ui.javafx;
 
 import javafx.concurrent.Task;
+import org.jobsui.core.bookmark.BookmarksStore;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
@@ -18,10 +19,12 @@ import java.net.URL;
 class LoadJobTask extends Task<Tuple2<Project,Job<Serializable>>> {
     private final URL url;
     private final String jobId;
+    private final BookmarksStore bookmarkStore;
 
-    LoadJobTask(URL url, String jobId) {
+    LoadJobTask(URL url, String jobId, BookmarksStore bookmarkStore) {
         this.url = url;
         this.jobId = jobId;
+        this.bookmarkStore = bookmarkStore;
     }
 
     @Override
@@ -35,7 +38,7 @@ class LoadJobTask extends Task<Tuple2<Project,Job<Serializable>>> {
         }
         Project project;
         try {
-            project = new ProjectGroovyBuilder().build(projectXML);
+            project = new ProjectGroovyBuilder().build(projectXML, bookmarkStore);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

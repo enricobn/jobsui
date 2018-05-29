@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.net.URL;
+import java.util.UUID;
 import java.util.prefs.Preferences;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -201,7 +202,7 @@ public class JobsUIPreferencesImplTest {
 
     private Bookmark createBookmark(String bookmarkName, Project project, Job<?> job) {
         JobValues values = mock(JobValues.class);
-        return new Bookmark(project, job, bookmarkName, values);
+        return new Bookmark(project, job, UUID.randomUUID().toString(), bookmarkName, values);
     }
 
 
