@@ -58,16 +58,26 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
 
     @Override
     public void addButton(UIButton<T> button) {
-//        add(button);
-    }
-
-    @Override
-    public void setOnOpenBookmark(Consumer<Bookmark> onOpenBookmark) {
         // TODO
     }
 
     @Override
-    public void refreshBookmarks(Project project, Job job) {
+    public void setOnOpenBookmark(Consumer<Bookmark> consumer) {
+        // TODO
+    }
+
+    @Override
+    public void setOnDeleteBookmark(Consumer<Bookmark> consumer) {
+        // TODO
+    }
+
+    @Override
+    public void refreshBookmarks(Project project, Job job, Bookmark activeBookmark) {
+        // TODO
+    }
+
+    @Override
+    public void setTitle(String title) {
         // TODO
     }
 

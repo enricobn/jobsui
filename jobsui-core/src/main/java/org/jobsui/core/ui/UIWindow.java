@@ -24,9 +24,13 @@ public interface UIWindow<T> extends UIContainer<T> {
 
     void addButton(UIButton<T> button);
 
-    void setOnOpenBookmark(Consumer<Bookmark> onOpenBookmark);
+    void setOnOpenBookmark(Consumer<Bookmark> consumer);
 
-    void refreshBookmarks(Project project, Job job);
+    void setOnDeleteBookmark(Consumer<Bookmark> consumer);
+
+    void refreshBookmarks(Project project, Job job, Bookmark activeBookmark);
+
+    void setTitle(String title);
 
 //    UIContainer<T> addContainer();
 

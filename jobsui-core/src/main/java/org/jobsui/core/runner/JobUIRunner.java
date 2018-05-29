@@ -148,6 +148,7 @@ public class JobUIRunner<C> implements JobRunner {
                                 break;
                             }
                             this.activeBookmark = bookmark;
+                            window.setTitle(bookmark.getName());
                             saveButton.setEnabled(true);
                         }
                     }
@@ -155,6 +156,15 @@ public class JobUIRunner<C> implements JobRunner {
                     throw new RuntimeException(e);
                 }
             });
+
+            window.setOnDeleteBookmark(bookmark -> {
+                if (activeBookmark != null && bookmark.getKey().equals(activeBookmark.getKey())) {
+                    activeBookmark = null;
+                    window.setTitle(null);
+                    saveButton.setEnabled(false);
+                }
+            });
+
 //            window.add(closeButton);
         });
 
@@ -183,8 +193,9 @@ public class JobUIRunner<C> implements JobRunner {
                     try {
                         Bookmark bookmark = new Bookmark(project, job, UUID.randomUUID().toString(), n, values);
                         preferences.saveBookmark(project, job, bookmark);
-                        window.refreshBookmarks(project, job);
                         this.activeBookmark = bookmark;
+                        window.refreshBookmarks(project, job, activeBookmark);
+                        window.setTitle(bookmark.getName());
                     } catch (Exception e) {
                         ui.showError("Error saving bookmark.", e);
                     }
@@ -206,6 +217,7 @@ public class JobUIRunner<C> implements JobRunner {
                     activeBookmark.getValues().clear();
                     activeBookmark.getValues().putAll(values.getMap(job));
                     preferences.saveBookmark(project, job, activeBookmark);
+                    window.refreshBookmarks(project, job, activeBookmark);
                 } catch (Exception e) {
                     ui.showError("Error saving bookmark.", e);
                 }

@@ -8,5 +8,6 @@ public interface JobsUIFXStyles {
     String VALIDATION_ERROR_TEXT = "errorText";
     String TITLE_TEXT = "titleText";
     String FIELD_LABEL = "fieldLabel";
+    String WINDOW_TITLE = "windowTitle";
 
 }

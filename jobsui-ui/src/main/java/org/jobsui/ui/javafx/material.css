@@ -13,6 +13,13 @@
     -fx-font-weight: BOLD;
 }
 
+.windowTitle {
+    -fx-text-fill: rgb(77, 102, 204);
+    -fx-font-size: 16px;
+    -fx-font-weight: BOLD;
+    -fx-underline: true;
+}
+
 /* Button */
 .button {
     -fx-padding: 0.7em 0.57em;

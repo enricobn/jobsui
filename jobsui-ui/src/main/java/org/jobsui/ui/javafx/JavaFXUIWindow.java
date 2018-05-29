@@ -16,6 +16,7 @@ import org.jobsui.core.job.Project;
 import org.jobsui.core.ui.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -27,6 +28,8 @@ class JavaFXUIWindow implements UIWindow<Node> {
     private ListView<Bookmark> bookmarkListView;
     private VBox componentsPanel;
     private Consumer<Bookmark> onOpenBookmark;
+    private Label titleLabel;
+    private Consumer<Bookmark> onDeleteBookmark;
 
     JavaFXUIWindow(UI<Node> ui) {
         this.ui = ui;
@@ -138,14 +141,45 @@ class JavaFXUIWindow implements UIWindow<Node> {
     }
 
     @Override
-    public void setOnOpenBookmark(Consumer<Bookmark> onOpenBookmark) {
-        this.onOpenBookmark = onOpenBookmark;
+    public void setOnOpenBookmark(Consumer<Bookmark> consumer) {
+        this.onOpenBookmark = consumer;
     }
 
     @Override
-    public void refreshBookmarks(Project project, Job job) {
+    public void setOnDeleteBookmark(Consumer<Bookmark> consumer) {
+        this.onDeleteBookmark = consumer;
+    }
+
+    @Override
+    public void refreshBookmarks(Project project, Job job, Bookmark activeBookmark) {
         bookmarkListView.getItems().clear();
-        bookmarkListView.getItems().addAll(ui.getPreferences().getBookmarks(project, job));
+        List<Bookmark> bookmarks = ui.getPreferences().getBookmarks(project, job);
+        bookmarkListView.getItems().addAll(bookmarks);
+
+        if (activeBookmark != null) {
+            Optional<Bookmark> first = bookmarks.stream()
+                    .filter(it -> it.getKey().equals(activeBookmark.getKey()))
+                    .findFirst();
+
+            first.ifPresent(bookmark -> bookmarkListView.getSelectionModel().select(bookmark));
+        }
+    }
+
+    @Override
+    public void setTitle(String title) {
+        if (title == null) {
+            if (titleLabel != null) {
+                componentsPanel.getChildren().remove(titleLabel);
+                titleLabel = null;
+            }
+        } else {
+            if (titleLabel == null) {
+                titleLabel = new Label(title);
+                titleLabel.getStyleClass().add(JobsUIFXStyles.WINDOW_TITLE);
+                componentsPanel.getChildren().add(0, titleLabel);
+            }
+            titleLabel.setText(title);
+        }
     }
 
     @Override
@@ -178,12 +212,12 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
             cell.setOnMouseEntered(e -> {
                 bookmarkListView.setCursor(Cursor.HAND);
-                bookmarkListView.getSelectionModel().select(cell.getItem());
+                //bookmarkListView.getSelectionModel().select(cell.getItem());
             });
 
             cell.setOnMouseExited(e -> {
                 bookmarkListView.setCursor(Cursor.DEFAULT);
-                bookmarkListView.getSelectionModel().clearSelection();
+                //bookmarkListView.getSelectionModel().clearSelection();
             });
 
             cell.setOnMouseClicked(e -> {
@@ -209,7 +243,8 @@ class JavaFXUIWindow implements UIWindow<Node> {
                 if (bookmark != null) {
                     JobsUIPreferences preferences = ui.getPreferences();
                     if (preferences.deleteBookmark(project, job, bookmark.getName())) {
-                        refreshBookmarks(project, job);
+                        refreshBookmarks(project, job, bookmark);
+                        onDeleteBookmark.accept(bookmark);
                     }
                 }
             });

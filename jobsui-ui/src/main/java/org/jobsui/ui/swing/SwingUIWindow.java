@@ -64,13 +64,23 @@ public class SwingUIWindow implements UIWindow<JComponent> {
     }
 
     @Override
-    public void setOnOpenBookmark(Consumer<Bookmark> onOpenBookmark) {
+    public void setOnOpenBookmark(Consumer<Bookmark> consumer) {
         // TODO
     }
 
     @Override
-    public void refreshBookmarks(Project project, Job job) {
+    public void setOnDeleteBookmark(Consumer<Bookmark> consumer) {
+        // TODO
+    }
+
+    @Override
+    public void refreshBookmarks(Project project, Job job, Bookmark activeBookmark) {
         // todo
+    }
+
+    @Override
+    public void setTitle(String title) {
+        // TODO
     }
 
     @Override
