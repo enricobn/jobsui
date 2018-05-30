@@ -256,4 +256,24 @@ public class JobXMLImpl implements JobXML {
     public void setVersion(String version) {
         this.version = version;
     }
+
+    @Override
+    public JobXML copy() {
+        JobXMLImpl jobXML = new JobXMLImpl(id + "_copy", name + " copy", "1.0.0");
+        parameters.values().forEach(it -> {
+            try {
+                jobXML.addCheckedParameter(it);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        wizardSteps.forEach(jobXML::add);
+
+        jobXML.setRunScript(getRunScript());
+
+        jobXML.setValidateScript(getValidateScript());
+
+        return jobXML;
+    }
 }

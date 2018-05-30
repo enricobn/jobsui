@@ -53,4 +53,7 @@ public interface JobXML extends ValidatingXML{
     void setId(String id);
 
     void setVersion(String version);
+
+    JobXML copy();
+
 }

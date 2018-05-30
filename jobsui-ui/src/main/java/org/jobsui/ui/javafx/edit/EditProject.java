@@ -375,6 +375,16 @@ public class EditProject {
             projectXML.getJobs().remove(jobXML);
             treeItem.getParent().getChildren().remove(treeItem);
         });
+
+        MenuItem copy = new MenuItem("Copy");
+        contextMenu.getItems().add(copy);
+        copy.setOnAction(t -> {
+            JobXML copied = jobXML.copy();
+            projectXML.addJob(copied);
+
+            TreeItem<EditItem> item = createJobTreeItem(copied);
+            treeItem.getParent().getChildren().add(item);
+        });
     }
 
     private void populateProjectMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {

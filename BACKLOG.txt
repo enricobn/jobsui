@@ -15,8 +15,6 @@ NEXT
   - copy and paste parameter
   - move parameter
   - warning if close with changes
-- run:
-  - copy bookmark
 - tab on edit script: 4 spaces
 - when I write the job.xml change parameter's fields order to:
   - key, name, component, dependsOn
