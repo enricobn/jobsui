@@ -9,7 +9,7 @@ import java.util.Objects;
  */
 public class ProjectId {
     private final String groupId;
-    private final String moduleId;
+    private final String artifactId;
     private final Version version;
 
     public static ProjectId of(String id, Version version) throws Exception {
@@ -24,12 +24,12 @@ public class ProjectId {
         return of(id, Version.valueOf(version));
     }
 
-    public ProjectId(String groupId, String moduleId, Version version) {
+    public ProjectId(String groupId, String artifactId, Version version) {
         Objects.requireNonNull(groupId);
-        Objects.requireNonNull(moduleId);
+        Objects.requireNonNull(artifactId);
         Objects.requireNonNull(version);
         this.groupId = groupId;
-        this.moduleId = moduleId;
+        this.artifactId = artifactId;
         this.version = version;
     }
 
@@ -37,8 +37,8 @@ public class ProjectId {
         return groupId;
     }
 
-    public String getModuleId() {
-        return moduleId;
+    public String getArtifactId() {
+        return artifactId;
     }
 
     public Version getVersion() {
@@ -46,7 +46,7 @@ public class ProjectId {
     }
 
     public CompatibleProjectId toCompatibleProjectId() {
-        return new CompatibleProjectId(groupId, moduleId, version.getMajorVersion());
+        return new CompatibleProjectId(groupId, artifactId, version.getMajorVersion());
     }
 
     @Override
@@ -57,20 +57,20 @@ public class ProjectId {
         ProjectId projectId = (ProjectId) o;
 
         if (!groupId.equals(projectId.groupId)) return false;
-        if (!moduleId.equals(projectId.moduleId)) return false;
+        if (!artifactId.equals(projectId.artifactId)) return false;
         return version.equals(projectId.version);
     }
 
     @Override
     public int hashCode() {
         int result = groupId.hashCode();
-        result = 31 * result + moduleId.hashCode();
+        result = 31 * result + artifactId.hashCode();
         result = 31 * result + version.hashCode();
         return result;
     }
 
     @Override
     public String toString() {
-        return groupId + ":" + moduleId + ":" + version;
+        return groupId + ":" + artifactId + ":" + version;
     }
 }

@@ -50,7 +50,7 @@ public class RepositoryImpl implements Repository {
     }
 
     private URL getUrl(ProjectId projectId) throws MalformedURLException {
-        return new URL(root.toString() + "/" + projectId.getGroupId() + "/" + projectId.getModuleId() + "/" + projectId.getVersion().toString());
+        return new URL(root.toString() + "/" + projectId.getGroupId() + "/" + projectId.getArtifactId() + "/" + projectId.getVersion().toString());
     }
 
     private synchronized Set<ProjectId> getProjectIds() throws IOException {
