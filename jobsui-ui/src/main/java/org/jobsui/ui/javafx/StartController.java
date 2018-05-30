@@ -2,6 +2,7 @@ package org.jobsui.ui.javafx;
 
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.Initializable;
 import javafx.scene.Cursor;
 import javafx.scene.control.*;
@@ -116,8 +117,7 @@ public class StartController implements Initializable {
 
             ContextMenu menu = new ContextMenu();
 
-            MenuItem editMenuItem = new MenuItem("Edit");
-            editMenuItem.setOnAction(event -> {
+            addMenu("Edit", menu, event -> {
                 // TODO I don't want to add the edit menu for "not file"
                 if (cell.getItem() != null && cell.getItem().url.startsWith("file:/")) {
                     URL url;
@@ -131,11 +131,26 @@ public class StartController implements Initializable {
                     editProject(url);
                 }
             });
-            menu.getItems().add(editMenuItem);
+
+            addMenu("Delete", menu, event -> {
+                preferences.removeLastOpenedItem(cell.getItem());
+
+                projects.getItems().clear();
+
+                projects.getItems().addAll(preferences.getLastOpenedItems());
+            });
 
             cell.setContextMenu(menu);
 
             return cell;
+        }
+
+        private void addMenu(String text, ContextMenu menu, EventHandler<ActionEvent> actionEventEventHandler) {
+            MenuItem editMenuItem = new MenuItem(text);
+
+            editMenuItem.setOnAction(actionEventEventHandler);
+
+            menu.getItems().add(editMenuItem);
         }
     }
 

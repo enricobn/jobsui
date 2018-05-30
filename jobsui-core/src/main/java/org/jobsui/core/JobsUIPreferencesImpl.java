@@ -188,6 +188,12 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
         return bookmarksStore;
     }
 
+    @Override
+    public void removeLastOpenedItem(OpenedItem openedItem) {
+        lastOpenedProjects.removeIf(item -> item.url.equals(openedItem.url));
+        save();
+    }
+
     private void load() {
         int length = lastOpenedProjectsNode.getInt(SIZE, 0);
         for (int i = 0; i < length; i++) {

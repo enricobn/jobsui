@@ -3,7 +3,6 @@ DOING
 
 NEXT
 -----
-- on main window: remove from history
 - on new project:
  - why parent folder and folder?
  - Namespace -> Group id?

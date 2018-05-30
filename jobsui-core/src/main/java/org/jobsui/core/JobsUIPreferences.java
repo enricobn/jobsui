@@ -56,4 +56,5 @@ public interface JobsUIPreferences {
 
     BookmarksStore getBookmarksStore();
 
+    void removeLastOpenedItem(OpenedItem openedItem);
 }
