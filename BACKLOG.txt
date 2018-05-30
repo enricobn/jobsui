@@ -3,6 +3,7 @@ DOING
 
 NEXT
 -----
+- on main window: remove from history
 - on new project:
  - why parent folder and folder?
  - Namespace -> Group id?
@@ -14,6 +15,7 @@ NEXT
   - add Save & Run
   - copy and paste parameter
   - move parameter
+  - warning if close with changes
 - run:
   - copy bookmark
 - tab on edit script: 4 spaces
