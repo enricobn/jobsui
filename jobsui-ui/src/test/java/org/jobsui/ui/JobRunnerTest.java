@@ -144,7 +144,7 @@ public class JobRunnerTest {
     @After
     public void tearDown() {
         verify(runButton).setTitle("Run");
-        verify(bookmarkButton).setTitle("Bookmark");
+        verify(bookmarkButton).setTitle("Save as");
         jobs = null;
         projects = null;
     }
