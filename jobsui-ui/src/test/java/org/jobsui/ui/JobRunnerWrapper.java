@@ -18,30 +18,28 @@ public class JobRunnerWrapper<T extends Serializable, C> {
     private final FakeUIWindow window;
     private final JobUIRunner<C> runner;
     private final FakeUIButton runButton;
-    private final Runnable interaction;
 
     JobRunnerWrapper(JobUIRunner<C> runner, FakeUIWindow window, FakeUIButton runButton) {
-        this(runner, window, runButton, null);
-    }
-
-    JobRunnerWrapper(JobUIRunner<C> runner, FakeUIWindow window, FakeUIButton runButton, Runnable interaction) {
         this.runner = runner;
         this.window = window;
         this.runButton = runButton;
-        this.interaction = interaction;
     }
 
     public boolean interactAndValidate(Tuple2<Project,Job<T>> projectJob) {
-        return interactAndValidate(projectJob.first, projectJob.second);
+        return interactAndValidate(projectJob, null);
     }
 
-    public boolean interactAndValidate(Project project, Job<T> job) {
+    public boolean interactAndValidate(Tuple2<Project,Job<T>> projectJob, Runnable interaction) {
+        return interactAndValidate(projectJob.first, projectJob.second, interaction);
+    }
+
+    public boolean interactAndValidate(Project project, Job<T> job, Runnable interaction) {
         runJob(project, job);
 
         window.waitUntilStarted();
 
         try {
-            interact();
+            interact(interaction);
         } finally {
             window.exit();
         }
@@ -49,17 +47,21 @@ public class JobRunnerWrapper<T extends Serializable, C> {
     }
 
     T run(Tuple2<Project,Job<T>> projectJob) throws Exception {
-        return run(projectJob.first, projectJob.second);
+        return run(projectJob, null);
     }
 
-    T run(Project project, Job<T> job) throws Exception {
+    T run(Tuple2<Project,Job<T>> projectJob, Runnable interaction) throws Exception {
+        return run(projectJob.first, projectJob.second, interaction);
+    }
+
+    T run(Project project, Job<T> job, Runnable interaction) throws Exception {
 
         final Future<T> future = runJob(project, job);
 
         window.waitUntilStarted();
 
         try {
-            interact();
+            interact(interaction);
             runButton.click();
         } finally {
             window.exit();
@@ -81,7 +83,7 @@ public class JobRunnerWrapper<T extends Serializable, C> {
         });
     }
 
-    private void interact() {
+    private void interact(Runnable interaction) {
         if (interaction != null) {
             interaction.run();
         }

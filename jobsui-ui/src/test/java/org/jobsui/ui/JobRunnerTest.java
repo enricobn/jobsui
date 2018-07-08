@@ -53,6 +53,8 @@ public class JobRunnerTest {
     private FakeUIButton runButton;
     private FakeUIButton bookmarkButton;
     private Map<String, UIWidget> widgets;
+    private JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper;
+
     @Mock
     private UI<FakeComponent> ui;
     @Mock
@@ -139,6 +141,7 @@ public class JobRunnerTest {
             widgets.put(title, widget);
             return widget;
         });
+        jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton);
     }
 
     @After
@@ -154,13 +157,11 @@ public class JobRunnerTest {
         final FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        boolean validate = jobRunnerWrapper.interactAndValidate(jobs.get(JobType.simpleJob).get(),
                 () -> {
                     uiValueName.setValue("John");
                     uiValueSurname.setValue("Doe");
                 });
-
-        boolean validate = jobRunnerWrapper.interactAndValidate(jobs.get(JobType.simpleJob).get());
 
         assertThat(validate, is(true));
     }
@@ -170,13 +171,11 @@ public class JobRunnerTest {
         final FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleJob).get(),
                 () -> {
                     uiValueName.setValue("John");
                     uiValueSurname.setValue("Doe");
                 });
-
-        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleJob).get());
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -185,8 +184,6 @@ public class JobRunnerTest {
         FakeUiValue uiValueName = new FakeUiValue();
         FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
-
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton);
 
         boolean validate = jobRunnerWrapper.interactAndValidate(jobs.get(JobType.simpleJob).get());
 
@@ -198,14 +195,12 @@ public class JobRunnerTest {
         FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        boolean validate = jobRunnerWrapper.interactAndValidate(jobs.get(JobType.simpleJob).get(),
                 () -> {
                     uiValueName.setValue("John");
                     uiValueSurname.setValue("Doe");
                     uiValueSurname.setValue(null);
                 });
-
-        boolean validate = jobRunnerWrapper.interactAndValidate(jobs.get(JobType.simpleJob).get());
 
         assertThat(validate, is(false));
     }
@@ -215,13 +210,11 @@ public class JobRunnerTest {
         final FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleJob).get(),
                 () -> {
                     uiValueName.setValue("John");
                     uiValueSurname.setValue("Doe");
                 });
-
-        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleJob).get());
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -232,13 +225,11 @@ public class JobRunnerTest {
         when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
         when(ui.createChoice()).thenReturn(new FakeUIChoice());
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleFSJob).get(),
                 () -> {
                     uiValueName.setValue("John");
                     uiValueSurname.setValue("Doe");
                 });
-
-        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleFSJob).get());
 
         assertThat(result, equalTo("(John,Doe)"));
     }
@@ -249,14 +240,12 @@ public class JobRunnerTest {
         final FakeUIChoice uiChoiceUser = new FakeUIChoice();
         when(ui.createChoice()).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        String result = jobRunnerWrapper.run(jobs.get(JobType.complexJob).get(),
                 () -> {
-                uiChoiceVersion.setItems(Arrays.asList("1.0", "2.0"));
-                uiChoiceVersion.setValue("1.0");
-                uiChoiceDb.setValue("Dev-1.0");
-            });
-
-        String result = jobRunnerWrapper.run(jobs.get(JobType.complexJob).get());
+                    uiChoiceVersion.setItems(Arrays.asList("1.0", "2.0"));
+                    uiChoiceVersion.setValue("1.0");
+                    uiChoiceDb.setValue("Dev-1.0");
+                });
 
         assertThat(result, equalTo("1.0 Dev-1.0"));
         assertThat(uiChoiceDb.getItems(), equalTo(Arrays.asList("Dev-1.0", "Cons-1.0", "Dev")));
@@ -269,14 +258,12 @@ public class JobRunnerTest {
         final FakeUIChoice uiChoiceUser = new FakeUIChoice();
         when(ui.createChoice()).thenReturn(uiChoiceVersion, uiChoiceDb, uiChoiceUser);
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        boolean validate = jobRunnerWrapper.interactAndValidate(jobs.get(JobType.complexJob).get(),
                 () -> {
                     uiChoiceVersion.setItems(Collections.singletonList("1.0"));
                     uiChoiceDb.setItems(Collections.singletonList("Dev-1.0"));
                     uiChoiceUser.setItems(Collections.singletonList("John"));
                 });
-
-        boolean validate = jobRunnerWrapper.interactAndValidate(jobs.get(JobType.complexJob).get());
 
         assertThat(validate, is(true));
     }
@@ -287,10 +274,8 @@ public class JobRunnerTest {
         when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
         when(ui.createChoice()).thenReturn(new FakeUIChoice());
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        jobRunnerWrapper.run(jobs.get(JobType.simpleFSJob).get(),
                 () -> uiValueName.setValue(null));
-
-        jobRunnerWrapper.run(jobs.get(JobType.simpleFSJob).get());
 
         ArgumentCaptor<List> captor = ArgumentCaptor.forClass(List.class);
 
@@ -316,14 +301,12 @@ public class JobRunnerTest {
 
         final Job<String> job = builder.build();
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        jobRunnerWrapper.run(createSingleJobProject(job),
                 () -> {
                     // I want to ignore all validations at startup
                     Mockito.reset(job.getParameter("inv"));
                     surnameComponent.setValue(null);
                 });
-
-        jobRunnerWrapper.run(createSingleJobProject(job));
 
         final JobParameter invParameter = job.getParameter("inv");
         verify(invParameter, never()).validate(anyMapOf(String.class, Serializable.class), isNull(Serializable.class));
@@ -341,13 +324,11 @@ public class JobRunnerTest {
 
         final Job<String> job = builder.build();
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        jobRunnerWrapper.run(createSingleJobProject(job),
                 () -> {
                     nameComponent.setValue("John");
                     surnameComponent.setValue("Doe");
                 });
-
-        jobRunnerWrapper.run(createSingleJobProject(job));
 
         final JobParameter invParameter = job.getParameter("inv");
         verify(invParameter).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
@@ -371,13 +352,11 @@ public class JobRunnerTest {
 
         when(job.validate(anyMapOf(String.class, Serializable.class))).thenReturn(Collections.singletonList("Error"));
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        jobRunnerWrapper.run(createSingleJobProject(job),
                 () -> {
                     nameComponent.setValue("John");
                     surnameComponent.setValue("Doe");
                 });
-
-        jobRunnerWrapper.run(createSingleJobProject(job));
 
         assertEquals(Collections.singletonList("Error"), window.getValidationMessages());
     }
@@ -387,13 +366,11 @@ public class JobRunnerTest {
         final FakeUiValue uiValueSecond = new FakeUiValue();
         when(ui.createValue()).thenReturn(uiValueFirst, uiValueSecond);
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        String result = jobRunnerWrapper.run(getJob("/external", "concat"),
                 () -> {
                     uiValueFirst.setValue("John");
                     uiValueSecond.setValue(" Doe");
                 });
-
-        String result = jobRunnerWrapper.run(getJob("/external", "concat"));
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -406,13 +383,11 @@ public class JobRunnerTest {
         when(ui.createValue()).thenReturn(uiValueFirst, uiValueSecond);
         when(ui.createChoice()).thenReturn(uiValueInv);
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleWithInternalCallFSJob).get(),
                 () -> {
                     uiValueFirst.setValue("John");
                     uiValueSecond.setValue(" Doe");
                 });
-
-        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleWithInternalCallFSJob).get());
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -425,13 +400,11 @@ public class JobRunnerTest {
         when(ui.createValue()).thenReturn(uiValueFirst, uiValueSecond);
         when(ui.createChoice()).thenReturn(uiValueInv);
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleWithInternalCallFSJob).get(),
                 () -> {
                     uiValueFirst.setValue("John");
                     uiValueSecond.setValue(" Doe");
                 });
-
-        String result = jobRunnerWrapper.run(jobs.get(JobType.simpleWithInternalCallFSJob).get());
 
         assertThat(result, equalTo("John Doe"));
     }
@@ -442,15 +415,13 @@ public class JobRunnerTest {
 
         when(ui.createValue()).thenReturn(uiValueFirst, uiValueSecond);
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        final Tuple2<Project, Job<String>> pojectJob = jobs.get(JobType.simpleJobWithExpression).get();
+
+        String result = jobRunnerWrapper.run(pojectJob.first, pojectJob.second,
                 () -> {
                     uiValueFirst.setValue("John");
                     uiValueSecond.setValue("Doe");
                 });
-
-        final Tuple2<Project, Job<String>> pojectJob = jobs.get(JobType.simpleJobWithExpression).get();
-
-        String result = jobRunnerWrapper.run(pojectJob.first, pojectJob.second);
 
         assertThat(result, equalTo("Mr. John Doe"));
     }
@@ -469,13 +440,11 @@ public class JobRunnerTest {
 
         final Job<String> job = builder.build();
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        jobRunnerWrapper.run(createSingleJobProject(job),
                 () -> {
                     nameComponent.setValue(null);
                     surnameComponent.setValue(null);
                 });
-
-        jobRunnerWrapper.run(createSingleJobProject(job));
 
         final JobParameter inv = job.getParameter("inv");
         verify(inv, never()).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
@@ -491,10 +460,8 @@ public class JobRunnerTest {
 
         final Job<String> job = builder.build();
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
-                () -> nameComponent.setValue("Jones"));
-
-        assertThat(jobRunnerWrapper.run(createSingleJobProject(job)), is("Mr. Jones"));
+        assertThat(jobRunnerWrapper.run(createSingleJobProject(job),
+                () -> nameComponent.setValue("Jones")), is("Mr. Jones"));
     }
 
     /**
@@ -520,9 +487,8 @@ public class JobRunnerTest {
 
         final Job<String> job = builder.build();
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
-                () -> pathComponent.setValue("home"));
-        assertThat(jobRunnerWrapper.interactAndValidate(createSingleJobProject(job)), is(false));
+        assertThat(jobRunnerWrapper.interactAndValidate(createSingleJobProject(job), () -> pathComponent.setValue("home")),
+                is(false));
 
     }
 
@@ -546,14 +512,11 @@ public class JobRunnerTest {
 
         final Job<String> job = builder.build();
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        String result = jobRunnerWrapper.run(createSingleJobProject(job),
                 () -> {
                     pathComponent.setValue("home");
                     fileComponent.setValue("one.xml");
-                }
-        );
-
-        String result = jobRunnerWrapper.run(createSingleJobProject(job));
+                });
 
         assertThat(runner.isValid(), is(true));
 
@@ -570,13 +533,11 @@ public class JobRunnerTest {
 
         final Job<String> job = builder.build();
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        jobRunnerWrapper.run(createSingleJobProject(job),
                 () -> {
                     nameComponent.setValue("Hello");
                     nameComponent.setValue(null);
                 });
-
-        jobRunnerWrapper.run(createSingleJobProject(job));
 
         assertThat(widgets.get("inv").isEnabled(), is(false));
     }
@@ -595,7 +556,7 @@ public class JobRunnerTest {
 
         final Job<String> job = builder.build();
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
+        jobRunnerWrapper.run(createSingleJobProject(job),
                 () -> {
                     UIWidget inv = widgets.get("inv");
 
@@ -610,8 +571,6 @@ public class JobRunnerTest {
                     assertThat(inv.isEnabled(), is(true));
                 });
 
-        jobRunnerWrapper.run(createSingleJobProject(job));
-
     }
 
     @Test public void verify_that_when_no_dependencies_then_component_is_enabled() throws Exception {
@@ -620,9 +579,6 @@ public class JobRunnerTest {
         UIValue nameComponent = builder.addParameter("name", UIValue.class).build();
 
         final Job<String> job = builder.build();
-
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
-                () -> {});
 
         jobRunnerWrapper.run(createSingleJobProject(job));
 
@@ -651,12 +607,8 @@ public class JobRunnerTest {
         final FakeUIChoice uiValueName = new FakeUIChoice();
         when(ui.createChoice()).thenReturn(uiValueName);
 
-        JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
-                () -> {
-                    uiValueName.setValue(new SavedLink("1", "simple", "John Doe"));
-                });
-
-        String result = jobRunnerWrapper.run(projectJob);
+        String result = jobRunnerWrapper.run(projectJob,
+                () -> uiValueName.setValue(new SavedLink("1", "simple", "John Doe")));
 
         assertThat(result, equalTo("John Doe"));
     }
