@@ -86,7 +86,7 @@ public class JobRunnerTest {
     }
 
     @Before
-    public void init() throws Exception {
+    public void init() {
         projects = new HashMap<>();
 
         jobs = new HashMap<>();
@@ -96,11 +96,11 @@ public class JobRunnerTest {
         jobs.put(JobType.simpleJobWithExpression, new CachedJob(() -> getJob("/simplejob", "simpleWithExpression")));
         jobs.put(JobType.simpleJob, new CachedJob(() -> {
             Job<String> simpleJob = createSimpleJob();
-            return new Tuple2<>(createSingleJobProject(simpleJob), simpleJob);
+            return createSingleJobProject(simpleJob);
         }));
         jobs.put(JobType.complexJob, new CachedJob(() -> {
             Job<String> complexJob = createComplexJob();
-            return new Tuple2<>(createSingleJobProject(complexJob), complexJob);
+            return createSingleJobProject(complexJob);
         }));
         jobs.put(JobType.simpleWithSaved, new CachedJob(() -> getJob("/simplejob", "simpleWithSaved")));
 
@@ -149,7 +149,7 @@ public class JobRunnerTest {
         projects = null;
     }
 
-    @Test public void assert_that_simplejob_is_valid_when_run_with_valid_parameters() throws Exception {
+    @Test public void assert_that_simplejob_is_valid_when_run_with_valid_parameters() {
         final FakeUiValue uiValueName = new FakeUiValue();
         final FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
@@ -181,7 +181,7 @@ public class JobRunnerTest {
         assertThat(result, equalTo("John Doe"));
     }
 
-    @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters() throws Exception {
+    @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters() {
         FakeUiValue uiValueName = new FakeUiValue();
         FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
@@ -193,7 +193,7 @@ public class JobRunnerTest {
         assertThat(validate, is(false));
     }
 
-    @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters_on_interact() throws Exception {
+    @Test public void assert_that_simplejob_is_not_valid_when_run_with_invalid_parameters_on_interact() {
         FakeUiValue uiValueName = new FakeUiValue();
         FakeUiValue uiValueSurname = new FakeUiValue();
         when(ui.createValue()).thenReturn(uiValueName, uiValueSurname);
@@ -263,7 +263,7 @@ public class JobRunnerTest {
         assertThat(uiChoiceUser.getItems(), equalTo(Collections.singletonList("1.0 Dev-1.0")));
     }
 
-    @Test public void assert_that_the_default_value_of_a_parameter_triggers_validation() throws Exception {
+    @Test public void assert_that_the_default_value_of_a_parameter_triggers_validation() {
         final FakeUIChoice uiChoiceVersion = new FakeUIChoice();
         final FakeUIChoice uiChoiceDb = new FakeUIChoice();
         final FakeUIChoice uiChoiceUser = new FakeUIChoice();
@@ -323,7 +323,7 @@ public class JobRunnerTest {
                     surnameComponent.setValue(null);
                 });
 
-        jobRunnerWrapper.run(createSingleJobProject(job), job);
+        jobRunnerWrapper.run(createSingleJobProject(job));
 
         final JobParameter invParameter = job.getParameter("inv");
         verify(invParameter, never()).validate(anyMapOf(String.class, Serializable.class), isNull(Serializable.class));
@@ -347,7 +347,7 @@ public class JobRunnerTest {
                     surnameComponent.setValue("Doe");
                 });
 
-        jobRunnerWrapper.run(createSingleJobProject(job), job);
+        jobRunnerWrapper.run(createSingleJobProject(job));
 
         final JobParameter invParameter = job.getParameter("inv");
         verify(invParameter).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
@@ -377,7 +377,7 @@ public class JobRunnerTest {
                     surnameComponent.setValue("Doe");
                 });
 
-        jobRunnerWrapper.run(createSingleJobProject(job), job);
+        jobRunnerWrapper.run(createSingleJobProject(job));
 
         assertEquals(Collections.singletonList("Error"), window.getValidationMessages());
     }
@@ -475,7 +475,7 @@ public class JobRunnerTest {
                     surnameComponent.setValue(null);
                 });
 
-        jobRunnerWrapper.run(createSingleJobProject(job), job);
+        jobRunnerWrapper.run(createSingleJobProject(job));
 
         final JobParameter inv = job.getParameter("inv");
         verify(inv, never()).onDependenciesChange(any(UIWidget.class), anyMapOf(String.class, Serializable.class));
@@ -494,14 +494,14 @@ public class JobRunnerTest {
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> nameComponent.setValue("Jones"));
 
-        assertThat(jobRunnerWrapper.run(createSingleJobProject(job), job), is("Mr. Jones"));
+        assertThat(jobRunnerWrapper.run(createSingleJobProject(job)), is("Mr. Jones"));
     }
 
     /**
      * This test is for testing a bug that was in JobRunnerContext.jobValidationObserver when mixing parameters
      * and expressions due to ordering.
      */
-    @Test public void assert_that_mixing_expressions_and_parameters_does_not_fool_dependencies() throws Exception {
+    @Test public void assert_that_mixing_expressions_and_parameters_does_not_fool_dependencies() {
         MockedJobBuilder<String> builder = new MockedJobBuilder<>();
 
         UIValue pathComponent = builder.addParameter("path", UIValue.class).build();
@@ -522,7 +522,7 @@ public class JobRunnerTest {
 
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> pathComponent.setValue("home"));
-        assertThat(jobRunnerWrapper.interactAndValidate(createSingleJobProject(job), job), is(false));
+        assertThat(jobRunnerWrapper.interactAndValidate(createSingleJobProject(job)), is(false));
 
     }
 
@@ -553,7 +553,7 @@ public class JobRunnerTest {
                 }
         );
 
-        String result = jobRunnerWrapper.run(createSingleJobProject(job), job);
+        String result = jobRunnerWrapper.run(createSingleJobProject(job));
 
         assertThat(runner.isValid(), is(true));
 
@@ -576,7 +576,7 @@ public class JobRunnerTest {
                     nameComponent.setValue(null);
                 });
 
-        jobRunnerWrapper.run(createSingleJobProject(job), job);
+        jobRunnerWrapper.run(createSingleJobProject(job));
 
         assertThat(widgets.get("inv").isEnabled(), is(false));
     }
@@ -610,7 +610,7 @@ public class JobRunnerTest {
                     assertThat(inv.isEnabled(), is(true));
                 });
 
-        jobRunnerWrapper.run(createSingleJobProject(job), job);
+        jobRunnerWrapper.run(createSingleJobProject(job));
 
     }
 
@@ -624,7 +624,7 @@ public class JobRunnerTest {
         JobRunnerWrapper<String,FakeComponent> jobRunnerWrapper = new JobRunnerWrapper<>(runner, window, runButton,
                 () -> {});
 
-        jobRunnerWrapper.run(createSingleJobProject(job), job);
+        jobRunnerWrapper.run(createSingleJobProject(job));
 
         assertThat(((FakeUiValue) nameComponent).isEnabled(), is(true));
     }
@@ -661,18 +661,18 @@ public class JobRunnerTest {
         assertThat(result, equalTo("John Doe"));
     }
 
-    private static Project createSingleJobProject(Job job) {
+    private static <T> Tuple2<Project,Job<T>> createSingleJobProject(Job<T> job) {
         Project project = mock(Project.class);
         String id = job.getId();
         when(project.getJobsIds()).thenReturn(Collections.singleton(id));
-        when(project.getJob(id)).thenReturn(job);
+        when(project.getJob(id)).thenReturn((Job<Object>)job);
         try {
             when(project.getId()).thenReturn(ProjectId.of("test:singleJobProject", "1.0.0"));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         when(project.getName()).thenReturn("Single JobProject for job " + id);
-        return project;
+        return new Tuple2<>(project, job);
     }
 
     private MockSettings printInvocation(String name, final CharSequence methodName) {
@@ -712,7 +712,7 @@ public class JobRunnerTest {
                 "Name",
                 new NotEmptyStringValidator(), false, true) {
             @Override
-            public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
+            public UIComponent createComponent(UI ui) {
                 final UIValue<?> uiValue = (UIValue<?>) ui.createValue();
                 uiValue.setConverter(new StringConverterString());
                 uiValue.setDefaultValue("John");
@@ -730,7 +730,7 @@ public class JobRunnerTest {
                 "Surname",
                 new NotEmptyStringValidator(), false, true) {
             @Override
-            public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
+            public UIComponent createComponent(UI ui) {
                 final UIValue<?> uiValue = (UIValue<?>) ui.createValue();
                 uiValue.setConverter(new StringConverterString());
                 return uiValue;
@@ -813,7 +813,7 @@ public class JobRunnerTest {
                 false,
                 true) {
             @Override
-            public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
+            public UIComponent createComponent(UI ui) {
                 return ui.createChoice();
             }
 
@@ -830,7 +830,7 @@ public class JobRunnerTest {
                 false,
                 true) {
             @Override
-            public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
+            public UIComponent createComponent(UI ui) {
                 return ui.createChoice();
             }
 
@@ -856,7 +856,7 @@ public class JobRunnerTest {
                 false,
                 true) {
             @Override
-            public UIComponent createComponent(UI ui) throws UnsupportedComponentException {
+            public UIComponent createComponent(UI ui) {
                 return ui.createChoice();
             }
 
