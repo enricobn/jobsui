@@ -1,7 +1,6 @@
 package org.jobsui.core.xml;
 
 import org.jobsui.core.ui.UIComponentRegistryImpl;
-import org.jobsui.core.ui.UIComponentType;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -98,6 +97,11 @@ class JobXMLExporter {
         rootElement.appendChild(element);
         XMLUtils.addAttr(element, "key", parameter.getKey());
         XMLUtils.addAttr(element, "name", parameter.getName());
+
+        if (parameter instanceof SimpleParameterXML) {
+            XMLUtils.addAttr(element, "optional", Boolean.toString(parameter.isOptional()));
+            XMLUtils.addAttr(element, "visible", Boolean.toString(parameter.isVisible()));
+        }
 
         if (!parameter.getDependencies().isEmpty()) {
             String dependencies = String.join(",", parameter.getDependencies());

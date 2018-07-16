@@ -54,4 +54,6 @@ public abstract class ParameterXML extends JobDependencyXML implements Validatin
         return messages;
     }
 
+    public abstract ParameterXML copy();
+
 }

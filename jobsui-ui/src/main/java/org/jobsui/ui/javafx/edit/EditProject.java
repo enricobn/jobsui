@@ -552,6 +552,24 @@ public class EditProject {
                 ui.showMessage(validationResult.getMessages().stream().collect(Collectors.joining("\n")));
             }
         });
+
+        MenuItem copy = new MenuItem("Copy");
+        contextMenu.getItems().add(copy);
+        copy.setOnAction(t -> {
+            JobXMLImpl jobXML = findAncestorPayload(treeItem, JobXMLImpl.class);
+            if (jobXML == null) {
+                return;
+            }
+            ParameterXML parameter = (ParameterXML) treeItem.getValue().payload;
+            ParameterXML copied = parameter.copy();
+
+            try {
+                jobXML.add(copied);
+                addParameter(treeItem.getParent(), treeItem.getValue().itemType, copied, jobXML);
+            } catch (Exception e1) {
+                ui.showError("Error adding new parameter.", e1);
+            }
+        });
     }
 
     private void populateDependencyMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {

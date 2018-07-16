@@ -172,6 +172,8 @@ class ItemDetail extends VBox {
                 .sorted(Comparator.comparing(UIComponentType::getName))
                 .collect(Collectors.toList());
 
+        addCheckboxProperty(treeItem, "Optional", parameter::isOptional, parameter::setOptional);
+
         addComboProperty(treeItem, "Component", parameter::getComponent, parameter::setComponent,
                 uiComponentTypes);
 
@@ -243,6 +245,20 @@ class ItemDetail extends VBox {
             label.setPadding(new Insets(20, 0, 0, 0));
         }
         getChildren().add(label);
+    }
+
+    private void addCheckboxProperty(TreeItem<EditItem> treeItem, String title, Supplier<Boolean> get, Consumer<Boolean> set) {
+        addPropertyNameLabel(title);
+
+        UICheckBox<Node> control = ui.createCheckBox();
+        control.setTitle(title);
+        control.setValue(get.get());
+
+        control.getObservable().subscribe(newValue -> {
+            set.accept((Boolean)newValue);
+            updateSelectedItem(treeItem);
+        });
+        getChildren().add(control.getComponent());
     }
 
     private void updateSelectedItem(TreeItem<EditItem> treeItem) {

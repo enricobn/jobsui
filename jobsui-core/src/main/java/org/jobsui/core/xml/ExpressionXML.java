@@ -32,6 +32,14 @@ public class ExpressionXML extends ParameterXML {
     }
 
     @Override
+    public ParameterXML copy() {
+        ExpressionXML copy = new ExpressionXML(getKey() + "_copy", getName() + " copy");
+        getDependencies().forEach(copy::addDependency);
+        copy.evaluateScript = evaluateScript;
+        return copy;
+    }
+
+    @Override
     public boolean isVisible() {
         return false;
     }

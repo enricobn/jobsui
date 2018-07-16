@@ -58,4 +58,16 @@ public class CallXML extends ParameterXML {
         return messages;
     }
 
+    @Override
+    public ParameterXML copy() {
+        CallXML copy = new CallXML(getKey() + "_copy", getName() + " copy");
+        getDependencies().forEach(copy::addDependency);
+        copy.setProject(project);
+        copy.setJob(job);
+
+        map.forEach(this::addMap);
+
+        return copy;
+    }
+
 }

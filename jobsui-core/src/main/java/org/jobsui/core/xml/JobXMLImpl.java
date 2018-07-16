@@ -50,18 +50,6 @@ public class JobXMLImpl implements JobXML {
         this.validateScript = XMLUtils.scriptToEditForm(validateScript);
     }
 
-    public void add(SimpleParameterXML simpleParameterXML) throws Exception {
-        addCheckedParameter(simpleParameterXML);
-    }
-
-    public void add(ExpressionXML expressionXML) throws Exception {
-        addCheckedParameter(expressionXML);
-    }
-
-    public void add(CallXML callXML) throws Exception {
-        addCheckedParameter(callXML);
-    }
-
     @Override
     public String getRunScript() {
         return runScript;
@@ -104,7 +92,7 @@ public class JobXMLImpl implements JobXML {
                 .collect(Collectors.toList());
     }
 
-    private void addCheckedParameter(ParameterXML parameterXML) throws Exception {
+    public void add(ParameterXML parameterXML) throws Exception {
         if (parameters.containsKey(parameterXML.getKey())) {
             throw new Exception("Duplicate key '" + parameterXML.getKey() + "' for parameter " +
                     "with name '" + parameterXML.getName() + "'.");
@@ -262,7 +250,7 @@ public class JobXMLImpl implements JobXML {
         JobXMLImpl jobXML = new JobXMLImpl(id + "_copy", name + " copy", "1.0.0");
         parameters.values().forEach(it -> {
             try {
-                jobXML.addCheckedParameter(it);
+                jobXML.add(it);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }

@@ -45,6 +45,20 @@ public class SimpleParameterXML extends ParameterXML {
         return visible;
     }
 
+    @Override
+    public ParameterXML copy() {
+        SimpleParameterXML copy = new SimpleParameterXML(getKey() + "_copy", getName() + " copy");
+        getDependencies().forEach(copy::addDependency);
+        copy.parameterValidateScript = parameterValidateScript;
+        copy.onDependenciesChangeScript = onDependenciesChangeScript;
+        copy.visible = visible;
+        copy.optional = optional;
+        copy.onInitScript = onInitScript;
+        copy.component = component;
+
+        return copy;
+    }
+
     public boolean isOptional() {
         return optional;
     }
