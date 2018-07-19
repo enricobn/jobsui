@@ -1,11 +1,9 @@
 package org.jobsui.core.utils;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.Collections;
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Created by enrico on 5/16/16.
@@ -63,6 +61,16 @@ public interface JobsUIUtils {
             th.printStackTrace(pw);
             return sw.toString();
         } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    static String getVersion() {
+        try (InputStream versionIs = JobsUIUtils.class.getResourceAsStream("/version.properties")) {
+            Properties properties = new Properties();
+            properties.load(versionIs);
+            return properties.getProperty("version");
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

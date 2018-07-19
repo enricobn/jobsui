@@ -1,6 +1,10 @@
+import java.text.SimpleDateFormat
+//import org.ajoberstar.grgit.Grgit
+
 plugins {
     id 'java'
     id 'com.github.johnrengelman.shadow' version '1.2.4'
+    //id "org.ajoberstar.grgit" version "2.3.0"
 }
 
 sourceCompatibility = '1.8'
@@ -27,7 +31,7 @@ tasks.shadowJar.dependsOn(buildNeeded)
 subprojects {
     apply plugin: 'java'
 
-    version = '1.0.0-SNAPSHOT'
+    version = "${version}"
     group = 'org.jobsui'
 
     sourceCompatibility = '1.8'
@@ -59,3 +63,14 @@ subprojects {
 
 }
 
+task versionProperties()  {
+    // revision=${Grgit.open(dir: '.').head().id}
+    doLast {
+        new File("$projectDir/jobsui-core/src/main/resources/version.properties").text =
+"""version=${version}
+buildtime=${new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())}
+"""
+    }
+}
+
+tasks.shadowJar.dependsOn(versionProperties)
