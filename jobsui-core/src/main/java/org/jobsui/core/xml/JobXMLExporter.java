@@ -33,24 +33,25 @@ class JobXMLExporter {
 
         XMLUtils.addAttr(rootElement, "name", jobXML.getName());
         XMLUtils.addAttr(rootElement, "version", jobXML.getVersion());
+        XMLUtils.addAttr(rootElement, "jobsUIVersion", JobsUIUtils.getVersion());
 
         for (SimpleParameterXML parameter : jobXML.getSimpleParameterXMLs()) {
             Element element = createParameterElement(doc, rootElement, parameter, "Parameter");
 
-            if (!parameter.getComponent().equals(UIComponentRegistryImpl.Value.getName())) {
+            if (!parameter.getComponent().getName().equals(UIComponentRegistryImpl.Value.getName())) {
                 XMLUtils.addAttr(element, "component", parameter.getComponent().getName());
             }
 
             if (parameter.getOnInitScript() != null && !parameter.getOnInitScript().isEmpty()) {
-                XMLUtils.addTextElement(element, "OnInit", parameter.getOnInitScript(), true);
+                XMLUtils.addTextElement(element, "OnInit", parameter.getOnInitScript(), true, true);
             }
 
             if (!JobsUIUtils.isNullOrEmptyOrSpaces(parameter.getValidateScript())) {
-                XMLUtils.addTextElement(element, "Validate", parameter.getValidateScript(), true);
+                XMLUtils.addTextElement(element, "Validate", parameter.getValidateScript(), true, true);
             }
 
             if (parameter.getOnDependenciesChangeScript() != null && !parameter.getOnDependenciesChangeScript().isEmpty()) {
-                XMLUtils.addTextElement(element, "OnDependenciesChange", parameter.getOnDependenciesChangeScript(), true);
+                XMLUtils.addTextElement(element, "OnDependenciesChange", parameter.getOnDependenciesChangeScript(), true, true);
             }
         }
 
@@ -58,7 +59,7 @@ class JobXMLExporter {
             Element element = createParameterElement(doc, rootElement, expressionXML, "Expression");
 
             if (expressionXML.getEvaluateScript() != null && !expressionXML.getEvaluateScript().isEmpty()) {
-                XMLUtils.addTextNode(element, expressionXML.getEvaluateScript(), true);
+                XMLUtils.addTextNode(element, expressionXML.getEvaluateScript(), true, true);
             }
         }
 
@@ -73,16 +74,16 @@ class JobXMLExporter {
             XMLUtils.addAttr(element, "dependsOn", dependsOn);
 
             if (wizardStep.getValidateScript() != null && !wizardStep.getValidateScript().isEmpty()) {
-                XMLUtils.addTextElement(element, "Validate", wizardStep.getValidateScript(), true);
+                XMLUtils.addTextElement(element, "Validate", wizardStep.getValidateScript(), true, true);
             }
         }
 
         if (!JobsUIUtils.isNullOrEmptyOrSpaces(jobXML.getValidateScript())) {
-            XMLUtils.addTextElement(rootElement, "Validate", jobXML.getValidateScript(), true);
+            XMLUtils.addTextElement(rootElement, "Validate", jobXML.getValidateScript(), true, true);
         }
 
         if (!JobsUIUtils.isNullOrEmptyOrSpaces(jobXML.getRunScript())) {
-            XMLUtils.addTextElement(rootElement, "Run", jobXML.getRunScript(), true);
+            XMLUtils.addTextElement(rootElement, "Run", jobXML.getRunScript(), true, true);
         }
 
         try {

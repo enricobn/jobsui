@@ -80,4 +80,5 @@ public class ProjectParserTest {
         assertThat(secondStep.getDependencies(), is(Collections.singleton("dependent")));
         assertThat(secondStep.getValidateScript(), notNullValue());
     }
+
 }

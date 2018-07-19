@@ -1,5 +1,6 @@
 package org.jobsui.core.xml;
 
+import com.sun.org.apache.xerces.internal.xs.XSModel;
 import org.jobsui.core.groovy.JobsUIParseException;
 import org.jobsui.core.ui.UIComponentRegistry;
 import org.jobsui.core.ui.UIComponentRegistryImpl;
@@ -19,25 +20,30 @@ import javax.xml.validation.Validator;
 import java.io.InputStream;
 import java.net.URL;
 
-import static org.jobsui.core.xml.XMLUtils.getElementContent;
-import static org.jobsui.core.xml.XMLUtils.getMandatoryAttribute;
+import static org.jobsui.core.xml.XMLUtils.*;
 
 /**
  * Created by enrico on 4/5/17.
  */
 public class JobParserImpl implements JobParser {
+    private static final URL jobXsd = ProjectParserImpl.class.getResource("/org/jobsui/job.xsd");
+    private static final URL jobXsd_000 = ProjectParserImpl.class.getResource("/org/jobsui/0.0.0/job.xsd");
     private static final Validator jobValidator;
+    private static final Validator jobValidator_000;
 
     static {
         String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
         SchemaFactory factory = SchemaFactory.newInstance(language);
         Schema jobSchema;
+        Schema jobSchema_000;
         try {
-            jobSchema = factory.newSchema(ProjectParserImpl.class.getResource("/org/jobsui/job.xsd"));
+            jobSchema = factory.newSchema(jobXsd);
+            jobSchema_000 = factory.newSchema(jobXsd_000);
         } catch (SAXException e) {
             throw new RuntimeException(e);
         }
         jobValidator = jobSchema.newValidator();
+        jobValidator_000 = jobSchema_000.newValidator();
     }
 
     public static JobXML parse(ProjectXML projectXML, String id) throws Exception {
@@ -50,20 +56,13 @@ public class JobParserImpl implements JobParser {
     @Override
     public JobXML parse(String id, URL url, UIComponentRegistry uiComponentRegistry) throws Exception {
         try (InputStream inputStream = url.openStream()) {
-            final StreamSource source = new StreamSource(inputStream);
-            try {
-                jobValidator.validate(source);
-            } catch (Exception e) {
-                throw new Exception("Cannot parse job \"" + url + "\".", e);
-            }
-        }
-
-        try (InputStream inputStream = url.openStream()) {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             dbFactory.setValidating(false);
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 
             Document doc = dBuilder.parse(inputStream);
+
+            XSModel xsModel = XMLUtils.readXsd(jobXsd.toURI().toString());
 
             //optional, but recommended
             //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
@@ -71,30 +70,53 @@ public class JobParserImpl implements JobParser {
             String subject = "Job with id='" + id + "'";
             String name = getMandatoryAttribute(doc.getDocumentElement(), "name", subject);
             String version = getMandatoryAttribute(doc.getDocumentElement(), "version", subject);
+            String jobsUIVersion = getAttribute(doc.getDocumentElement(), "jobsUIVersion", xsModel);
 
-            JobXMLImpl jobXML = new JobXMLImpl(id, name, version);
+            validate(url, jobsUIVersion);
 
-            String runScript = getElementContent(doc.getDocumentElement(), "Run", true, subject);
-
-            jobXML.setRunScript(runScript);
-
-            String validateScript = getElementContent(doc.getDocumentElement(), "Validate", false, subject);
-
-            jobXML.setValidateScript(validateScript);
-
-            parseParameters(doc, jobXML, uiComponentRegistry);
-
-            parseExpressions(doc, jobXML);
-
-            parseCalls(doc, jobXML);
-
-            parseWizardSteps(doc, jobXML);
-
-            return jobXML;
+            return parse(id, uiComponentRegistry, doc, subject, name, jobsUIVersion, version);
         }
     }
 
-    private void parseWizardSteps(Document doc, JobXMLImpl jobXML) throws JobsUIParseException {
+    private JobXML parse(String id, UIComponentRegistry uiComponentRegistry, Document doc, String subject, String name,
+                         String jobsUIVersion, String version) throws Exception {
+        JobXMLImpl jobXML = new JobXMLImpl(id, name, version);
+
+        String runScript = getElementContent(doc.getDocumentElement(), "Run", true, subject,
+                useCData(jobsUIVersion));
+
+        jobXML.setRunScript(runScript);
+
+        String validateScript = getElementContent(doc.getDocumentElement(), "Validate", false, subject,
+                useCData(jobsUIVersion));
+
+        jobXML.setValidateScript(validateScript);
+
+        parseParameters(doc, jobXML, uiComponentRegistry, jobsUIVersion);
+
+        parseExpressions(doc, jobXML);
+
+        parseCalls(doc, jobXML);
+
+        parseWizardSteps(doc, jobXML, jobsUIVersion);
+
+        return jobXML;
+    }
+
+    private void validate(URL url, String jobsUIVersion) throws Exception {
+        Validator jobValidator = getJobValidator(jobsUIVersion);
+
+        try (InputStream inputStream = url.openStream()) {
+            final StreamSource source = new StreamSource(inputStream);
+            try {
+                jobValidator.validate(source);
+            } catch (Exception e) {
+                throw new Exception("Cannot parse job \"" + url + "\".", e);
+            }
+        }
+    }
+
+    private void parseWizardSteps(Document doc, JobXMLImpl jobXML, String jobsUIVersion) throws JobsUIParseException {
         NodeList wizardStepList = doc.getElementsByTagName("WizardStep");
         for (int i = 0; i < wizardStepList.getLength(); i++) {
             Element element = (Element) wizardStepList.item(i);
@@ -107,7 +129,8 @@ public class JobParserImpl implements JobParser {
                 wizardStep.addDependency(dependency);
             }
 
-            String validateScript = getElementContent(element, "Validate", false, subject);
+            String validateScript = getElementContent(element, "Validate", false, subject,
+                    useCData(jobsUIVersion));
             if (validateScript != null) {
                 wizardStep.setValidateScript(validateScript);
             }
@@ -165,7 +188,8 @@ public class JobParserImpl implements JobParser {
         }
     }
 
-    private static void parseParameters(Document doc, JobXMLImpl jobXML, UIComponentRegistry uiComponentRegistry)
+    private static void parseParameters(Document doc, JobXMLImpl jobXML, UIComponentRegistry uiComponentRegistry,
+                                        String jobsUIVersion)
             throws Exception {
         NodeList parametersList = doc.getElementsByTagName("Parameter");
 
@@ -180,9 +204,12 @@ public class JobParserImpl implements JobParser {
             if (component == null || component.isEmpty()) {
                 component = "Value";
             }
-            String parameterValidateScript = getElementContent(element, "Validate", false, subject);
-            String onInitScript = getElementContent(element, "OnInit", false, subject);
-            String onDependenciesChangeScript = getElementContent(element, "OnDependenciesChange", false, subject);
+            String parameterValidateScript = getElementContent(element, "Validate", false, subject,
+                    useCData(jobsUIVersion));
+            String onInitScript = getElementContent(element, "OnInit", false, subject,
+                    useCData(jobsUIVersion));
+            String onDependenciesChangeScript = getElementContent(element, "OnDependenciesChange", false, subject,
+                    useCData(jobsUIVersion));
             String visibleString = element.getAttribute("visible");
             String optionalString = element.getAttribute("optional");
 
@@ -217,6 +244,17 @@ public class JobParserImpl implements JobParser {
         for (String dependency : dependsOn.split(",")) {
             parameterXML.addDependency(dependency);
         }
+    }
+
+    private Validator getJobValidator(String jobsUIVersion) {
+        if (jobsUIVersion.compareTo("1.0.0") < 0 ) {
+            return jobValidator_000;
+        }
+        return jobValidator;
+    }
+
+    private static boolean useCData(String jobsUIVersion) {
+        return jobsUIVersion.compareTo("1.0.0") >= 0;
     }
 
 }

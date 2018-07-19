@@ -129,7 +129,7 @@ public class ProjectParserImpl implements ProjectParser {
         for (int i = 0; i < libraries.getLength(); i++) {
             Element element = (Element) libraries.item(i);
             subject = "Library for Project with id='" + projectXML.getId() + "'";
-            String library = getElementContent(element, "#text", false, subject);
+            String library = getElementContent(element, "#text", false, subject, false);
             projectXML.addLibrary(library);
         }
 
@@ -138,7 +138,7 @@ public class ProjectParserImpl implements ProjectParser {
         for (int i = 0; i < imports.getLength(); i++) {
             Element element = (Element) imports.item(i);
             subject = "Import for Project with id='" + projectXML.getId() + "'";
-            String imp = getElementContent(element, "#text", false, subject);
+            String imp = getElementContent(element, "#text", false, subject, false);
             String name = getMandatoryAttribute(element, "name", subject);
             projectXML.addImport(name, imp);
         }
@@ -147,7 +147,7 @@ public class ProjectParserImpl implements ProjectParser {
         for (int i = 0; i < jobs.getLength(); i++) {
             Element element = (Element) jobs.item(i);
             subject = "Job for Project with id='" + projectXML.getId() + "'";
-            String id = getElementContent(element, "#text", true, subject);
+            String id = getElementContent(element, "#text", true, subject, false);
 
             projectXML.addJob(JobParserImpl.parse(projectXML, id));
         }

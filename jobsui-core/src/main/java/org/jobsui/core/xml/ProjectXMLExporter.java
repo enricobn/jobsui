@@ -1,6 +1,7 @@
 package org.jobsui.core.xml;
 
 import org.apache.commons.io.FileUtils;
+import org.jobsui.core.utils.JobsUIUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -28,24 +29,28 @@ public class ProjectXMLExporter {
 
         // root elements
         Document doc = docBuilder.newDocument();
+
         Element rootElement = doc.createElement("Project");
+
         XMLUtils.addAttr(rootElement, "id", projectXML.getId());
         XMLUtils.addAttr(rootElement, "name", projectXML.getName());
         XMLUtils.addAttr(rootElement, "version", projectXML.getVersion());
+        XMLUtils.addAttr(rootElement, "jobsUIVersion", JobsUIUtils.getVersion());
+
         doc.appendChild(rootElement);
 
         for (ProjectLibraryXML library : projectXML.getLibraries()) {
-            XMLUtils.addTextElement(rootElement, "Library", library.toString(), false);
+            XMLUtils.addTextElement(rootElement, "Library", library.toString(), false, false);
         }
 
         for (Map.Entry<String, String> entry : projectXML.getImports().entrySet()) {
-            Element element = XMLUtils.addTextElement(rootElement, "Import", entry.getValue(), false);
+            Element element = XMLUtils.addTextElement(rootElement, "Import", entry.getValue(), false, false);
             // TODO rename to id
             XMLUtils.addAttr(element, "name", entry.getKey());
         }
 
         for (JobXML job : projectXML.getJobs()) {
-            XMLUtils.addTextElement(rootElement, "Job", job.getId(), false);
+            XMLUtils.addTextElement(rootElement, "Job", job.getId(), false, false);
         }
 
         XMLUtils.write(doc, new File(folder, ProjectParserImpl.PROJECT_FILE_NAME),

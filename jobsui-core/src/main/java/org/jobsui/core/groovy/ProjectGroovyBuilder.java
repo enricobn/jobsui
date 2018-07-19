@@ -136,8 +136,9 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
 
         List<JobParameterGroovy> sortedJobParameterDefs = JobDependency.sort(jobParameters);
 
-        return new JobGroovy<>(groovyShell, jobXML.getId(), Version.valueOf(jobXML.getVersion()), jobXML.getName(), sortedJobParameterDefs, jobExpressions,
-                jobXML.getRunScript(), jobXML.getValidateScript(), jobXML.getWizardSteps());
+        return new JobGroovy<>(groovyShell, jobXML.getId(), Version.valueOf(jobXML.getVersion()), jobXML.getName(),
+                sortedJobParameterDefs, jobExpressions, jobXML.getRunScript(), jobXML.getValidateScript(),
+                jobXML.getWizardSteps());
     }
 
     private static <T,R> Object toGroovyFunction(Function<T,R> function) {

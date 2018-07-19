@@ -3,6 +3,11 @@ DOING
 
 NEXT
 -----
+- create a JobParserFactory that given the jobXmlVersion returns a parser and a validator
+- create a ProjectParserImpl use jobXmlVersion to get a validator
+- create a ProjectParserFactory that given the jobXmlVersion returns a parser and a validator
+- use XMLUtils.getAttribute to get an attribute, it resolves the default
+- about with version (JobsUIUtils.getVersion)
 - on new project:
  - why parent folder and folder?
  - Namespace -> Group id?
@@ -18,7 +23,6 @@ NEXT
 - tab on edit script: 4 spaces
 - when I write the job.xml change parameter's fields order to:
   - key, name, component, dependsOn
-- when I write the job.xml put [DATA] in scripts
 - is project version needed? Probably yes for repository.
 - add a way to upgrade job data (bookmarks, calls) to a new version
 - now saving a job will delete old job files and script folder, but retain other files, to preserve other files,
