@@ -4,6 +4,7 @@ import com.github.zafarkhaja.semver.Version;
 import org.jobsui.core.bookmark.BookmarksStore;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
+import org.jobsui.core.ui.UI;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -23,13 +24,15 @@ public class RepositoryImplTest {
 
     @Mock
     private BookmarksStore bookmarkStore;
+    @Mock
+    private UI ui;
 
     @Test
     public void testSimple() throws Exception {
         URL url = getClass().getResource("/repository");
         RepositoryImpl sut = new RepositoryImpl(url);
 
-        Optional<Project> project = sut.getProject("test:simple", Version.valueOf("1.0.0"), bookmarkStore);
+        Optional<Project> project = sut.getProject("test:simple", Version.valueOf("1.0.0"), bookmarkStore, ui);
 
         assertThat(project.isPresent(), is(true));
 

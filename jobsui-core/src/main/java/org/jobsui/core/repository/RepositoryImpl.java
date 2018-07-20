@@ -6,6 +6,7 @@ import org.jobsui.core.bookmark.BookmarksStore;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.job.ProjectId;
+import org.jobsui.core.ui.UI;
 import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.xml.ProjectXML;
 
@@ -31,7 +32,7 @@ public class RepositoryImpl implements Repository {
     }
 
     @Override
-    public Optional<Project> getProject(String id, Version version, BookmarksStore bookmarksStore) throws Exception {
+    public Optional<Project> getProject(String id, Version version, BookmarksStore bookmarksStore, UI ui) throws Exception {
         ProjectId projectId = ProjectId.of(id, version);
 
         if (!getProjectIds().contains(projectId)) {
@@ -41,7 +42,7 @@ public class RepositoryImpl implements Repository {
         URL url = getUrl(projectId);
         ProjectXML projectXML = new ProjectParserImpl().parse(url);
 
-        return Optional.of(new ProjectGroovyBuilder().build(projectXML, bookmarksStore));
+        return Optional.of(new ProjectGroovyBuilder().build(projectXML, bookmarksStore, ui));
     }
 
     @Override

@@ -2,8 +2,6 @@ package org.jobsui.core;
 
 import org.apache.commons.cli.*;
 import org.jobsui.core.bookmark.BookmarksStore;
-import org.jobsui.core.job.Job;
-import org.jobsui.core.job.Project;
 import org.jobsui.core.job.ProjectBuilder;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.jobsui.core.xml.ProjectFSXML;
@@ -28,15 +26,19 @@ import java.util.function.Consumer;
  */
 public class CommandLineArguments {
     private final UIType uiType;
+    private final ProjectBuilder projectBuilder;
+    private final BookmarksStore bookmarksStore;
     private StartAction action = StartAction.None;
-    private Project project;
 
-    private Job job;
+    private String job;
     private ProjectFSXML projectFSXML;
     private URL projectURL;
+    private ProjectXML projectXML;
 
-    private CommandLineArguments(UIType uiType) {
+    private CommandLineArguments(UIType uiType, ProjectBuilder projectBuilder, BookmarksStore bookmarksStore) {
         this.uiType = uiType;
+        this.projectBuilder = projectBuilder;
+        this.bookmarksStore = bookmarksStore;
     }
 
     private void setAction(StartAction action) {
@@ -103,7 +105,7 @@ public class CommandLineArguments {
                     }
                 }
 
-                arguments = new CommandLineArguments(uiType);
+                arguments = new CommandLineArguments(uiType, projectBuilder, bookmarksStore);
 
                 if (line.hasOption(run.getOpt())) {
                     String[] values = line.getOptionValues(run.getOpt());
@@ -120,15 +122,11 @@ public class CommandLineArguments {
                         }
 
                         ProjectXML projectXML = projectParser.parse(url);
-                        Project project = projectBuilder.build(projectXML, bookmarksStore);
-                        Job<Object> job = project.getJob(jobString);
-                        if (job == null) {
-                            throw new Exception(String.format("Cannot find job %s.", jobString));
-                        }
+
                         arguments.setProjectURL(url);
+                        arguments.setProjectXML(projectXML);
                         arguments.setAction(StartAction.Run);
-                        arguments.setProject(project);
-                        arguments.setJob(job);
+                        arguments.setJob(jobString);
                     } catch (Exception e) {
                         toError(onError, e);
                         return false;
@@ -172,6 +170,14 @@ public class CommandLineArguments {
         }
     }
 
+    private void setProjectXML(ProjectXML projectXML) {
+        this.projectXML = projectXML;
+    }
+
+    public ProjectXML getProjectXML() {
+        return projectXML;
+    }
+
     private static void toError(Consumer<List<String>> onError, Exception e) {
         String message = e.getMessage();
         if (message == null) {
@@ -184,19 +190,11 @@ public class CommandLineArguments {
         return uiType;
     }
 
-    public Project getProject() {
-        return project;
-    }
-
-    public void setProject(Project project) {
-        this.project = project;
-    }
-
-    public Job getJob() {
+    public String getJob() {
         return job;
     }
 
-    public void setJob(Job job) {
+    public void setJob(String job) {
         this.job = job;
     }
 
@@ -214,6 +212,14 @@ public class CommandLineArguments {
 
     public URL getProjectURL() {
         return projectURL;
+    }
+
+    public BookmarksStore getBookmarksStore() {
+        return bookmarksStore;
+    }
+
+    public ProjectBuilder getProjectBuilder() {
+        return projectBuilder;
     }
 
     private static String getHelp(Options options) {

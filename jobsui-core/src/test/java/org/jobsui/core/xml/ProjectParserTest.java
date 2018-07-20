@@ -4,6 +4,7 @@ import org.jobsui.core.bookmark.BookmarksStore;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
+import org.jobsui.core.ui.UI;
 import org.jobsui.core.ui.UIComponentRegistryImpl;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -27,6 +28,8 @@ public class ProjectParserTest {
     private static ProjectXML projectXML;
     @Mock
     private BookmarksStore bookmarkStore;
+    @Mock
+    private UI ui;
 
     @BeforeClass
     public static void setUpStatic() throws Exception {
@@ -41,7 +44,7 @@ public class ProjectParserTest {
 
     @Test
     public void test_parse() throws Exception {
-        Project project = new ProjectGroovyBuilder().build(projectXML, bookmarkStore);
+        Project project = new ProjectGroovyBuilder().build(projectXML, bookmarkStore, ui);
         Job<Object> job = project.getJob("simple");
 
         assertThat(job, is(notNullValue()));

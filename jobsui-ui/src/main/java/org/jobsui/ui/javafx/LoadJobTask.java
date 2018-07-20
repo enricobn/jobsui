@@ -5,6 +5,7 @@ import org.jobsui.core.bookmark.BookmarksStore;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
+import org.jobsui.core.ui.UI;
 import org.jobsui.core.utils.Tuple2;
 import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.xml.ProjectParserImpl;
@@ -17,11 +18,13 @@ import java.net.URL;
  * Created by enrico on 3/30/17.
  */
 class LoadJobTask extends Task<Tuple2<Project,Job<Serializable>>> {
+    private final UI ui;
     private final URL url;
     private final String jobId;
     private final BookmarksStore bookmarkStore;
 
-    LoadJobTask(URL url, String jobId, BookmarksStore bookmarkStore) {
+    LoadJobTask(UI ui, URL url, String jobId, BookmarksStore bookmarkStore) {
+        this.ui = ui;
         this.url = url;
         this.jobId = jobId;
         this.bookmarkStore = bookmarkStore;
@@ -38,7 +41,7 @@ class LoadJobTask extends Task<Tuple2<Project,Job<Serializable>>> {
         }
         Project project;
         try {
-            project = new ProjectGroovyBuilder().build(projectXML, bookmarkStore);
+            project = new ProjectGroovyBuilder().build(projectXML, bookmarkStore, ui);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -43,12 +43,12 @@ import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.jobsui.core.CommandLineArguments;
 import org.jobsui.core.JobsUIPreferences;
+import org.jobsui.core.StartAction;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.runner.JobUIRunner;
 import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.xml.ProjectFSXML;
-import org.jobsui.core.StartAction;
 import org.jobsui.ui.javafx.edit.EditProject;
 import org.jobsui.ui.javafx.edit.NewProject;
 
@@ -87,9 +87,15 @@ public class StartApp extends Application {
         try {
 
             if (arguments.getAction() == StartAction.Run) {
+                Project project = arguments.getProjectBuilder().build(arguments.getProjectXML(),
+                        arguments.getBookmarksStore(), ui);
+                Job<Serializable> job = project.getJob(arguments.getJob());
+                if (job == null) {
+                    throw new Exception(String.format("Cannot find job %s.", arguments.getJob()));
+                }
                 ui.getPreferences().registerOpenedProject(arguments.getProjectURL(),
-                        arguments.getProject().getName());
-                gotoRun(arguments.getProject(), arguments.getJob());
+                        project.getName());
+                gotoRun(project, job);
             } else if (arguments.getAction() == StartAction.Edit) {
                 if (arguments.getProjectFSXML() != null) {
                     ui.getPreferences().registerOpenedProject(arguments.getProjectURL(),
@@ -115,6 +121,10 @@ public class StartApp extends Application {
 
     public JobsUIPreferences getPreferences() {
         return ui.getPreferences();
+    }
+
+    public static JavaFXUI getUi() {
+        return ui;
     }
 
     void gotoRun(Project project, Job<Serializable> job) {

@@ -12,6 +12,7 @@ import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.job.ProjectBuilder;
 import org.jobsui.core.job.ProjectId;
+import org.jobsui.core.ui.UI;
 import org.jobsui.core.xml.*;
 
 import java.io.File;
@@ -31,13 +32,14 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
     private static final Logger LOGGER = Logger.getLogger(ProjectGroovyBuilder.class.getName());
 
     @Override
-    public Project build(ProjectXML projectXML, BookmarksStore bookmarksStore) throws Exception {
+    public Project build(ProjectXML projectXML, BookmarksStore bookmarksStore, UI ui) throws Exception {
         LOGGER.info("Building project " + projectXML.getId());
 
         LOGGER.info("Creating groovy shell for project " + projectXML.getId());
         GroovyShell groovyShell = createGroovyShell(projectXML);
         groovyShell.setProperty("projectRelativeURL", toGroovyFunction(projectXML::getRelativeURL));
         groovyShell.setProperty("classLoader", groovyShell.getClassLoader());
+        groovyShell.setProperty("ui", ui);
 
         LOGGER.info("Created groovy shell for project " + projectXML.getId());
 
@@ -61,7 +63,7 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
             try {
 //                ProjectParser projectParser = projectXML.getJobParser(entry.getValue());
                 ProjectXML refProjectXML = projectParser.parse(projectXML.getRelativeURL(value));
-                projects.put(key, projectGroovyBuilder.build(refProjectXML, bookmarksStore));
+                projects.put(key, projectGroovyBuilder.build(refProjectXML, bookmarksStore, ui));
             } catch (Exception e) {
                 // TODO
                 throw new RuntimeException(e);

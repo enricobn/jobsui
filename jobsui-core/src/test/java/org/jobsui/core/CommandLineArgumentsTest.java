@@ -4,6 +4,7 @@ import org.jobsui.core.bookmark.BookmarksStore;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.job.ProjectBuilder;
+import org.jobsui.core.ui.UI;
 import org.jobsui.core.xml.ProjectFSXML;
 import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.xml.ProjectXML;
@@ -20,14 +21,12 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CommandLineArgumentsTest {
-
     @Mock
     private ProjectParser projectParser;
     @Mock
@@ -46,6 +45,8 @@ public class CommandLineArgumentsTest {
     private File projectFile;
     @Mock
     private BookmarksStore bookmarksStore;
+    @Mock
+    private UI ui;
 
     private URI projectURI = new URI("file://project");
 
@@ -55,7 +56,7 @@ public class CommandLineArgumentsTest {
     @Before
     public void setUp() throws Exception {
         when(projectParser.parse(any(File.class))).thenReturn(projectFSXML);
-        when(projectBuilder.build(any(ProjectXML.class), eq(bookmarksStore))).thenReturn(project);
+        when(projectBuilder.build(any(ProjectXML.class), eq(bookmarksStore), eq(ui))).thenReturn(project);
         when(project.getJob("job")).thenReturn(job);
         when(fileSystem.getPath(anyString())).thenReturn(projectPath);
         when(projectPath.toFile()).thenReturn(projectFile);
@@ -67,9 +68,8 @@ public class CommandLineArgumentsTest {
     @Test
     public void parseRun() throws Exception {
         Consumer<CommandLineArguments> onSuccess = arguments -> {
-            assertTrue(arguments.getAction() == StartAction.Run);
-            assertTrue(arguments.getProject() == project);
-            assertTrue(arguments.getJob() == job);
+            assertSame(arguments.getAction(), StartAction.Run);
+            assertEquals("job", arguments.getJob());
         };
 
         Consumer<List<String>> onFailure = error -> fail(error.toString());

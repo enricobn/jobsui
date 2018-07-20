@@ -643,7 +643,7 @@ public class JobRunnerTest {
             if (project == null) {
                 ProjectParser parser = new ProjectParserImpl();
                 ProjectXML projectXML = parser.parse(JobRunnerTest.class.getResource(file));
-                project = new ProjectGroovyBuilder().build(projectXML, bookmarksStore);
+                project = new ProjectGroovyBuilder().build(projectXML, bookmarksStore, ui);
                 projects.put(file, project);
             }
             job = project.getJob(jobId);
