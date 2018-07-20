@@ -68,7 +68,7 @@ task versionProperties()  {
     doLast {
         new File("$projectDir/jobsui-core/src/main/resources/version.properties").text =
 """version=${version}
-buildtime=${new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())}
+buildTime=${new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date())}
 """
     }
 }
