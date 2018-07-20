@@ -31,11 +31,12 @@ public class ProjectParserImpl implements ProjectParser {
     public static final String PROJECT_FILE_NAME = "project.xml";
     private static final Logger LOGGER = Logger.getLogger(ProjectParserImpl.class.getName());
     private static final Validator projectValidator;
+    private static final Schema projectSchema;
 
     static {
         String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
         SchemaFactory factory = SchemaFactory.newInstance(language);
-        Schema projectSchema;
+
         try {
             projectSchema = factory.newSchema(ProjectParserImpl.class.getResource("/org/jobsui/project.xsd"));
         } catch (SAXException e) {
@@ -99,6 +100,7 @@ public class ProjectParserImpl implements ProjectParser {
 
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             dbFactory.setValidating(false);
+            dbFactory.setSchema(projectSchema);
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 
             Document doc = dBuilder.parse(is);

@@ -1,16 +1,9 @@
 package org.jobsui.core.xml;
 
-import com.sun.org.apache.xerces.internal.impl.xs.XSComplexTypeDecl;
-import com.sun.org.apache.xerces.internal.impl.xs.XSImplementationImpl;
-import com.sun.org.apache.xerces.internal.xs.XSAttributeUse;
-import com.sun.org.apache.xerces.internal.xs.XSElementDeclaration;
-import com.sun.org.apache.xerces.internal.xs.XSLoader;
-import com.sun.org.apache.xerces.internal.xs.XSModel;
 import org.jobsui.core.groovy.JobsUIParseException;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.w3c.dom.*;
 import org.w3c.dom.CharacterData;
-import org.w3c.dom.bootstrap.DOMImplementationRegistry;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
@@ -28,7 +21,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -207,32 +203,5 @@ public interface XMLUtils {
         }
         return attribute;
     }
-
-    static String getAttribute(Element element, String name, XSModel model) {
-        XSElementDeclaration elementDeclaration = model.getElementDeclaration(element.getNodeName(), element.getNamespaceURI());
-
-        final String attribute = element.getAttribute(name);
-        if (attribute == null || attribute.length() == 0) {
-            if (elementDeclaration.getTypeDefinition() instanceof XSComplexTypeDecl) {
-                XSComplexTypeDecl typeDefinition = ((XSComplexTypeDecl) elementDeclaration.getTypeDefinition());
-
-                XSAttributeUse attributeUse = typeDefinition.getAttributeUse(element.getNamespaceURI(), name);
-
-                if (attributeUse != null && attributeUse.getActualVC() != null) {
-                    return Objects.toString(attributeUse.getActualVC());
-                }
-            }
-        }
-        return attribute;
-    }
-
-    static XSModel readXsd(String uri) throws Exception {
-        System.setProperty(DOMImplementationRegistry.PROPERTY, "com.sun.org.apache.xerces.internal.dom.DOMXSImplementationSourceImpl");
-        DOMImplementationRegistry registry = DOMImplementationRegistry.newInstance();
-        com.sun.org.apache.xerces.internal.impl.xs.XSImplementationImpl impl = (XSImplementationImpl) registry.getDOMImplementation("XS-Loader");
-        XSLoader schemaLoader = impl.createXSLoader(null);
-        return schemaLoader.loadURI(uri);
-    }
-
 
 }

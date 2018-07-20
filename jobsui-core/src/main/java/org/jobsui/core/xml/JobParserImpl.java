@@ -1,6 +1,5 @@
 package org.jobsui.core.xml;
 
-import com.sun.org.apache.xerces.internal.xs.XSModel;
 import org.jobsui.core.groovy.JobsUIParseException;
 import org.jobsui.core.ui.UIComponentRegistry;
 import org.jobsui.core.ui.UIComponentRegistryImpl;
@@ -20,7 +19,8 @@ import javax.xml.validation.Validator;
 import java.io.InputStream;
 import java.net.URL;
 
-import static org.jobsui.core.xml.XMLUtils.*;
+import static org.jobsui.core.xml.XMLUtils.getElementContent;
+import static org.jobsui.core.xml.XMLUtils.getMandatoryAttribute;
 
 /**
  * Created by enrico on 4/5/17.
@@ -30,12 +30,12 @@ public class JobParserImpl implements JobParser {
     private static final URL jobXsd_000 = ProjectParserImpl.class.getResource("/org/jobsui/0.0.0/job.xsd");
     private static final Validator jobValidator;
     private static final Validator jobValidator_000;
+    private static final Schema jobSchema;
+    private static final Schema jobSchema_000;
 
     static {
         String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
         SchemaFactory factory = SchemaFactory.newInstance(language);
-        Schema jobSchema;
-        Schema jobSchema_000;
         try {
             jobSchema = factory.newSchema(jobXsd);
             jobSchema_000 = factory.newSchema(jobXsd_000);
@@ -58,11 +58,12 @@ public class JobParserImpl implements JobParser {
         try (InputStream inputStream = url.openStream()) {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             dbFactory.setValidating(false);
+
+            // to get default values in the xsd
+            dbFactory.setSchema(jobSchema);
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 
             Document doc = dBuilder.parse(inputStream);
-
-            XSModel xsModel = XMLUtils.readXsd(jobXsd.toURI().toString());
 
             //optional, but recommended
             //read this - http://stackoverflow.com/questions/13786607/normalization-in-dom-parsing-with-java-how-does-it-work
@@ -70,7 +71,7 @@ public class JobParserImpl implements JobParser {
             String subject = "Job with id='" + id + "'";
             String name = getMandatoryAttribute(doc.getDocumentElement(), "name", subject);
             String version = getMandatoryAttribute(doc.getDocumentElement(), "version", subject);
-            String jobsUIVersion = getAttribute(doc.getDocumentElement(), "jobsUIVersion", xsModel);
+            String jobsUIVersion = doc.getDocumentElement().getAttribute("jobsUIVersion");
 
             validate(url, jobsUIVersion);
 
