@@ -6,6 +6,7 @@ import org.jobsui.core.JobsUIPreferencesImpl;
 import org.jobsui.core.bookmark.BookmarksStoreFSImpl;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.repository.RepositoryURLStreamHandlerFactory;
+import org.jobsui.core.ui.UI;
 import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.ui.javafx.JavaFXUI;
 
@@ -39,8 +40,9 @@ public class Main {
                         Preferences.userNodeForPackage(Main.class),
                         BookmarksStoreFSImpl.getUserStore()
                 );
-
-        new JavaFXUI(preferences).start(arguments);
+        // TODO hard wired UI
+        UI ui = new JavaFXUI(preferences);
+        ui.start(arguments);
     }
 
 }

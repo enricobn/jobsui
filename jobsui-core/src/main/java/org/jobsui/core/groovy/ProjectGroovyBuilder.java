@@ -37,6 +37,7 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
         LOGGER.info("Creating groovy shell for project " + projectXML.getId());
         GroovyShell groovyShell = createGroovyShell(projectXML);
         groovyShell.setProperty("projectRelativeURL", toGroovyFunction(projectXML::getRelativeURL));
+        groovyShell.setProperty("classLoader", groovyShell.getClassLoader());
 
         LOGGER.info("Created groovy shell for project " + projectXML.getId());
 
