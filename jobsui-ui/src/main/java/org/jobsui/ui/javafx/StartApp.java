@@ -179,32 +179,26 @@ public class StartApp extends Application {
         Scene scene = stage.getScene();
 
         if (scene == null) {
-            switch (ui.getPreferences().getTheme()) {
+            JobsUITheme theme = ui.getPreferences().getTheme();
+
+            switch (theme) {
                 case Dark:
                     scene = new Scene(page, 700, 450);
-                    scene.getStylesheets().add(resourceToURL("dark.css"));
                     break;
                 case Material:
                     JFXDecorator decorator = new JFXDecorator(stage, page, false, true, true);
                     addTitleToDecorator(stage, decorator);
 
                     scene = new Scene(decorator, 700, 450);
-                    scene.getStylesheets().addAll(
-                            resourceToURL("/resources/css/jfoenix-fonts.css"),
-                            resourceToURL("/resources/css/jfoenix-design.css"),
-                            resourceToURL("material.css")
-                    );
                     break;
                 default:
-                    scene = new Scene(page, 700, 450);
-                    scene.getStylesheets().add(resourceToURL("standard.css"));
-                    break;
+                    throw new IllegalStateException("Unknown theme '" + theme + "'.");
             }
+            theme.applyToScene(scene);
             stage.setScene(scene);
         } else {
             stage.getScene().setRoot(page);
         }
-        scene.getStylesheets().add(resourceToURL("shared.css"));
     }
 
     private static void addTitleToDecorator(Stage stage, JFXDecorator decorator) {
