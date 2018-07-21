@@ -182,14 +182,15 @@ public class StartApp extends Application {
             JobsUITheme theme = ui.getPreferences().getTheme();
 
             switch (theme) {
-                case Dark:
-                    scene = new Scene(page, 700, 450);
-                    break;
                 case Material:
                     JFXDecorator decorator = new JFXDecorator(stage, page, false, true, true);
                     addTitleToDecorator(stage, decorator);
 
                     scene = new Scene(decorator, 700, 450);
+                    break;
+                case Dark:
+                case Standard:
+                    scene = new Scene(page, 700, 450);
                     break;
                 default:
                     throw new IllegalStateException("Unknown theme '" + theme + "'.");
