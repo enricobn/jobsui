@@ -23,10 +23,7 @@ import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -180,6 +177,7 @@ public class StartController implements Initializable {
             openJob(url, job.getId(), simpleProjectXML);
         } else {
             List<JobWrapper> jobWrappers = simpleProjectXML.getJobs().stream()
+                    .sorted(Comparator.comparing(JobXML::getName))
                     .map(JobWrapper::new)
                     .collect(Collectors.toList());
 
