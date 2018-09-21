@@ -1,12 +1,12 @@
 DOING
 ------
+- text ui
 
 NEXT
 -----
 - create a JobParserFactory that given the jobXmlVersion returns a parser and a validator
-- create a ProjectParserImpl use jobXmlVersion to get a validator
+- ProjectParserImpl use jobXmlVersion to get a validator
 - create a ProjectParserFactory that given the jobXmlVersion returns a parser and a validator
-- use XMLUtils.getAttribute to get an attribute, it resolves the default
 - about with version (JobsUIUtils.getVersion)
 - on new project:
  - why parent folder and folder?

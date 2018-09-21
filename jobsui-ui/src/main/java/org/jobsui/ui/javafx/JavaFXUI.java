@@ -9,6 +9,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import org.jobsui.core.CommandLineArguments;
+import org.jobsui.core.JobsUIApplication;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.*;
 import org.jobsui.ui.javafx.uicomponent.*;
@@ -91,8 +92,8 @@ public class JavaFXUI implements UI<Node> {
     }
 
     @Override
-    public void start(CommandLineArguments arguments) {
-        StartApp.main(this, arguments);
+    public JobsUIApplication start(CommandLineArguments arguments) {
+        return StartApp.main(this, arguments);
     }
 
     @Override
@@ -130,6 +131,7 @@ public class JavaFXUI implements UI<Node> {
     }
 
     public static void uncaughtException(Thread t, Throwable e) {
+        e.printStackTrace();
         showErrorStatic("Error on thread " + t.getName(), e);
     }
 

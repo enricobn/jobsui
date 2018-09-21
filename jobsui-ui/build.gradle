@@ -2,6 +2,8 @@ description = 'JobsUI UI'
 
 dependencies {
     compile project(':jobsui-core')
+    compile project(':jobsui-textui')
+
     compile 'com.jfoenix:jfoenix:1.2.0'
     compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.7-M5'
 

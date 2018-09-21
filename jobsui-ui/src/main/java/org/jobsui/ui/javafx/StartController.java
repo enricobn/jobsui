@@ -56,7 +56,7 @@ public class StartController implements Initializable {
     }
 
     public void onNew(ActionEvent actionEvent) {
-        StartApp.getInstance().gotoNew();
+        StartApp.getInstance().newProject();
     }
 
     public void onEdit(ActionEvent actionEvent) {
@@ -154,7 +154,7 @@ public class StartController implements Initializable {
     private void editProject(URL url) {
         Task<ProjectFSXML> task = new LoadProjectXMLTask(new File(url.getPath()));
         ProgressDialog.run(task, "Opening project", project -> {
-            StartApp.getInstance().gotoEdit(project);
+            StartApp.getInstance().edit(project);
             preferences.registerOpenedProject(url, project.getName());
             projects.getItems().clear();
             projects.getItems().addAll(preferences.getLastOpenedItems());
@@ -197,7 +197,7 @@ public class StartController implements Initializable {
     private void openJob(URL url, String jobId, ProjectXML simpleProjectXML) {
         Task<Tuple2<Project,Job<Serializable>>> task = new LoadJobTask(StartApp.getUi(), url, jobId, preferences.getBookmarksStore());
         ProgressDialog.run(task, "Opening job", tuple -> {
-                StartApp.getInstance().gotoRun(tuple.first, tuple.second);
+                StartApp.getInstance().run(tuple.first, tuple.second);
             preferences.registerOpenedProject(url, simpleProjectXML.getName());
             projects.getItems().clear();
             projects.getItems().addAll(preferences.getLastOpenedItems());

@@ -99,6 +99,8 @@ public class CommandLineArguments {
                         uiType = UIType.Swing;
                     } else if ("javafx".equals(uiTypeString.toLowerCase())) {
                         uiType = UIType.JavaFX;
+                    } else if ("text".equals(uiTypeString.toLowerCase())) {
+                        uiType = UIType.Text;
                     } else {
                         uiType = null;
                         validation.add(String.format("Unknown ui type '%s'.", uiTypeString));

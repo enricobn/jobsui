@@ -1,6 +1,7 @@
 package org.jobsui.ui.swing;
 
 import org.jobsui.core.CommandLineArguments;
+import org.jobsui.core.JobsUIApplication;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.utils.JobsUIUtils;
@@ -85,8 +86,9 @@ public class SwingUI implements UI<JComponent> {
     }
 
     @Override
-    public void start(CommandLineArguments arguments) {
+    public JobsUIApplication start(CommandLineArguments arguments) {
         // TODO
+        return null;
     }
 
     @Override

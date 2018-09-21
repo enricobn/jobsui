@@ -42,8 +42,8 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import org.jobsui.core.CommandLineArguments;
+import org.jobsui.core.JobsUIApplication;
 import org.jobsui.core.JobsUIPreferences;
-import org.jobsui.core.StartAction;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.runner.JobUIRunner;
@@ -61,20 +61,22 @@ import java.util.logging.Logger;
 /**
  * Main Application. This class handles navigation
  */
-public class StartApp extends Application {
-    private static final StartApp instance = new StartApp();
+public class StartApp extends Application implements JobsUIApplication {
+    private static StartApp instance;
     private static JavaFXUI ui;
     private static CommandLineArguments arguments;
-    private Stage stage;
+    private static Runnable runnable;
+    private static Stage stage;
+    private static Stage primaryStage;
 
     public static StartApp getInstance() {
         return instance;
     }
 
-    public static void main(JavaFXUI ui, CommandLineArguments arguments) {
+    public static JobsUIApplication main(JavaFXUI ui, CommandLineArguments arguments) {
         StartApp.ui = ui;
         StartApp.arguments = arguments;
-        launch();
+        return new StartApp();
     }
 
     public static void initForTest(JavaFXUI ui) {
@@ -82,29 +84,56 @@ public class StartApp extends Application {
     }
 
     @Override public void start(Stage primaryStage) {
+        StartApp.primaryStage = primaryStage;
+        StartApp.instance = this;
         Thread.setDefaultUncaughtExceptionHandler(JavaFXUI::uncaughtException);
+        StartApp.runnable.run();
+    }
 
+    public JobsUIPreferences getPreferences() {
+        return ui.getPreferences();
+    }
+
+    public static JavaFXUI getUi() {
+        return ui;
+    }
+
+    @Override
+    public void gotoMain() {
+        runnable = this::main;
+        launch();
+    }
+
+    @Override
+    public void gotoRun(Project project, Job<Serializable> job) {
+        runnable = () -> run(project, job);
+        launch();
+    }
+
+    @Override
+    public void gotoEdit(ProjectFSXML projectXML) {
+        runnable = () -> edit(projectXML);
+        launch();
+    }
+
+    @Override
+    public void gotoNew() {
+        runnable = this::newProject;
+        launch();
+    }
+
+    public void run(Project project, Job<Serializable> job) {
+        JobUIRunner<Node> runner = new JobUIRunner<>(ui);
         try {
+            runner.run(project, job);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-            if (arguments.getAction() == StartAction.Run) {
-                Project project = arguments.getProjectBuilder().build(arguments.getProjectXML(),
-                        arguments.getBookmarksStore(), ui);
-                Job<Serializable> job = project.getJob(arguments.getJob());
-                if (job == null) {
-                    throw new Exception(String.format("Cannot find job %s.", arguments.getJob()));
-                }
-                ui.getPreferences().registerOpenedProject(arguments.getProjectURL(),
-                        project.getName());
-                gotoRun(project, job);
-            } else if (arguments.getAction() == StartAction.Edit) {
-                if (arguments.getProjectFSXML() != null) {
-                    ui.getPreferences().registerOpenedProject(arguments.getProjectURL(),
-                            arguments.getProjectFSXML().getName());
-                    gotoEdit(arguments.getProjectFSXML());
-                } else {
-                    gotoNew();
-                }
-            } else if (getPreferences().getTheme() == JobsUITheme.Material) {
+    public void main() {
+        try {
+            if (getPreferences().getTheme() == JobsUITheme.Material) {
                 replaceSceneContent(primaryStage, StartApp.class.getResource("StartMaterial.fxml"));
                 primaryStage.setTitle("JobsUI");
                 primaryStage.show();
@@ -119,30 +148,13 @@ public class StartApp extends Application {
         }
     }
 
-    public JobsUIPreferences getPreferences() {
-        return ui.getPreferences();
-    }
-
-    public static JavaFXUI getUi() {
-        return ui;
-    }
-
-    void gotoRun(Project project, Job<Serializable> job) {
-        JobUIRunner<Node> runner = new JobUIRunner<>(ui);
-        try {
-            runner.run(project, job);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    void gotoNew() {
+    public void newProject() {
         Optional<ProjectFSXML> newProject = NewProject.show(ui);
 
         newProject.ifPresent(this::editProject);
     }
 
-    void gotoEdit(ProjectFSXML projectXML) {
+    public void edit(ProjectFSXML projectXML) {
         stage = new Stage();
         try {
             try {
