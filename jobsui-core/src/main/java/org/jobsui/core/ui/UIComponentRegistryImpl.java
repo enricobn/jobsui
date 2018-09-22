@@ -5,56 +5,56 @@ import java.util.Collection;
 import java.util.Optional;
 
 public class UIComponentRegistryImpl implements UIComponentRegistry {
-    public static UIComponentType Button = new UIComponentTypeAbstract("Button") {
+    public static final UIComponentType Button = new UIComponentTypeAbstract("Button") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
             return (COMP) ui.createButton();
         }
     };
 
-    public static UIComponentType CheckBox = new UIComponentTypeAbstract("CheckBox") {
+    public static final UIComponentType CheckBox = new UIComponentTypeAbstract("CheckBox") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
             return (COMP) ui.createCheckBox();
         }
     };
 
-    public static UIComponentType Choice = new UIComponentTypeAbstract("Choice") {
+    public static final UIComponentType Choice = new UIComponentTypeAbstract("Choice") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
             return (COMP) ui.createChoice();
         }
     };
 
-    public static UIComponentType List = new UIComponentTypeAbstract("List") {
+    public static final UIComponentType List = new UIComponentTypeAbstract("List") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
             return (COMP) ui.createList();
         }
     };
 
-    public static UIComponentType Password = new UIComponentTypeAbstract("Password") {
+    public static final UIComponentType Password = new UIComponentTypeAbstract("Password") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
             return (COMP) ui.createPassword();
         }
     };
 
-    public static UIComponentType Value = new UIComponentTypeAbstract("Value") {
+    public static final UIComponentType Value = new UIComponentTypeAbstract("Value") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
             return (COMP) ui.createValue();
         }
     };
 
-    public static UIComponentType FileChooser = new UIComponentTypeAbstract("FileChooser") {
+    public static final UIComponentType FileChooser = new UIComponentTypeAbstract("FileChooser") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
             return (COMP) ui.createFileChooser();
         }
     };
 
-    private Collection<UIComponentType> componentTypes = Arrays.asList(Button, CheckBox, Choice, List, Password, Value,
+    private final Collection<UIComponentType> componentTypes = Arrays.asList(Button, CheckBox, Choice, List, Password, Value,
             FileChooser);
 
     public Optional<UIComponentType> getComponentType(String name) {

@@ -7,7 +7,7 @@ import java.util.Set;
  * Created by enrico on 4/30/17.
  */
 public class WizardStepImpl implements WizardStep {
-    private Set<String> dependencies = new HashSet<>();
+    private final Set<String> dependencies = new HashSet<>();
     private String validateScript;
     private String name;
 

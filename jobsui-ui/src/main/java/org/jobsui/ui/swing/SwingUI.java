@@ -92,7 +92,7 @@ public class SwingUI implements UI<JComponent> {
     @Override
     public Optional<String> askString(String message) {
         // TODO
-        return null;
+        return Optional.empty();
     }
 
     @Override

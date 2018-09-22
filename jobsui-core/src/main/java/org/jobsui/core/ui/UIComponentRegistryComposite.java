@@ -6,7 +6,7 @@ import java.util.*;
  * The first added is the one which wins in case of name clash.
  */
 public class UIComponentRegistryComposite implements UIComponentRegistry{
-    private List<UIComponentRegistry> uiComponentRegistries = new ArrayList<>();
+    private final List<UIComponentRegistry> uiComponentRegistries = new ArrayList<>();
 
     public void add(UIComponentRegistry uiComponentRegistry) {
         uiComponentRegistries.add(uiComponentRegistry);
