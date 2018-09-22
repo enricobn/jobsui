@@ -7,6 +7,7 @@ import javafx.scene.Node;
 import javafx.scene.control.ComboBox;
 import org.jobsui.core.ui.JobsUITheme;
 import org.jobsui.core.ui.UIChoice;
+import org.jobsui.ui.javafx.AutocompleteComboBox;
 import org.jobsui.ui.javafx.JavaFXUI;
 import rx.Observable;
 import rx.Subscriber;
@@ -53,7 +54,7 @@ public class JavaFXUIChoice implements UIChoice<Node> {
 
     @Override
     public Serializable getValue() {
-        return combo.getSelectionModel().getSelectedItem();
+        return AutocompleteComboBox.getComboBoxValue(combo);
     }
 
     @Override
@@ -179,9 +180,14 @@ public class JavaFXUIChoice implements UIChoice<Node> {
         } else {
             result = new ComboBox<>();
         }
+
+        AutocompleteComboBox.autoCompleteComboBoxPlus(result, JavaFXUIChoice::compareLowerCase);
+
         return result;
     }
 
-
+    private static <T> boolean compareLowerCase(String typedText, T itemToCompare) {
+        return itemToCompare != null && itemToCompare.toString().toLowerCase().contains(typedText.toLowerCase());
+    }
 
 }
