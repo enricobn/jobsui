@@ -18,6 +18,7 @@ import org.jobsui.core.ui.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 10/7/16.
@@ -25,7 +26,7 @@ import java.util.function.Consumer;
 class JavaFXUIWindow implements UIWindow<Node> {
     private final UI<Node> ui;
     private HBox buttonsPanel;
-    private ListView<Bookmark> bookmarkListView;
+    private TreeView<Bookmark> bookmarksView;
     private VBox componentsPanel;
     private Consumer<Bookmark> onOpenBookmark;
     private Label titleLabel;
@@ -45,9 +46,11 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
         VBox mainPanel = createMainPanel(buttonsPanel, componentsPanel);
 
-        bookmarkListView = createBookmarkListView(project, job);
+        bookmarksView = createBookmarksView(project, job);
 
-        VBox bookmarksPanel = createBookmarksPanel(bookmarkListView);
+        refreshBookmarks(project, job, null);
+
+        VBox bookmarksPanel = createBookmarksPanel(bookmarksView);
 
         SplitPane root = new SplitPane(bookmarksPanel, mainPanel);
         Platform.runLater(() -> root.setDividerPosition(0, ui.getPreferences().getRunDividerPosition()));
@@ -83,7 +86,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
         return mainPanel;
     }
 
-    private static VBox createBookmarksPanel(ListView<Bookmark> bookmarkListView) {
+    private static VBox createBookmarksPanel(TreeView<Bookmark> bookmarkListView) {
         VBox bookmarksPanel = new VBox(5);
 
         Label bookmarksLabel = new Label("Bookmarks");
@@ -102,15 +105,13 @@ class JavaFXUIWindow implements UIWindow<Node> {
         return mainPanel;
     }
 
-    private ListView<Bookmark> createBookmarkListView(Project project, Job job) {
-        ListView<Bookmark> bookmarkListView = new ListView<>();
+    private TreeView<Bookmark> createBookmarksView(Project project, Job job) {
+        TreeView<Bookmark> view = new TreeView<>();
 //        bookmarkListView.setMinWidth(200);
-        bookmarkListView.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        bookmarkListView.setCellFactory(new CellFactory(project, job));
-        List<Bookmark> bookmarks = ui.getPreferences().getBookmarks(project, job);
-        bookmarkListView.getItems().addAll(bookmarks);
-        bookmarkListView.setBorder(Border.EMPTY);
-        return bookmarkListView;
+        view.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        view.setCellFactory(new CellFactory(project, job));
+        view.setBorder(Border.EMPTY);
+        return view;
     }
 
     @Override
@@ -152,16 +153,18 @@ class JavaFXUIWindow implements UIWindow<Node> {
 
     @Override
     public void refreshBookmarks(Project project, Job job, Bookmark activeBookmark) {
-        bookmarkListView.getItems().clear();
         List<Bookmark> bookmarks = ui.getPreferences().getBookmarks(project, job);
-        bookmarkListView.getItems().addAll(bookmarks);
+        TreeItem<Bookmark> root = new TreeItem<>();
+        root.setExpanded(true);
+        root.getChildren().setAll(bookmarks.stream().map(TreeItem::new).collect(Collectors.toList()));
+        bookmarksView.setRoot(root);
 
         if (activeBookmark != null) {
             Optional<Bookmark> first = bookmarks.stream()
                     .filter(it -> it.getKey().equals(activeBookmark.getKey()))
                     .findFirst();
 
-            first.ifPresent(bookmark -> bookmarkListView.getSelectionModel().select(bookmark));
+            first.ifPresent(bookmark -> bookmarksView.getSelectionModel().select(new TreeItem<>(bookmark)));
         }
     }
 
@@ -187,7 +190,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
         componentsPanel.getChildren().clear();
     }
 
-    private class CellFactory implements Callback<ListView<Bookmark>, ListCell<Bookmark>> {
+    private class CellFactory implements Callback<TreeView<Bookmark>, TreeCell<Bookmark>> {
         private final Project project;
         private final Job job;
 
@@ -197,26 +200,30 @@ class JavaFXUIWindow implements UIWindow<Node> {
         }
 
         @Override
-        public ListCell<Bookmark> call(ListView<Bookmark> lv) {
-            ListCell<Bookmark> cell = new ListCell<Bookmark>() {
+        public TreeCell<Bookmark> call(TreeView<Bookmark> lv) {
+            TreeCell<Bookmark> cell = new TreeCell<Bookmark>() {
                 @Override
                 public void updateItem(Bookmark item, boolean empty) {
                     super.updateItem(item, empty);
                     if (empty) {
                         setText(null);
                     } else {
-                        setText(item.toString());
+                        if (item == null) {
+                            setText("");
+                        } else {
+                            setText(item.toString());
+                        }
                     }
                 }
             };
 
             cell.setOnMouseEntered(e -> {
-                bookmarkListView.setCursor(Cursor.HAND);
+                bookmarksView.setCursor(Cursor.HAND);
                 //bookmarkListView.getSelectionModel().select(cell.getItem());
             });
 
             cell.setOnMouseExited(e -> {
-                bookmarkListView.setCursor(Cursor.DEFAULT);
+                bookmarksView.setCursor(Cursor.DEFAULT);
                 //bookmarkListView.getSelectionModel().clearSelection();
             });
 

@@ -70,6 +70,10 @@ public class WizardState {
 
         window.clear();
 
+        if (step == 0) {
+            window.add(context.getTagsWidget());
+        }
+
         for (String dependency : sortedDependencies) {
             if (wizardStep.getDependencies().contains(dependency)) {
                 JobParameter jobParameter = job.getParameter(dependency);

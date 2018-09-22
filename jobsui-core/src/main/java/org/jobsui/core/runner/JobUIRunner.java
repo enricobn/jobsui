@@ -80,6 +80,7 @@ public class JobUIRunner<C> implements JobRunner {
                 wizardState.updateWindow(context, window);
 
             } else {
+                window.add(context.getTagsWidget());
                 for (JobParameter jobParameter : job.getParameterDefs()) {
                     UIWidget<C> widget = context.getWidget(jobParameter);
                     window.add(widget);
@@ -94,8 +95,8 @@ public class JobUIRunner<C> implements JobRunner {
 
             UIButton<C> runButton = createRunButton(context, values, atomicResult);
 
-            UIButton<C> saveAsButton = createSaveAsButton(project, job, window, values);
-            UIButton<C> saveButton = createSaveButton(project, job, window, values);
+            UIButton<C> saveAsButton = createSaveAsButton(context, project, job, window, values);
+            UIButton<C> saveButton = createSaveButton(context, project, job, window, values);
             saveButton.setEnabled(false);
 
             Observable<JobsUIValidationResult> validationObserver = context.jobValidationObserver();
@@ -149,6 +150,7 @@ public class JobUIRunner<C> implements JobRunner {
                             }
                             this.activeBookmark = bookmark;
                             window.setTitle(bookmark.getName());
+                            context.getTagsWidget().getComponent().setValue(bookmark.getTags());
                             saveButton.setEnabled(true);
                         }
                     }
@@ -174,7 +176,7 @@ public class JobUIRunner<C> implements JobRunner {
         return atomicResult.get();
     }
 
-    private <T extends Serializable> UIButton<C> createSaveAsButton(Project project, Job<T> job, UIWindow<C> window, JobValues values) {
+    private <T extends Serializable> UIButton<C> createSaveAsButton(JobUIRunnerContext<T, C> context, Project project, Job<T> job, UIWindow<C> window, JobValues values) {
         UIButton<C> button = ui.createButton();
         button.setEnabled(false);
         button.setTitle("Save as");
@@ -191,7 +193,8 @@ public class JobUIRunner<C> implements JobRunner {
 
                 if (ok) {
                     try {
-                        Bookmark bookmark = new Bookmark(project, job, UUID.randomUUID().toString(), n, values);
+                        String tags = (String) context.getTagsWidget().getComponent().getValue();
+                        Bookmark bookmark = new Bookmark(project, job, UUID.randomUUID().toString(), n, values, tags);
                         preferences.saveBookmark(project, job, bookmark);
                         this.activeBookmark = bookmark;
                         window.refreshBookmarks(project, job, activeBookmark);
@@ -205,7 +208,7 @@ public class JobUIRunner<C> implements JobRunner {
         return button;
     }
 
-    private <T extends Serializable> UIButton<C> createSaveButton(Project project, Job<T> job, UIWindow<C> window, JobValues values) {
+    private <T extends Serializable> UIButton<C> createSaveButton(JobUIRunnerContext<T, C> context, Project project, Job<T> job, UIWindow<C> window, JobValues values) {
         UIButton<C> button = ui.createButton();
         button.setEnabled(false);
         button.setTitle("Save");
@@ -216,6 +219,8 @@ public class JobUIRunner<C> implements JobRunner {
                 try {
                     activeBookmark.getValues().clear();
                     activeBookmark.getValues().putAll(values.getMap(job));
+                    String tags = (String) context.getTagsWidget().getComponent().getValue();
+                    activeBookmark.setTags(tags);
                     preferences.saveBookmark(project, job, activeBookmark);
                     window.refreshBookmarks(project, job, activeBookmark);
                 } catch (Exception e) {

@@ -202,7 +202,7 @@ public class JobsUIPreferencesImplTest {
 
     private Bookmark createBookmark(String bookmarkName, Project project, Job<?> job) {
         JobValues values = mock(JobValues.class);
-        return new Bookmark(project, job, UUID.randomUUID().toString(), bookmarkName, values);
+        return new Bookmark(project, job, UUID.randomUUID().toString(), bookmarkName, values, null);
     }
 
 

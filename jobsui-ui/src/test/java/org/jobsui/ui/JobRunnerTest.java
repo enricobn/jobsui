@@ -598,7 +598,7 @@ public class JobRunnerTest {
 
         JobValues firstValues = new JobValuesImpl(firstMapValues);
 
-        Bookmark bookmark = new Bookmark(projectSimpleJob.first, projectSimpleJob.second, "1", "John Doe", firstValues);
+        Bookmark bookmark = new Bookmark(projectSimpleJob.first, projectSimpleJob.second, "1", "John Doe", firstValues, null);
 
         bookmarks.put(bookmark.getKey(), bookmark);
 

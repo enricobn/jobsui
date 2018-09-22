@@ -16,12 +16,14 @@ public class Bookmark implements Serializable {
     private final String key;
     private final String name;
     private final Map<String, Serializable> values = new HashMap<>();
+    private String tags;
 
-    public Bookmark(Project project, Job<?> job, String key, String name, JobValues values) {
+    public Bookmark(Project project, Job<?> job, String key, String name, JobValues values, String tags) {
         this.projectId = project.getId().toCompatibleProjectId();
         this.jobId = job.getCompatibleJobId();
         this.key = key;
         this.name = name;
+        this.tags = tags;
         for (JobParameter parameterDef : job.getParameterDefs()) {
             if (!parameterDef.isCalculated()) {
                 this.values.put(parameterDef.getKey(), values.getValue(parameterDef));
@@ -47,6 +49,14 @@ public class Bookmark implements Serializable {
 
     public String getKey() {
         return key;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
     }
 
     @Override

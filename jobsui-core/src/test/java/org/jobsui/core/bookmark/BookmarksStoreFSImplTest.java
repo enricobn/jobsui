@@ -153,7 +153,7 @@ public class BookmarksStoreFSImplTest {
 
     private Bookmark createBookmark(Project project, Job<?> job, JobValues values, String name) {
         String key = UUID.randomUUID().toString();
-        return new Bookmark(project, job, key,name, values);
+        return new Bookmark(project, job, key,name, values, null);
     }
 
 }

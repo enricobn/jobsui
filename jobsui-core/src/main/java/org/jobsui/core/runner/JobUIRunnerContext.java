@@ -23,20 +23,24 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
     private final Map<String,UIWidget<C>> widgets;
     private final List<JobDependency> sortedJobDependencies;
     private final DependenciesObservables dependenciesObservables;
+    private final UIWidget<C> tagsWidget;
 
     private JobUIRunnerContext(UI<C> ui, Project project, Job<T> job, Map<String, UIWidget<C>> widgets,
-                              List<JobDependency> sortedJobDependencies,
-                              DependenciesObservables dependenciesObservables) {
+                               List<JobDependency> sortedJobDependencies,
+                               DependenciesObservables dependenciesObservables, UIWidget<C> tagsWidget) {
         this.ui = ui;
         this.project = project;
         this.job = job;
         this.widgets = widgets;
         this.sortedJobDependencies = sortedJobDependencies;
         this.dependenciesObservables = dependenciesObservables;
+        this.tagsWidget = tagsWidget;
     }
 
     public static <T extends Serializable, C> JobUIRunnerContext<T,C> of(Project project, Job<T> job, UI<C> ui, UIWindow<C> window) throws Exception {
         LOGGER.fine("Creating Job runner context");
+
+        final UIWidget<C> tagsWidget = ui.createWidget("Tags", ui.createValue());
 
         Map<String,UIWidget<C>> widgets = new HashMap<>();
         for (final JobParameter jobParameter : job.getParameterDefs()) {
@@ -54,7 +58,7 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
 
         LOGGER.fine("Created Job runner context");
 
-        return new JobUIRunnerContext<>(ui, project, job, widgets, sortedDependencies, dependenciesObservables);
+        return new JobUIRunnerContext<>(ui, project, job, widgets, sortedDependencies, dependenciesObservables, tagsWidget);
     }
 
     public Job<T> getJob() {
@@ -333,6 +337,10 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
 
         List<Observable<Serializable>> getList();
 
+    }
+
+    public UIWidget<C> getTagsWidget() {
+        return tagsWidget;
     }
 
     private static class DependenciesObservablesImpl implements DependenciesObservables {
