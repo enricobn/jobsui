@@ -82,7 +82,7 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
             }
         }
 
-        result.sort(Comparator.comparing(Bookmark::getName));
+        result.sort(Comparator.comparing(it -> it.getName().toLowerCase()));
 
         return result.stream()
                 .collect(Collectors.toMap(
