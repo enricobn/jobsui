@@ -3,9 +3,9 @@ package org.jobsui.ui.javafx.edit;
 /**
  * Created by enrico on 4/28/17.
  */
-class EditItem {
-    final ItemType itemType;
-    final Object payload;
+public class EditItem {
+    public final ItemType itemType;
+    public final Object payload;
 
     EditItem(ItemType itemType, Object payload) {
         this.itemType = itemType;

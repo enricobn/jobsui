@@ -1,10 +1,13 @@
 package org.jobsui.core.ui;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class UIComponentRegistryImpl implements UIComponentRegistry {
+
     public static final UIComponentType Button = new UIComponentTypeAbstract("Button") {
         @Override
         public <COMP extends UIComponent> COMP create(UI ui) throws UnsupportedComponentException {
@@ -54,18 +57,16 @@ public class UIComponentRegistryImpl implements UIComponentRegistry {
         }
     };
 
-    private final Collection<UIComponentType> componentTypes = Arrays.asList(Button, CheckBox, Choice, List, Password, Value,
-            FileChooser);
+    private final Map<String,UIComponentType> componentTypes = Stream.of(Button, CheckBox, Choice, List, Password, Value,
+            FileChooser).collect(Collectors.toMap(UIComponentType::getName, it -> it));
 
     public Optional<UIComponentType> getComponentType(String name) {
-        return componentTypes.stream()
-                .filter(c -> c.getName().equals(name))
-                .findFirst();
+        return Optional.ofNullable(componentTypes.get(name));
     }
 
     @Override
     public Collection<UIComponentType> getComponentTypes() {
-        return componentTypes;
+        return componentTypes.values();
     }
 
 }

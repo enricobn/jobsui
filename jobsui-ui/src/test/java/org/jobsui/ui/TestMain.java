@@ -1,24 +1,27 @@
 package org.jobsui.ui;
 
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.hamcrest.core.Is;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.OpenedItem;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.ui.JobsUITheme;
+import org.jobsui.core.xml.ParameterXML;
 import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.xml.ProjectXML;
 import org.jobsui.ui.javafx.JavaFXUI;
 import org.jobsui.ui.javafx.StartApp;
+import org.jobsui.ui.javafx.edit.EditItem;
+import org.jobsui.ui.javafx.edit.ItemDetail;
+import org.jobsui.ui.javafx.edit.ItemType;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -29,8 +32,10 @@ import org.testfx.framework.junit.ApplicationTest;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +62,7 @@ public class TestMain extends ApplicationTest {
         when(preferences.getEditWidth()).thenReturn(600d);
         when(preferences.getEditHeight()).thenReturn(600d);
         when(preferences.getRunDividerPosition()).thenReturn(0.4d);
+        when(preferences.getEditDividerPosition()).thenReturn(0.4d);
     }
 
     @Override
@@ -118,6 +124,72 @@ public class TestMain extends ApplicationTest {
         closeCurrentWindow();
     }
 
+    @Test
+    public void editAndSelectAParameter() throws Exception {
+        editProject();
+
+        TreeView<EditItem> treeView = lookupWithTimeout(node -> node instanceof TreeView, 5_000);
+
+        while (treeView.getRoot() == null) {
+            sleep(100);
+        }
+
+        TreeItem<EditItem> treeViewItem = getTreeViewItem(treeView.getRoot(), ItemType.Parameter,
+                it -> ((ParameterXML) it.payload).getName().equals("First"));
+
+        Platform.runLater(() -> treeView.getSelectionModel().select(treeViewItem));
+
+        TextField detailParameterName = lookupWithTimeout("#" + ItemDetail.ID_DETAIL_PARAMETER_NAME, 5_000);
+
+        assertEquals("First", detailParameterName.getText());
+    }
+
+
+    private <T extends Node> T lookupWithTimeout(Predicate<T> predicate, long timeout) throws Exception {
+        long time = System.currentTimeMillis();
+        while (System.currentTimeMillis() < time + timeout) {
+            try {
+                return robotContext().getNodeFinder().lookup(predicate).query();
+            } catch (Exception e) {
+                sleep(100);
+            }
+        }
+        throw new Exception("Timeout expired");
+    }
+
+    private <T extends Node> T lookupWithTimeout(String query, long timeout) throws Exception {
+        long time = System.currentTimeMillis();
+        while (System.currentTimeMillis()< time + timeout) {
+            try {
+                return robotContext().getNodeFinder().lookup(query).query();
+            } catch (Exception e) {
+                sleep(100);
+            }
+        }
+        throw new Exception("Timeout expired");
+    }
+
+    private TreeItem<EditItem> getTreeViewItem(TreeItem<EditItem> item, ItemType itemType, Predicate<EditItem> p)
+    {
+        if (item != null && item.getValue().itemType == itemType && p.test(item.getValue()))
+            return  item;
+
+        if (item == null)
+            return null;
+
+        while (item.getChildren() == null) {
+            sleep(100);
+        }
+
+        for (TreeItem<EditItem> child : item.getChildren()){
+            TreeItem<EditItem> s = getTreeViewItem(child, itemType, p);
+            if(s!=null)
+                return s;
+
+        }
+        return null;
+    }
+
     private Button waitUntilRunButtonIsPresent() {
         long time = System.currentTimeMillis();
         while (true) {
@@ -140,7 +212,27 @@ public class TestMain extends ApplicationTest {
         clickOn(openedItemListCell);
     }
 
+    private void editProject() {
+        ListCell<OpenedItem> openedItemListCell = robotContext().getNodeFinder().lookup(
+                "#openedItem_0").query();
+        rightClickOn(openedItemListCell);
+
+        clickOn("#edit");
+    }
+
     private Button getButtonByText(String text) {
-        return robotContext().getNodeFinder().lookup(node -> ((Button) node).getText().equals(text)).query();
+        try {
+            return robotContext().getNodeFinder().lookup(node -> ((Button) node).getText().equals(text)).query();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private TextField getTextById(String id) {
+        try {
+            return robotContext().getNodeFinder().lookup("#" + id).query();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

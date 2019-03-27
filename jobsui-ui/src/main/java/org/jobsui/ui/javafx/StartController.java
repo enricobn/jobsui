@@ -114,7 +114,7 @@ public class StartController implements Initializable {
 
             ContextMenu menu = new ContextMenu();
 
-            addMenu("Edit", menu, event -> {
+            MenuItem edit = addMenu("Edit", menu, event -> {
                 // TODO I don't want to add the edit menu for "not file"
                 if (cell.getItem() != null && cell.getItem().url.startsWith("file:/")) {
                     URL url;
@@ -129,6 +129,8 @@ public class StartController implements Initializable {
                 }
             });
 
+            edit.setId("edit");
+
             addMenu("Delete", menu, event -> {
                 preferences.removeLastOpenedItem(cell.getItem());
 
@@ -142,12 +144,14 @@ public class StartController implements Initializable {
             return cell;
         }
 
-        private void addMenu(String text, ContextMenu menu, EventHandler<ActionEvent> actionEventEventHandler) {
-            MenuItem editMenuItem = new MenuItem(text);
+        private MenuItem addMenu(String text, ContextMenu menu, EventHandler<ActionEvent> actionEventEventHandler) {
+            MenuItem menuItem = new MenuItem(text);
 
-            editMenuItem.setOnAction(actionEventEventHandler);
+            menuItem.setOnAction(actionEventEventHandler);
 
-            menu.getItems().add(editMenuItem);
+            menu.getItems().add(menuItem);
+
+            return menuItem;
         }
     }
 

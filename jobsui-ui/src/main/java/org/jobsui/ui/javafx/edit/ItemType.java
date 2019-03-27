@@ -4,7 +4,7 @@ import org.jobsui.core.xml.*;
 
 import java.util.function.Function;
 
-enum ItemType {
+public enum ItemType {
     Project(ProjectXML.class, ProjectXML::getName),
         Libraries(ProjectXML.class, p -> "libraries"),
             Library(ProjectLibraryXML.class, ProjectLibraryXML::toString),

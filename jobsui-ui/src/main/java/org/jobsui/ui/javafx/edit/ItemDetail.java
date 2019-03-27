@@ -12,7 +12,6 @@ import org.fxmisc.richtext.CodeArea;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.xml.*;
-import org.jobsui.ui.javafx.JavaFXUI;
 import org.jobsui.ui.javafx.JobsUIFXStyles;
 
 import java.io.Serializable;
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
 /**
  * Created by enrico on 4/28/17.
  */
-class ItemDetail extends VBox {
+public class ItemDetail extends VBox {
     private static final Border CODE_AREA_DARK_FOCUSED_BORDER =
             new Border(new BorderStroke(Paint.valueOf("039ED3"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
     private static final Border CODE_AREA_FOCUSED_BORDER =
@@ -36,16 +35,17 @@ class ItemDetail extends VBox {
             new Border(new BorderStroke(Paint.valueOf("black"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
     private static final Border CODE_AREA_NOT_FOCUSED_BORDER =
             new Border(new BorderStroke(Paint.valueOf("gray"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
+    public static final String ID_DETAIL_PARAMETER_NAME = "detailParameterName";
+    public static final String ID_DETAIL_PARAMETER_KEY = "detailParameterKey";
 
-    private final JavaFXUI ui;
+    private final UI ui;
     private final JobsUIPreferences preferences;
-    private final UIComponentRegistry uiComponentRegistry;
+    private UIComponentRegistry uiComponentRegistry;
 
-    public ItemDetail(JavaFXUI ui, UIComponentRegistry uiComponentRegistry) {
+    public ItemDetail(UI ui) {
         super(0);
         this.ui = ui;
         this.preferences = ui.getPreferences();
-        this.uiComponentRegistry = uiComponentRegistry;
     }
 
     public void setSelectedItem(TreeItem<EditItem> treeItem) {
@@ -202,9 +202,10 @@ class ItemDetail extends VBox {
 
         ParameterXML parameter = (ParameterXML) treeItem.getValue().payload;
 
-        addTextProperty(treeItem, "Key", parameter::getKey, key -> jobXML.changeParameterKey(parameter, key));
+        addTextProperty(treeItem, "Key", parameter::getKey, key -> jobXML.changeParameterKey(parameter, key),
+                ID_DETAIL_PARAMETER_KEY);
 
-        addTextProperty(treeItem, "Name", parameter::getName, parameter::setName);
+        addTextProperty(treeItem, "Name", parameter::getName, parameter::setName, ID_DETAIL_PARAMETER_NAME);
 
         return true;
     }
@@ -225,11 +226,18 @@ class ItemDetail extends VBox {
     }
 
     private void addTextProperty(TreeItem<EditItem> treeItem, String title, Supplier<String> get, Consumer<String> set) {
+        addTextProperty(treeItem, title, get, set, null);
+    }
+
+    private void addTextProperty(TreeItem<EditItem> treeItem, String title, Supplier<String> get, Consumer<String> set, String idForTest) {
         addPropertyNameLabel(title);
 
         UIValue<Node> control = ui.createValue();
         control.setTitle(title);
         control.setValue(get.get());
+        if (idForTest != null) {
+            control.getComponent().setId(idForTest);
+        }
 
         control.getObservable().subscribe(newValue -> {
             set.accept(Objects.toString(newValue));
@@ -331,4 +339,7 @@ class ItemDetail extends VBox {
     }
 
 
+    public void setUiComponentRegistry(UIComponentRegistry uiComponentRegistry) {
+        this.uiComponentRegistry = uiComponentRegistry;
+    }
 }

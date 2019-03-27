@@ -1,6 +1,7 @@
 package org.jobsui.core.xml;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -42,21 +43,15 @@ public class WizardStepImpl implements WizardStep {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         WizardStepImpl that = (WizardStepImpl) o;
-
-        if (!dependencies.equals(that.dependencies)) return false;
-        if (validateScript != null ? !validateScript.equals(that.validateScript) : that.validateScript != null)
-            return false;
-        return name.equals(that.name);
+        return Objects.equals(dependencies, that.dependencies) &&
+                Objects.equals(validateScript, that.validateScript) &&
+                Objects.equals(name, that.name);
     }
 
     @Override
     public int hashCode() {
-        int result = dependencies.hashCode();
-        result = 31 * result + (validateScript != null ? validateScript.hashCode() : 0);
-        result = 31 * result + name.hashCode();
-        return result;
+        return Objects.hash(dependencies, validateScript, name);
     }
 
     @Override

@@ -5,8 +5,9 @@ import org.jobsui.core.groovy.ProjectGroovyBuilder;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.ui.UI;
-import org.jobsui.core.ui.UIComponentRegistryImpl;
+import org.jobsui.core.ui.UIComponentRegistry;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,10 +16,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import java.net.URL;
 import java.util.Collections;
+import java.util.Optional;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 /**
  * Created by enrico on 5/4/16.
@@ -30,6 +34,8 @@ public class ProjectParserTest {
     private BookmarksStore bookmarkStore;
     @Mock
     private UI ui;
+    @Mock
+    private UIComponentRegistry uiComponentRegistry;
 
     @BeforeClass
     public static void setUpStatic() throws Exception {
@@ -40,6 +46,11 @@ public class ProjectParserTest {
     @AfterClass
     public static void tearDownStatic() throws Exception {
         projectXML = null;
+    }
+
+    @Before
+    public void setUp() throws Exception {
+        when(uiComponentRegistry.getComponentType(anyString())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -60,7 +71,7 @@ public class ProjectParserTest {
     public void assert_that_is_visible_for_inv_expression_in_Simplejob_is_false() throws Exception {
         JobParser parser = new JobParserImpl();
         URL url = ProjectParserTest.class.getResource("/simplejob/simple.xml");
-        JobXML job = parser.parse("simple", url, new UIComponentRegistryImpl());
+        JobXML job = parser.parse("simple", url, uiComponentRegistry);
         ExpressionXML inv = job.getExpression("inv");
         assertThat(inv.isVisible(), is(false));
     }
@@ -69,7 +80,7 @@ public class ProjectParserTest {
     public void parse_wizard() throws Exception {
         JobParser parser = new JobParserImpl();
         URL url = ProjectParserTest.class.getResource("/simplejob/simpleWithWizard.xml");
-        JobXML job = parser.parse("simpleWithWizard", url, new UIComponentRegistryImpl());
+        JobXML job = parser.parse("simpleWithWizard", url, uiComponentRegistry);
 
         assertThat(job.getWizardSteps().size(), is(2));
 

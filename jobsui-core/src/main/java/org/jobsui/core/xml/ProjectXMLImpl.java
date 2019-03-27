@@ -1,7 +1,9 @@
 package org.jobsui.core.xml;
 
 import org.jobsui.core.ui.UIComponentRegistry;
+import org.jobsui.core.ui.UIComponentRegistryComposite;
 import org.jobsui.core.ui.UIComponentRegistryImpl;
+import org.jobsui.core.ui.UIComponentType;
 import org.jobsui.core.utils.JobsUIUtils;
 
 import java.net.MalformedURLException;
@@ -15,7 +17,7 @@ public class ProjectXMLImpl implements ProjectXML {
     private final URL projectURL;
     private final Set<ProjectLibraryXML> libraries = new HashSet<>();
     private final Map<String, String> imports = new HashMap<>();
-    private final UIComponentRegistry uiComponentRegistry = new UIComponentRegistryImpl();
+    private final UIComponentRegistryComposite uiComponentRegistry = new UIComponentRegistryComposite();
     private String id;
     private String name;
     private String version;
@@ -27,6 +29,23 @@ public class ProjectXMLImpl implements ProjectXML {
         this.id = id;
         this.name = name;
         this.version = version;
+        /*
+         * The idea is that new types of UIComponent, or different implementations, can be created by users.
+         * TODO find a way to customize it
+         */
+        UIComponentRegistry customUiComponentRegistry = new UIComponentRegistry() {
+            @Override
+            public Optional<UIComponentType> getComponentType(String name) {
+                return Optional.empty();
+            }
+
+            @Override
+            public Collection<UIComponentType> getComponentTypes() {
+                return Collections.emptyList();
+            }
+        };
+        uiComponentRegistry.add(customUiComponentRegistry);
+        uiComponentRegistry.add(new UIComponentRegistryImpl());
     }
 
     public URL getRelativeURL(String relativePath) {

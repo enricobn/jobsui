@@ -15,10 +15,12 @@ import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.runner.JobsUIValidationResult;
-import org.jobsui.core.ui.*;
+import org.jobsui.core.ui.UI;
+import org.jobsui.core.ui.UIButton;
+import org.jobsui.core.ui.UIComponentRegistry;
+import org.jobsui.core.ui.UIComponentType;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.jobsui.core.xml.*;
-import org.jobsui.ui.javafx.JavaFXUI;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,31 +40,14 @@ public class EditProject {
     private List<String> originalScriptLocations = null;
     private UIButton<Node> saveButton;
     private JobsUIPreferences preferences;
-    private JavaFXUI ui;
+    private UI ui;
     private SplitPane splitPane;
-    private final UIComponentRegistryComposite uiComponentRegistry = new UIComponentRegistryComposite();
-    /**
-     * The idea is that new types of UIComponent, or different implementations, can be created by users.
-     * TODO find a way to customize it
-     */
-    private final UIComponentRegistry customUiComponentRegistry = new UIComponentRegistry() {
-        @Override
-        public Optional<UIComponentType> getComponentType(String name) {
-            return Optional.empty();
-        }
-
-        @Override
-        public Collection<UIComponentType> getComponentTypes() {
-            return Collections.emptyList();
-        }
-    };
+    private UIComponentRegistry uiComponentRegistry;
 
     public EditProject() {
-        uiComponentRegistry.add(customUiComponentRegistry);
-        uiComponentRegistry.add(new UIComponentRegistryImpl());
     }
 
-    public Parent getEditNode(JavaFXUI ui) {
+    public Parent getEditNode(UI ui) {
         this.ui = ui;
         preferences = ui.getPreferences();
         VBox root = new VBox(5);
@@ -182,7 +167,7 @@ public class EditProject {
             }
         });
 
-        itemDetail = new ItemDetail(ui, uiComponentRegistry);
+        itemDetail = new ItemDetail(ui);
         itemDetail.setPadding(new Insets(5, 5, 5, 5));
 
         splitPane = new SplitPane(itemsTree, itemDetail);
@@ -197,6 +182,9 @@ public class EditProject {
     }
 
     private TreeItem<EditItem> loadProject(ProjectFSXML projectXML) {
+        this.uiComponentRegistry = projectXML.getUiComponentRegistry();
+        itemDetail.setUiComponentRegistry(uiComponentRegistry);
+
         TreeItem<EditItem> root = new TreeItem<>(new EditItem(ItemType.Project, projectXML));
 
         TreeItem<EditItem> libraries = new TreeItem<>(new EditItem(ItemType.Libraries, projectXML));
@@ -219,14 +207,15 @@ public class EditProject {
 
         projectXML.getJobs().stream()
                 .sorted(Comparator.comparing(JobXML::getName))
-                .map(this::createJobTreeItem)
+                .map(EditProject::createJobTreeItem)
                 .forEach(root.getChildren()::add);
+
+
         return root;
     }
 
-    private TreeItem<EditItem> createJobTreeItem(JobXML job) {
+    private static TreeItem<EditItem> createJobTreeItem(JobXML job) {
         TreeItem<EditItem> result = new TreeItem<>(new EditItem(ItemType.Job, job));
-
 
         addParameters(result, job, ItemType.Parameters, ItemType.Parameter, job.getSimpleParameterXMLs());
         addParameters(result, job, ItemType.Expressions, ItemType.Expression, job.getExpressionXMLs());
@@ -238,7 +227,7 @@ public class EditProject {
         return result;
     }
 
-    private void addWizard(JobXML job, TreeItem<EditItem> result) {
+    private static void addWizard(JobXML job, TreeItem<EditItem> result) {
         TreeItem<EditItem> wizardSteps = new TreeItem<>(new EditItem(ItemType.WizardSteps, job));
 
         result.getChildren().add(wizardSteps);
@@ -258,7 +247,7 @@ public class EditProject {
 
     }
 
-    private void addParameters(TreeItem<EditItem> result, JobXML jobXML, ItemType containerType, ItemType itemType,
+    private static void addParameters(TreeItem<EditItem> result, JobXML jobXML, ItemType containerType, ItemType itemType,
                                List<? extends ParameterXML> parametersList) {
         TreeItem<EditItem> parameters = new TreeItem<>(new EditItem(containerType, jobXML));
         parameters.setExpanded(true);
@@ -267,7 +256,7 @@ public class EditProject {
         parametersList.forEach(parameter -> addParameter(parameters, itemType, parameter, jobXML));
     }
 
-    private void addParameter(TreeItem<EditItem> parameters, ItemType itemType, ParameterXML parameterDef, JobXML jobXML) {
+    private static void addParameter(TreeItem<EditItem> parameters, ItemType itemType, ParameterXML parameterDef, JobXML jobXML) {
         TreeItem<EditItem> parameterTI = new TreeItem<>(new EditItem(itemType, parameterDef));
         parameters.getChildren().add(parameterTI);
         TreeItem<EditItem> dependencies = new TreeItem<>(new EditItem(ItemType.Dependencies, parameterDef));
@@ -326,23 +315,23 @@ public class EditProject {
         EditItem item = treeItem.getValue();
 
         if (item.itemType == ItemType.Parameters) {
-            populateParametersMenu(contextMenu, treeItem);
+            populateParametersMenu(ui, uiComponentRegistry, contextMenu, treeItem);
         } else if (item.itemType == ItemType.Parameter) {
-            populateParameterMenu(contextMenu, treeItem);
+            populateParameterMenu(ui, contextMenu, treeItem);
         } else if (item.itemType == ItemType.Dependencies) {
-            populateDependenciesMenu(contextMenu, treeItem);
+            populateDependenciesMenu(ui, contextMenu, treeItem);
         } else if (item.itemType == ItemType.Dependency) {
             populateDependencyMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Expressions) {
-            populateExpressionsMenu(contextMenu, treeItem);
+            populateExpressionsMenu(ui, contextMenu, treeItem);
         } else if (item.itemType == ItemType.Expression) {
-            populateParameterMenu(contextMenu, treeItem);
+            populateParameterMenu(ui, contextMenu, treeItem);
         } else if (item.itemType == ItemType.Calls) {
-            populateCallsMenu(contextMenu, treeItem);
+            populateCallsMenu(ui, contextMenu, treeItem);
         } else if (item.itemType == ItemType.Call) {
-            populateParameterMenu(contextMenu, treeItem);
+            populateParameterMenu(ui, contextMenu, treeItem);
         } else if (item.itemType == ItemType.ScriptsLocation) {
-            populateScriptsLocationMenu(contextMenu, treeItem);
+            populateScriptsLocationMenu(ui, contextMenu, treeItem);
         } else if (item.itemType == ItemType.ScriptFile) {
             populateScriptFileMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Libraries) {
@@ -364,7 +353,7 @@ public class EditProject {
         }
     }
 
-    private void populateJobMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateJobMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         ProjectFSXML projectXML = findAncestorPayload(treeItem, ProjectFSXML.class);
 
         JobXML jobXML = (JobXML) treeItem.getValue().payload;
@@ -387,7 +376,7 @@ public class EditProject {
         });
     }
 
-    private void populateProjectMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateProjectMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         ProjectFSXMLImpl projectXML = (ProjectFSXMLImpl) treeItem.getValue().payload;
 
         MenuItem add = new MenuItem("Add job");
@@ -410,7 +399,7 @@ public class EditProject {
 
     }
 
-    private void populateScriptFileMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateScriptFileMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         ProjectFSXML projectXML = findAncestorPayload(treeItem, ProjectFSXML.class);
 
         String location = findAncestorPayload(treeItem, ItemType.ScriptsLocation);
@@ -426,7 +415,7 @@ public class EditProject {
 
     }
 
-    private void populateWizardStepDependencyMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateWizardStepDependencyMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         WizardStep wizardStep = findAncestorPayload(treeItem, WizardStep.class);
 
         String parameterKey = ((ParameterXML) treeItem.getValue().payload).getKey();
@@ -439,7 +428,7 @@ public class EditProject {
         });
     }
 
-    private void populateWizardStepDependenciesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateWizardStepDependenciesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         JobXML jobXML = findAncestorPayload(treeItem, JobXML.class);
 
         WizardStep wizardStep = (WizardStep) treeItem.getValue().payload;
@@ -468,7 +457,7 @@ public class EditProject {
 
     }
 
-    private void populateWizardStepMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateWizardStepMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         JobXML jobXML = findAncestorPayload(treeItem, JobXML.class);
         if (jobXML == null) {
             return;
@@ -484,7 +473,7 @@ public class EditProject {
         });
     }
 
-    private void populateWizardStepsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateWizardStepsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         JobXML jobXML = findAncestorPayload(treeItem, JobXML.class);
         if (jobXML == null) {
             return;
@@ -504,7 +493,7 @@ public class EditProject {
         });
     }
 
-    private void populateLibraryMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateLibraryMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         ProjectXML projectXML = findAncestorPayload(treeItem, ProjectXML.class);
         if (projectXML == null) {
             return;
@@ -520,7 +509,7 @@ public class EditProject {
         });
     }
 
-    private void populateLibrariesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateLibrariesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         ProjectXML projectXML = findAncestorPayload(treeItem, ProjectXML.class);
         if (projectXML == null) {
             return;
@@ -539,7 +528,7 @@ public class EditProject {
         });
     }
 
-    private void populateParameterMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateParameterMenu(UI ui, ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         MenuItem delete = new MenuItem("Delete");
         contextMenu.getItems().add(delete);
         delete.setOnAction(t -> {
@@ -549,7 +538,7 @@ public class EditProject {
             if (validationResult.isValid()) {
                 treeItem.getParent().getChildren().remove(treeItem);
             } else {
-                ui.showMessage(validationResult.getMessages().stream().collect(Collectors.joining("\n")));
+                ui.showMessage(String.join("\n", validationResult.getMessages()));
             }
         });
 
@@ -572,7 +561,7 @@ public class EditProject {
         });
     }
 
-    private void populateDependencyMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateDependencyMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         MenuItem delete = new MenuItem("Delete");
         contextMenu.getItems().add(delete);
         delete.setOnAction(t -> {
@@ -582,7 +571,7 @@ public class EditProject {
         });
     }
 
-    private void populateDependenciesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateDependenciesMenu(UI ui, ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         ParameterXML parameterXML = (ParameterXML) treeItem.getValue().payload;
         List<String> dependencies = parameterXML.getDependencies();
         JobXML jobXML = findAncestorPayload(treeItem, JobXML.class);
@@ -618,7 +607,7 @@ public class EditProject {
         }
     }
 
-    private void populateScriptsLocationMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateScriptsLocationMenu(UI ui, ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         ProjectFSXML projectXML = findAncestorPayload(treeItem, ProjectFSXML.class);
         if (projectXML == null) {
             return;
@@ -640,7 +629,7 @@ public class EditProject {
         });
     }
 
-    private void populateExpressionsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateExpressionsMenu(UI ui, ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         JobXMLImpl jobXML = findAncestorPayload(treeItem, JobXMLImpl.class);
         if (jobXML == null) {
             return;
@@ -660,7 +649,7 @@ public class EditProject {
         });
     }
 
-    private void populateCallsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateCallsMenu(UI ui, ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         JobXMLImpl jobXML = findAncestorPayload(treeItem, JobXMLImpl.class);
         if (jobXML == null) {
             return;
@@ -680,7 +669,8 @@ public class EditProject {
         });
     }
 
-    private void populateParametersMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populateParametersMenu(UI ui, UIComponentRegistry uiComponentRegistry, ContextMenu contextMenu,
+                                               TreeItem<EditItem> treeItem) {
         JobXMLImpl jobXML = findAncestorPayload(treeItem, JobXMLImpl.class);
         if (jobXML == null) {
             return;
@@ -711,11 +701,11 @@ public class EditProject {
             });
     }
 
-    private String nextAvailableParameterKey(JobXML jobXML) {
+    private static String nextAvailableParameterKey(JobXML jobXML) {
         return nextAvailableKey(jobXML.getAllParameters(), ParameterXML::getKey, "newParam");
     }
 
-    private <T> String nextAvailableKey(Collection<T> collection, Function<T, String> getKey, String prefix) {
+    private static <T> String nextAvailableKey(Collection<T> collection, Function<T, String> getKey, String prefix) {
         String newKey = prefix;
         int i = 0;
 
@@ -726,7 +716,7 @@ public class EditProject {
             if (!found) {
                 break;
             }
-            newKey = prefix + Integer.toString(++i);
+            newKey = prefix + ++i;
         }
         return newKey;
     }
