@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -144,20 +143,8 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
                 jobXML.getWizardSteps());
     }
 
-    private static <T,R> Object toGroovyFunction(Function<T,R> function) {
-        return new Object() {
-            public R call(T arg) {
-                return function.apply(arg);
-            }
-        };
-    }
-
-    private static <T,U,R> Object toGroovyFunction(BiFunction<T,U,R> function) {
-        return new Object() {
-            public R call(T arg, U arg1) {
-                return function.apply(arg, arg1);
-            }
-        };
+    private static <T,R> GroovyFunction<T,R> toGroovyFunction(Function<T,R> function) {
+        return function::apply;
     }
 
     private static void addDependencies(List<? extends JobDependency> jobDependencies,

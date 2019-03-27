@@ -91,7 +91,9 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     @Override
     public List<Bookmark> getBookmarks(Project project, Job job) {
         // I cannot cache bookmarks since they depend on job's classloader
-        return new ArrayList<>(bookmarksStore.getBookmarks(project, job).values());
+        ArrayList<Bookmark> bookmarks = new ArrayList<>(bookmarksStore.getBookmarks(project, job).values());
+        bookmarks.sort(Comparator.comparing(Bookmark::getName));
+        return bookmarks;
     }
 
     @Override
@@ -102,9 +104,6 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
-        List<Bookmark> bookmarks = new ArrayList<>(getBookmarks(project, job));
-        bookmarks.sort(Comparator.comparing(Bookmark::getName));
     }
 
     @Override

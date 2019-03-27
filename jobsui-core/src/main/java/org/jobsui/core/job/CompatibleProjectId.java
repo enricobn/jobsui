@@ -1,11 +1,12 @@
 package org.jobsui.core.job;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * Created by enrico on 5/4/17.
  */
-public class CompatibleProjectId {
+public class CompatibleProjectId implements Serializable {
     private final String groupId;
     private final String moduleId;
     private final int majorVersion;

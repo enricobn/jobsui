@@ -6,9 +6,8 @@ import org.jobsui.core.job.CompatibleProjectId;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
@@ -39,12 +38,16 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
     public void saveBookmark(Project project, Job job, Bookmark bookmark) throws IOException {
         File jobRoot = getJobRoot(project, job);
         if (!jobRoot.exists()) {
-            jobRoot.mkdirs();
+            if (!jobRoot.mkdirs()) {
+                throw new IOException();
+            }
         }
 
         File file = new File(jobRoot, bookmark.getName() + ".xml");
 
-        try (FileWriter fileWriter = new FileWriter(file)) {
+
+        try (FileOutputStream out = new FileOutputStream(file);
+                Writer fileWriter = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
             XStream xstream = new XStream();
             if (job.getClassLoader() != null) {
                 xstream.setClassLoader(job.getClassLoader());
@@ -74,8 +77,8 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
 
         for (String fileName : list) {
             File file = new File(jobRoot, fileName);
-            try {
-                result.add((Bookmark) xstream.fromXML(file));
+            try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)){
+                result.add((Bookmark) xstream.fromXML(reader));
             } catch (Exception e) {
                 // TODO show a message in UI
                 LOGGER.log(Level.SEVERE, "Error loading bookmark from " + file, e);

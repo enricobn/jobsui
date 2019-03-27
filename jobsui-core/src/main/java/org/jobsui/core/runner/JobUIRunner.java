@@ -143,7 +143,7 @@ public class JobUIRunner<C> implements JobRunner {
                                     throw new RuntimeException("Error setting value for parameter with key '" + jobDependency.getKey() + "'.", e);
                                 }
                             } else {
-                                ui.showMessage(String.format("Value '%s' for parameter '%s' is not valid:\n%s",
+                                ui.showMessage(String.format("Value '%s' for parameter '%s' is not valid:%n%s",
                                         value, jobParameter.getName(), String.join(",", validate)));
                                 break;
                             }
