@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
  * Created by enrico on 4/28/17.
  */
 public class ItemDetail extends VBox {
+    public static final String ID_DETAIL_PARAMETER_NAME = "detailParameterName";
     private static final Border CODE_AREA_DARK_FOCUSED_BORDER =
             new Border(new BorderStroke(Paint.valueOf("039ED3"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
     private static final Border CODE_AREA_FOCUSED_BORDER =
@@ -35,20 +36,19 @@ public class ItemDetail extends VBox {
             new Border(new BorderStroke(Paint.valueOf("black"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
     private static final Border CODE_AREA_NOT_FOCUSED_BORDER =
             new Border(new BorderStroke(Paint.valueOf("gray"), BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT));
-    public static final String ID_DETAIL_PARAMETER_NAME = "detailParameterName";
-    public static final String ID_DETAIL_PARAMETER_KEY = "detailParameterKey";
+    private static final String ID_DETAIL_PARAMETER_KEY = "detailParameterKey";
 
     private final UI ui;
     private final JobsUIPreferences preferences;
     private UIComponentRegistry uiComponentRegistry;
 
-    public ItemDetail(UI ui) {
+    ItemDetail(UI ui) {
         super(0);
         this.ui = ui;
         this.preferences = ui.getPreferences();
     }
 
-    public void setSelectedItem(TreeItem<EditItem> treeItem) {
+    void setSelectedItem(TreeItem<EditItem> treeItem) {
         EditItem item = treeItem.getValue();
         getChildren().clear();
 
@@ -292,7 +292,8 @@ public class ItemDetail extends VBox {
         }
     }
 
-    private void addTextAreaProperty(TreeItem<EditItem> treeItem, String title, Supplier<String> get, Consumer<String> set, boolean showLineNumbers) {
+    private void addTextAreaProperty(TreeItem<EditItem> treeItem, String title, Supplier<String> get, Consumer<String> set,
+                                     boolean showLineNumbers) {
         addPropertyNameLabel(title);
 
         VBox parent = new VBox();
@@ -339,7 +340,7 @@ public class ItemDetail extends VBox {
     }
 
 
-    public void setUiComponentRegistry(UIComponentRegistry uiComponentRegistry) {
+    void setUiComponentRegistry(UIComponentRegistry uiComponentRegistry) {
         this.uiComponentRegistry = uiComponentRegistry;
     }
 }

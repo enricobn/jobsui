@@ -15,10 +15,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 /**
@@ -55,7 +55,6 @@ public class CommandLineArguments {
     public static boolean parse(String[] args, ProjectParser projectParser, ProjectBuilder projectBuilder,
                                 FileSystem fileSystem, Consumer<CommandLineArguments> onSuccess,
                                 Consumer<List<String>> onError, BookmarksStore bookmarksStore) {
-        List<String> validation = new ArrayList<>();
 
         Option run = Option.builder("run")
                 .numberOfArgs(2)
@@ -91,18 +90,20 @@ public class CommandLineArguments {
             } else {
                 CommandLineArguments arguments;
 
-                UIType uiType = UIType.JavaFX;
+                UIType uiType;
                 if (line.hasOption("ui")) {
                     String uiTypeString = line.getOptionValue("ui");
 
-                    if ("swing".equals(uiTypeString.toLowerCase())) {
+                    if ("swing".equals(uiTypeString.toLowerCase(Locale.ENGLISH))) {
                         uiType = UIType.Swing;
-                    } else if ("javafx".equals(uiTypeString.toLowerCase())) {
+                    } else if ("javafx".equals(uiTypeString.toLowerCase(Locale.ENGLISH))) {
                         uiType = UIType.JavaFX;
                     } else {
-                        uiType = null;
-                        validation.add(String.format("Unknown ui type '%s'.", uiTypeString));
+                        onError.accept(Collections.singletonList(String.format("Unknown ui type '%s'.", uiTypeString)));
+                        return false;
                     }
+                } else {
+                    uiType = UIType.JavaFX;
                 }
 
                 arguments = new CommandLineArguments(uiType, projectBuilder, bookmarksStore);
@@ -113,13 +114,7 @@ public class CommandLineArguments {
                     String jobString = values[1];
                     try {
                         // in case of run either a folder or an URL can be specified
-                        URL url;
-                        try {
-                            url = new URL(projectString);
-                        } catch (MalformedURLException e) {
-                            url = new File(projectString).toURI().toURL();
-                            System.out.println(url);
-                        }
+                        URL url = getUrl(projectString);
 
                         ProjectXML projectXML = projectParser.parse(url);
 
@@ -154,19 +149,20 @@ public class CommandLineArguments {
                         return false;
                     }
                 }
-
-                if (validation.isEmpty()) {
-                    onSuccess.accept(arguments);
-                    return true;
-                } else {
-                    onError.accept(validation);
-                    return false;
-                }
-
+                onSuccess.accept(arguments);
+                return true;
             }
         } catch (ParseException exp) {
             onError.accept(Arrays.asList(exp.getMessage(), getHelp(options)));
             return false;
+        }
+    }
+
+    private static URL getUrl(String projectString) throws MalformedURLException {
+        try {
+            return new URL(projectString);
+        } catch (MalformedURLException e) {
+            return new File(projectString).toURI().toURL();
         }
     }
 

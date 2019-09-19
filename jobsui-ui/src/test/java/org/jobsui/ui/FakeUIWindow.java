@@ -11,7 +11,6 @@ import org.jobsui.core.ui.UIWindow;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
@@ -22,8 +21,6 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
     private static final int SLEEP = 50;
     private volatile boolean exit = false;
     private volatile boolean started = false;
-//    private volatile boolean valid = false;
-    private volatile AtomicInteger unnamed = new AtomicInteger(0);
     private List<String> validationMessages = new ArrayList<>();
 
     @Override
@@ -130,11 +127,11 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
 //        return valid;
 //    }
 
-    public void exit() {
+    void exit() {
         this.exit = true;
     }
 
-    public void waitUntilStarted() {
+    void waitUntilStarted() {
         boolean inDebug =
                 java.lang.management.ManagementFactory.getRuntimeMXBean().
                         getInputArguments().toString().indexOf("-agentlib:jdwp") > 0;
@@ -157,7 +154,7 @@ public class FakeUIWindow<T extends Serializable> implements UIWindow<T> {
 //    }
 
     // TODO I don't like it here, it must know nothing about validation
-    public List<String> getValidationMessages() {
+    List<String> getValidationMessages() {
         return validationMessages;
     }
 }

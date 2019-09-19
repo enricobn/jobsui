@@ -129,7 +129,7 @@ public class JavaFXUI implements UI<Node> {
         return widget;
     }
 
-    public static void uncaughtException(Thread t, Throwable e) {
+    static void uncaughtException(Thread t, Throwable e) {
         showErrorStatic("Error on thread " + t.getName(), e);
     }
 
@@ -178,7 +178,7 @@ public class JavaFXUI implements UI<Node> {
         e.printStackTrace();
     }
 
-    public static void showMessageStatic(String message) {
+    private static void showMessageStatic(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("JobsUI");
         alert.setHeaderText("");
@@ -186,7 +186,7 @@ public class JavaFXUI implements UI<Node> {
         alert.showAndWait();
     }
 
-    public static <T> Optional<T> chooseStatic(String message, List<T> choices) {
+    static <T> Optional<T> chooseStatic(String message, List<T> choices) {
         ChoiceDialog<T> dialog = new ChoiceDialog<>(null, choices);
         dialog.setTitle("JobsUI");
         dialog.setHeaderText(message);

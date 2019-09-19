@@ -66,7 +66,7 @@ public class CommandLineArgumentsTest {
     }
 
     @Test
-    public void parseRun() throws Exception {
+    public void parseRun() {
         Consumer<CommandLineArguments> onSuccess = arguments -> {
             assertSame(arguments.getAction(), StartAction.Run);
             assertEquals("job", arguments.getJob());
@@ -79,10 +79,10 @@ public class CommandLineArgumentsTest {
     }
 
     @Test
-    public void parseEdit() throws Exception {
+    public void parseEdit() {
         Consumer<CommandLineArguments> onSuccess = arguments -> {
-            assertTrue(arguments.getAction() == StartAction.Edit);
-            assertTrue(arguments.getProjectFSXML() == projectFSXML);
+            assertSame(arguments.getAction(), StartAction.Edit);
+            assertSame(arguments.getProjectFSXML(), projectFSXML);
         };
 
         Consumer<List<String>> onFailure = error -> fail(error.toString());

@@ -165,11 +165,6 @@ public class StartApp extends Application {
         stage.showAndWait();
     }
 
-    private static String resourceToURL(String resource) {
-        URL url = StartApp.class.getResource(resource);
-        return url.toExternalForm();
-    }
-
     private void replaceSceneContent(Stage stage, URL fxml) throws Exception {
         Parent page = FXMLLoader.load(fxml, null, new JavaFXBuilderFactory());
         replaceSceneContent(stage, page);

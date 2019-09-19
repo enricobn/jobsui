@@ -25,7 +25,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockSettings;
 import org.mockito.Mockito;
-import org.mockito.listeners.InvocationListener;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
@@ -33,6 +32,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
+import java.util.logging.Logger;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
@@ -46,6 +46,7 @@ import static org.mockito.Mockito.*;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class JobRunnerTest {
+    private static final Logger LOGGER = Logger.getLogger(JobRunnerTest.class.getName());
     private Map<String, Project> projects;
     private Map<JobType, CachedJob> jobs;
     private JobUIRunner<FakeComponent> runner;
@@ -70,7 +71,7 @@ public class JobRunnerTest {
             this.supplier = supplier;
         }
 
-        public Tuple2<Project,Job<String>> get() {
+        Tuple2<Project,Job<String>> get() {
             if (job == null) {
                 job = supplier.get();
             }
@@ -118,8 +119,8 @@ public class JobRunnerTest {
         doAnswer(invocation -> {
             String message = invocation.getArgumentAt(0, String.class);
             Exception exception = invocation.getArgumentAt(1, Exception.class);
-            System.err.println(message);
-            exception.printStackTrace();
+            LOGGER.severe(message);
+            LOGGER.severe(exception.toString());
             return null;
         }).when(ui).showError(anyString(), any(Throwable.class));
 
@@ -628,7 +629,7 @@ public class JobRunnerTest {
     }
 
     private MockSettings printInvocation(String name, final CharSequence methodName) {
-        return Mockito.withSettings().name(name).invocationListeners((InvocationListener) methodInvocationReport -> {
+        return Mockito.withSettings().name(name).invocationListeners(methodInvocationReport -> {
             if (methodInvocationReport.getInvocation().toString().contains(methodName)) {
                 new RuntimeException().printStackTrace();
             }

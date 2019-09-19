@@ -22,7 +22,7 @@ public class JobXMLImpl implements JobXML {
     private String validateScript;
     private int order;
 
-    public JobXMLImpl(String id, String name, String version) {
+    JobXMLImpl(String id, String name, String version) {
         this.name = name;
         this.id = id;
         this.version = version;

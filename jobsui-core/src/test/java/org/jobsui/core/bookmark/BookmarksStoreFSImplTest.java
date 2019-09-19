@@ -31,7 +31,7 @@ public class BookmarksStoreFSImplTest {
     }
 
     @Test
-    public void assert_that_when_there_is_no_folder_for_project_then_bookmarks_is_empty() throws Exception {
+    public void assert_that_when_there_is_no_folder_for_project_then_bookmarks_is_empty() {
         Project project = createProject();
         Job<?> job = createJob("jobId");
         assertThat(sut.getBookmarks(project, job).isEmpty(), is(true));
@@ -94,12 +94,12 @@ public class BookmarksStoreFSImplTest {
         assertThat(savedBookmark.getName(), is(bookmark.getName()));
     }
 
-    private ArrayList<Bookmark> getBookmarks(Project project, Job<?> job) {
+    private List<Bookmark> getBookmarks(Project project, Job<?> job) {
         return new ArrayList<>(sut.getBookmarks(project, job).values());
     }
 
     @Test
-    public void assert_that_when_no_bookmarks_are_registered_for_a_job_then_existsBookmark_retuns_false() throws Exception {
+    public void assert_that_when_no_bookmarks_are_registered_for_a_job_then_existsBookmark_retuns_false() {
         Project project = createProject();
         Job<?> job = createJob("jobId");
 
@@ -119,7 +119,7 @@ public class BookmarksStoreFSImplTest {
     }
 
     @Test
-    public void assert_that_when_no_bookmarks_are_registered_for_a_job_then_deleteBookmark_retuns_false() throws Exception {
+    public void assert_that_when_no_bookmarks_are_registered_for_a_job_then_deleteBookmark_retuns_false() {
         Project project = createProject();
         Job<?> job = createJob("jobId");
 

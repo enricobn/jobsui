@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.util.*;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -32,15 +33,18 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
 
     @Override
     public Project build(ProjectXML projectXML, BookmarksStore bookmarksStore, UI ui) throws Exception {
-        LOGGER.info("Building project " + projectXML.getId());
-
-        LOGGER.info("Creating groovy shell for project " + projectXML.getId());
+        if (LOGGER.isLoggable(Level.INFO)) {
+            LOGGER.info("Building project " + projectXML.getId());
+            LOGGER.info("Creating groovy shell for project " + projectXML.getId());
+        }
         GroovyShell groovyShell = createGroovyShell(projectXML);
         groovyShell.setProperty("projectRelativeURL", toGroovyFunction(projectXML::getRelativeURL));
         groovyShell.setProperty("classLoader", groovyShell.getClassLoader());
         groovyShell.setProperty("ui", ui);
 
-        LOGGER.info("Created groovy shell for project " + projectXML.getId());
+        if (LOGGER.isLoggable(Level.INFO)) {
+            LOGGER.info("Created groovy shell for project " + projectXML.getId());
+        }
 
         Map<String, JobGroovy<Serializable>> jobs = new HashMap<>();
 
@@ -82,7 +86,9 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
         for (JobGroovy<?> job : jobs.values()) {
             job.init(projectGroovy);
         }
-        LOGGER.info("Built project " + projectXML.getId());
+        if (LOGGER.isLoggable(Level.INFO)) {
+            LOGGER.info("Built project " + projectXML.getId());
+        }
         return projectGroovy;
     }
 

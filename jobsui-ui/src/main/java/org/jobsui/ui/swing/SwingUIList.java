@@ -18,10 +18,10 @@ public class SwingUIList implements UIList<JComponent> {
     private final JPanel component = new JPanel();
     private final Observable<Serializable> observable;
     private final List<Subscriber<? super Serializable>> subscribers = new ArrayList<>();
-    private ArrayList<Serializable> items;
+    private List<Serializable> items;
     private boolean allowRemove = true;
 
-    public SwingUIList() {
+    SwingUIList() {
         component.setLayout(new GridBagLayout());
         observable = Observable.create(subscriber -> {
             subscriber.onStart();

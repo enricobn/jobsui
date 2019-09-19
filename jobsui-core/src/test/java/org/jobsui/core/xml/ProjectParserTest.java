@@ -44,12 +44,12 @@ public class ProjectParserTest {
     }
 
     @AfterClass
-    public static void tearDownStatic() throws Exception {
+    public static void tearDownStatic() {
         projectXML = null;
     }
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         when(uiComponentRegistry.getComponentType(anyString())).thenReturn(Optional.empty());
     }
 

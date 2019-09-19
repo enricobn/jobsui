@@ -722,7 +722,7 @@ public class EditProject {
     }
 
 
-    static <T> T findAncestorPayload(TreeItem<EditItem> treeItem, Class<T> payloadClass) {
+    private static <T> T findAncestorPayload(TreeItem<EditItem> treeItem, Class<T> payloadClass) {
         return findAncestorPayload(treeItem, item -> payloadClass.isAssignableFrom(item.payload.getClass()));
     }
 
@@ -731,7 +731,7 @@ public class EditProject {
         return findAncestorPayload(treeItem, item -> itemTypesSet.contains(item.itemType));
     }
 
-    static <T> T findAncestorPayload(TreeItem<EditItem> treeItem, Predicate<EditItem> predicate) {
+    private static <T> T findAncestorPayload(TreeItem<EditItem> treeItem, Predicate<EditItem> predicate) {
         TreeItem<EditItem> ancestor = treeItem.getParent();
 
         if (ancestor == null) {

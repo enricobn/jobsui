@@ -10,13 +10,13 @@ import java.util.Map;
  * Created by enrico on 4/24/17.
  */
 class ChangedValue {
-    private final JobDependency jobDependency;
-    private final Map<String, Serializable> values;
-    public final Map<String, Serializable> validValues;
-    private final List<String> validation;
+    public final JobDependency jobDependency;
+    public final Map<String, Serializable> values;
+    public final List<String> validation;
+    final Map<String, Serializable> validValues;
 
-    public ChangedValue(JobDependency jobDependency, Map<String, Serializable> values, Map<String, Serializable> validValues,
-                        List<String> validation) {
+    ChangedValue(JobDependency jobDependency, Map<String, Serializable> values, Map<String, Serializable> validValues,
+                 List<String> validation) {
         this.jobDependency = jobDependency;
         this.values = values;
         this.validValues = validValues;

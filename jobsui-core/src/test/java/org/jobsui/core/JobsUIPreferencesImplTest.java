@@ -1,10 +1,8 @@
 package org.jobsui.core;
 
-import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.bookmark.BookmarksStore;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
-import org.jobsui.core.runner.JobValues;
 import org.jobsui.core.ui.JobsUITheme;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import java.net.URL;
-import java.util.UUID;
 import java.util.prefs.Preferences;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -21,9 +18,7 @@ import static org.jobsui.core.JobsUIPreferencesImpl.*;
 import static org.jobsui.core.TestUtils.createJob;
 import static org.jobsui.core.TestUtils.createProject;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -45,7 +40,7 @@ public class JobsUIPreferencesImplTest {
     private java.util.prefs.Preferences run;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         when(preferences.node(LAST_OPENED_PROJECTS_NODE)).thenReturn(lastOpenedProjects);
         when(preferences.node(OTHERS_NODE)).thenReturn(others);
         when(preferences.node(EDIT_NODE)).thenReturn(edit);
@@ -53,7 +48,7 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void assert_that_default_value_for_theme_is_material() throws Exception {
+    public void assert_that_default_value_for_theme_is_material() {
         when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
@@ -62,7 +57,7 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void assert_that_when_standard_theme_is_specified_then_that_theme_is_returned() throws Exception {
+    public void assert_that_when_standard_theme_is_specified_then_that_theme_is_returned() {
         when(others.get(eq(THEME), anyString())).thenReturn(JobsUITheme.Standard.name());
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
@@ -111,7 +106,7 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void assert_that_opened_projects_are_memorized_in_insertion_order() throws Exception {
+    public void assert_that_opened_projects_are_memorized_in_insertion_order() {
         when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
         when(lastOpenedProjects.getInt(eq(SIZE), anyInt())).thenReturn(2);
 
@@ -198,11 +193,6 @@ public class JobsUIPreferencesImplTest {
         sut.getBookmarks(project, job);
 
         verify(bookmarkStore).getBookmarks(project, job);
-    }
-
-    private Bookmark createBookmark(String bookmarkName, Project project, Job<?> job) {
-        JobValues values = mock(JobValues.class);
-        return new Bookmark(project, job, UUID.randomUUID().toString(), bookmarkName, values);
     }
 
 

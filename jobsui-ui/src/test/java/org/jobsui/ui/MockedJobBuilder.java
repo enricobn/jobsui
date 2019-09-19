@@ -13,24 +13,20 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMapOf;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.isNotNull;
-import static org.mockito.Matchers.isNull;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
  * Created by enrico on 4/2/17.
  */
-public class MockedJobBuilder<T> {
+class MockedJobBuilder<T> {
     private final Map<String, JobParameter> parameters = new LinkedHashMap<>();
     private final Map<String, JobExpression> expressions = new LinkedHashMap<>();
     private final Job<T> job = mock(Job.class);
     private boolean adding = false;
     private Function<Map<String, Serializable>, T> onRun;
 
-    public <COMP extends UIComponent> MockedParameter<COMP> addParameter(String key, Class<COMP> componentTYpe) {
+    <COMP extends UIComponent> MockedParameter<COMP> addParameter(String key, Class<COMP> componentTYpe) {
         if (adding) {
             throw new IllegalStateException("Cannot add another parameter before creating the previous. Forgotten a create()?.");
         }
@@ -42,7 +38,7 @@ public class MockedJobBuilder<T> {
         return new MockedParameter<>(componentTYpe, jobParameter);
     }
 
-    public void addExpression(String key, Function<Map<String,Serializable>, Serializable> evaluate, String... dependencies) {
+    void addExpression(String key, Function<Map<String, Serializable>, Serializable> evaluate, String... dependencies) {
         if (adding) {
             throw new IllegalStateException("Cannot add another parameter before creating the previous. Forgotten a create()?.");
         }
@@ -83,11 +79,11 @@ public class MockedJobBuilder<T> {
         expressions.put(key, jobExpression);
     }
 
-    public void onRun(Function<Map<String,Serializable>, T> onRun) {
+    void onRun(Function<Map<String, Serializable>, T> onRun) {
         this.onRun = onRun;
     }
 
-    public Job<T> build() {
+    Job<T> build() {
         if (adding) {
             throw new IllegalStateException("Cannot create job while creating a parameter. Forgotten a create()?.");
         }
@@ -154,7 +150,7 @@ public class MockedJobBuilder<T> {
         private BiConsumer<COMP,Map<String,Serializable>> onDependenciesChange;
         private Consumer<COMP> onInit;
 
-        public MockedParameter(Class<COMP> componentTYpe, JobParameter jobParameter) {
+        MockedParameter(Class<COMP> componentTYpe, JobParameter jobParameter) {
             this.componentTYpe = componentTYpe;
             this.jobParameter = jobParameter;
         }
@@ -164,7 +160,7 @@ public class MockedJobBuilder<T> {
             return this;
         }
 
-        public MockedParameter<COMP> dependsOn(String... dependencies) {
+        MockedParameter<COMP> dependsOn(String... dependencies) {
             List<String> dependenciesList = Arrays.asList(dependencies);
             when(jobParameter.getDependencies()).thenReturn(dependenciesList);
             try {
@@ -176,22 +172,22 @@ public class MockedJobBuilder<T> {
             return this;
         }
 
-        public MockedParameter<COMP> onDependenciesChange(BiConsumer<COMP,Map<String,Serializable>> onDependenciesChange) {
+        MockedParameter<COMP> onDependenciesChange(BiConsumer<COMP, Map<String, Serializable>> onDependenciesChange) {
             this.onDependenciesChange = onDependenciesChange;
             return this;
         }
 
-        public MockedParameter<COMP> onInit(Consumer<COMP> onInit) {
+        MockedParameter<COMP> onInit(Consumer<COMP> onInit) {
             this.onInit = onInit;
             return this;
         }
 
-        public MockedParameter<COMP> invisible() {
+        MockedParameter<COMP> invisible() {
             this.visible = false;
             return this;
         }
 
-        public COMP build() {
+        COMP build() {
             final COMP uiComponent;
 
             if (componentTYpe.equals(UIValue.class)) {
@@ -203,7 +199,7 @@ public class MockedJobBuilder<T> {
             }
 
             try {
-                when(jobParameter.createComponent(any(UI.class))).thenReturn((UIComponent<Object>)uiComponent);
+                when(jobParameter.createComponent(any(UI.class))).thenReturn(uiComponent);
             } catch (UnsupportedComponentException e) {
                 throw new RuntimeException(e);
             }

@@ -18,7 +18,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import static org.jobsui.core.xml.XMLUtils.getElementContent;
@@ -28,7 +30,7 @@ import static org.jobsui.core.xml.XMLUtils.getMandatoryAttribute;
  * Created by enrico on 5/4/16.
  */
 public class ProjectParserImpl implements ProjectParser {
-    public static final String PROJECT_FILE_NAME = "project.xml";
+    static final String PROJECT_FILE_NAME = "project.xml";
     private static final Logger LOGGER = Logger.getLogger(ProjectParserImpl.class.getName());
     private static final Validator projectValidator;
     private static final Schema projectSchema;
@@ -60,7 +62,7 @@ public class ProjectParserImpl implements ProjectParser {
             }
         });
 
-        Charset utf8 = Charset.forName("UTF-8");
+        Charset utf8 = StandardCharsets.UTF_8;
 
         for (String root : projectFSXML.getScriptsLocations()) {
             File rootFolder = new File(folder, root);
@@ -83,7 +85,9 @@ public class ProjectParserImpl implements ProjectParser {
     }
 
     private static <T extends ProjectXMLImpl> T parse(URL url, Function<Tuple3<String,String, String>,T> supplier) throws Exception {
-        LOGGER.info("Parsing " + url);
+        if (LOGGER.isLoggable(Level.INFO)) {
+            LOGGER.info("Parsing " + url);
+        }
         URL projectURL = new URL(url + "/" + PROJECT_FILE_NAME);
 
         try (InputStream is = projectURL.openStream()) {
@@ -119,7 +123,9 @@ public class ProjectParserImpl implements ProjectParser {
             parseProject(doc, projectXML);
         }
 
-        LOGGER.info("Parsed " + url);
+        if (LOGGER.isLoggable(Level.INFO)) {
+            LOGGER.info("Parsed " + url);
+        }
         return projectXML;
 
     }

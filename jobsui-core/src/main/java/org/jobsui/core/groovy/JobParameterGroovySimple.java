@@ -22,9 +22,9 @@ public class JobParameterGroovySimple extends JobParameterAbstract implements Jo
     private final Binding shellBinding;
     private final UIComponentType componentType;
 
-    public JobParameterGroovySimple(GroovyShell shell, String key, String name, UIComponentType componentType,
-                                    String onInitScript, String onDependenciesChangeScript,
-                                    String validateScript, boolean optional, boolean visible) {
+    JobParameterGroovySimple(GroovyShell shell, String key, String name, UIComponentType componentType,
+                             String onInitScript, String onDependenciesChangeScript,
+                             String validateScript, boolean optional, boolean visible) {
         super(key, name, null, optional, visible);
         this.componentType = componentType;
         Objects.requireNonNull(componentType);

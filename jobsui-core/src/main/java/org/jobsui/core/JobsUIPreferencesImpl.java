@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
 /**
@@ -32,12 +33,12 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     static final String LAST_OPENED_PROJECTS_NODE = "lastOpenedProjects";
     static final String OPENED_PROJECT_PATH_PREFIX = "path_";
     static final String OPENED_PROJECT_NAME_PREFIX = "name_";
-    private final Preferences lastOpenedProjectsNode;
-    private final Preferences othersNode;
-    private final Preferences editNode;
-    private final Preferences runNode;
+    private final transient Preferences lastOpenedProjectsNode;
+    private final transient Preferences othersNode;
+    private final transient Preferences editNode;
+    private final transient Preferences runNode;
     private final BookmarksStore bookmarksStore;
-    private final List<OpenedItem> lastOpenedProjects = new ArrayList<>();
+    private final transient List<OpenedItem> lastOpenedProjects = new ArrayList<>();
     private JobsUITheme theme;
     private double editDividerPosition;
     private double editWidth;
@@ -97,13 +98,9 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     }
 
     @Override
-    public void saveBookmark(Project project, Job job, Bookmark bookmark) {
+    public void saveBookmark(Project project, Job job, Bookmark bookmark) throws IOException {
         // I cannot cache bookmarks since they depend on job's classloader
-        try {
-            bookmarksStore.saveBookmark(project, job, bookmark);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        bookmarksStore.saveBookmark(project, job, bookmark);
     }
 
     @Override
@@ -220,7 +217,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
         }
     }
 
-    private void saveTH() throws Exception {
+    private void saveTH() throws BackingStoreException {
         lastOpenedProjectsNode.clear();
 
         lastOpenedProjectsNode.putInt(SIZE, lastOpenedProjects.size());

@@ -1,6 +1,9 @@
 package org.jobsui.core.repository;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by enrico on 5/5/17.
@@ -21,7 +24,7 @@ public class RepositoriesProviderImpl implements RepositoriesProvider {
         return repositories.remove(id);
     }
 
-    public void removeAll() {
+    void removeAll() {
         repositories.clear();
     }
 }

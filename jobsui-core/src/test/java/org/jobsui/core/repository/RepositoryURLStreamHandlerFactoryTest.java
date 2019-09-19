@@ -9,7 +9,7 @@ import org.junit.Test;
 import java.net.URL;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThat;
 
 /**
  * Created by enrico on 5/6/17.
@@ -17,7 +17,7 @@ import static org.junit.Assert.*;
 public class RepositoryURLStreamHandlerFactoryTest {
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         URL repositoryUrl = getClass().getResource("/repository");
 
         RepositoryImpl repository = new RepositoryImpl(repositoryUrl);
@@ -26,7 +26,7 @@ public class RepositoryURLStreamHandlerFactoryTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         RepositoryURLStreamHandlerFactory.getInstance().clear();
     }
 

@@ -3,7 +3,10 @@ package org.jobsui.core.runner;
 import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.bookmark.SavedLink;
 import org.jobsui.core.job.*;
-import org.jobsui.core.ui.*;
+import org.jobsui.core.ui.UI;
+import org.jobsui.core.ui.UIComponent;
+import org.jobsui.core.ui.UIWidget;
+import org.jobsui.core.ui.UnsupportedComponentException;
 import rx.Observable;
 import rx.Subscriber;
 
@@ -35,12 +38,12 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
         this.dependenciesObservables = dependenciesObservables;
     }
 
-    public static <T extends Serializable, C> JobUIRunnerContext<T,C> of(Project project, Job<T> job, UI<C> ui, UIWindow<C> window) throws Exception {
+    public static <T extends Serializable, C> JobUIRunnerContext<T,C> of(Project project, Job<T> job, UI<C> ui) throws Exception {
         LOGGER.fine("Creating Job runner context");
 
         Map<String,UIWidget<C>> widgets = new HashMap<>();
         for (final JobParameter jobParameter : job.getParameterDefs()) {
-            UIWidget<C> widget = createWidget(ui, window, jobParameter);
+            UIWidget<C> widget = createWidget(ui, jobParameter);
             widget.setDisable(!jobParameter.getDependencies().isEmpty());
             widgets.put(jobParameter.getKey(), widget);
         }
@@ -65,15 +68,15 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
         return ui;
     }
 
-    public List<JobDependency> getSortedJobDependencies() {
+    List<JobDependency> getSortedJobDependencies() {
         return sortedJobDependencies;
     }
 
-    public DependenciesObservables getDependenciesObservables() {
+    DependenciesObservables getDependenciesObservables() {
         return dependenciesObservables;
     }
 
-    public void disableDependants(JobDependency jobDependency) {
+    void disableDependants(JobDependency jobDependency) {
         for (JobDependency dependant : getDependants(jobDependency)) {
             if (dependant instanceof JobParameter) {
                 getWidget((JobParameter) dependant).setDisable(true);
@@ -82,7 +85,7 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
         }
     }
 
-    public void reEnableDependants(Map<String,Serializable> validValues, JobDependency jobDependency) {
+    void reEnableDependants(Map<String, Serializable> validValues, JobDependency jobDependency) {
         for (JobDependency dependant : getDependants(jobDependency)) {
             Map<String, Serializable> dependenciesValues = getDependenciesValues(validValues, dependant);
             if (dependenciesValues.size() == dependant.getDependencies().size()) {
@@ -108,7 +111,7 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
      * Creates an Observable that emits a JobValidation, with the validation status of the job, when all values are set or
      * a value is changed.
      */
-    public Observable<JobsUIValidationResult> jobValidationObserver() {
+    Observable<JobsUIValidationResult> jobValidationObserver() {
         List<Observable<Serializable>> observables = getDependenciesObservables().getList();
 
         return Observable.combineLatest(observables, args -> {
@@ -146,7 +149,7 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
      * Creates an Observable that emits a map with all valid values, when all values are set or
      * a value is changed.
      */
-    public Observable<Map<String,Serializable>> valuesChangeObserver() {
+    Observable<Map<String,Serializable>> valuesChangeObserver() {
         List<Observable<Serializable>> observables = dependenciesObservables.getList();
 
         return Observable.combineLatest(observables, args -> {
@@ -174,14 +177,14 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
         });
     }
 
-    public static boolean isValid(JobParameterValidator jobParameterValidator, Map<String,Serializable> dependenciesValues, Serializable value) {
+    static boolean isValid(JobParameterValidator jobParameterValidator, Map<String, Serializable> dependenciesValues, Serializable value) {
         final List<String> validate = jobParameterValidator.validate(dependenciesValues, value);
 
         return validate.isEmpty();
     }
 
-    public static Map<String, Serializable> getDependenciesValues(Map<String, Serializable> values,
-                                                                   JobDependency jobDependency) {
+    static Map<String, Serializable> getDependenciesValues(Map<String, Serializable> values,
+                                                           JobDependency jobDependency) {
         Map<String,Serializable> dependenciesValues = new HashMap<>();
         for (String dependency : jobDependency.getDependencies()) {
             if (values.containsKey(dependency)) {
@@ -192,7 +195,7 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
         return dependenciesValues;
     }
 
-    public Observable<Map<String, Serializable>> combineDependenciesObservables(
+    Observable<Map<String, Serializable>> combineDependenciesObservables(
             List<String> dependencies,
             Collection<Observable<Serializable>> observables,
             Map<String, Serializable> validValues)
@@ -220,7 +223,7 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
         });
     }
 
-    public Observable<ChangedValue> valueChangeObserver() {
+    Observable<ChangedValue> valueChangeObserver() {
         Map<String, Observable<Serializable>> observables = dependenciesObservables.getMap();
 
         List<Subscriber<? super ChangedValue>> subscribers = new ArrayList<>();
@@ -266,11 +269,11 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
         return mapObservable;
     }
 
-    public UIWidget<C> getWidget(JobParameter jobParameter) {
+    UIWidget<C> getWidget(JobParameter jobParameter) {
         return widgets.get(jobParameter.getKey());
     }
 
-    public DependenciesObservables getDependenciesObservables(List<String> dependencies) {
+    DependenciesObservables getDependenciesObservables(List<String> dependencies) {
         return getDependenciesObservables(job, widgets, dependencies);
     }
 
@@ -306,7 +309,7 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
         return project;
     }
 
-    public Serializable transformValue(Serializable value) {
+    Serializable transformValue(Serializable value) {
         Serializable transformedValues;
         if (value instanceof SavedLink) {
             SavedLink savedLink = (SavedLink) value;
@@ -321,7 +324,7 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
         return transformedValues;
     }
 
-    public Map<String, Serializable> transformValues(Map<String, Serializable> values) {
+    Map<String, Serializable> transformValues(Map<String, Serializable> values) {
         Map<String, Serializable> transformedValues = new HashMap<>(values.size());
         values.forEach((key, value) -> transformedValues.put(key, transformValue(value)));
         return transformedValues;
@@ -354,8 +357,8 @@ public class JobUIRunnerContext<T extends Serializable, C> implements JobDepende
         }
     }
 
-    private static <C> UIWidget<C> createWidget(final UI<C> ui, UIWindow<C> window,
-                                                          final JobParameter jobParameter)
+    private static <C> UIWidget<C> createWidget(final UI<C> ui,
+                                                final JobParameter jobParameter)
     throws UnsupportedComponentException {
         final UIComponent<C> component = jobParameter.createComponent(ui);
         if (component == null) {

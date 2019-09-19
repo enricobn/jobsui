@@ -1,7 +1,6 @@
 package org.jobsui.core.groovy;
 
 import org.apache.ivy.Ivy;
-import org.apache.ivy.core.event.download.StartArtifactDownloadEvent;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
@@ -35,16 +34,15 @@ class IvyUtils {
     }
 
     // from https://makandracards.com/evgeny-goldin/5817-calling-ivy-from-groovy-or-java
-    public static File resolveArtifact(String groupId, String artifactId, String version) throws IOException, ParseException {
+    static File resolveArtifact(String groupId, String artifactId, String version) throws IOException, ParseException {
         File ivyFile = getIvyFile(groupId, artifactId, version);
 
         // TODO it does not work
-        IVY.getEventManager().addIvyListener(event -> {
-            if (event instanceof StartArtifactDownloadEvent) {
-                StartArtifactDownloadEvent artifactEvent = (StartArtifactDownloadEvent) event;
-                System.out.println("Downloading " + artifactEvent.getArtifact());
-            }
-        });
+//        IVY.getEventManager().addIvyListener(event -> {
+//            if (event instanceof StartArtifactDownloadEvent) {
+//                StartArtifactDownloadEvent artifactEvent = (StartArtifactDownloadEvent) event;
+//            }
+//        });
 
         //init resolve report
         ResolveReport report = IVY.resolve(ivyFile.toURI().toURL(), RESOLVE_OPTIONS);

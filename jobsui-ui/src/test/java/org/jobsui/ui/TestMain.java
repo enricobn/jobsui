@@ -32,6 +32,7 @@ import org.testfx.framework.junit.ApplicationTest;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -50,7 +51,7 @@ public class TestMain extends ApplicationTest {
     private OpenedItem openedItem;
     private URL projectResource;
 
-    private void setUpPreferences() throws Exception {
+    private void setUpPreferences() {
         projectResource = getClass().getResource("/simplejob");
         String urlString = projectResource.toExternalForm();
         openedItem = new OpenedItem(urlString, "SimpleJob");
@@ -79,7 +80,7 @@ public class TestMain extends ApplicationTest {
     }
 
     @Test
-    public void assert_that_projects_are_loaded_with_openedItems() throws Exception {
+    public void assert_that_projects_are_loaded_with_openedItems() {
         ListView<OpenedItem> projects = robotContext().getNodeFinder().lookup("#projects").query();
         assertThat(projects.getItems().iterator().next(), Is.is(openedItem));
     }
@@ -128,7 +129,7 @@ public class TestMain extends ApplicationTest {
     public void editAndSelectAParameter() throws Exception {
         editProject();
 
-        TreeView<EditItem> treeView = lookupWithTimeout(node -> node instanceof TreeView, 5_000);
+        TreeView<EditItem> treeView = lookupWithTimeout(Objects::nonNull, 5_000);
 
         while (treeView.getRoot() == null) {
             sleep(100);
@@ -228,11 +229,4 @@ public class TestMain extends ApplicationTest {
         }
     }
 
-    private TextField getTextById(String id) {
-        try {
-            return robotContext().getNodeFinder().lookup("#" + id).query();
-        } catch (Exception e) {
-            return null;
-        }
-    }
 }

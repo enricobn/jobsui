@@ -11,20 +11,22 @@ import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.ui.javafx.JavaFXUI;
 
 import java.nio.file.FileSystems;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 /**
  * Created by enrico on 5/5/16.
  */
 public class Main {
+    private static final Logger LOGGER = Logger.getLogger(Main.class.getName());
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         CommandLineArguments.parse(args,
                 new ProjectParserImpl(),
                 new ProjectGroovyBuilder(),
                 FileSystems.getDefault(),
                 Main::run,
-                errors -> System.err.println(String.join("\n", errors)),
+                errors -> LOGGER.severe(String.join("\n", errors)),
                 BookmarksStoreFSImpl.getUserStore());
 
 //        errors -> JavaFXUI.showMessageStatic("Error starting application:\n" +

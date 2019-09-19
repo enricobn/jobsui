@@ -5,7 +5,10 @@ import rx.Observable;
 /**
  * Created by enrico on 2/20/16.
  */
-abstract class ObservableUtils {
+public class ObservableUtils {
+
+    private ObservableUtils() {
+    }
 
     public static <T1,T2> Observable<Tuple2<T1,T2>> combineLatest(
             Observable<T1> o1, Observable<T2> o2)

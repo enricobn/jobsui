@@ -6,6 +6,7 @@ import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.ui.JobsUITheme;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.List;
 
@@ -24,7 +25,7 @@ public interface JobsUIPreferences {
 
     List<Bookmark> getBookmarks(Project project, Job job);
 
-    void saveBookmark(Project project, Job job, Bookmark bookmark);
+    void saveBookmark(Project project, Job job, Bookmark bookmark) throws IOException;
 
     boolean existsBookmark(Project project, Job job, String name);
 

@@ -81,7 +81,9 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
                 result.add((Bookmark) xstream.fromXML(reader));
             } catch (Exception e) {
                 // TODO show a message in UI
-                LOGGER.log(Level.SEVERE, "Error loading bookmark from " + file, e);
+                if (LOGGER.isLoggable(Level.SEVERE)) {
+                    LOGGER.log(Level.SEVERE, "Error loading bookmark from " + file, e);
+                }
             }
         }
 

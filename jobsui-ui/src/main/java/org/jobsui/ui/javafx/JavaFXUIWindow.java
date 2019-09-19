@@ -96,12 +96,6 @@ class JavaFXUIWindow implements UIWindow<Node> {
         return bookmarksPanel;
     }
 
-    private HBox createMainPanel(Project project, Job job, ListView<Bookmark> bookmarkListView) {
-        HBox mainPanel = new HBox(5);
-        mainPanel.getChildren().add(bookmarkListView);
-        return mainPanel;
-    }
-
     private ListView<Bookmark> createBookmarkListView(Project project, Job job) {
         ListView<Bookmark> bookmarkListView = new ListView<>();
 //        bookmarkListView.setMinWidth(200);

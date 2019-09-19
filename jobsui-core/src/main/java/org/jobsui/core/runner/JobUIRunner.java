@@ -40,7 +40,7 @@ public class JobUIRunner<C> implements JobRunner {
             JobUIRunnerContext<T,C> context;
 
             try {
-                 context = JobUIRunnerContext.of(project, job, ui, window);
+                 context = JobUIRunnerContext.of(project, job, ui);
             } catch (Exception e) {
                 throw new RuntimeException((e));
 //                exceptions.add(e);
@@ -87,7 +87,7 @@ public class JobUIRunner<C> implements JobRunner {
             }
 
             try {
-                observeDependencies(ui, context, project);
+                observeDependencies(ui, context);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -288,8 +288,7 @@ public class JobUIRunner<C> implements JobRunner {
         }
     }
 
-    private static <T extends Serializable, C> void observeDependencies(UI<C> ui, JobUIRunnerContext<T, C> context,
-                                                                        Project project) throws Exception {
+    private static <T extends Serializable, C> void observeDependencies(UI<C> ui, JobUIRunnerContext<T, C> context) throws Exception {
         Map<String, Serializable> validValues = new HashMap<>();
 
         context.valueChangeObserver().subscribe(changedValue -> {

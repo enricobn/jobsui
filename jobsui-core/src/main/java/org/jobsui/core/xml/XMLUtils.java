@@ -2,8 +2,8 @@ package org.jobsui.core.xml;
 
 import org.jobsui.core.groovy.JobsUIParseException;
 import org.jobsui.core.utils.JobsUIUtils;
-import org.w3c.dom.*;
 import org.w3c.dom.CharacterData;
+import org.w3c.dom.*;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
@@ -76,20 +76,21 @@ public interface XMLUtils {
     }
 
     static void addTextNode(Element parent, String text, boolean indent, boolean cData) {
+        String resultText = text;
         Document doc = parent.getOwnerDocument();
         if (indent) {
             int parents = countParents(parent);
             String prefix = String.join("", Collections.nCopies((parents) * INDENT_SIZE, " "));
             String suffix = String.join("", Collections.nCopies((parents - 1) * INDENT_SIZE, " "));
-            text = scriptToEditForm(text);
-            text = System.lineSeparator() + Arrays.stream(text.split(System.lineSeparator()))
+            resultText = scriptToEditForm(resultText);
+            resultText = System.lineSeparator() + Arrays.stream(resultText.split(System.lineSeparator()))
                     .map(s -> prefix + s)
                     .collect(Collectors.joining(System.lineSeparator())) + System.lineSeparator() + suffix;
         }
         if (cData) {
-            parent.appendChild(doc.createCDATASection(text));
+            parent.appendChild(doc.createCDATASection(resultText));
         } else {
-            parent.appendChild(doc.createTextNode(text));
+            parent.appendChild(doc.createTextNode(resultText));
         }
     }
 
@@ -160,7 +161,7 @@ public interface XMLUtils {
                         try {
                             return getCharacterDataFromElement(((Element) node));
                         } catch (Exception e) {
-                            throw new JobsUIParseException("Node \"" + name + "\" " + e.getMessage() + " in " + subject);
+                            throw new JobsUIParseException("Node \"" + name + "\" " + e.getMessage() + " in " + subject, e);
                         }
                     } else {
                         throw new JobsUIParseException("Node \"" + name + "\" is not an Element in " + subject);
