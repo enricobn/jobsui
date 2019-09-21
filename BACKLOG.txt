@@ -25,7 +25,7 @@ NEXT
   - key, name, component, dependsOn
 - is project version needed? Probably yes for repository.
 - add a way to upgrade job data (bookmarks, calls) to a new version
-- now saving a job will delete old job files and script folder, but retain other files, to preserve other files,
+- now saving a job will delete old job files and script folder, but retain other files, to preserve them,
   but "save as" does not copy the other files. What to do?
 - WizardStep is used in XML and job, may be better to have two classes?
 - rename WizardStep to Group?

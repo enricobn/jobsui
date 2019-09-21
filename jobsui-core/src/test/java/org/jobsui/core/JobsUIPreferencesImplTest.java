@@ -10,7 +10,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import java.io.File;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.prefs.Preferences;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -45,12 +47,13 @@ public class JobsUIPreferencesImplTest {
         when(preferences.node(OTHERS_NODE)).thenReturn(others);
         when(preferences.node(EDIT_NODE)).thenReturn(edit);
         when(preferences.node(RUN_NODE)).thenReturn(run);
+
+        when(run.get(eq(PROJECTS_HOME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
     }
 
     @Test
     public void assert_that_default_value_for_theme_is_material() {
-        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
-
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         assertThat(sut.getTheme(), is(JobsUITheme.Material));
@@ -67,8 +70,6 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void verify_that_when_the_same_theme_is_set_then_flush_is_not_called() throws Exception {
-        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
-
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         sut.setTheme(sut.getTheme());
@@ -78,8 +79,6 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void verify_that_when_different_theme_is_set_then_flush_is_called() throws Exception {
-        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
-
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         sut.setTheme(JobsUITheme.Standard);
@@ -88,8 +87,7 @@ public class JobsUIPreferencesImplTest {
     }
 
     @Test
-    public void verify_that_when_last_opened_projects_size_ss_2_then_2_paths_and_2_name_are_requested() throws Exception {
-        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
+    public void verify_that_when_last_opened_projects_size_is_2_then_2_paths_and_2_name_are_requested() throws Exception {
         when(lastOpenedProjects.getInt(eq(SIZE), anyInt())).thenReturn(2);
 
         JobsUIPreferencesImpl.get(preferences, bookmarkStore);
@@ -107,7 +105,6 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void assert_that_opened_projects_are_memorized_in_insertion_order() {
-        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
         when(lastOpenedProjects.getInt(eq(SIZE), anyInt())).thenReturn(2);
 
         when(lastOpenedProjects.get(eq(OPENED_PROJECT_PATH_PREFIX + "0"), anyString())).thenReturn("file:1");
@@ -120,18 +117,17 @@ public class JobsUIPreferencesImplTest {
 
         OpenedItem lastOpenedItem = sut.getLastOpenedItems().get(0);
 
-        assertThat(lastOpenedItem.url, is("file:2"));
-        assertThat(lastOpenedItem.name, is("file2"));
+        assertThat(lastOpenedItem.getUrl(), is("file:2"));
+        assertThat(lastOpenedItem.getName(), is("file2"));
 
         OpenedItem firstOpenedItem = sut.getLastOpenedItems().get(1);
 
-        assertThat(firstOpenedItem.url, is("file:1"));
-        assertThat(firstOpenedItem.name, is("file1"));
+        assertThat(firstOpenedItem.getUrl(), is("file:1"));
+        assertThat(firstOpenedItem.getName(), is("file1"));
     }
 
     @Test
     public void verify_that_when_opened_project_is_registered_then_flush_is_called() throws Exception {
-        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
         when(lastOpenedProjects.getInt(eq(SIZE), anyInt())).thenReturn(2);
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
@@ -143,7 +139,6 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void assert_that_when_opened_projects_are_registered_then_the_last_becomes_the_first() throws Exception {
-        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
         when(lastOpenedProjects.getInt(eq(SIZE), anyInt())).thenReturn(2);
 
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
@@ -153,14 +148,12 @@ public class JobsUIPreferencesImplTest {
 
         OpenedItem openedItem = sut.getLastOpenedItems().get(0);
 
-        assertThat(openedItem.url, is("file:2"));
-        assertThat(openedItem.name, is("file2"));
+        assertThat(openedItem.getUrl(), is("file:2"));
+        assertThat(openedItem.getName(), is("file2"));
     }
 
     @Test
     public void assert_that_when_a_project_has_no_bookmarks_then_empy_list_is_returned() throws Exception {
-        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
-
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         Project project = createProject("test:projectId");
@@ -171,8 +164,6 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void assert_that_when_a_job_has_no_bookmarks_then_empy_list_is_returned() throws Exception {
-        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
-
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         Project project = createProject("test:projectId");
@@ -183,8 +174,6 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void verify_that_when_asking_for_bookmarks_for_the_first_time_then_bookmarkstore_is_called() throws Exception {
-        when(others.get(eq(THEME), anyString())).thenAnswer(invocation -> invocation.getArgumentAt(1, String.class));
-
         JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
 
         Project project = createProject("test:projectId");
@@ -195,5 +184,25 @@ public class JobsUIPreferencesImplTest {
         verify(bookmarkStore).getBookmarks(project, job);
     }
 
+    @Test
+    public void assert_that_given_the_default_configuration_when_asking_for_projects_home_then_the_jobsui_folder_in_user_home_is_returned() {
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+
+        String projectsHome = Paths.get(
+                System.getProperty("java.util.prefs.userRoot", System.getProperty("user.home")),
+                "jobsui")
+                .toFile()
+                .getAbsolutePath();
+        assertThat(sut.getProjectsHome(), is(new File(projectsHome)));
+    }
+
+    @Test
+    public void verify_that_project_home_is_saved() {
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+
+        sut.setProjectsHome(new File("afile"));
+
+        verify(run).put(PROJECTS_HOME, new File("afile").getAbsolutePath());
+    }
 
 }

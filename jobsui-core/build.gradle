@@ -15,16 +15,9 @@ dependencies {
     compile 'commons-cli:commons-cli:1.4'
 }
 
-//apply plugin: 'pmd'
-
-tasks.withType(com.github.spotbugs.SpotBugsTask) {
-    reports {
-        xml.enabled = false
-        html.enabled = true
-    }
-}
-
 /*
+apply plugin: 'pmd'
+
 tasks.withType(Pmd) {
     reports {
         xml.enabled = false

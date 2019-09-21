@@ -45,7 +45,6 @@ public class BookmarksStoreFSImpl implements BookmarksStore {
 
         File file = new File(jobRoot, bookmark.getName() + ".xml");
 
-
         try (FileOutputStream out = new FileOutputStream(file);
                 Writer fileWriter = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
             XStream xstream = new XStream();

@@ -6,6 +6,7 @@ import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.ui.JobsUITheme;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
@@ -58,4 +59,9 @@ public interface JobsUIPreferences {
     BookmarksStore getBookmarksStore();
 
     void removeLastOpenedItem(OpenedItem openedItem);
+
+    File getProjectsHome();
+
+    void setProjectsHome(File projectsHome);
+
 }

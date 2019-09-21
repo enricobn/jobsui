@@ -6,8 +6,10 @@ import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.ui.JobsUITheme;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -33,6 +35,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     static final String LAST_OPENED_PROJECTS_NODE = "lastOpenedProjects";
     static final String OPENED_PROJECT_PATH_PREFIX = "path_";
     static final String OPENED_PROJECT_NAME_PREFIX = "name_";
+    static final String PROJECTS_HOME = "projectsHome";
     private final transient Preferences lastOpenedProjectsNode;
     private final transient Preferences othersNode;
     private final transient Preferences editNode;
@@ -46,6 +49,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     private double runWidth;
     private double runHeight;
     private double runDividerPosition;
+    private File projectsHome;
 
     private JobsUIPreferencesImpl(Preferences preferences, BookmarksStore bookmarksStore) {
         lastOpenedProjectsNode = preferences.node(LAST_OPENED_PROJECTS_NODE);
@@ -71,7 +75,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     @Override
     public void registerOpenedProject(URL url, String name) {
         OpenedItem openedItem = new OpenedItem(url.toString(), name);
-        lastOpenedProjects.removeIf(item -> item.url.equals(openedItem.url));
+        lastOpenedProjects.removeIf(item -> item.getUrl().equals(openedItem.getUrl()));
         lastOpenedProjects.add(openedItem);
         save();
     }
@@ -186,7 +190,18 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
 
     @Override
     public void removeLastOpenedItem(OpenedItem openedItem) {
-        lastOpenedProjects.removeIf(item -> item.url.equals(openedItem.url));
+        lastOpenedProjects.removeIf(item -> item.getUrl().equals(openedItem.getUrl()));
+        save();
+    }
+
+    @Override
+    public File getProjectsHome() {
+        return projectsHome;
+    }
+
+    @Override
+    public void setProjectsHome(File projectsHome) {
+        this.projectsHome = projectsHome;
         save();
     }
 
@@ -207,6 +222,12 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
         this.runWidth = runNode.getDouble(RUN_WIDTH, 600);
         this.runHeight = runNode.getDouble(RUN_HEIGHT, 600);
         this.runDividerPosition = runNode.getDouble(RUN_DIVIDER_POSITION, 0.4);
+        String projectsHome = Paths.get(
+                System.getProperty("java.util.prefs.userRoot", System.getProperty("user.home")),
+                "jobsui")
+                .toFile()
+                .getAbsolutePath();
+        this.projectsHome = new File(runNode.get(PROJECTS_HOME, projectsHome));
     }
 
     private void save() {
@@ -224,8 +245,8 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
 
         for (int i = 0; i < lastOpenedProjects.size(); i++) {
             OpenedItem openedItem = lastOpenedProjects.get(i);
-            lastOpenedProjectsNode.put("path_" + i, openedItem.url);
-            lastOpenedProjectsNode.put("name_" + i, openedItem.name);
+            lastOpenedProjectsNode.put("path_" + i, openedItem.getUrl());
+            lastOpenedProjectsNode.put("name_" + i, openedItem.getName());
         }
 
         lastOpenedProjectsNode.flush();
@@ -244,6 +265,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
         runNode.putDouble(RUN_WIDTH, runWidth);
         runNode.putDouble(RUN_HEIGHT, runHeight);
         runNode.putDouble(RUN_DIVIDER_POSITION, runDividerPosition);
+        runNode.put(PROJECTS_HOME, projectsHome.getAbsolutePath());
         runNode.flush();
     }
 

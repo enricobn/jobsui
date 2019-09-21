@@ -38,30 +38,43 @@ public class NewProject {
 
         root.getChildren().add(buttons);
 
-        JavaFXUIFileChooser labeledParentFolder = new JavaFXUIFileChooser(ui);
-        labeledParentFolder.setFolder();
-        labeledParentFolder.setTitle("Parent folder");
-        labeledParentFolder.getField().setValue(".");
-        labeledParentFolder.setPadding(new Insets(20, 10, 0, 10));
-        root.getChildren().add(labeledParentFolder);
-
-        LabeledField labeledFolderName = new LabeledField(ui, "Folder name");
-        labeledFolderName.setPadding(new Insets(10, 10, 0, 10));
-        root.getChildren().add(labeledFolderName);
-
         LabeledField labeledNamespace = new LabeledField(ui,"Namespace");
         labeledNamespace.setPadding(new Insets(10, 10, 0, 10));
         labeledNamespace.getField().setValue("myself.com");
         root.getChildren().add(labeledNamespace);
 
-        LabeledField labeledId = new LabeledField(ui,"Id");
-        labeledId.setPadding(new Insets(10, 10, 0, 10));
-        labeledId.getField().setValue("myproject");
-        root.getChildren().add(labeledId);
-
         LabeledField labeledName = new LabeledField(ui, "Project name");
         labeledName.setPadding(new Insets(10, 10, 0, 10));
         root.getChildren().add(labeledName);
+
+        LabeledField labeledId = new LabeledField(ui,"Id");
+        labeledId.setPadding(new Insets(10, 10, 0, 10));
+        root.getChildren().add(labeledId);
+
+        LabeledField labeledFolderName = new LabeledField(ui, "Folder name");
+        labeledFolderName.setPadding(new Insets(10, 10, 0, 10));
+        root.getChildren().add(labeledFolderName);
+
+        JavaFXUIFileChooser labeledParentFolder = new JavaFXUIFileChooser(ui);
+        labeledParentFolder.setFolder();
+        labeledParentFolder.setTitle("Projects home");
+        labeledParentFolder.getField().setValue(ui.getPreferences().getProjectsHome());
+        labeledParentFolder.setPadding(new Insets(20, 10, 0, 10));
+        root.getChildren().add(labeledParentFolder);
+
+        labeledName.getField().getObservable().subscribe(newValue -> {
+            if (newValue != null) {
+//                Serializable labeledIdValue = labeledId.getField().getValue();
+//                if (labeledIdValue == null || labeledIdValue.toString().isEmpty()) {
+                    labeledId.getField().setValue(newValue.toString().toLowerCase().replace(" ", ""));
+//                }
+
+//                Serializable laveledFolderNameValue = labeledFolderName.getField().getValue();
+//                if (laveledFolderNameValue == null || laveledFolderNameValue.toString().isEmpty()) {
+                    labeledFolderName.getField().setValue(newValue);
+//                }
+            }
+        });
 
         Stage stage = StartApp.getInstance().replaceSceneContent(root, "New project");
 
@@ -105,13 +118,16 @@ public class NewProject {
 
                 if (projectFolder.exists()) {
                     ui.showMessage("Folder " + projectFolder + " already exists.");
-                } else if (projectFolder.mkdir()) {
+                } else if (projectFolder.mkdirs()) {
                     ProjectFSXMLImpl projectFSXML = createProjectXML(projectFolder, namespace, id, name);
 
                     new ProjectXMLExporter().export(projectFSXML, projectFolder);
                     project.set(projectFSXML);
                     ui.getPreferences().registerOpenedProject(projectFolder.toURI().toURL(), name);
+                    ui.getPreferences().setProjectsHome(new File(parentFolder));
                     stage.close();
+                } else {
+                    throw new RuntimeException("Cannot create folder project.");
                 }
             } catch (Exception e) {
                 ui.showError("Cannot create project.", e);

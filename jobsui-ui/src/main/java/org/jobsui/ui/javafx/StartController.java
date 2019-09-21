@@ -103,7 +103,7 @@ public class StartController implements Initializable {
                 if (cell.getItem() != null && e.getButton() == MouseButton.PRIMARY) {
                     URL url;
                     try {
-                        url = new URL(cell.getItem().url);
+                        url = new URL(cell.getItem().getUrl());
                         openProject(url);
                     } catch (Exception e1) {
                         // TODO message
@@ -116,10 +116,10 @@ public class StartController implements Initializable {
 
             MenuItem edit = addMenu("Edit", menu, event -> {
                 // TODO I don't want to add the edit menu for "not file"
-                if (cell.getItem() != null && cell.getItem().url.startsWith("file:/")) {
+                if (cell.getItem() != null && cell.getItem().getUrl().startsWith("file:/")) {
                     URL url;
                     try {
-                        url = new URL(cell.getItem().url);
+                        url = new URL(cell.getItem().getUrl());
                     } catch (MalformedURLException e1) {
                         // TODO message
                         throw new RuntimeException(e1);

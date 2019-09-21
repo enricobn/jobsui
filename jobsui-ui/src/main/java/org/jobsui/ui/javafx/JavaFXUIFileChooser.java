@@ -116,7 +116,10 @@ public class JavaFXUIFileChooser extends VBox implements UIFileChooser<Node> {
 
             try {
                 File file = new File(Objects.toString(field.getValue()));
-                if (file.isDirectory()) {
+                while (file != null && !file.isDirectory()) {
+                    file = file.getParentFile();
+                }
+                if (file != null) {
                     chooser.setInitialDirectory(file);
                 }
             } catch (Exception e) {
