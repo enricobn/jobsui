@@ -45,11 +45,13 @@ public class WizardState {
             throw new RuntimeException(e);
         }
 
-        WizardStepImpl runStep = new WizardStepImpl();
-        runStep.setName("Run");
+        if (!missedParameters.isEmpty()) {
+            WizardStepImpl runStep = new WizardStepImpl();
+            runStep.setName("Run");
 
-        missedParameters.forEach(runStep::addDependency);
-        steps.add(runStep);
+            missedParameters.forEach(runStep::addDependency);
+            steps.add(runStep);
+        }
     }
 
     public boolean hasNext() {

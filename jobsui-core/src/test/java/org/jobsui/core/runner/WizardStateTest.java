@@ -45,8 +45,8 @@ public class WizardStateTest {
     }
 
     @Test
-    public void assert_that_when_there_is_a_step_then_hasNext_is_true() throws Exception {
-        WizardState sut = createWizardStateWithOneStep();
+    public void assert_that_when_there_are_at_least_two_steps_then_hasNext_is_true() throws Exception {
+        WizardState sut = createComplexWizardState();
 
         assertThat(sut.hasNext(), is(true));
     }
@@ -59,8 +59,8 @@ public class WizardStateTest {
     }
 
     @Test
-    public void verify_that_when_there_is_a_step_then_next_clears_window() throws Exception {
-        WizardState sut = createWizardStateWithOneStep();
+    public void assert_that_when_there_are_at_least_two_steps_then_next_clears_window() throws Exception {
+        WizardState sut = createComplexWizardState();
 
         sut.next(context, window);
 
@@ -68,8 +68,8 @@ public class WizardStateTest {
     }
 
     @Test
-    public void assert_that_when_there_is_a_step_then_next_then_hasPrevious_is_true() throws Exception {
-        WizardState sut = createWizardStateWithOneStep();
+    public void assert_that_when_there_are_at_least_two_steps_then_next_then_hasPrevious_is_true() throws Exception {
+        WizardState sut = createComplexWizardState();
 
         sut.next(context, window);
 
@@ -77,17 +77,15 @@ public class WizardStateTest {
     }
 
     @Test
-    public void assert_that_when_there_is_only_a_step_then_next_then_hasNext_is_false() throws Exception {
+    public void assert_that_when_there_is_only_a_step_then_hasNext_is_false() throws Exception {
         WizardState sut = createWizardStateWithOneStep();
-
-        sut.next(context, window);
 
         assertThat(sut.hasNext(), is(false));
     }
 
     @Test
-    public void assert_that_when_there_is_a_step_then_next_then_previous_then_hasPrevious_is_false() throws Exception {
-        WizardState sut = createWizardStateWithOneStep();
+    public void assert_that_when_there_are_at_least_two_steps_then_next_then_previous_then_hasPrevious_is_false() throws Exception {
+        WizardState sut = createComplexWizardState();
 
         sut.next(context, window);
         sut.previous(context, window);
@@ -96,8 +94,8 @@ public class WizardStateTest {
     }
 
     @Test
-    public void assert_that_when_there_is_a_step_then_next_then_previous_then_hasNext_is_true() throws Exception {
-        WizardState sut = createWizardStateWithOneStep();
+    public void assert_that_when_there_are_at_least_two_steps_then_next_then_previous_then_hasNext_is_true() throws Exception {
+        WizardState sut = createComplexWizardState();
 
         sut.next(context, window);
         sut.previous(context, window);
