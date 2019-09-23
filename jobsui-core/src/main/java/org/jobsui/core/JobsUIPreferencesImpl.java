@@ -2,6 +2,8 @@ package org.jobsui.core;
 
 import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.bookmark.BookmarksStore;
+import org.jobsui.core.history.RunHistory;
+import org.jobsui.core.history.RunHistoryStore;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.ui.JobsUITheme;
@@ -10,10 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
@@ -41,6 +40,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     private final transient Preferences editNode;
     private final transient Preferences runNode;
     private final BookmarksStore bookmarksStore;
+    private final RunHistoryStore runHistoryStore;
     private final transient List<OpenedItem> lastOpenedProjects = new ArrayList<>();
     private JobsUITheme theme;
     private double editDividerPosition;
@@ -51,16 +51,18 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     private double runDividerPosition;
     private File projectsHome;
 
-    private JobsUIPreferencesImpl(Preferences preferences, BookmarksStore bookmarksStore) {
+    private JobsUIPreferencesImpl(Preferences preferences, BookmarksStore bookmarksStore, RunHistoryStore runHistoryStore) {
         lastOpenedProjectsNode = preferences.node(LAST_OPENED_PROJECTS_NODE);
         othersNode = preferences.node(OTHERS_NODE);
         editNode = preferences.node(EDIT_NODE);
         runNode = preferences.node(RUN_NODE);
         this.bookmarksStore = bookmarksStore;
+        this.runHistoryStore = runHistoryStore;
     }
 
-    public static JobsUIPreferencesImpl get(Preferences preferences, BookmarksStore bookmarkStore) {
-        JobsUIPreferencesImpl jobsUIPreferences = new JobsUIPreferencesImpl(preferences, bookmarkStore);
+    public static JobsUIPreferencesImpl get(Preferences preferences, BookmarksStore bookmarkStore,
+                                            RunHistoryStore runHistoryStore) {
+        JobsUIPreferencesImpl jobsUIPreferences = new JobsUIPreferencesImpl(preferences, bookmarkStore, runHistoryStore);
         jobsUIPreferences.load();
         return jobsUIPreferences;
     }
@@ -104,7 +106,7 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     @Override
     public void saveBookmark(Project project, Job job, Bookmark bookmark) throws IOException {
         // I cannot cache bookmarks since they depend on job's classloader
-        bookmarksStore.saveBookmark(project, job, bookmark);
+        bookmarksStore.save(project, job, bookmark);
     }
 
     @Override
@@ -113,8 +115,8 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     }
 
     @Override
-    public boolean deleteBookmark(Project project, Job job, String name) {
-        return bookmarksStore.deleteBookmark(project, job, name);
+    public boolean deleteBookmark(Project project, Job job, Bookmark bookmark) {
+        return bookmarksStore.delete(project, job, bookmark);
     }
 
     @Override
@@ -203,6 +205,16 @@ public class JobsUIPreferencesImpl implements JobsUIPreferences {
     public void setProjectsHome(File projectsHome) {
         this.projectsHome = projectsHome;
         save();
+    }
+
+    @Override
+    public Optional<RunHistory> getLastRun(Project project, Job job) {
+        return runHistoryStore.getLast(project, job);
+    }
+
+    @Override
+    public void saveLastRun(Project project, Job job, RunHistory runHistory) throws IOException {
+        runHistoryStore.save(project, job, runHistory);
     }
 
     private void load() {

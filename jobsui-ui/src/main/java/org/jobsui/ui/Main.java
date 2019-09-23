@@ -5,6 +5,7 @@ import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.JobsUIPreferencesImpl;
 import org.jobsui.core.bookmark.BookmarksStoreFSImpl;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
+import org.jobsui.core.history.RunHistoryStoreFSImpl;
 import org.jobsui.core.repository.RepositoryURLStreamHandlerFactory;
 import org.jobsui.core.ui.UI;
 import org.jobsui.core.xml.ProjectParserImpl;
@@ -40,7 +41,8 @@ public class Main {
         JobsUIPreferences preferences =
                 JobsUIPreferencesImpl.get(
                         Preferences.userNodeForPackage(Main.class),
-                        BookmarksStoreFSImpl.getUserStore()
+                        BookmarksStoreFSImpl.getUserStore(),
+                        RunHistoryStoreFSImpl.getUserStore()
                 );
         // TODO hard wired UI
         UI ui = new JavaFXUI(preferences);

@@ -4,6 +4,7 @@ import org.jobsui.core.TestUtils;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.runner.JobValues;
+import org.jobsui.core.runner.JobValuesImpl;
 import org.jobsui.core.utils.JobsUIUtils;
 import org.junit.Before;
 import org.junit.Test;
@@ -44,7 +45,7 @@ public class BookmarksStoreFSImplTest {
 
         JobValues values = mock(JobValues.class);
         Bookmark bookmark = createBookmark(project, job, values);
-        sut.saveBookmark(project, job, bookmark);
+        sut.save(project, job, bookmark);
 
         Bookmark savedBookmark = getBookmarks(project, job).get(0);
 
@@ -60,10 +61,10 @@ public class BookmarksStoreFSImplTest {
 
         JobValues values = mock(JobValues.class);
         Bookmark bookmark2 = createBookmark(project, job, values, "bookmark2");
-        sut.saveBookmark(project, job, bookmark2);
+        sut.save(project, job, bookmark2);
 
         Bookmark bookmark1 = createBookmark(project, job, values, "bookmark1");
-        sut.saveBookmark(project, job, bookmark1);
+        sut.save(project, job, bookmark1);
 
         List<Bookmark> savedBookmarks = getBookmarks(project, job);
 
@@ -78,10 +79,10 @@ public class BookmarksStoreFSImplTest {
 
         JobValues values = mock(JobValues.class);
         Bookmark bookmark = createBookmark(project, job, values);
-        sut.saveBookmark(project, job, bookmark);
+        sut.save(project, job, bookmark);
 
         bookmark = createBookmark(project, job, values);
-        sut.saveBookmark(project, job, bookmark);
+        sut.save(project, job, bookmark);
 
         List<Bookmark> bookmarks = getBookmarks(project, job);
 
@@ -113,7 +114,7 @@ public class BookmarksStoreFSImplTest {
 
         JobValues values = mock(JobValues.class);
         Bookmark bookmark = createBookmark(project, job, values);
-        sut.saveBookmark(project, job, bookmark);
+        sut.save(project, job, bookmark);
 
         assertThat(sut.existsBookmark(project, job, bookmark.getName()), is(true));
     }
@@ -123,7 +124,9 @@ public class BookmarksStoreFSImplTest {
         Project project = createProject();
         Job<?> job = createJob("jobId");
 
-        assertThat(sut.deleteBookmark(project, job, "test"), is(false));
+        Bookmark bookmark = new Bookmark(project, job, "akey", "test", new JobValuesImpl());
+
+        assertThat(sut.delete(project, job, bookmark), is(false));
     }
 
     @Test
@@ -133,9 +136,9 @@ public class BookmarksStoreFSImplTest {
 
         JobValues values = mock(JobValues.class);
         Bookmark bookmark = createBookmark(project, job, values);
-        sut.saveBookmark(project, job, bookmark);
+        sut.save(project, job, bookmark);
 
-        assertThat(sut.deleteBookmark(project, job, bookmark.getName()), is(true));
+        assertThat(sut.delete(project, job, bookmark), is(true));
         assertThat(sut.getBookmarks(project, job).isEmpty(), is(true));
     }
 

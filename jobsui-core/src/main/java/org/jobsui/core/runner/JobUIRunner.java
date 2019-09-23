@@ -2,12 +2,14 @@ package org.jobsui.core.runner;
 
 import org.jobsui.core.JobsUIPreferences;
 import org.jobsui.core.bookmark.Bookmark;
+import org.jobsui.core.history.RunHistory;
 import org.jobsui.core.job.*;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.utils.JobsUIUtils;
 import rx.Observable;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -129,29 +131,11 @@ public class JobUIRunner<C> implements JobRunner {
 
             window.setOnOpenBookmark(bookmark -> {
                 try {
-                    for (JobDependency jobDependency : job.getSortedDependencies()) {
-                        if (jobDependency instanceof JobParameter) {
-                            JobParameter jobParameter = (JobParameter) jobDependency;
-                            Serializable value = bookmark.getValues().get(jobParameter.getKey());
-
-                            List<String> validate = jobParameter.validate(bookmark.getValues(), value);
-
-                            if (validate.isEmpty()) {
-                                try {
-                                    context.getWidget(jobParameter).getComponent().setValue(value);
-                                } catch (Exception e) {
-                                    throw new RuntimeException("Error setting value for parameter with key '" + jobDependency.getKey() + "'.", e);
-                                }
-                            } else {
-                                ui.showMessage(String.format("Value '%s' for parameter '%s' is not valid:%n%s",
-                                        value, jobParameter.getName(), String.join(",", validate)));
-                                break;
-                            }
-                            this.activeBookmark = bookmark;
-                            window.setTitle(bookmark.getName());
-                            saveButton.setEnabled(true);
-                        }
-                    }
+                    Map<String, Serializable> bookmarkValues = bookmark.getValues();
+                    fillValues(job, context, bookmarkValues);
+                    window.setTitle(bookmark.getName());
+                    saveButton.setEnabled(true);
+                    this.activeBookmark = bookmark;
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -165,6 +149,15 @@ public class JobUIRunner<C> implements JobRunner {
                 }
             });
 
+            JobsUIPreferences preferences = ui.getPreferences();
+            preferences.getLastRun(project, job).ifPresent(it -> {
+                try {
+                    fillValues(job, context, it.getValues());
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
 //            window.add(closeButton);
         });
 
@@ -172,6 +165,31 @@ public class JobUIRunner<C> implements JobRunner {
             throw exceptions.get(0);
         }
         return atomicResult.get();
+    }
+
+    private <T extends Serializable> void fillValues(Job<T> job,
+                                                     JobUIRunnerContext<T, C> context,
+                                                     Map<String, Serializable> values) throws Exception {
+        for (JobDependency jobDependency : job.getSortedDependencies()) {
+            if (jobDependency instanceof JobParameter) {
+                JobParameter jobParameter = (JobParameter) jobDependency;
+                Serializable value = values.get(jobParameter.getKey());
+
+                List<String> validate = jobParameter.validate(values, value);
+
+                if (validate.isEmpty()) {
+                    try {
+                        context.getWidget(jobParameter).getComponent().setValue(value);
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error setting value for parameter with key '" + jobDependency.getKey() + "'.", e);
+                    }
+                } else {
+                    ui.showMessage(String.format("Value '%s' for parameter '%s' is not valid:%n%s",
+                            value, jobParameter.getName(), String.join(",", validate)));
+                    break;
+                }
+            }
+        }
     }
 
     private <T extends Serializable> UIButton<C> createSaveAsButton(Project project, Job<T> job, UIWindow<C> window, JobValues values) {
@@ -226,7 +244,8 @@ public class JobUIRunner<C> implements JobRunner {
     }
 
 
-    private <T extends Serializable> UIButton<C> createRunButton(JobUIRunnerContext<T, C> context, JobValues values, AtomicReference<T> atomicResult) {
+    private <T extends Serializable> UIButton<C> createRunButton(JobUIRunnerContext<T, C> context,
+                                                                 JobValues values, AtomicReference<T> atomicResult) {
         UIButton<C> runButton = ui.createButton();
         runButton.setEnabled(false);
         runButton.setTitle("Run");
@@ -238,6 +257,10 @@ public class JobUIRunner<C> implements JobRunner {
                     ui.showError("Error running job.", result.getException());
                 } else {
                     atomicResult.set(result.get());
+
+                    RunHistory runHistory = new RunHistory(context.getProject(), context.getJob(), UUID.randomUUID().toString(),
+                            LocalDateTime.now(), values);
+                    ui.getPreferences().saveLastRun(context.getProject(), context.getJob(), runHistory);
                 }
             } catch (Exception e) {
                 ui.showError("Error running job.", e);

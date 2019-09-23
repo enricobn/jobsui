@@ -21,8 +21,11 @@ import org.jobsui.core.xml.ProjectXML;
 
 import java.io.File;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,6 +60,7 @@ public class StartController implements Initializable {
 
     public void onNew(ActionEvent actionEvent) {
         StartApp.getInstance().gotoNew();
+        refreshProjects();
     }
 
     public void onEdit(ActionEvent actionEvent) {
@@ -72,7 +76,13 @@ public class StartController implements Initializable {
         }
     }
 
+    private void refreshProjects() {
+        projects.getItems().clear();
+        projects.getItems().addAll(preferences.getLastOpenedItems());
+    }
+
     private class CellFactory implements Callback<ListView<OpenedItem>, ListCell<OpenedItem>> {
+
         @Override
         public ListCell<OpenedItem> call(ListView<OpenedItem> lv) {
             ListCell<OpenedItem> cell = new ListCell<OpenedItem>() {
@@ -134,9 +144,7 @@ public class StartController implements Initializable {
             addMenu("Delete", menu, event -> {
                 preferences.removeLastOpenedItem(cell.getItem());
 
-                projects.getItems().clear();
-
-                projects.getItems().addAll(preferences.getLastOpenedItems());
+                refreshProjects();
             });
 
             cell.setContextMenu(menu);
@@ -156,12 +164,17 @@ public class StartController implements Initializable {
     }
 
     private void editProject(URL url) {
-        Task<ProjectFSXML> task = new LoadProjectXMLTask(new File(url.getPath()));
+        String path;
+        try {
+            path = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        Task<ProjectFSXML> task = new LoadProjectXMLTask(new File(path));
         ProgressDialog.run(task, "Opening project", project -> {
             StartApp.getInstance().gotoEdit(project);
             preferences.registerOpenedProject(url, project.getName());
-            projects.getItems().clear();
-            projects.getItems().addAll(preferences.getLastOpenedItems());
+            refreshProjects();
         });
 
     }
@@ -203,8 +216,7 @@ public class StartController implements Initializable {
         ProgressDialog.run(task, "Opening job", tuple -> {
                 StartApp.getInstance().gotoRun(tuple.first, tuple.second);
             preferences.registerOpenedProject(url, simpleProjectXML.getName());
-            projects.getItems().clear();
-            projects.getItems().addAll(preferences.getLastOpenedItems());
+            refreshProjects();
         });
     }
 

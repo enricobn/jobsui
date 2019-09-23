@@ -6,6 +6,7 @@ import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.bookmark.BookmarksStore;
 import org.jobsui.core.bookmark.SavedLink;
 import org.jobsui.core.groovy.ProjectGroovyBuilder;
+import org.jobsui.core.history.RunHistory;
 import org.jobsui.core.job.*;
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobUIRunner;
@@ -113,6 +114,7 @@ public class JobRunnerTest {
         when(ui.createWindow(anyString())).thenReturn(window);
         when(ui.getPreferences()).thenReturn(preferences);
         when(preferences.getBookmarksStore()).thenReturn(bookmarksStore);
+        when(preferences.getLastRun(any(), any())).thenReturn(Optional.empty());
         runButton = spy(new FakeUIButton());
         bookmarkButton = spy(new FakeUIButton());
         when(ui.createButton()).thenReturn(runButton, bookmarkButton);
@@ -587,7 +589,6 @@ public class JobRunnerTest {
     }
 
     @Test public void assert_that_simpleWithSaved_returns_the_correct_value_when_run_with_valid_parameters() throws Exception {
-
         Tuple2<Project, Job<String>> projectSimpleJob = jobs.get(JobType.simpleFSJob).get();
 
         Tuple2<Project, Job<String>> projectJob = jobs.get(JobType.simpleWithSaved).get();
@@ -612,6 +613,25 @@ public class JobRunnerTest {
                 () -> uiValueName.setValue(new SavedLink("1", "simple", "John Doe")));
 
         assertThat(result, equalTo("John Doe"));
+    }
+
+    @Test public void verify_that_when_run_history_contains_an_element_the_the_components_are_filled_with_the_values() throws Exception {
+        RunHistory runHistory = mock(RunHistory.class);
+        Map<String, Serializable> values = new HashMap<>();
+        values.put("name", "henry");
+        when(runHistory.getValues()).thenReturn(values);
+
+        when(preferences.getLastRun(any(), any())).thenReturn(Optional.of(runHistory));
+
+        MockedJobBuilder<String> builder = new MockedJobBuilder<>();
+
+        UIValue nameComponent = builder.addParameter("name", UIValue.class).build();
+
+        final Job<String> job = builder.build();
+
+        jobRunnerWrapper.run(createSingleJobProject(job));
+
+        assertThat(nameComponent.getValue(), equalTo("henry"));
     }
 
     private static <T> Tuple2<Project,Job<T>> createSingleJobProject(Job<T> job) {

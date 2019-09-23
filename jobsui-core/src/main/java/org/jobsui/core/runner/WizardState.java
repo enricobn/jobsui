@@ -17,13 +17,13 @@ import java.util.stream.Collectors;
 /**
  * Created by enrico on 5/1/17.
  */
-public class WizardState {
+class WizardState {
     private final Job<?> job;
     private final List<WizardStep> steps;
     private int step = 0;
     private List<String> sortedDependencies;
 
-    public WizardState(Job<?> job) throws Exception {
+    WizardState(Job<?> job) throws Exception {
         this.job = job;
         this.steps = new ArrayList<>(job.getWizardSteps());
 
@@ -54,20 +54,20 @@ public class WizardState {
         }
     }
 
-    public boolean hasNext() {
+    boolean hasNext() {
         return (step + 1) < steps.size();
     }
 
-    public boolean hasPrevious() {
+    boolean hasPrevious() {
         return step > 0;
     }
 
-    public <T extends Serializable, C> void next(JobUIRunnerContext<T, C> context, UIWindow<C> window) {
+    <T extends Serializable, C> void next(JobUIRunnerContext<T, C> context, UIWindow<C> window) {
         ++step;
         updateWindow(context, window);
     }
 
-    public <T extends Serializable, C> void updateWindow(JobUIRunnerContext<T, C> context, UIWindow<C> window) {
+    <T extends Serializable, C> void updateWindow(JobUIRunnerContext<T, C> context, UIWindow<C> window) {
         WizardStep wizardStep = steps.get(step);
 
         window.clear();
@@ -81,7 +81,7 @@ public class WizardState {
         }
     }
 
-    public <T extends Serializable, C> void previous(JobUIRunnerContext<T, C> context, UIWindow<C> window) {
+    <T extends Serializable, C> void previous(JobUIRunnerContext<T, C> context, UIWindow<C> window) {
         --step;
         updateWindow(context, window);
     }

@@ -1,6 +1,7 @@
 package org.jobsui.core;
 
 import org.jobsui.core.bookmark.BookmarksStore;
+import org.jobsui.core.history.RunHistoryStore;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.ui.JobsUITheme;
@@ -40,6 +41,8 @@ public class JobsUIPreferencesImplTest {
     private java.util.prefs.Preferences edit;
     @Mock
     private java.util.prefs.Preferences run;
+    @Mock
+    private RunHistoryStore runHistoryStore;
 
     @Before
     public void setUp() {
@@ -54,7 +57,7 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void assert_that_default_value_for_theme_is_material() {
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+        JobsUIPreferencesImpl sut = getSut();
 
         assertThat(sut.getTheme(), is(JobsUITheme.Material));
     }
@@ -63,14 +66,14 @@ public class JobsUIPreferencesImplTest {
     public void assert_that_when_standard_theme_is_specified_then_that_theme_is_returned() {
         when(others.get(eq(THEME), anyString())).thenReturn(JobsUITheme.Standard.name());
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+        JobsUIPreferencesImpl sut = getSut();
 
         assertThat(sut.getTheme(), is(JobsUITheme.Standard));
     }
 
     @Test
     public void verify_that_when_the_same_theme_is_set_then_flush_is_not_called() throws Exception {
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+        JobsUIPreferencesImpl sut = getSut();
 
         sut.setTheme(sut.getTheme());
 
@@ -79,7 +82,7 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void verify_that_when_different_theme_is_set_then_flush_is_called() throws Exception {
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+        JobsUIPreferencesImpl sut = getSut();
 
         sut.setTheme(JobsUITheme.Standard);
 
@@ -90,7 +93,7 @@ public class JobsUIPreferencesImplTest {
     public void verify_that_when_last_opened_projects_size_is_2_then_2_paths_and_2_name_are_requested() throws Exception {
         when(lastOpenedProjects.getInt(eq(SIZE), anyInt())).thenReturn(2);
 
-        JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+        getSut();
 
         verify(lastOpenedProjects).getInt(eq(SIZE), anyInt());
 
@@ -113,7 +116,7 @@ public class JobsUIPreferencesImplTest {
         when(lastOpenedProjects.get(eq(OPENED_PROJECT_NAME_PREFIX + "0"), anyString())).thenReturn("file1");
         when(lastOpenedProjects.get(eq(OPENED_PROJECT_NAME_PREFIX + "1"), anyString())).thenReturn("file2");
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+        JobsUIPreferencesImpl sut = getSut();
 
         OpenedItem lastOpenedItem = sut.getLastOpenedItems().get(0);
 
@@ -130,7 +133,7 @@ public class JobsUIPreferencesImplTest {
     public void verify_that_when_opened_project_is_registered_then_flush_is_called() throws Exception {
         when(lastOpenedProjects.getInt(eq(SIZE), anyInt())).thenReturn(2);
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+        JobsUIPreferencesImpl sut = getSut();
 
         sut.registerOpenedProject(new URL("file:1"), "file1");
 
@@ -141,7 +144,7 @@ public class JobsUIPreferencesImplTest {
     public void assert_that_when_opened_projects_are_registered_then_the_last_becomes_the_first() throws Exception {
         when(lastOpenedProjects.getInt(eq(SIZE), anyInt())).thenReturn(2);
 
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+        JobsUIPreferencesImpl sut = getSut();
 
         sut.registerOpenedProject(new URL("file:1"), "file1");
         sut.registerOpenedProject(new URL("file:2"), "file2");
@@ -154,7 +157,7 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void assert_that_when_a_project_has_no_bookmarks_then_empy_list_is_returned() throws Exception {
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+        JobsUIPreferencesImpl sut = getSut();
 
         Project project = createProject("test:projectId");
         Job<?> job = createJob("jobId");
@@ -164,7 +167,7 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void assert_that_when_a_job_has_no_bookmarks_then_empy_list_is_returned() throws Exception {
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+        JobsUIPreferencesImpl sut = getSut();
 
         Project project = createProject("test:projectId");
         Job<?> job = createJob("jobId");
@@ -174,7 +177,7 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void verify_that_when_asking_for_bookmarks_for_the_first_time_then_bookmarkstore_is_called() throws Exception {
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+        JobsUIPreferencesImpl sut = getSut();
 
         Project project = createProject("test:projectId");
         Job<?> job = createJob("jobId");
@@ -186,7 +189,7 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void assert_that_given_the_default_configuration_when_asking_for_projects_home_then_the_jobsui_folder_in_user_home_is_returned() {
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore, runHistoryStore);
 
         String projectsHome = Paths.get(
                 System.getProperty("java.util.prefs.userRoot", System.getProperty("user.home")),
@@ -198,11 +201,14 @@ public class JobsUIPreferencesImplTest {
 
     @Test
     public void verify_that_project_home_is_saved() {
-        JobsUIPreferencesImpl sut = JobsUIPreferencesImpl.get(preferences, bookmarkStore);
+        JobsUIPreferencesImpl sut = getSut();
 
         sut.setProjectsHome(new File("afile"));
 
         verify(run).put(PROJECTS_HOME, new File("afile").getAbsolutePath());
     }
 
+    private JobsUIPreferencesImpl getSut() {
+        return JobsUIPreferencesImpl.get(preferences, bookmarkStore, runHistoryStore);
+    }
 }

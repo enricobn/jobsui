@@ -2,6 +2,7 @@ package org.jobsui.core;
 
 import org.jobsui.core.bookmark.Bookmark;
 import org.jobsui.core.bookmark.BookmarksStore;
+import org.jobsui.core.history.RunHistory;
 import org.jobsui.core.job.Job;
 import org.jobsui.core.job.Project;
 import org.jobsui.core.ui.JobsUITheme;
@@ -10,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by enrico on 3/29/17.
@@ -30,7 +32,7 @@ public interface JobsUIPreferences {
 
     boolean existsBookmark(Project project, Job job, String name);
 
-    boolean deleteBookmark(Project project, Job job, String name);
+    boolean deleteBookmark(Project project, Job job, Bookmark bookmark);
 
     void setEditDividerPosition(double position);
 
@@ -63,5 +65,9 @@ public interface JobsUIPreferences {
     File getProjectsHome();
 
     void setProjectsHome(File projectsHome);
+
+    Optional<RunHistory> getLastRun(Project project, Job job);
+
+    void saveLastRun(Project project, Job job, RunHistory runHistory) throws IOException;
 
 }

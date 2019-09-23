@@ -236,7 +236,7 @@ class JavaFXUIWindow implements UIWindow<Node> {
                 Bookmark bookmark = cell.getItem();
                 if (bookmark != null) {
                     JobsUIPreferences preferences = ui.getPreferences();
-                    if (preferences.deleteBookmark(project, job, bookmark.getName())) {
+                    if (preferences.deleteBookmark(project, job, bookmark)) {
                         refreshBookmarks(project, job, bookmark);
                         onDeleteBookmark.accept(bookmark);
                     }

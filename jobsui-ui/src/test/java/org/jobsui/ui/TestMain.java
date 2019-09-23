@@ -33,11 +33,13 @@ import java.net.URL;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 /**
@@ -64,6 +66,7 @@ public class TestMain extends ApplicationTest {
         when(preferences.getEditHeight()).thenReturn(600d);
         when(preferences.getRunDividerPosition()).thenReturn(0.4d);
         when(preferences.getEditDividerPosition()).thenReturn(0.4d);
+        when(preferences.getLastRun(any(), any())).thenReturn(Optional.empty());
     }
 
     @Override
