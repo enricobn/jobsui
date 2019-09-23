@@ -1,5 +1,8 @@
 package org.jobsui.core;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -24,7 +27,13 @@ public class OpenedItem {
 
     @Override
     public String toString() {
-        return name + " (" + url + ")";
+        String decodedUrl;
+        try {
+            decodedUrl = URLDecoder.decode(url, StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+        return name + " (" + decodedUrl + ")";
     }
 
     @Override
