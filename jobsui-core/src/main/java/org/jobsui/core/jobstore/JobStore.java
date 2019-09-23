@@ -7,7 +7,8 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Created by enrico on 4/17/17.
+ * Used to save and restore a Bean related to a Job
+ * @param <T>
  */
 public interface JobStore<T extends JobStoreElement> {
 

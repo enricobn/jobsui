@@ -433,8 +433,11 @@ public class EditProject {
 
         WizardStep wizardStep = (WizardStep) treeItem.getValue().payload;
 
-        List<String> parameters = getParametersKeys(jobXML);
-        parameters.removeAll(wizardStep.getDependencies());
+        List<String> parameters = JobXML.getSimpleParametersKeys(jobXML);
+
+        for (WizardStep step : jobXML.getWizardSteps()) {
+            parameters.removeAll(step.getDependencies());
+        }
 
         if (!parameters.isEmpty()) {
             Menu addDependency = new Menu("Add");
@@ -581,7 +584,7 @@ public class EditProject {
             return;
         }
 
-        List<String> parameters = getAllParametersKeys(jobXML);
+        List<String> parameters = JobXML.getAllParametersKeys(jobXML);
         parameters.removeAll(dependencies);
 
         if (!parameters.isEmpty()) {
@@ -742,17 +745,6 @@ public class EditProject {
             return findAncestorPayload(ancestor, predicate);
         }
     }
-
-    private static List<String> getAllParametersKeys(JobXML jobXML) {
-        return jobXML.getAllParameters().stream()
-                .map(ParameterXML::getKey).collect(Collectors.toList());
-    }
-
-    private static List<String> getParametersKeys(JobXML jobXML) {
-        return jobXML.getSimpleParameterXMLs().stream()
-                .map(ParameterXML::getKey).collect(Collectors.toList());
-    }
-
 
     private static TreeItem<EditItem> findItem(TreeItem<EditItem> root, EditItem item) {
         if (root.getValue() == item) {

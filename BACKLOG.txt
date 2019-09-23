@@ -3,11 +3,14 @@ DOING
 
 BUGS
 -----
-- when defining wizard steps, only missed parameters (in all steps) must be shown
 - error opening project with a space in folder
 
 NEXT
 -----
+- show run history
+- let the user configure:
+  - projects home
+  - maximum elements in run history
 - add wizard step title
 - rename wizard to Pages?
 - create a JobParserFactory that given the jobXmlVersion returns a parser and a validator

@@ -5,11 +5,22 @@ import org.jobsui.core.runner.JobsUIValidationResult;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by enrico on 4/7/17.
  */
 public interface JobXML extends ValidatingXML{
+
+    static List<String> getSimpleParametersKeys(JobXML jobXML) {
+        return jobXML.getSimpleParameterXMLs().stream()
+                .map(ParameterXML::getKey).collect(Collectors.toList());
+    }
+
+    static List<String> getAllParametersKeys(JobXML jobXML) {
+        return jobXML.getAllParameters().stream()
+                .map(ParameterXML::getKey).collect(Collectors.toList());
+    }
 
     String getRunScript();
 
