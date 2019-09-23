@@ -3,7 +3,6 @@ DOING
 
 BUGS
 -----
-- error opening project with a space in folder
 
 NEXT
 -----
@@ -19,12 +18,10 @@ NEXT
 - use XMLUtils.getAttribute to get an attribute, it resolves the default
 - about with version (JobsUIUtils.getVersion)
 - on new project:
- - why parent folder and folder?
  - Namespace -> Group id?
  - id -> Artifact id
  - Project name -> Description
- - store as the last opened project
-- on edit:
+  on edit:
   - enable save only if there are pending changes
   - add Save & Run
   - copy and paste parameter
@@ -61,4 +58,3 @@ NEXT
    returns both
 - EditProject: the call to JobXML.getParameter is needed? Can I call a specific method for parameter, expression and call?
 - JobsUIPreferencesImpl why save every time all?
-- history of run
