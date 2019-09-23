@@ -278,6 +278,7 @@ public class ItemDetail extends VBox {
         EditItem value = treeItem.getValue();
         treeItem.setValue(null);
         treeItem.setValue(value);
+        value.setChanged(true);
     }
 
     private void validate(TreeItem<EditItem> treeItem, ValidatingXML validatingXML) {
@@ -338,7 +339,6 @@ public class ItemDetail extends VBox {
 
         VBox.setVgrow(parent, Priority.ALWAYS);
     }
-
 
     void setUiComponentRegistry(UIComponentRegistry uiComponentRegistry) {
         this.uiComponentRegistry = uiComponentRegistry;

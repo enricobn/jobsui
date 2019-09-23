@@ -6,6 +6,7 @@ package org.jobsui.ui.javafx.edit;
 public class EditItem {
     public final ItemType itemType;
     public final Object payload;
+    private boolean changed;
 
     EditItem(ItemType itemType, Object payload) {
         this.itemType = itemType;
@@ -16,8 +17,16 @@ public class EditItem {
         }
     }
 
+    void setChanged(boolean changed) {
+        this.changed = changed;
+    }
+
     @Override
     public String toString() {
-        return itemType.getTitleFunction().apply(payload);
+        return itemType.getTitleFunction().apply(payload) + (changed ? " *" : "");
+    }
+
+    boolean isChanged() {
+        return changed;
     }
 }

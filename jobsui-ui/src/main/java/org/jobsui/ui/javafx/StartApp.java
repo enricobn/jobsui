@@ -33,6 +33,7 @@ package org.jobsui.ui.javafx;
 
 import com.jfoenix.controls.JFXDecorator;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.scene.Node;
@@ -161,7 +162,18 @@ public class StartApp extends Application {
         Stage stage = StartApp.getInstance().replaceSceneContent(root, projectXML.getName());
         editProject.edit(projectXML, false);
         editProject.loadPreferences(stage);
-        stage.setOnHiding(event -> editProject.savePreferences(stage));
+
+        stage.setOnHiding(windowEvent -> {
+            if (editProject.isChanged()) {
+                if (!ui.askOKCancel("Project has unsaved changes. Do you wanto to close loosing all changes?", true)) {
+                    windowEvent.consume();
+                    Platform.runLater(stage::showAndWait);
+                    return;
+                }
+            }
+            editProject.savePreferences(stage);
+        });
+
         stage.showAndWait();
     }
 

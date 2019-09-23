@@ -18,7 +18,6 @@ public class ProjectFSXMLImpl extends ProjectXMLImpl implements ProjectFSXML {
     public ProjectFSXMLImpl(File folder, String id, String name, String version) throws MalformedURLException {
         super(folder.toURI().toURL(), id, name, version);
         this.folder = folder;
-
     }
 
     @Override

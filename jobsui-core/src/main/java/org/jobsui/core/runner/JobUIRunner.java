@@ -204,7 +204,7 @@ public class JobUIRunner<C> implements JobRunner {
 
                 boolean ok = true;
                 if (preferences.existsBookmark(project, job, n)) {
-                    ok = ui.askOKCancel("A bookmark with the same name exists. Do you want to override it?");
+                    ok = ui.askOKCancel("A bookmark with the same name exists. Do you want to override it?", false);
                 }
 
                 if (ok) {

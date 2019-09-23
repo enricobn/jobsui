@@ -1,6 +1,7 @@
 package org.jobsui.ui.javafx.edit;
 
 import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -85,6 +86,8 @@ public class EditProject {
                 exporter.export(projectXML, projectXML.getFolder());
 
                 FileUtils.deleteDirectory(tempDir);
+
+                setNotChanged();
             } catch (Exception e) {
                 // I restore the project
                 try {
@@ -123,6 +126,8 @@ public class EditProject {
                     saveButton.setEnabled(true);
                     projectXML.setFolder(file);
                     setProjectXML(projectXML);
+
+                    setNotChanged();
                 }
             } catch (Exception e) {
                 ui.showError("Error saving project.", e);
@@ -181,6 +186,38 @@ public class EditProject {
         return root;
     }
 
+    public boolean isChanged() {
+        return isChanged(itemsTree.getRoot());
+    }
+
+    private boolean isChanged(TreeItem<EditItem> treeItem) {
+        if (treeItem.getValue().isChanged()) {
+            return true;
+        }
+
+        for (TreeItem<EditItem> child : treeItem.getChildren()) {
+            if (isChanged(child)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void setNotChanged() {
+        setNotChanged(itemsTree.getRoot());
+        itemsTree.refresh();
+    }
+
+    private void setNotChanged(TreeItem<EditItem> treeItem) {
+        treeItem.getValue().setChanged(false);
+
+        for (TreeItem<EditItem> child : treeItem.getChildren()) {
+            setNotChanged(child);
+        }
+    }
+
+
     private TreeItem<EditItem> loadProject(ProjectFSXML projectXML) {
         this.uiComponentRegistry = projectXML.getUiComponentRegistry();
         itemDetail.setUiComponentRegistry(uiComponentRegistry);
@@ -203,6 +240,7 @@ public class EditProject {
                     .map(fileName -> new EditItem(ItemType.ScriptFile, fileName))
                     .map(TreeItem::new)
                     .forEach(treeItem -> locationItem.getChildren().add(treeItem));
+            handleTreeItemChange(locationItem);
         }
 
         projectXML.getJobs().stream()
@@ -210,6 +248,9 @@ public class EditProject {
                 .map(EditProject::createJobTreeItem)
                 .forEach(root.getChildren()::add);
 
+        libraries.getChildren().addListener((ListChangeListener<TreeItem<EditItem>>) change -> libraries.getValue().setChanged(true));
+
+        handleTreeItemChange(root);
 
         return root;
     }
@@ -224,6 +265,7 @@ public class EditProject {
         addWizard(job, result);
 
         result.setExpanded(true);
+
         return result;
     }
 
@@ -243,7 +285,10 @@ public class EditProject {
                 dependencies.getChildren().add(dependency);
             });
 
+            handleTreeItemChange(dependencies);
+
         });
+        handleTreeItemChange(wizardSteps);
 
     }
 
@@ -254,6 +299,17 @@ public class EditProject {
         result.getChildren().add(parameters);
 
         parametersList.forEach(parameter -> addParameter(parameters, itemType, parameter, jobXML));
+
+        handleTreeItemChange(parameters);
+    }
+
+    private static void handleTreeItemChange(TreeItem<EditItem> treeItem) {
+        treeItem.getChildren().addListener(new ListChangeListener<TreeItem<EditItem>>() {
+            @Override
+            public void onChanged(Change<? extends TreeItem<EditItem>> change) {
+                treeItem.getValue().setChanged(true);
+            }
+        });
     }
 
     private static void addParameter(TreeItem<EditItem> parameters, ItemType itemType, ParameterXML parameterDef, JobXML jobXML) {
@@ -272,6 +328,7 @@ public class EditProject {
                 .map(dep -> new EditItem(ItemType.Dependency, dep))
                 .map(TreeItem::new)
                 .forEach(dependencies.getChildren()::add);
+        handleTreeItemChange(dependencies);
     }
 
     public void edit(ProjectFSXML projectXML, boolean isNew) {

@@ -21,12 +21,12 @@ NEXT
  - Namespace -> Group id?
  - id -> Artifact id
  - Project name -> Description
-  on edit:
+ on edit:
+  - don't save when there are validation errors
   - enable save only if there are pending changes
   - add Save & Run
   - copy and paste parameter
   - move parameter
-  - warning if close with changes
 - tab on edit script: 4 spaces
 - when I write the job.xml change parameter's fields order to:
   - key, name, component, dependsOn

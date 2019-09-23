@@ -104,11 +104,18 @@ public class JavaFXUI implements UI<Node> {
     }
 
     @Override
-    public boolean askOKCancel(String message) {
+    public boolean askOKCancel(String message, boolean focusOnCancel) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("JobUI");
         alert.setHeaderText(message);
-//        alert.setContentText("Are you ok with this?");
+
+        if (focusOnCancel) {
+            Button okButton = (Button) alert.getDialogPane().lookupButton(ButtonType.OK);
+            okButton.setDefaultButton(false);
+
+            Button cancelButton = (Button) alert.getDialogPane().lookupButton(ButtonType.CANCEL);
+            cancelButton.setDefaultButton(true);
+        }
 
         Optional<ButtonType> resultO = alert.showAndWait();
         ButtonType result = resultO.orElse(ButtonType.CANCEL);

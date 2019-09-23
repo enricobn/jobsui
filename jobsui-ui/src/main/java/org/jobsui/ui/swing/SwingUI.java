@@ -96,7 +96,7 @@ public class SwingUI implements UI<JComponent> {
     }
 
     @Override
-    public boolean askOKCancel(String message) {
+    public boolean askOKCancel(String message, boolean focusOnOK) {
         // TODO
         return false;
     }

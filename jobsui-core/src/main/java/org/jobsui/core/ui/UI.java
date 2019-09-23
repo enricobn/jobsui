@@ -40,7 +40,7 @@ public interface UI<T> {
 
     Optional<String> askString(String message);
 
-    boolean askOKCancel(String message);
+    boolean askOKCancel(String message, boolean focusOnOK);
 
     JobsUIPreferences getPreferences();
 
