@@ -3,7 +3,6 @@ package org.jobsui.ui.javafx.edit;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
-import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -270,27 +269,12 @@ public class ItemDetail extends VBox {
     }
 
     private void updateSelectedItem(TreeItem<EditItem> treeItem) {
-        Object payload = treeItem.getValue().payload;
-        if (payload instanceof ValidatingXML) {
-            validate(treeItem, (ValidatingXML) payload);
-        }
+        EditProject.validate(treeItem, true);
 
         EditItem value = treeItem.getValue();
         treeItem.setValue(null);
         treeItem.setValue(value);
         value.setChanged(true);
-    }
-
-    private void validate(TreeItem<EditItem> treeItem, ValidatingXML validatingXML) {
-        List<String> validate = validatingXML.validate();
-        if (!validate.isEmpty()) {
-            Label label = new Label("?");
-            label.setTextFill(Color.RED);
-            label.setTooltip(new Tooltip(String.join("\n", validate)));
-            treeItem.setGraphic(label);
-        } else {
-            treeItem.setGraphic(null);
-        }
     }
 
     private void addTextAreaProperty(TreeItem<EditItem> treeItem, String title, Supplier<String> get, Consumer<String> set,

@@ -2,6 +2,7 @@ package org.jobsui.ui.javafx.edit;
 
 import org.jobsui.core.xml.*;
 
+import java.util.List;
 import java.util.function.Function;
 
 public enum ItemType {
@@ -12,19 +13,19 @@ public enum ItemType {
             ScriptsLocation(String.class, p -> p),
                 ScriptFile(String.class, p -> p),
         Job(JobXML.class, JobXML::getName),
-            WizardSteps(JobXML.class, p -> "wizards"),
+            WizardSteps(List.class, p -> "wizards"),
                 WizardStep(WizardStep.class, org.jobsui.core.xml.WizardStep::getName),
                     WizardStepDependencies(WizardStep.class, p -> "parameters"),
                         WizardStepDependency(ParameterXML.class, ParameterXML::getName),
-            Parameters(JobXML.class, p -> "parameters"),
+            Parameters(List.class, p -> "parameters"),
                 Parameter(SimpleParameterXML.class, SimpleParameterXML::getName),
                     Dependencies(ParameterXML.class, p -> "dependencies"),
                         Dependency(ParameterXML.class, ParameterXML::getName),
-            Expressions(JobXML.class, p -> "expressions"),
+            Expressions(List.class, p -> "expressions"),
                 Expression(ExpressionXML.class, ExpressionXML::getName),
                     //Dependencies
                         //Dependency
-            Calls(JobXML.class, p -> "calls"),
+            Calls(List.class, p -> "calls"),
                 Call(CallXML.class, CallXML::getName);
                     //Dependencies
                         //Dependency

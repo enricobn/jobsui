@@ -4,6 +4,7 @@ import org.apache.ivy.Ivy;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
+import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
@@ -48,7 +49,12 @@ class IvyUtils {
         ResolveReport report = IVY.resolve(ivyFile.toURI().toURL(), RESOLVE_OPTIONS);
 
         //so you can get the jar library
-        return report.getAllArtifactsReports()[0].getLocalFile();
+        ArtifactDownloadReport[] allArtifactsReports = report.getAllArtifactsReports();
+
+        if (allArtifactsReports.length == 0) {
+            throw new IOException("Cannot resolve artifact " + groupId + ":" + artifactId + ":" + version);
+        }
+        return allArtifactsReports[0].getLocalFile();
     }
 
     private static File getIvyFile(String groupId, String artifactId, String version) throws IOException {

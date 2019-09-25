@@ -18,11 +18,10 @@ NEXT
 - use XMLUtils.getAttribute to get an attribute, it resolves the default
 - about with version (JobsUIUtils.getVersion)
 - on new project:
- - Namespace -> Group id?
- - id -> Artifact id
- - Project name -> Description
- on edit:
-  - don't save when there are validation errors
+  - Namespace -> Group id?
+  - id -> Artifact id
+  - Project name -> Description
+- on edit:
   - enable save only if there are pending changes
   - add Save & Run
   - copy and paste parameter

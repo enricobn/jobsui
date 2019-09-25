@@ -37,7 +37,6 @@ public interface ProjectXML extends ValidatingXML {
 
     UIComponentRegistry getUiComponentRegistry();
 
-
     void addJob(JobXML jobXML);
 
     JobXML getJobXMLById(String job);
