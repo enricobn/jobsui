@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * Created by enrico on 4/30/17.
  */
-public class WizardStepImpl implements WizardStep {
+public class JobPageImpl implements JobPage {
     private final Set<String> dependencies = new HashSet<>();
     private String validateScript;
     private String name;
@@ -27,7 +27,7 @@ public class WizardStepImpl implements WizardStep {
         return validateScript;
     }
 
-    public void setValidateScript(String validateScript) {
+    void setValidateScript(String validateScript) {
         this.validateScript = validateScript;
     }
 
@@ -43,7 +43,7 @@ public class WizardStepImpl implements WizardStep {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        WizardStepImpl that = (WizardStepImpl) o;
+        JobPageImpl that = (JobPageImpl) o;
         return Objects.equals(dependencies, that.dependencies) &&
                 Objects.equals(validateScript, that.validateScript) &&
                 Objects.equals(name, that.name);

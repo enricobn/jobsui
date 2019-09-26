@@ -1,0 +1,4 @@
+Version
+--------
+- to change the version edit gradle.properties, then chenge version.properties or run ./gradlew shadowJar that changes
+  it automatically

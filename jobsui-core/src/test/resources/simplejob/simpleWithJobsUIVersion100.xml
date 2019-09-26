@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<Job name="Simple" version="1.0.0" jobsUIVersion="1.0.0">
+
+    <Parameter key="name" name="Name">
+        <OnInit>
+            component.setDefaultValue("Enrico");
+        </OnInit>
+    </Parameter>
+
+    <Parameter key="surname" name="Surname"/>
+
+    <Expression key="inv" name="Inv" dependsOn="name,surname">
+        return Foo.concat(name, surname)
+    </Expression>
+
+    <Run>
+        return inv
+    </Run>
+
+</Job>

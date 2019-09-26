@@ -5,8 +5,8 @@ import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.JobParameter;
 import org.jobsui.core.ui.UIWidget;
 import org.jobsui.core.ui.UIWindow;
-import org.jobsui.core.xml.WizardStep;
-import org.jobsui.core.xml.WizardStepImpl;
+import org.jobsui.core.xml.JobPage;
+import org.jobsui.core.xml.JobPageImpl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -17,21 +17,21 @@ import java.util.stream.Collectors;
 /**
  * Created by enrico on 5/1/17.
  */
-class WizardState {
+class JobPagesState {
     private final Job<?> job;
-    private final List<WizardStep> steps;
-    private int step = 0;
+    private final List<JobPage> pages;
+    private int page = 0;
     private List<String> sortedDependencies;
 
-    WizardState(Job<?> job) throws Exception {
+    JobPagesState(Job<?> job) throws Exception {
         this.job = job;
-        this.steps = new ArrayList<>(job.getWizardSteps());
+        this.pages = new ArrayList<>(job.getJobPages());
 
         sortedDependencies = job.getSortedDependencies().stream()
                 .map(JobDependency::getKey)
                 .collect(Collectors.toList());
 
-        Set<String> dependencies = steps.stream()
+        Set<String> dependencies = pages.stream()
                 .flatMap(step -> step.getDependencies().stream())
                 .collect(Collectors.toSet());
 
@@ -46,34 +46,34 @@ class WizardState {
         }
 
         if (!missedParameters.isEmpty()) {
-            WizardStepImpl runStep = new WizardStepImpl();
+            JobPageImpl runStep = new JobPageImpl();
             runStep.setName("Run");
 
             missedParameters.forEach(runStep::addDependency);
-            steps.add(runStep);
+            pages.add(runStep);
         }
     }
 
     boolean hasNext() {
-        return (step + 1) < steps.size();
+        return (page + 1) < pages.size();
     }
 
     boolean hasPrevious() {
-        return step > 0;
+        return page > 0;
     }
 
     <T extends Serializable, C> void next(JobUIRunnerContext<T, C> context, UIWindow<C> window) {
-        ++step;
+        ++page;
         updateWindow(context, window);
     }
 
     <T extends Serializable, C> void updateWindow(JobUIRunnerContext<T, C> context, UIWindow<C> window) {
-        WizardStep wizardStep = steps.get(step);
+        JobPage jobPage = pages.get(page);
 
         window.clear();
 
         for (String dependency : sortedDependencies) {
-            if (wizardStep.getDependencies().contains(dependency)) {
+            if (jobPage.getDependencies().contains(dependency)) {
                 JobParameter jobParameter = job.getParameter(dependency);
                 UIWidget<C> widget = context.getWidget(jobParameter);
                 window.add(widget);
@@ -82,7 +82,7 @@ class WizardState {
     }
 
     <T extends Serializable, C> void previous(JobUIRunnerContext<T, C> context, UIWindow<C> window) {
-        --step;
+        --page;
         updateWindow(context, window);
     }
 }

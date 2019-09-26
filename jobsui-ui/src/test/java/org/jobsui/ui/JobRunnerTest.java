@@ -14,10 +14,10 @@ import org.jobsui.core.runner.JobValues;
 import org.jobsui.core.runner.JobValuesImpl;
 import org.jobsui.core.ui.*;
 import org.jobsui.core.utils.Tuple2;
+import org.jobsui.core.xml.JobPage;
 import org.jobsui.core.xml.ProjectParser;
 import org.jobsui.core.xml.ProjectParserImpl;
 import org.jobsui.core.xml.ProjectXML;
-import org.jobsui.core.xml.WizardStep;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -769,7 +769,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public List<WizardStep> getWizardSteps() {
+            public List<JobPage> getJobPages() {
                 return Collections.emptyList();
             }
         };
@@ -900,7 +900,7 @@ public class JobRunnerTest {
             }
 
             @Override
-            public List<WizardStep> getWizardSteps() {
+            public List<JobPage> getJobPages() {
                 return Collections.emptyList();
             }
         };

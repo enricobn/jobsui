@@ -51,7 +51,7 @@ public interface JobXML extends ValidatingXML{
 
     String getVersion();
 
-    List<WizardStep> getWizardSteps();
+    List<JobPage> getJobPages();
 
     default Collection<JobDependencyXML> getJobDependencyXmls() {
         Collection<JobDependencyXML> result = new ArrayList<>(getSimpleParameterXMLs());

@@ -7,7 +7,7 @@ import java.util.Set;
 /**
  * Created by enrico on 4/30/17.
  */
-public interface WizardStep extends ValidatingXML {
+public interface JobPage extends ValidatingXML {
 
     String getName();
 

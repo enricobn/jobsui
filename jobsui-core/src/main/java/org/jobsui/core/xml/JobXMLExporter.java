@@ -15,7 +15,7 @@ import java.util.List;
  */
 class JobXMLExporter {
 
-    public void export(JobXML jobXML, File file) throws Exception {
+    void export(JobXML jobXML, File file) throws Exception {
         List<String> validate = jobXML.validate();
 
         if (!validate.isEmpty()) {
@@ -65,16 +65,16 @@ class JobXMLExporter {
 
         // TODO Calls
 
-        for (WizardStep wizardStep : jobXML.getWizardSteps()) {
-            Element element = doc.createElement("WizardStep");
+        for (JobPage jobPage : jobXML.getJobPages()) {
+            Element element = doc.createElement("Page");
             rootElement.appendChild(element);
 
-            XMLUtils.addAttr(element, "name", wizardStep.getName());
-            String dependsOn = String.join(",", wizardStep.getDependencies());
+            XMLUtils.addAttr(element, "name", jobPage.getName());
+            String dependsOn = String.join(",", jobPage.getDependencies());
             XMLUtils.addAttr(element, "dependsOn", dependsOn);
 
-            if (wizardStep.getValidateScript() != null && !wizardStep.getValidateScript().isEmpty()) {
-                XMLUtils.addTextElement(element, "Validate", wizardStep.getValidateScript(), true, true);
+            if (jobPage.getValidateScript() != null && !jobPage.getValidateScript().isEmpty()) {
+                XMLUtils.addTextElement(element, "Validate", jobPage.getValidateScript(), true, true);
             }
         }
 

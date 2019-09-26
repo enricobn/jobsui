@@ -3,7 +3,7 @@ package org.jobsui.core.job;
 import com.github.zafarkhaja.semver.Version;
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobValues;
-import org.jobsui.core.xml.WizardStep;
+import org.jobsui.core.xml.JobPage;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -39,7 +39,7 @@ public interface Job<T> extends JobDependencyProvider {
 
     List<String> validate(Map<String, Serializable> values);
 
-    List<WizardStep> getWizardSteps();
+    List<JobPage> getJobPages();
 
     default ClassLoader getClassLoader() {
         return null;

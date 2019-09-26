@@ -5,7 +5,7 @@ import org.jobsui.core.job.JobDependency;
 import org.jobsui.core.job.JobParameter;
 import org.jobsui.core.ui.UIWidget;
 import org.jobsui.core.ui.UIWindow;
-import org.jobsui.core.xml.WizardStep;
+import org.jobsui.core.xml.JobPage;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
  * Created by enrico on 5/2/17.
  */
 @RunWith(MockitoJUnitRunner.class)
-public class WizardStateTest {
+public class JobPagesStateTest {
     @Mock
     private Job<?> job;
     @Mock
@@ -32,35 +32,35 @@ public class WizardStateTest {
 
     @Test
     public void assert_that_when_no_steps_then_hasNext_is_false() throws Exception {
-        WizardState sut = new WizardState(job);
+        JobPagesState sut = new JobPagesState(job);
 
         assertThat(sut.hasNext(), is(false));
     }
 
     @Test
     public void assert_that_when_no_steps_then_hasPrevious_is_false() throws Exception {
-        WizardState sut = new WizardState(job);
+        JobPagesState sut = new JobPagesState(job);
 
         assertThat(sut.hasPrevious(), is(false));
     }
 
     @Test
     public void assert_that_when_there_are_at_least_two_steps_then_hasNext_is_true() throws Exception {
-        WizardState sut = createComplexWizardState();
+        JobPagesState sut = createComplexPagesState();
 
         assertThat(sut.hasNext(), is(true));
     }
 
     @Test
     public void assert_that_when_there_is_a_step_then_hasPrevious_is_false() throws Exception {
-        WizardState sut = createWizardStateWithOneStep();
+        JobPagesState sut = createPagesStateWithOnePage();
 
         assertThat(sut.hasPrevious(), is(false));
     }
 
     @Test
     public void assert_that_when_there_are_at_least_two_steps_then_next_clears_window() throws Exception {
-        WizardState sut = createComplexWizardState();
+        JobPagesState sut = createComplexPagesState();
 
         sut.next(context, window);
 
@@ -69,7 +69,7 @@ public class WizardStateTest {
 
     @Test
     public void assert_that_when_there_are_at_least_two_steps_then_next_then_hasPrevious_is_true() throws Exception {
-        WizardState sut = createComplexWizardState();
+        JobPagesState sut = createComplexPagesState();
 
         sut.next(context, window);
 
@@ -78,14 +78,14 @@ public class WizardStateTest {
 
     @Test
     public void assert_that_when_there_is_only_a_step_then_hasNext_is_false() throws Exception {
-        WizardState sut = createWizardStateWithOneStep();
+        JobPagesState sut = createPagesStateWithOnePage();
 
         assertThat(sut.hasNext(), is(false));
     }
 
     @Test
     public void assert_that_when_there_are_at_least_two_steps_then_next_then_previous_then_hasPrevious_is_false() throws Exception {
-        WizardState sut = createComplexWizardState();
+        JobPagesState sut = createComplexPagesState();
 
         sut.next(context, window);
         sut.previous(context, window);
@@ -95,7 +95,7 @@ public class WizardStateTest {
 
     @Test
     public void assert_that_when_there_are_at_least_two_steps_then_next_then_previous_then_hasNext_is_true() throws Exception {
-        WizardState sut = createComplexWizardState();
+        JobPagesState sut = createComplexPagesState();
 
         sut.next(context, window);
         sut.previous(context, window);
@@ -105,7 +105,7 @@ public class WizardStateTest {
 
     @Test
     public void verify_that_when_there_is_a_step_with_two_dependencies_then_updateWindow_adds_two_widgets_to_window() throws Exception {
-        WizardState sut = createComplexWizardState();
+        JobPagesState sut = createComplexPagesState();
 
         sut.updateWindow(context, window);
 
@@ -114,7 +114,7 @@ public class WizardStateTest {
 
     @Test
     public void verify_that_when_there_is_a_step_with_two_dependencies_then_next_adds_the_remaining_widgets_to_window() throws Exception {
-        WizardState sut = createComplexWizardState();
+        JobPagesState sut = createComplexPagesState();
 
         sut.next(context, window);
 
@@ -123,7 +123,7 @@ public class WizardStateTest {
 
     @Test
     public void verify_that_when_there_is_a_step_with_two_dependencies_then_next_then_previous_adds_all_the_widgets_to_window() throws Exception {
-        WizardState sut = createComplexWizardState();
+        JobPagesState sut = createComplexPagesState();
 
         sut.next(context, window);
         sut.previous(context, window);
@@ -131,34 +131,34 @@ public class WizardStateTest {
         verify(window, times(3)).add(any(UIWidget.class));
     }
 
-    private WizardState createWizardStateWithOneStep() throws Exception {
-        List<WizardStep> steps = Collections.singletonList(mock(WizardStep.class));
-        when(job.getWizardSteps()).thenReturn(steps);
+    private JobPagesState createPagesStateWithOnePage() throws Exception {
+        List<JobPage> steps = Collections.singletonList(mock(JobPage.class));
+        when(job.getJobPages()).thenReturn(steps);
 
-        return new WizardState(job);
+        return new JobPagesState(job);
     }
 
     /**
-     * Creates a WizardState of a job with three parameters: first, second and third,
-     * and a step with first and second.
+     * Creates a PagesState of a job with three parameters: first, second and third,
+     * and a page with first and second.
      */
-    private WizardState createComplexWizardState() throws Exception {
-        WizardStep wizardStep = mock(WizardStep.class);
+    private JobPagesState createComplexPagesState() throws Exception {
+        JobPage jobPage = mock(JobPage.class);
 
         JobParameter first = addJobParameter("first");
         JobParameter second = addJobParameter("second");
         JobParameter third = addJobParameter("third");
 
         Set<String> dependencies = new HashSet<>(Arrays.asList(first.getKey(), second.getKey()));
-        when(wizardStep.getDependencies()).thenReturn(dependencies);
+        when(jobPage.getDependencies()).thenReturn(dependencies);
 
-        List<WizardStep> steps = Collections.singletonList(wizardStep);
-        when(job.getWizardSteps()).thenReturn(steps);
+        List<JobPage> steps = Collections.singletonList(jobPage);
+        when(job.getJobPages()).thenReturn(steps);
 
         List<JobDependency> parameters = Arrays.asList(first, second, third);
         when(job.getSortedDependencies()).thenReturn(parameters);
 
-        return new WizardState(job);
+        return new JobPagesState(job);
     }
 
     private JobParameter addJobParameter(String key) {

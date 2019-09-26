@@ -27,23 +27,22 @@ import static org.jobsui.core.xml.XMLUtils.getMandatoryAttribute;
  */
 public class JobParserImpl implements JobParser {
     private static final URL jobXsd = ProjectParserImpl.class.getResource("/org/jobsui/job.xsd");
+    private static final URL jobXsd_100 = ProjectParserImpl.class.getResource("/org/jobsui/1.0.0/job.xsd");
     private static final URL jobXsd_000 = ProjectParserImpl.class.getResource("/org/jobsui/0.0.0/job.xsd");
-    private static final Validator jobValidator;
-    private static final Validator jobValidator_000;
-    private static final Schema jobSchema;
+    private static final Schema jobSchema_current;
     private static final Schema jobSchema_000;
+    private static final Schema jobSchema_100;
 
     static {
         String language = XMLConstants.W3C_XML_SCHEMA_NS_URI;
         SchemaFactory factory = SchemaFactory.newInstance(language);
         try {
-            jobSchema = factory.newSchema(jobXsd);
+            jobSchema_current = factory.newSchema(jobXsd);
+            jobSchema_100 = factory.newSchema(jobXsd_100);
             jobSchema_000 = factory.newSchema(jobXsd_000);
         } catch (SAXException e) {
             throw new RuntimeException(e);
         }
-        jobValidator = jobSchema.newValidator();
-        jobValidator_000 = jobSchema_000.newValidator();
     }
 
     public static JobXML parse(ProjectXML projectXML, String id) throws Exception {
@@ -55,6 +54,10 @@ public class JobParserImpl implements JobParser {
 
     @Override
     public JobXML parse(String id, URL url, UIComponentRegistry uiComponentRegistry) throws Exception {
+        String jobsUIVersion = XMLJobsUIVersionParser.getInJob(url);
+
+        Schema jobSchema = getSchema(jobsUIVersion);
+
         try (InputStream inputStream = url.openStream()) {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             dbFactory.setValidating(false);
@@ -71,9 +74,8 @@ public class JobParserImpl implements JobParser {
             String subject = "Job with id='" + id + "'";
             String name = getMandatoryAttribute(doc.getDocumentElement(), "name", subject);
             String version = getMandatoryAttribute(doc.getDocumentElement(), "version", subject);
-            String jobsUIVersion = doc.getDocumentElement().getAttribute("jobsUIVersion");
 
-            validate(url, jobsUIVersion);
+            validate(url, jobSchema);
 
             return parse(id, uiComponentRegistry, doc, subject, name, jobsUIVersion, version);
         }
@@ -99,13 +101,13 @@ public class JobParserImpl implements JobParser {
 
         parseCalls(doc, jobXML);
 
-        parseWizardSteps(doc, jobXML, jobsUIVersion);
+        parsePages(doc, jobXML, jobsUIVersion);
 
         return jobXML;
     }
 
-    private void validate(URL url, String jobsUIVersion) throws Exception {
-        Validator jobValidator = getJobValidator(jobsUIVersion);
+    private void validate(URL url, Schema schema) throws Exception {
+        Validator jobValidator = schema.newValidator();
 
         try (InputStream inputStream = url.openStream()) {
             final StreamSource source = new StreamSource(inputStream);
@@ -117,25 +119,27 @@ public class JobParserImpl implements JobParser {
         }
     }
 
-    private void parseWizardSteps(Document doc, JobXMLImpl jobXML, String jobsUIVersion) throws JobsUIParseException {
-        NodeList wizardStepList = doc.getElementsByTagName("WizardStep");
-        for (int i = 0; i < wizardStepList.getLength(); i++) {
-            Element element = (Element) wizardStepList.item(i);
-            WizardStepImpl wizardStep = new WizardStepImpl();
-            String name = getMandatoryAttribute(element, "name", "Wizard step");
-            wizardStep.setName(name);
-            String subject = "Wizard step '" + name + "'";
+    private void parsePages(Document doc, JobXMLImpl jobXML, String jobsUIVersion) throws JobsUIParseException {
+        String pageElementName = getPageElementName(jobsUIVersion);
+
+        NodeList pagesList = doc.getElementsByTagName(pageElementName);
+        for (int i = 0; i < pagesList.getLength(); i++) {
+            Element element = (Element) pagesList.item(i);
+            JobPageImpl page = new JobPageImpl();
+            String name = getMandatoryAttribute(element, "name", "Page");
+            page.setName(name);
+            String subject = "Page '" + name + "'";
             String dependsOn = getMandatoryAttribute(element, "dependsOn", subject);
             for (String dependency : dependsOn.split(",")) {
-                wizardStep.addDependency(dependency);
+                page.addDependency(dependency);
             }
 
             String validateScript = getElementContent(element, "Validate", false, subject,
                     useCData(jobsUIVersion));
             if (validateScript != null) {
-                wizardStep.setValidateScript(validateScript);
+                page.setValidateScript(validateScript);
             }
-            jobXML.add(wizardStep);
+            jobXML.add(page);
         }
     }
 
@@ -247,11 +251,23 @@ public class JobParserImpl implements JobParser {
         }
     }
 
-    private Validator getJobValidator(String jobsUIVersion) {
-        if (jobsUIVersion.compareTo("1.0.0") < 0 ) {
-            return jobValidator_000;
+    private Schema getSchema(String jobsUIVersion) {
+        if (jobsUIVersion.compareTo("1.0.0") < 0) {
+            return jobSchema_000;
+        } else if (jobsUIVersion.compareTo("1.1.0") < 0) {
+            return jobSchema_100;
         }
-        return jobValidator;
+        return jobSchema_current;
+    }
+
+    private String getPageElementName(String jobsUIVersion) {
+        String pageElementName;
+        if (jobsUIVersion.compareTo("1.1.0") < 0) {
+            pageElementName = "WizardStep";
+        } else {
+            pageElementName = "Page";
+        }
+        return pageElementName;
     }
 
     private static boolean useCData(String jobsUIVersion) {

@@ -9,7 +9,7 @@ import org.jobsui.core.job.JobExpression;
 import org.jobsui.core.job.JobParameter;
 import org.jobsui.core.runner.JobResult;
 import org.jobsui.core.runner.JobResultImpl;
-import org.jobsui.core.xml.WizardStep;
+import org.jobsui.core.xml.JobPage;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class JobGroovy<T> implements Job<T> {
     private final Version version;
     private final String name;
     private final List<JobParameterGroovy> parameterDefsGroovy;
-    private final List<WizardStep> wizardSteps;
+    private final List<JobPage> jobPages;
     private final List<JobExpression> expressions;
     private final List<JobParameter> parameterDefs;
     private final Script run;
@@ -33,14 +33,14 @@ public class JobGroovy<T> implements Job<T> {
     private final Binding shellBinding;
     private final GroovyShell shell;
 
-    public JobGroovy(GroovyShell shell, String id, Version version, String name, List<JobParameterGroovy> parameterDefsGroovy,
-                     List<JobExpressionGroovy> expressions, String runScript, String validateScript, List<WizardStep> wizardSteps) {
+    JobGroovy(GroovyShell shell, String id, Version version, String name, List<JobParameterGroovy> parameterDefsGroovy,
+              List<JobExpressionGroovy> expressions, String runScript, String validateScript, List<JobPage> jobPages) {
         this.shell = shell;
         this.id = id;
         this.version = version;
         this.name = name;
         this.parameterDefsGroovy = parameterDefsGroovy;
-        this.wizardSteps = wizardSteps;
+        this.jobPages = jobPages;
         this.expressions = new ArrayList<>();
         this.expressions.addAll(expressions);
         this.parameterDefs = new ArrayList<>();
@@ -107,7 +107,7 @@ public class JobGroovy<T> implements Job<T> {
         return version;
     }
 
-    public void init(ProjectGroovy project) {
+    void init(ProjectGroovy project) {
         for (JobParameterGroovy jobParameter : parameterDefsGroovy) {
             jobParameter.init(project);
         }
@@ -119,7 +119,7 @@ public class JobGroovy<T> implements Job<T> {
     }
 
     @Override
-    public List<WizardStep> getWizardSteps() {
-        return wizardSteps;
+    public List<JobPage> getJobPages() {
+        return jobPages;
     }
 }

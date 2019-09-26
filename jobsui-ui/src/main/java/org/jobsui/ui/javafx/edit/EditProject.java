@@ -310,9 +310,7 @@ public class EditProject {
             EditProject.this.valid =  valid.get();
         });
 
-        TreeItem<EditItem> treeItem = new TreeItem<>(editItem);
-
-        return treeItem;
+        return new TreeItem<>(editItem);
     }
 
     private TreeItem<EditItem> createJobTreeItem(JobXML job) {
@@ -322,33 +320,33 @@ public class EditProject {
         addParameters(result, job, ItemType.Expressions, ItemType.Expression, job.getExpressionXMLs());
         addParameters(result, job, ItemType.Calls, ItemType.Call, job.getCallXMLs());
 
-        addWizard(job, result);
+        addPage(job, result);
 
         result.setExpanded(true);
 
         return result;
     }
 
-    private void addWizard(JobXML job, TreeItem<EditItem> result) {
-        TreeItem<EditItem> wizardSteps = getTreeItem(ItemType.WizardSteps, job.getWizardSteps());
+    private void addPage(JobXML job, TreeItem<EditItem> result) {
+        TreeItem<EditItem> pages = getTreeItem(ItemType.Pages, job.getJobPages());
 
-        result.getChildren().add(wizardSteps);
+        result.getChildren().add(pages);
 
-        job.getWizardSteps().forEach(w -> {
-            TreeItem<EditItem> wizardStep = getTreeItem(ItemType.WizardStep, w);
-            wizardSteps.getChildren().add(wizardStep);
-            TreeItem<EditItem> dependencies = getTreeItem(ItemType.WizardStepDependencies, w);
-            wizardStep.getChildren().add(dependencies);
+        job.getJobPages().forEach(w -> {
+            TreeItem<EditItem> page = getTreeItem(ItemType.Page, w);
+            pages.getChildren().add(page);
+            TreeItem<EditItem> dependencies = getTreeItem(ItemType.PageDependencies, w);
+            page.getChildren().add(dependencies);
 
             w.getDependencies().forEach(d -> {
-                TreeItem<EditItem> dependency = getTreeItem(ItemType.WizardStepDependency, job.getParameter(d));
+                TreeItem<EditItem> dependency = getTreeItem(ItemType.PageDependency, job.getParameter(d));
                 dependencies.getChildren().add(dependency);
             });
 
             handleTreeItemChange(dependencies);
 
         });
-        handleTreeItemChange(wizardSteps);
+        handleTreeItemChange(pages);
 
     }
 
@@ -451,14 +449,14 @@ public class EditProject {
             populateLibrariesMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Library) {
             populateLibraryMenu(contextMenu, treeItem);
-        } else if (item.itemType == ItemType.WizardSteps) {
-            populateWizardStepsMenu(contextMenu, treeItem);
-        } else if (item.itemType == ItemType.WizardStep) {
-            populateWizardStepMenu(contextMenu, treeItem);
-        } else if (item.itemType == ItemType.WizardStepDependencies) {
-            populateWizardStepDependenciesMenu(contextMenu, treeItem);
-        } else if (item.itemType == ItemType.WizardStepDependency) {
-            populateWizardStepDependencyMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Pages) {
+            populatePagesMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.Page) {
+            populatePageMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.PageDependencies) {
+            populatePageDependenciesMenu(contextMenu, treeItem);
+        } else if (item.itemType == ItemType.PageDependency) {
+            populatePageDependencyMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Project) {
             populateProjectMenu(contextMenu, treeItem);
         } else if (item.itemType == ItemType.Job) {
@@ -528,27 +526,27 @@ public class EditProject {
 
     }
 
-    private static void populateWizardStepDependencyMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
-        WizardStep wizardStep = findAncestorPayload(treeItem, WizardStep.class);
+    private static void populatePageDependencyMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+        JobPage jobPage = findAncestorPayload(treeItem, JobPage.class);
 
         String parameterKey = ((ParameterXML) treeItem.getValue().payload).getKey();
 
         MenuItem delete = new MenuItem("Delete");
         contextMenu.getItems().add(delete);
         delete.setOnAction(t -> {
-            wizardStep.getDependencies().remove(parameterKey);
+            jobPage.getDependencies().remove(parameterKey);
             treeItem.getParent().getChildren().remove(treeItem);
         });
     }
 
-    private void populateWizardStepDependenciesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private void populatePageDependenciesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         JobXML jobXML = findAncestorPayload(treeItem, JobXML.class);
 
-        WizardStep wizardStep = (WizardStep) treeItem.getValue().payload;
+        JobPage jobPage = (JobPage) treeItem.getValue().payload;
 
         List<String> parameters = JobXML.getSimpleParametersKeys(jobXML);
 
-        for (WizardStep step : jobXML.getWizardSteps()) {
+        for (JobPage step : jobXML.getJobPages()) {
             parameters.removeAll(step.getDependencies());
         }
 
@@ -560,8 +558,8 @@ public class EditProject {
                 String name = parameter.getName();
                 MenuItem dependencyMenuItem = new MenuItem(name);
                 dependencyMenuItem.setOnAction(e -> {
-                    wizardStep.getDependencies().add(dependency);
-                    TreeItem<EditItem> newDep = getTreeItem(ItemType.WizardStepDependency, parameter);
+                    jobPage.getDependencies().add(dependency);
+                    TreeItem<EditItem> newDep = getTreeItem(ItemType.PageDependency, parameter);
                     treeItem.getChildren().add(newDep);
                 });
                 addDependency.getItems().add(dependencyMenuItem);
@@ -572,23 +570,23 @@ public class EditProject {
 
     }
 
-    private static void populateWizardStepMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private static void populatePageMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         JobXML jobXML = findAncestorPayload(treeItem, JobXML.class);
         if (jobXML == null) {
             return;
         }
 
-        WizardStep wizardStep = (WizardStep) treeItem.getValue().payload;
+        JobPage jobPage = (JobPage) treeItem.getValue().payload;
 
         MenuItem delete = new MenuItem("Delete");
         contextMenu.getItems().add(delete);
         delete.setOnAction(t -> {
-            jobXML.getWizardSteps().remove(wizardStep);
+            jobXML.getJobPages().remove(jobPage);
             treeItem.getParent().getChildren().remove(treeItem);
         });
     }
 
-    private void populateWizardStepsMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
+    private void populatePagesMenu(ContextMenu contextMenu, TreeItem<EditItem> treeItem) {
         JobXML jobXML = findAncestorPayload(treeItem, JobXML.class);
         if (jobXML == null) {
             return;
@@ -597,11 +595,11 @@ public class EditProject {
         MenuItem add = new MenuItem("Add");
         contextMenu.getItems().add(add);
         add.setOnAction(t -> {
-            WizardStepImpl wizardStep = new WizardStepImpl();
-            wizardStep.setName("New wizard step");
-            jobXML.getWizardSteps().add(wizardStep);
-            TreeItem<EditItem> item = getTreeItem(ItemType.WizardStep, wizardStep);
-            TreeItem<EditItem> dependencies = getTreeItem(ItemType.WizardStepDependencies, wizardStep);
+            JobPageImpl page = new JobPageImpl();
+            page.setName("New page");
+            jobXML.getJobPages().add(page);
+            TreeItem<EditItem> item = getTreeItem(ItemType.Page, page);
+            TreeItem<EditItem> dependencies = getTreeItem(ItemType.PageDependencies, page);
             item.getChildren().add(dependencies);
 
             treeItem.getChildren().add(item);
@@ -871,8 +869,6 @@ public class EditProject {
     }
 
     private void validate() {
-        traverse(it -> {
-            validate(it, false);
-        });
+        traverse(it -> validate(it, false));
     }
 }

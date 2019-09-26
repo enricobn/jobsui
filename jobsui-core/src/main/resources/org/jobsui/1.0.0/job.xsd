@@ -57,7 +57,7 @@
                     </xs:complexType>
                 </xs:element>
 
-                <xs:element name="Page" maxOccurs="unbounded" minOccurs="0">
+                <xs:element name="WizardStep" maxOccurs="unbounded" minOccurs="0">
                     <xs:complexType>
                         <xs:sequence>
                             <xs:element type="xs:string" name="Validate" minOccurs="0"/>

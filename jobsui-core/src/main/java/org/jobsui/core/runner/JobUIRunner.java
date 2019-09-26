@@ -49,10 +49,10 @@ public class JobUIRunner<C> implements JobRunner {
 //                return;
             }
 
-            if (!job.getWizardSteps().isEmpty()) {
-                WizardState wizardState;
+            if (!job.getJobPages().isEmpty()) {
+                JobPagesState jobPagesState;
                 try {
-                    wizardState = new WizardState(job);
+                    jobPagesState = new JobPagesState(job);
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -65,21 +65,21 @@ public class JobUIRunner<C> implements JobRunner {
                 previousButton.setEnabled(false);
 
                 nextButton.getObservable().subscribe(serializable -> {
-                    wizardState.next(context, window);
-                    nextButton.setEnabled(wizardState.hasNext());
-                    previousButton.setEnabled(wizardState.hasPrevious());
+                    jobPagesState.next(context, window);
+                    nextButton.setEnabled(jobPagesState.hasNext());
+                    previousButton.setEnabled(jobPagesState.hasPrevious());
                 });
 
                 previousButton.getObservable().subscribe(serializable -> {
-                    wizardState.previous(context, window);
-                    nextButton.setEnabled(wizardState.hasNext());
-                    previousButton.setEnabled(wizardState.hasPrevious());
+                    jobPagesState.previous(context, window);
+                    nextButton.setEnabled(jobPagesState.hasNext());
+                    previousButton.setEnabled(jobPagesState.hasPrevious());
                 });
 
                 window.addButton(previousButton);
                 window.addButton(nextButton);
 
-                wizardState.updateWindow(context, window);
+                jobPagesState.updateWindow(context, window);
 
             } else {
                 for (JobParameter jobParameter : job.getParameterDefs()) {

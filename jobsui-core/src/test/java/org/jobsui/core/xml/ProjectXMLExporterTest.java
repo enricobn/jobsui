@@ -102,7 +102,7 @@ public class ProjectXMLExporterTest {
             checkExpression(originalExpression, exportedExpression);
         }
 
-        assertThat(exportedJobXML.getWizardSteps(), is(originalJobXML.getWizardSteps()));
+        assertThat(exportedJobXML.getJobPages(), is(originalJobXML.getJobPages()));
     }
 
     private static void check(ParameterXML originalParameter, ParameterXML exportedParameter) {

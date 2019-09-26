@@ -11,7 +11,6 @@ NEXT
   - projects home
   - maximum elements in run history
 - add wizard step title
-- rename wizard to Pages?
 - create a JobParserFactory that given the jobXmlVersion returns a parser and a validator
 - create a ProjectParserImpl use jobXmlVersion to get a validator
 - create a ProjectParserFactory that given the jobXmlVersion returns a parser and a validator

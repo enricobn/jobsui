@@ -146,7 +146,7 @@ public class ProjectGroovyBuilder implements ProjectBuilder {
 
         return new JobGroovy<>(groovyShell, jobXML.getId(), Version.valueOf(jobXML.getVersion()), jobXML.getName(),
                 sortedJobParameterDefs, jobExpressions, jobXML.getRunScript(), jobXML.getValidateScript(),
-                jobXML.getWizardSteps());
+                jobXML.getJobPages());
     }
 
     private static <T,R> GroovyFunction<T,R> toGroovyFunction(Function<T,R> function) {

@@ -14,7 +14,7 @@ import java.util.stream.Stream;
  */
 public class JobXMLImpl implements JobXML {
     private final Map<String, ParameterXML> parameters = new LinkedHashMap<>();
-    private final List<WizardStep> wizardSteps = new ArrayList<>();
+    private final List<JobPage> jobPages = new ArrayList<>();
     private String id;
     private String name;
     private String version;
@@ -170,16 +170,16 @@ public class JobXMLImpl implements JobXML {
             }
         }
 
-        Set<String> wizardStepName = new HashSet<>();
+        Set<String> pageNames = new HashSet<>();
 
-        for (WizardStep wizardStep : getWizardSteps()) {
-            List<String> wizardStepMessages = wizardStep.validate();
-            if (!wizardStepMessages.isEmpty()) {
-                messages.add(wizardStep.getName() + ": " + String.join(" ", wizardStepMessages));
+        for (JobPage jobPage : getJobPages()) {
+            List<String> pageMessages = jobPage.validate();
+            if (!pageMessages.isEmpty()) {
+                messages.add(jobPage.getName() + ": " + String.join(" ", pageMessages));
             }
 
-            if (!wizardStepName.add(wizardStep.getName())) {
-                messages.add("Duplicate wizard name '" + wizardStep.getName() + "'.");
+            if (!pageNames.add(jobPage.getName())) {
+                messages.add("Duplicate page name '" + jobPage.getName() + "'.");
             }
         }
 
@@ -194,13 +194,13 @@ public class JobXMLImpl implements JobXML {
         this.name = name;
     }
 
-    public void add(WizardStep wizardStep) {
-        wizardSteps.add(wizardStep);
+    public void add(JobPage jobPage) {
+        jobPages.add(jobPage);
     }
 
     @Override
-    public List<WizardStep> getWizardSteps() {
-        return wizardSteps;
+    public List<JobPage> getJobPages() {
+        return jobPages;
     }
 
     @Override
@@ -222,11 +222,11 @@ public class JobXMLImpl implements JobXML {
                     return parameterType + " " + d.getName() + " depends from " + parameterXML.getName() + ".";
                 });
 
-        Stream<String> wizardMessages = getWizardSteps().stream()
+        Stream<String> pagesMessages = getJobPages().stream()
                 .filter(w -> w.getDependencies().contains(parameterXML.getKey()))
-                .map(w -> "Wizard step " + w.getName() + " depends on " + parameterXML.getName() + ".");
+                .map(w -> "Page " + w.getName() + " depends on " + parameterXML.getName() + ".");
 
-        result.setMessages(Stream.concat(parametersDependenciesMessages, wizardMessages).collect(Collectors.toList()));
+        result.setMessages(Stream.concat(parametersDependenciesMessages, pagesMessages).collect(Collectors.toList()));
 
         if (result.isValid()) {
             parameters.remove(parameterXML.getKey());
@@ -256,7 +256,7 @@ public class JobXMLImpl implements JobXML {
             }
         });
 
-        wizardSteps.forEach(jobXML::add);
+        jobPages.forEach(jobXML::add);
 
         jobXML.setRunScript(getRunScript());
 

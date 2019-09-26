@@ -77,19 +77,19 @@ public class ProjectParserTest {
     }
 
     @Test
-    public void parse_wizard() throws Exception {
+    public void parse_page() throws Exception {
         JobParser parser = new JobParserImpl();
         URL url = ProjectParserTest.class.getResource("/simplejob/simpleWithWizard.xml");
         JobXML job = parser.parse("simpleWithWizard", url, uiComponentRegistry);
 
-        assertThat(job.getWizardSteps().size(), is(2));
+        assertThat(job.getJobPages().size(), is(2));
 
-        WizardStep firstStep = job.getWizardSteps().get(0);
+        JobPage firstStep = job.getJobPages().get(0);
         assertThat(firstStep.getName(), is("First"));
         assertThat(firstStep.getDependencies(), is(Collections.singleton("name")));
         assertThat(firstStep.getValidateScript(), nullValue());
 
-        WizardStep secondStep = job.getWizardSteps().get(1);
+        JobPage secondStep = job.getJobPages().get(1);
         assertThat(secondStep.getName(), is("Second"));
         assertThat(secondStep.getDependencies(), is(Collections.singleton("dependent")));
         assertThat(secondStep.getValidateScript(), notNullValue());

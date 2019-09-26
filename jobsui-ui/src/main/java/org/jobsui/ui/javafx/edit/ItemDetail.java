@@ -83,15 +83,15 @@ public class ItemDetail extends VBox {
                 break;
             }
 
-            case WizardStep:
-                setWizardStepDetail(treeItem);
+            case Page:
+                setPageDetail(treeItem);
                 break;
         }
     }
 
-    private void setWizardStepDetail(TreeItem<EditItem> treeItem) {
-        WizardStep wizardStep = (WizardStep) treeItem.getValue().payload;
-        addTextProperty(treeItem, "Name", wizardStep::getName, wizardStep::setName);
+    private void setPageDetail(TreeItem<EditItem> treeItem) {
+        JobPage jobPage = (JobPage) treeItem.getValue().payload;
+        addTextProperty(treeItem, "Name", jobPage::getName, jobPage::setName);
     }
 
     private boolean setLibraryDetail(TreeItem<EditItem> treeItem) {
