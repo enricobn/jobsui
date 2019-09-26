@@ -10,7 +10,6 @@ NEXT
 - let the user configure:
   - projects home
   - maximum elements in run history
-- add wizard step title
 - create a JobParserFactory that given the jobXmlVersion returns a parser and a validator
 - create a ProjectParserImpl use jobXmlVersion to get a validator
 - create a ProjectParserFactory that given the jobXmlVersion returns a parser and a validator
@@ -32,10 +31,9 @@ NEXT
 - add a way to upgrade job data (bookmarks, calls) to a new version
 - now saving a job will delete old job files and script folder, but retain other files, to preserve them,
   but "save as" does not copy the other files. What to do?
-- WizardStep is used in XML and job, may be better to have two classes?
-- rename WizardStep to Group?
-- WizardStep has no custom validation nor automatic (through dependencies)
-- is it better to define Wizard step only with a name and reference it in parameters?
+- JobPage is used in XML and job, may be better to have two classes?
+- JobPage has no custom validation nor automatic (through dependencies)
+- is it better to define JobPage only with a name and reference it in parameters?
 - customizable UIComponentType
 - JobDependency and JobDependencyXML are correct names?
 - Edit: warning on closing project with changes
