@@ -33,24 +33,15 @@ class LoadJobTask extends Task<Tuple2<Project,Job<Serializable>>> {
     @Override
     protected Tuple2<Project,Job<Serializable>> call() throws Exception {
         ProjectParser projectParser = new ProjectParserImpl();
-        ProjectXML projectXML;
-        try {
-            projectXML = projectParser.parse(url);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        Project project;
-        try {
-            project = new ProjectGroovyBuilder().build(projectXML, bookmarkStore, ui);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+
+        ProjectXML projectXML = projectParser.parse(url);
+
+        Project project = new ProjectGroovyBuilder().build(projectXML, bookmarkStore, ui);
 
         final Job<Serializable> job = project.getJob(jobId);
 
         if (job == null) {
-            throw new RuntimeException("Cannot find job with id \"" + jobId + "\" in folder " +
-                    url + " .");
+            throw new Exception("Cannot find job with id \"" + jobId + "\" in folder " + url + " .");
         }
         return new Tuple2<>(project, job);
     }

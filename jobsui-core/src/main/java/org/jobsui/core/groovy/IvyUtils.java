@@ -96,7 +96,7 @@ class IvyUtils {
         mavenCentralResolver.setCheckconsistency(false);
         //you can specify the url resolution pattern strategy
         mavenCentralResolver.addArtifactPattern(
-                "http://repo1.maven.org/maven2/[organisation]/[module]/[revision]/[artifact](-[revision]).[ext]");
+                "https://repo1.maven.org/maven2/[organisation]/[module]/[revision]/[artifact](-[revision]).[ext]");
         return mavenCentralResolver;
     }
 
